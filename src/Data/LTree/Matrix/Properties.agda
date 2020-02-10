@@ -169,3 +169,59 @@ module Data.LTree.Matrix.Properties where
                                 (M i j ᵃ*ʸ_) (ᵃ*ʸ-zero _) (ᵃ*ʸ-distrib _) in
              ∑-linear λ k → N j k ᵇ*ᶜ O k l) ⟩
       (∑ λ j → M i j ᵃ*ʸ (∑Y λ k → N j k ᵇ*ᶜ O k l))  ∎
+
+  module ZeroMult
+    (0A : A) (_≈_ : Rel C r) (0C : C) (_+_ : Op₂ C) (_*_ : A → B → C)
+    (open Defs _≈_)
+    (refl : Reflexive _≈_)
+    (trans : Transitive _≈_)
+    (+-cong : Congruent₂ _+_)
+    (0+0 : (0C + 0C) ≈ 0C)
+    (0-* : ∀ b → (0A * b) ≈ 0C)
+    where
+
+    open Rea _≈_ refl trans
+
+    open Zero 0A renaming (0ᴹ to 0ᴹᵃ)
+    open Zero 0C renaming (0ᴹ to 0ᴹᶜ)
+    open Mult 0C _+_ _*_
+    open Sum 0C _+_
+    open SumCong _≈_ 0C _+_ refl +-cong
+    open Sum0 _≈_ 0C _+_ trans refl +-cong 0+0
+
+    infix 4 _≈ᴹ_
+    _≈ᴹ_ = Lift₂ᴹ _≈_
+
+    0ᴹ-*ᴹ : (M : Matrix B t u) → 0ᴹᵃ *ᴹ M ≈ᴹ 0ᴹᶜ {s}
+    0ᴹ-*ᴹ {t = t} M .get i k = begin
+      (∑ λ j → 0A * M j k)  ∼⟨ ∑-cong (mk λ j → 0-* (M j k)) ⟩
+      (∑ {t} λ j → 0C)      ∼⟨ ∑-0 t ⟩
+      0C                    ∎
+
+  module MultZero
+    (0B : B) (_≈_ : Rel C r) (0C : C) (_+_ : Op₂ C) (_*_ : A → B → C)
+    (open Defs _≈_)
+    (refl : Reflexive _≈_)
+    (trans : Transitive _≈_)
+    (+-cong : Congruent₂ _+_)
+    (0+0 : (0C + 0C) ≈ 0C)
+    (*-0 : ∀ a → (a * 0B) ≈ 0C)
+    where
+
+    open Rea _≈_ refl trans
+
+    open Zero 0B renaming (0ᴹ to 0ᴹᵇ)
+    open Zero 0C renaming (0ᴹ to 0ᴹᶜ)
+    open Mult 0C _+_ _*_
+    open Sum 0C _+_
+    open SumCong _≈_ 0C _+_ refl +-cong
+    open Sum0 _≈_ 0C _+_ trans refl +-cong 0+0
+
+    infix 4 _≈ᴹ_
+    _≈ᴹ_ = Lift₂ᴹ _≈_
+
+    *ᴹ-0ᴹ : (M : Matrix A s t) → M *ᴹ 0ᴹᵇ ≈ᴹ 0ᴹᶜ {s} {u}
+    *ᴹ-0ᴹ {t = t} M .get i k = begin
+      (∑ λ j → M i j * 0B)  ∼⟨ ∑-cong (mk λ j → *-0 (M i j)) ⟩
+      (∑ {t} λ j → 0C)      ∼⟨ ∑-0 t ⟩
+      0C                    ∎
