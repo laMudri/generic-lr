@@ -32,9 +32,12 @@ module Data.LTree.Matrix where
   open Ident public renaming (1ᴹ to ident)
 
   module Mult (0# : C) (_+_ : C → C → C) (_*_ : A → B → C) where
+    open Sum 0# _+_
+
     infixr 7 _*ᴹ_
     _*ᴹ_ : Matrix A s t → Matrix B t u → Matrix C s u
-    _*ᴹ_ {t = t} M N i k = fold id 0# _+_ {t} (λ j → M i j * N j k)
+    _*ᴹ_ M N i k = ∑ λ j → M i j * N j k
+
   open Mult public renaming (_*ᴹ_ to mult)
 
   -- Pointwise
@@ -58,6 +61,13 @@ module Data.LTree.Matrix where
     constructor mk
     field get : ∀ i j → R (u i j) (v i j)
   open Lift₂ᴹ public
+
+  module Zero (0# : A) where
+    0ᴹ = lift₀ᴹ 0#
+
+  module Plus (_+_ : A → A → A) where
+    infixr 6 _+ᴹ_
+    _+ᴹ_ = lift₂ᴹ _+_
 
   -- Block matrix operations
 

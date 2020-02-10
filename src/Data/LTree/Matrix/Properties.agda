@@ -5,7 +5,7 @@ module Data.LTree.Matrix.Properties where
   open import Algebra.Core using (Op₂)
   import Algebra.Definitions as Defs
   open import Data.Product
-  open import Function.Base using (id; _∘_; _∘′_; _∋_; flip)
+  open import Function.Base using (id; _∘_; flip)
   open import Level using (Level)
   open import Relation.Binary using (Rel)
   open import Relation.Binary.Definitions
@@ -13,6 +13,7 @@ module Data.LTree.Matrix.Properties where
 
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Data.LTree.Vector.Properties
   open import Data.LTree.Matrix hiding (ident; mult)
 
   open import Data.Bool
@@ -28,104 +29,6 @@ module Data.LTree.Matrix.Properties where
       Y : Set y
       Z : Set z
       s t u v : LTree
-
-  module Sum (0# : A) (_+_ : Op₂ A) where
-    ∑ = fold id 0# _+_
-
-  module SumCong
-    (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A) (open Defs _≈_)
-    (0-cong : 0# ≈ 0#)
-    (+-cong : Congruent₂ _+_)
-    where
-
-    open Sum 0# _+_
-
-    ∑-cong : ∀ {s} {u v : Vector A s} → Lift₂ _≈_ u v → ∑ u ≈ ∑ v
-    ∑-cong {[-]} (mk qs) = qs here
-    ∑-cong {ε} (mk qs) = 0-cong
-    ∑-cong {s <+> t} (mk qs) =
-      +-cong (∑-cong (mk (qs ∘ go-left))) (∑-cong (mk (qs ∘ go-right)))
-
-  module Sum0
-    (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A)
-    (open Defs _≈_)
-    (trans : Transitive _≈_)
-    (0-cong : 0# ≈ 0#)
-    (+-cong : Congruent₂ _+_)
-    (0+0 : (0# + 0#) ≈ 0#)
-    where
-
-    open Sum 0# _+_
-
-    ∑-0 : ∀ s → ∑ {s} (λ _ → 0#) ≈ 0#
-    ∑-0 [-] = 0-cong
-    ∑-0 ε = 0-cong
-    ∑-0 (s <+> t) = trans (+-cong (∑-0 s) (∑-0 t)) 0+0
-
-  module Sum+
-    (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A)
-    (open Defs _≈_)
-    (refl : Reflexive _≈_)
-    (trans : Transitive _≈_)
-    (+-cong : Congruent₂ _+_)
-    (0+0 : 0# ≈ (0# + 0#))
-    (exchange : Interchangable _+_ _+_)
-    where
-
-    open Sum 0# _+_
-
-    ∑-+ : (u v : Vector A s) → ∑ (λ i → u i + v i) ≈ (∑ u + ∑ v)
-    ∑-+ {[-]} u v = refl
-    ∑-+ {ε} u v = 0+0
-    ∑-+ {s <+> t} u v =
-      trans (+-cong (∑-+ (u ∘ go-left) (v ∘ go-left))
-                    (∑-+ (u ∘ go-right) (v ∘ go-right)))
-            (exchange _ _ _ _)
-
-  module SumLinear
-    (0A : A) (_+A_ : Op₂ A)
-    (_≈_ : Rel B r) (0B : B) (_+B_ : Op₂ B)
-    (open Defs _≈_)
-    (refl : Reflexive _≈_)
-    (trans : Transitive _≈_)
-    (+-cong : Congruent₂ _+B_)
-    (f : A → B)
-    (f-0 : f 0A ≈ 0B)
-    (f-+ : ∀ x y → f (x +A y) ≈ (f x +B f y))
-    where
-
-    open Sum 0A _+A_ renaming (∑ to ∑A)
-    open Sum 0B _+B_ renaming (∑ to ∑B)
-
-    ∑-linear : ∀ {s} (u : Vector A s) → f (∑A u) ≈ ∑B (f ∘ u)
-    ∑-linear {[-]} u = refl
-    ∑-linear {ε} u = f-0
-    ∑-linear {s <+> t} u =
-      trans (f-+ (∑A (u ∘ go-left)) (∑A (u ∘ go-right)))
-            (+-cong (∑-linear (u ∘ go-left)) (∑-linear (u ∘ go-right)))
-
-  module SumComm
-    (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A)
-    (open Defs _≈_)
-    (refl : Reflexive _≈_)
-    (trans : Transitive _≈_)
-    (+-cong : Congruent₂ _+_)
-    (0+0-→ : (0# + 0#) ≈ 0#)
-    (0+0-← : 0# ≈ (0# + 0#))
-    (exchange : Interchangable _+_ _+_)
-    where
-
-    open Sum 0# _+_
-    open Sum0 _≈_ 0# _+_ trans refl +-cong 0+0-→
-    open Sum+ _≈_ 0# _+_ refl trans +-cong 0+0-← exchange
-
-    ∑-comm : (M : Matrix A s t) →
-             (∑ λ i → ∑ λ j → M i j) ≈ (∑ λ j → ∑ λ i → M i j)
-    ∑-comm {s} {[-]} M = refl
-    ∑-comm {s} {ε} M = ∑-0 s
-    ∑-comm {s} {tl <+> tr} M =
-      trans (∑-+ (λ i → ∑ (leftᴹ M i)) (λ i → ∑ (rightᴹ M i)))
-            (+-cong (∑-comm (leftᴹ M)) (∑-comm (rightᴹ M)))
 
   module IdentMult
     (0A : A) (1A : A) (_≈_ : Rel B r) (0B : B) (_+_ : Op₂ B) (_*_ : A → B → B)

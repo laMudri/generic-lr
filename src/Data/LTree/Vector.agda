@@ -5,6 +5,8 @@
 module Data.LTree.Vector where
 
   open import Data.LTree
+
+  open import Algebra.Core using (Op₂)
   open import Data.Product using (_×_; _,_)
   open import Function.Base using (id; _∘_)
   open import Level using (Level; _⊔_)
@@ -66,3 +68,6 @@ module Data.LTree.Vector where
     fold {[-]} u = b (u here)
     fold {ε} u = e
     fold {s <+> t} u = a (fold (u ∘ go-left)) (fold (u ∘ go-right))
+
+  module Sum (0# : A) (_+_ : Op₂ A) where
+    ∑ = fold id 0# _+_
