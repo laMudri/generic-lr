@@ -51,6 +51,17 @@ module Generic.Linear.Thinning.Properties
   ⊴*-refl .get i = ⊴-refl
   ⊴*-trans : P ⊴* Q → Q ⊴* R → P ⊴* R
   ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
+  open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
+
+  data Thinning-cols (th : Thinning PΓ QΔ) (j : Ptr (Ctx.s QΔ)) : Set where
+    is-basis : (v : Var A (Ctx.Γ PΓ)) (vq : th .lookup v .idx ≡ j)
+               (les : ∀ i → th .M i j ⊴ 1ᴹ i (v .idx)) → Thinning-cols th j
+    is-zero : (¬v : (v : Var A (Ctx.Γ PΓ)) → th .lookup v .idx ≢ j)
+              (les : ∀ i → th .M i j ⊴ 0#) → Thinning-cols th j
+
+  thinning-cols :
+    ∀ {PΓ QΔ} (th : Thinning PΓ QΔ) (j : Ptr (Ctx.s QΔ)) → Thinning-cols th j
+  thinning-cols th j = {!!}
 
   thinning-sub-1ᴹ :
     ∀ {PΓ QΔ A}
@@ -87,18 +98,31 @@ module Generic.Linear.Thinning.Properties
 
   select : Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
   M (select th ρ) = M th *ᴹ M ρ
-  sums (select th ρ) .get j =
-    ⊴-trans (sums ρ .get j) {!sums th!}
+  sums (select {PΓ = PΓ} {QΔ} th ρ) .get j =
+    ⊴-trans (sums ρ .get j)
+            (⊴-trans (*ᴹ-cong {M = row (Ctx.R QΔ)} {row (Ctx.R PΓ) *ᴹ M th}
+                              {M ρ}
+                              (mk λ _ j → sums th .get j)
+                              ⊴ᴹ-refl .get here j)
+                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ) .get here j))
+    where
+    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
+    open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
+                  {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!}
   lookup (select th ρ) v = {!lookup ρ (plain-var (lookup th v))!}
 
-  extend : Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
+  extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
   M (extend les) i (go-left j) = 1ᴹ i j
   M (extend les) i (go-right j) = 0#
   sums (extend les) .get (go-left j) = *ᴹ-1ᴹ (row _) .get here j
     where
     open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
                    {!!} {!!} {!!} {!!}
-  sums (extend les) .get (go-right j) = ⊴-trans (les .get j) {!!}
+  sums (extend {PΓ} {QΔ} les) .get (go-right j) =
+    ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
+    where
+    open MultZero 0# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+                  {!!} {!!} {!!}
   idx (lookup (extend les) v) = go-left (idx v)
   tyq (lookup (extend les) v) = tyq v
   basis (lookup (extend les) v) .get (go-left j) = ⊴-refl
