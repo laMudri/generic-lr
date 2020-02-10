@@ -30,6 +30,36 @@ module Data.LTree.Matrix.Properties where
       Z : Set z
       s t u v : LTree
 
+  module Reflᴹ (_∼_ : Rel A r) (refl : Reflexive _∼_) where
+
+    reflᴹ : Reflexive {A = Matrix A s t} (Lift₂ᴹ _∼_)
+    reflᴹ .get i j = refl
+
+  module Transᴹ (_∼_ : Rel A r) (trans : Transitive _∼_) where
+
+    transᴹ : Transitive {A = Matrix A s t} (Lift₂ᴹ _∼_)
+    transᴹ MM NN .get i j = trans (MM .get i j) (NN .get i j)
+
+  module Mult-cong
+    (0# : C) (_+_ : C → C → C) (_*_ : A → B → C)
+    (_∼A_ : Rel A x) (_∼B_ : Rel B y) (_∼C_ : Rel C z)
+    (open Defs _∼C_)
+    (refl : Reflexive _∼C_)
+    (+-cong : Congruent₂ _+_)
+    (*-cong : ∀ {a a′ b b′} → a ∼A a′ → b ∼B b′ → (a * b) ∼C (a′ * b′))
+    where
+
+    open Sum 0# _+_
+    open Mult 0# _+_ _*_
+
+    open SumCong _∼C_ 0# _+_ refl +-cong
+
+    *ᴹ-cong : {M M′ : Matrix A s t} {N N′ : Matrix B t u} →
+              Lift₂ᴹ _∼A_ M M′ → Lift₂ᴹ _∼B_ N N′ →
+              Lift₂ᴹ _∼C_ (M *ᴹ N) (M′ *ᴹ N′)
+    *ᴹ-cong MM NN .get i k =
+      ∑-cong (mk λ j → *-cong (MM .get i j) (NN .get j k))
+
   module IdentMult
     (0A : A) (1A : A) (_≈_ : Rel B r) (0B : B) (_+_ : Op₂ B) (_*_ : A → B → B)
     (open Defs _≈_)
