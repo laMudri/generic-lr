@@ -1,18 +1,42 @@
 {-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Core
-open import Level renaming (zero to lzero; suc to lsuc)
-open import Relation.Binary using (Rel; IsPreorder)
+import Algebra.Definitions as Defs
+open import Function.Base using (flip; _∘_)
+open import Level using (0ℓ)
+open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Thinning.Properties
-  (Ty Ann : Set) (_≈_ : Rel Ann 0ℓ) (_⊴_ : Rel Ann 0ℓ)
+  (Ty Ann : Set) (_⊴_ : Rel Ann 0ℓ)
   (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
-  (⊴-isPreorder : IsPreorder _≈_ _⊴_)
+  (let module ⊴ = Defs _⊴_)
+  (let module ⊵ = Defs (flip _⊴_))
+  (open ⊴ using (Congruent₂; Interchangable))
+  -- ⊴:
+  (⊴-refl : Reflexive _⊴_)
+  (⊴-trans : Transitive _⊴_)
+  -- +:
+  (+-mono : Congruent₂ _+_)
+  (+-identity-→ : ⊴.Identity 0# _+_)
+  (+-identity-← : ⊵.Identity 0# _+_)
+  (+-interchange : Interchangable _+_ _+_)
+  -- ↑ Note: interchange + identity gives rise to assoc and comm.
+  -- *:
+  (*-mono : Congruent₂ _*_)
+  (*-identityˡ-→ : ⊴.LeftIdentity 1# _*_)
+  (*-identityʳ-← : ⊵.RightIdentity 1# _*_)
+  (*-assoc-→ : ⊴.Associative _*_)
+  -- both:
+  (zeroˡ-→ : ∀ a → (0# * a) ⊴ 0#)
+  (distribˡ-→ : ∀ a b c → ((a + b) * c) ⊴ ((a * c) + (b * c)))
+  (zeroʳ-← : ∀ a → 0# ⊴ (a * 0#))
+  (distribʳ-← : ∀ a b c → ((a * b) + (a * c)) ⊴ (a * (b + c)))
+  -- ↑ Note: stdlib (and common mathematical) names for left/right
+  -- distributivity are the wrong way round. I fix this.
   where
 
   open import Data.Product
   open import Data.Sum
-  open import Function.Base using (flip; _∘_)
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary
 
@@ -29,11 +53,6 @@ module Generic.Linear.Thinning.Properties
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
 
   open _─Env
-
-  open IsPreorder ⊴-isPreorder using () renaming
-    ( refl to ⊴-refl
-    ; trans to ⊴-trans
-    )
 
   private
     variable
@@ -77,7 +96,7 @@ module Generic.Linear.Thinning.Properties
   sums (identity {PΓ}) .get j = *ᴹ-1ᴹ (row (Ctx.R PΓ)) .get here j
     where
     open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                   {!!} {!!} {!!} {!!}
+                   +-mono +-identity-← *-identityʳ-← zeroʳ-←
   idx (lookup identity v) = idx v
   tyq (lookup identity v) = tyq v
   basis (lookup identity v) = ⊴*-refl
@@ -89,9 +108,12 @@ module Generic.Linear.Thinning.Properties
              (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-cong (row-cong₂ (sums th)) ⊴ᴹ-refl)
                                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
     where
-    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
+    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
     open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-                  {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!}
+                  +-mono (+-identity-→ .proj₁ 0#) (+-identity-← .proj₂ 0#)
+                  +-interchange *-assoc-→
+                  zeroˡ-→ (λ a b c → distribˡ-→ b c a)
+                  zeroʳ-← distribʳ-←
   lookup (select {𝓥 = 𝓥} {RΘ = ctx R Θ} th ρ) v =
     𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-cong
                                     (row-cong₂ (thinning-sub-1ᴹ th v))
@@ -101,9 +123,9 @@ module Generic.Linear.Thinning.Properties
     where
     postulate 𝓥-psh : ∀ {Γ : Vector Ty s} {P Q} →
                       Q ⊴* P → 𝓥 A (ctx P Γ) → 𝓥 A (ctx Q Γ)
-    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
+    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
     open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                   {!!} {!!} {!!} {!!}
+                   +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
 
   extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
   M (extend les) i (go-left j) = 1ᴹ i j
@@ -111,12 +133,12 @@ module Generic.Linear.Thinning.Properties
   sums (extend les) .get (go-left j) = *ᴹ-1ᴹ (row _) .get here j
     where
     open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                   {!!} {!!} {!!} {!!}
+                   +-mono +-identity-← *-identityʳ-← zeroʳ-←
   sums (extend {PΓ} {QΔ} les) .get (go-right j) =
     ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
     where
     open MultZero 0# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                  {!!} {!!} {!!}
+                  +-mono (+-identity-← .proj₂ 0#) zeroʳ-←
   idx (lookup (extend les) v) = go-left (idx v)
   tyq (lookup (extend les) v) = tyq v
   basis (lookup (extend les) v) .get (go-left j) = ⊴-refl
