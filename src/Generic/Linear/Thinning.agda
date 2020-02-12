@@ -30,10 +30,11 @@ module Generic.Linear.Thinning
       idx : Ptr s
       tyq : Γ idx ≡ A
       basis : P ⊴* 1ᴹ idx
+  open LVar public
 
-    plain-var : Var A (Ctx.Γ PΓ)
-    Var.idx plain-var = idx
-    Var.tyq plain-var = tyq
+  plain-var : ∀ {A PΓ} → LVar A PΓ → Var A (Ctx.Γ PΓ)
+  idx (plain-var v) = idx v
+  tyq (plain-var v) = tyq v
 
   Thinning : (PΓ QΔ : Ctx) → Set
   Thinning PΓ QΔ = (PΓ ─Env) LVar QΔ

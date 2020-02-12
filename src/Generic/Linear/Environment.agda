@@ -19,6 +19,7 @@ module Generic.Linear.Environment
   open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
 
   open import Data.Product
+  open import Function.Base using (_∘_)
 
   private
     variable
@@ -31,6 +32,7 @@ module Generic.Linear.Environment
     field
       idx : Ptr s
       tyq : Γ idx ≡ A
+  open Var public
 
   record _─Env (PΓ : Ctx) (𝓥 : Scoped) (QΔ : Ctx) : Set where
     constructor pack
@@ -44,9 +46,7 @@ module Generic.Linear.Environment
       lookup : ∀ {A} (v : Var A Γ) → 𝓥 A (record QΔ { R = M (Var.idx v) })
   open _─Env  -- TODO: better names so this can be public
 
-  -- split-env : ∀ {s t} {QΔ : SizedCtx (s <+> t)} → (PΓ ─Env) 𝓥 (sctx→ctx QΔ) →
-  --             (PΓ ─Env) 𝓥 (leftᶜ QΔ) × (PΓ ─Env) 𝓥 (rightᶜ QΔ)
-  -- split-env ρ .proj₁ .M = leftᴹ (ρ .M)
-  -- split-env ρ .proj₁ .sums .get k = ρ .sums .get (go-left k)
-  -- split-env ρ .proj₁ .lookup v = {!ρ .lookup v!}
-  -- split-env ρ .proj₂ = {!!}
+  leftᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ go-left) → Var A Γ
+  leftᵛ (var i q) = var (go-left i) q
+  rightᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ go-right) → Var A Γ
+  rightᵛ (var i q) = var (go-right i) q
