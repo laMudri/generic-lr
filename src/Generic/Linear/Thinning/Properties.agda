@@ -96,12 +96,22 @@ module Generic.Linear.Thinning.Properties
       record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
 
+  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
+  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
+                 +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
+  open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+                 +-mono +-identity-← *-identityʳ-← zeroʳ-←
+  open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
+                +-mono (+-identity-→ .proj₁ 0#) (+-identity-← .proj₂ 0#)
+                +-interchange *-assoc-→
+                zeroˡ-→ (λ a b c → distribˡ-→ b c a)
+                zeroʳ-← distribʳ-←
+  open MultZero 0# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+                +-mono (+-identity-← .proj₂ 0#) zeroʳ-←
+
   identity : Thinning PΓ PΓ
   M identity = 1ᴹ
   sums (identity {PΓ}) .get j = *ᴹ-1ᴹ (row (Ctx.R PΓ)) .get here j
-    where
-    open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                   +-mono +-identity-← *-identityʳ-← zeroʳ-←
   idx (lookup identity v) = idx v
   tyq (lookup identity v) = tyq v
   basis (lookup identity v) = ⊴*-refl
@@ -114,36 +124,19 @@ module Generic.Linear.Thinning.Properties
     ⊴*-trans (sums ρ)
              (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-cong (row-cong₂ (sums th)) ⊴ᴹ-refl)
                                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
-    where
-    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-                  +-mono (+-identity-→ .proj₁ 0#) (+-identity-← .proj₂ 0#)
-                  +-interchange *-assoc-→
-                  zeroˡ-→ (λ a b c → distribˡ-→ b c a)
-                  zeroʳ-← distribʳ-←
   lookup (select 𝓥-psh th ρ) v =
     𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-cong
                                     (row-cong₂ (thinning-sub-1ᴹ th v))
                                     ⊴ᴹ-refl))
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
           (lookup ρ (plain-var (lookup th v)))
-    where
-    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                   +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
 
   extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
   M (extend les) i (go-left j) = 1ᴹ i j
   M (extend les) i (go-right j) = 0#
   sums (extend les) .get (go-left j) = *ᴹ-1ᴹ (row _) .get here j
-    where
-    open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                   +-mono +-identity-← *-identityʳ-← zeroʳ-←
   sums (extend {PΓ} {QΔ} les) .get (go-right j) =
     ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
-    where
-    open MultZero 0# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
-                  +-mono (+-identity-← .proj₂ 0#) zeroʳ-←
   idx (lookup (extend les) v) = go-left (idx v)
   tyq (lookup (extend les) v) = tyq v
   basis (lookup (extend les) v) .get (go-left j) = ⊴-refl
