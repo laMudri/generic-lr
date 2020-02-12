@@ -71,6 +71,11 @@ module Generic.Linear.Thinning.Properties
   open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
   open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
 
+  LVar-psh : IsPresheaf LVar
+  idx (LVar-psh QP lv) = idx lv
+  tyq (LVar-psh QP lv) = tyq lv
+  basis (LVar-psh QP lv) = ⊴*-trans QP (basis lv)
+
   -- The rows of a thinning's matrix are a selection of standard basis vectors
   -- (i.e, rows from the identity matrix).
   -- Which rows, exactly, is defined by the action of the thinning (lookup).
@@ -101,9 +106,11 @@ module Generic.Linear.Thinning.Properties
   tyq (lookup identity v) = tyq v
   basis (lookup identity v) = ⊴*-refl
 
-  select : Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
-  M (select th ρ) = M th *ᴹ M ρ
-  sums (select {PΓ = PΓ} {QΔ} th ρ) =
+  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in
+           (∀ {A P Q} → Q ⊴* P → 𝓥 A (ctx P Θ) → 𝓥 A (ctx Q Θ)) →
+           Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
+  M (select 𝓥-psh th ρ) = M th *ᴹ M ρ
+  sums (select {PΓ = PΓ} {QΔ} 𝓥-psh th ρ) =
     ⊴*-trans (sums ρ)
              (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-cong (row-cong₂ (sums th)) ⊴ᴹ-refl)
                                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
@@ -114,15 +121,13 @@ module Generic.Linear.Thinning.Properties
                   +-interchange *-assoc-→
                   zeroˡ-→ (λ a b c → distribˡ-→ b c a)
                   zeroʳ-← distribʳ-←
-  lookup (select {𝓥 = 𝓥} {RΘ = ctx R Θ} th ρ) v =
+  lookup (select 𝓥-psh th ρ) v =
     𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-cong
                                     (row-cong₂ (thinning-sub-1ᴹ th v))
                                     ⊴ᴹ-refl))
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
           (lookup ρ (plain-var (lookup th v)))
     where
-    postulate 𝓥-psh : ∀ {Γ : Vector Ty s} {P Q} →
-                      Q ⊴* P → 𝓥 A (ctx P Γ) → 𝓥 A (ctx Q Γ)
     open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
     open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
                    +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
@@ -148,7 +153,7 @@ module Generic.Linear.Thinning.Properties
   extract t = t identity
 
   duplicate : ∀[ □ T ⇒ □ (□ T) ]
-  duplicate t ρ σ = t (select ρ σ)
+  duplicate t ρ {RΘ} σ = t (select (LVar-psh {RΘ}) ρ σ)
 
   th^□ : Thinnable (□ T)
   th^□ = duplicate
