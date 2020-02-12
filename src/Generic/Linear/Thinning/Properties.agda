@@ -98,13 +98,10 @@ module Generic.Linear.Thinning.Properties
 
   select : Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
   M (select th ρ) = M th *ᴹ M ρ
-  sums (select {PΓ = PΓ} {QΔ} th ρ) .get j =
-    ⊴-trans (sums ρ .get j)
-            (⊴-trans (*ᴹ-cong {M = row (Ctx.R QΔ)} {row (Ctx.R PΓ) *ᴹ M th}
-                              {M ρ}
-                              (mk λ _ j → sums th .get j)
-                              ⊴ᴹ-refl .get here j)
-                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ) .get here j))
+  sums (select {PΓ = PΓ} {QΔ} th ρ) =
+    ⊴*-trans (sums ρ)
+             (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-cong (row-cong₂ (sums th)) ⊴ᴹ-refl)
+                                    (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
     where
     open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
     open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans

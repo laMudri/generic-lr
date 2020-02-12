@@ -18,6 +18,7 @@ module Data.LTree.Matrix where
       A : Set a
       B : Set b
       C : Set c
+      R : REL A B r
       s s′ t t′ u : LTree
 
   Matrix : Set a → (s t : LTree) → Set a
@@ -102,6 +103,22 @@ module Data.LTree.Matrix where
   leftᴹ M i j = M i (go-left j)
   rightᴹ : Matrix A s (t <+> t′) → Matrix A s t′
   rightᴹ M i j = M i (go-right j)
+
+  -- Block matrix operations for equations
+
+  row-cong₂ : ∀ {u : Vector A t} {v : Vector B t} →
+              Lift₂ R u v → Lift₂ᴹ R (row u) (row v)
+  row-cong₂ (mk uv) = mk (λ _ j → uv j)
+  col-cong₂ : ∀ {u : Vector A s} {v : Vector B s} →
+              Lift₂ R u v → Lift₂ᴹ R (col u) (col v)
+  col-cong₂ (mk uv) = mk (λ i _ → uv i)
+
+  unrow-cong₂ : ∀ {M : Matrix A [-] t} {N : Matrix B [-] t} →
+                Lift₂ᴹ R M N → Lift₂ R (unrow M) (unrow N)
+  unrow-cong₂ (mk MN) = mk (λ j → MN here j)
+  uncol-cong₂ : ∀ {M : Matrix A s [-]} {N : Matrix B s [-]} →
+                Lift₂ᴹ R M N → Lift₂ R (uncol M) (uncol N)
+  uncol-cong₂ (mk MN) = mk (λ i → MN i here)
 
   private
     vertical-block : Matrix A s t → Matrix A s′ t → Matrix A (s <+> s′) t
