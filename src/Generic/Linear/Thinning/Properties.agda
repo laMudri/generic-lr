@@ -12,7 +12,7 @@ module Generic.Linear.Thinning.Properties
 
   open import Data.Product
   open import Data.Sum
-  open import Function.Base using (flip)
+  open import Function.Base using (flip; _∘_)
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary
 
@@ -29,8 +29,6 @@ module Generic.Linear.Thinning.Properties
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
 
   open _─Env
-  open Var
-  open LVar
 
   open IsPreorder ⊴-isPreorder using () renaming
     ( refl to ⊴-refl
@@ -52,39 +50,27 @@ module Generic.Linear.Thinning.Properties
   ⊴*-trans : P ⊴* Q → Q ⊴* R → P ⊴* R
   ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
   open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
+  open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
 
-  data Thinning-cols (th : Thinning PΓ QΔ) (j : Ptr (Ctx.s QΔ)) : Set where
-    is-basis : (v : Var A (Ctx.Γ PΓ)) (vq : th .lookup v .idx ≡ j)
-               (les : ∀ i → th .M i j ⊴ 1ᴹ i (v .idx)) → Thinning-cols th j
-    is-zero : (¬v : (v : Var A (Ctx.Γ PΓ)) → th .lookup v .idx ≢ j)
-              (les : ∀ i → th .M i j ⊴ 0#) → Thinning-cols th j
-
-  thinning-cols :
-    ∀ {PΓ QΔ} (th : Thinning PΓ QΔ) (j : Ptr (Ctx.s QΔ)) → Thinning-cols th j
-  thinning-cols th j = {!!}
-
+  -- The rows of a thinning's matrix are a selection of standard basis vectors
+  -- (i.e, rows from the identity matrix).
+  -- Which rows, exactly, is defined by the action of the thinning (lookup).
   thinning-sub-1ᴹ :
     ∀ {PΓ QΔ A}
     (th : Thinning PΓ QΔ) (v : Var A (Ctx.Γ PΓ)) →
-    M th (idx v) ⊴* 1ᴹ (idx (lookup th v))
-  thinning-sub-1ᴹ {ctx {s} P Γ} {ctx {[-]} Q Δ} th v = th .lookup v .basis
-  thinning-sub-1ᴹ {ctx {s} P Γ} {ctx {ε} Q Δ} th v .get (there () _)
-  thinning-sub-1ᴹ {ctx {s} P Γ} {ctx {tl <+> tr} Q Δ} th v .get (go-left j)
-    with th .lookup v .idx
-  ... | go-left j′ = {!thinning-sub-1ᴹ ? v .get j!}
-  ... | go-right j′ = {!!}
-  thinning-sub-1ᴹ {ctx {s} P Γ} {ctx {tl <+> tr} Q Δ} th v .get (go-right j) =
-    {!!}
-
-  thinning-action :
-    ∀ {PΓ QΔ u A}
-    (th : Thinning PΓ QΔ) (N : Matrix Ann _ u) (v : Var A (Ctx.Γ PΓ)) →
-    (M th *ᴹ N) (idx v) ⊴* N (idx (lookup th v))
-  thinning-action {ctx {s} P Γ} {ctx {[-]} Q Δ} (pack M sums lookup) N v@(var i tyq) .get k =
-    let lvar j q (mk bs) = lookup v in
-    {!bs!}
-  thinning-action {ctx {s} P Γ} {ctx {ε} Q Δ} (pack M sums lookup) N v@(var i tyq) .get k = {!!}
-  thinning-action {ctx {s} P Γ} {ctx {tl <+> tr} Q Δ} (pack M sums lookup) N v@(var i tyq) .get k = {!!}
+    M th (v .idx) ⊴* 1ᴹ (th .lookup v .idx)
+  thinning-sub-1ᴹ {ctx {[-]} P Γ} {ctx {t} Q Δ} th v@(var here q) =
+    th .lookup v .basis
+  thinning-sub-1ᴹ {PΓ} th (var (go-left i) q) =
+    thinning-sub-1ᴹ
+      {leftᶜ (ctx→sctx PΓ)}
+      record { M = topᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ leftᵛ }
+      (var i q)
+  thinning-sub-1ᴹ {PΓ} th (var (go-right i) q) =
+    thinning-sub-1ᴹ
+      {rightᶜ (ctx→sctx PΓ)}
+      record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
+      (var i q)
 
   identity : Thinning PΓ PΓ
   M identity = 1ᴹ
@@ -106,7 +92,18 @@ module Generic.Linear.Thinning.Properties
     open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
     open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
                   {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!} {!!}
-  lookup (select th ρ) v = {!lookup ρ (plain-var (lookup th v))!}
+  lookup (select {𝓥 = 𝓥} {RΘ = ctx R Θ} th ρ) v =
+    𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-cong
+                                    (row-cong₂ (thinning-sub-1ᴹ th v))
+                                    ⊴ᴹ-refl))
+                    (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
+          (lookup ρ (plain-var (lookup th v)))
+    where
+    postulate 𝓥-psh : ∀ {Γ : Vector Ty s} {P Q} →
+                      Q ⊴* P → 𝓥 A (ctx P Γ) → 𝓥 A (ctx Q Γ)
+    open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl {!!} {!!}
+    open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
+                   {!!} {!!} {!!} {!!}
 
   extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
   M (extend les) i (go-left j) = 1ᴹ i j
