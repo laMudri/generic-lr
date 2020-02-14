@@ -5,6 +5,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Data.LTree
   open import Data.LTree.Vector
   open import Function.Base using (_∘_)
+  open import Relation.Unary
 
   infix 2 _`⊢_
   infixr 3 _`*_
@@ -75,3 +76,6 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   Scoped : Set₁
   Scoped = Ty → Ctx → Set
+
+  Scope : Scoped → Ctx → Scoped
+  Scope T QΔ A = (QΔ ++ᶜ_) ⊢ T A
