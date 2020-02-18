@@ -47,17 +47,17 @@ module Generic.Linear.Syntax.Interpretation
       split-+ : R +* R ⊴* R
       T-prf : T RΓ
 
-  ⟦_⟧p : Premises → Scoped
-  ⟦ Γ `⊢ A′ ⟧p A = const (A′ ≡ A) ∩ ⟦ Γ ⊢ A ⟧
-  ⟦ `⊤ ⟧p A = U
-  ⟦ `I ⟧p A (ctx R Γ) = 0* ⊴* R
-  ⟦ p `∧ q ⟧p A = ⟦ p ⟧p A ∩ ⟦ q ⟧p A
-  ⟦ p `* q ⟧p A = ⟦ p ⟧p A ✴ ⟦ q ⟧p A
-  ⟦ ρ `· p ⟧p A = ρ · ⟦ p ⟧p A
-  ⟦ `□ p ⟧p A = Dup (⟦ p ⟧p A)
+  ⟦_⟧p : Premises → Ctx → Set
+  ⟦ Γ `⊢ A ⟧p = ⟦ Γ ⊢ A ⟧
+  ⟦ `⊤ ⟧p = U
+  ⟦ `I ⟧p (ctx R Γ) = 0* ⊴* R
+  ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
+  ⟦ p `* q ⟧p = ⟦ p ⟧p ✴ ⟦ q ⟧p
+  ⟦ ρ `· p ⟧p = ρ · ⟦ p ⟧p
+  ⟦ `□ p ⟧p = Dup (⟦ p ⟧p)
 
   ⟦_⟧r : Rule → Scoped
-  ⟦ rule ps A′ ⟧r A = const (A′ ≡ A) ∩ ⟦ ps ⟧p A
+  ⟦ rule ps A′ ⟧r A = const (A′ ≡ A) ∩ ⟦ ps ⟧p
 
   ⟦_⟧s : System → Scoped
   ⟦ system L rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ

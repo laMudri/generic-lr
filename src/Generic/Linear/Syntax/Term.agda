@@ -21,8 +21,8 @@ module Generic.Linear.Syntax.Term
   open import Data.LTree.Vector
 
   open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
-  import Generic.Linear.Syntax.Interpretation as Interp′
-  module Interp = Interp′ Ty Ann _⊴_ 0# _+_ 1# _*_
+  import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
+    as Interp
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
 

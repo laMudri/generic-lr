@@ -78,4 +78,4 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   Scoped = Ty → Ctx → Set
 
   Scope : Scoped → Ctx → Scoped
-  Scope T QΔ A = (QΔ ++ᶜ_) ⊢ T A
+  Scope T QΔ A = (_++ᶜ QΔ) ⊢ T A
