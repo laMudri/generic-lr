@@ -52,7 +52,7 @@ module Generic.Linear.Environment
       lookup : ∀ {A} (v : Var A Γ) → 𝓥 A (record QΔ { R = M (Var.idx v) })
   open _─Env  -- TODO: better names so this can be public
 
-  leftᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ go-left) → Var A Γ
-  leftᵛ (var i q) = var (go-left i) q
-  rightᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ go-right) → Var A Γ
-  rightᵛ (var i q) = var (go-right i) q
+  leftᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ ↙) → Var A Γ
+  leftᵛ (var i q) = var (↙ i) q
+  rightᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ ↘) → Var A Γ
+  rightᵛ (var i q) = var (↘ i) q

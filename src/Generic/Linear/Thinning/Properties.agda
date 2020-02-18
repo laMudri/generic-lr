@@ -85,12 +85,12 @@ module Generic.Linear.Thinning.Properties
     M th (v .idx) ⊴* 1ᴹ (th .lookup v .idx)
   thinning-sub-1ᴹ {ctx {[-]} P Γ} {ctx {t} Q Δ} th v@(var here q) =
     th .lookup v .basis
-  thinning-sub-1ᴹ {PΓ} th (var (go-left i) q) =
+  thinning-sub-1ᴹ {PΓ} th (var (↙ i) q) =
     thinning-sub-1ᴹ
       {leftᶜ (ctx→sctx PΓ)}
       record { M = topᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ leftᵛ }
       (var i q)
-  thinning-sub-1ᴹ {PΓ} th (var (go-right i) q) =
+  thinning-sub-1ᴹ {PΓ} th (var (↘ i) q) =
     thinning-sub-1ᴹ
       {rightᶜ (ctx→sctx PΓ)}
       record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
@@ -132,15 +132,15 @@ module Generic.Linear.Thinning.Properties
           (lookup ρ (plain-var (lookup th v)))
 
   extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
-  M (extend les) i (go-left j) = 1ᴹ i j
-  M (extend les) i (go-right j) = 0#
-  sums (extend les) .get (go-left j) = *ᴹ-1ᴹ (row _) .get here j
-  sums (extend {PΓ} {QΔ} les) .get (go-right j) =
+  M (extend les) i (↙ j) = 1ᴹ i j
+  M (extend les) i (↘ j) = 0#
+  sums (extend les) .get (↙ j) = *ᴹ-1ᴹ (row _) .get here j
+  sums (extend {PΓ} {QΔ} les) .get (↘ j) =
     ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
-  idx (lookup (extend les) v) = go-left (idx v)
+  idx (lookup (extend les) v) = ↙ (idx v)
   tyq (lookup (extend les) v) = tyq v
-  basis (lookup (extend les) v) .get (go-left j) = ⊴-refl
-  basis (lookup (extend les) v) .get (go-right j) = ⊴-refl
+  basis (lookup (extend les) v) .get (↙ j) = ⊴-refl
+  basis (lookup (extend les) v) .get (↘ j) = ⊴-refl
 
   extract : ∀[ □ T ⇒ T ]
   extract t = t identity

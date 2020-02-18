@@ -95,14 +95,14 @@ module Data.LTree.Matrix where
   [ M │ N ] = lift₂ _++_ M N
 
   topᴹ : Matrix A (s <+> s′) t → Matrix A s t
-  topᴹ M i j = M (go-left i) j
+  topᴹ M i j = M (↙ i) j
   botᴹ : Matrix A (s <+> s′) t → Matrix A s′ t
-  botᴹ M i j = M (go-right i) j
+  botᴹ M i j = M (↘ i) j
 
   leftᴹ : Matrix A s (t <+> t′) → Matrix A s t
-  leftᴹ M i j = M i (go-left j)
+  leftᴹ M i j = M i (↙ j)
   rightᴹ : Matrix A s (t <+> t′) → Matrix A s t′
-  rightᴹ M i j = M i (go-right j)
+  rightᴹ M i j = M i (↘ j)
 
   -- Block matrix operations for equations
 

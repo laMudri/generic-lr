@@ -84,22 +84,22 @@ module Data.LTree.Matrix.Properties where
 
     1ᴹ-*ᴹ : (M : Matrix B s t) → 1ᴹ *ᴹ M ≈ᴹ M
     1ᴹ-*ᴹ M .get here k = 1-* _
-    1ᴹ-*ᴹ {sl <+> sr} {t} M .get (go-left i) k = begin
-      (1ᴹ *ᴹ M) (go-left i) k  ≡⟨⟩
+    1ᴹ-*ᴹ {sl <+> sr} {t} M .get (↙ i) k = begin
+      (1ᴹ *ᴹ M) (↙ i) k  ≡⟨⟩
       (1ᴹ *ᴹ (topᴹ M)) i k + (∑ λ j → 0A * botᴹ M j k)
         ∼⟨ +-cong (1ᴹ-*ᴹ (topᴹ M) .get i k)
                   (trans (∑-cong (mk λ j → 0-* (botᴹ M j k))) (∑-0 sr)) ⟩
       topᴹ M i k + 0B          ∼⟨ +-identity .proj₂ _ ⟩
       topᴹ M i k               ≡⟨⟩
-      M (go-left i) k          ∎
-    1ᴹ-*ᴹ {sl <+> sr} {t} M .get (go-right i) k = begin
-      (1ᴹ *ᴹ M) (go-right i) k  ≡⟨⟩
+      M (↙ i) k          ∎
+    1ᴹ-*ᴹ {sl <+> sr} {t} M .get (↘ i) k = begin
+      (1ᴹ *ᴹ M) (↘ i) k  ≡⟨⟩
       (∑ λ j → 0A * topᴹ M j k) + (1ᴹ *ᴹ (botᴹ M)) i k
         ∼⟨ +-cong (trans (∑-cong (mk λ j → 0-* (topᴹ M j k))) (∑-0 sl))
                   (1ᴹ-*ᴹ (botᴹ M) .get i k) ⟩
       0B + botᴹ M i k           ∼⟨ +-identity .proj₁ _ ⟩
       botᴹ M i k                ≡⟨⟩
-      M (go-right i) k          ∎
+      M (↘ i) k          ∎
 
   module MultIdent
     (0A : A) (1A : A) (_≈_ : Rel B r) (0B : B) (_+_ : Op₂ B) (_*_ : B → A → B)
@@ -125,22 +125,22 @@ module Data.LTree.Matrix.Properties where
 
     *ᴹ-1ᴹ : (M : Matrix B s t) → M *ᴹ 1ᴹ ≈ᴹ M
     *ᴹ-1ᴹ M .get i here = *-1 _
-    *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (go-left k) = begin
-      (M *ᴹ 1ᴹ) i (go-left k)  ≡⟨⟩
+    *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (↙ k) = begin
+      (M *ᴹ 1ᴹ) i (↙ k)  ≡⟨⟩
       (∑ λ j → leftᴹ M i j * 1ᴹ j k) + (∑ λ j → rightᴹ M i j * 0A)
         ∼⟨ +-cong (*ᴹ-1ᴹ (leftᴹ M) .get i k)
                   (trans (∑-cong (mk λ j → *-0 (rightᴹ M i j))) (∑-0 tr)) ⟩
       leftᴹ M i k + 0B         ∼⟨ +-identity .proj₂ _ ⟩
       leftᴹ M i k              ≡⟨⟩
-      M i (go-left k)          ∎
-    *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (go-right k) = begin
-      (M *ᴹ 1ᴹ) i (go-right k)  ≡⟨⟩
+      M i (↙ k)          ∎
+    *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (↘ k) = begin
+      (M *ᴹ 1ᴹ) i (↘ k)  ≡⟨⟩
       (∑ λ j → leftᴹ M i j * 0A) + (∑ λ j → rightᴹ M i j * 1ᴹ j k)
         ∼⟨ +-cong (trans (∑-cong (mk λ j → *-0 (leftᴹ M i j))) (∑-0 tl))
                   (*ᴹ-1ᴹ (rightᴹ M) .get i k) ⟩
       0B + rightᴹ M i k         ∼⟨ +-identity .proj₁ _ ⟩
       rightᴹ M i k              ≡⟨⟩
-      M i (go-right k)          ∎
+      M i (↘ k)          ∎
 
   module MultMult
     (_≈_ : Rel Z r)

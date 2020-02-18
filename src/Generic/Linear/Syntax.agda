@@ -39,10 +39,10 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   ctx P Γ ++ᶜ ctx Q Δ = ctx (P ++ Q) (Γ ++ Δ)
 
   leftᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  leftᶜ (sctx P Γ) = ctx (P ∘ go-left) (Γ ∘ go-left)
+  leftᶜ (sctx P Γ) = ctx (P ∘ ↙) (Γ ∘ ↙)
 
   rightᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  rightᶜ (sctx P Γ) = ctx (P ∘ go-right) (Γ ∘ go-right)
+  rightᶜ (sctx P Γ) = ctx (P ∘ ↘) (Γ ∘ ↘)
 
   -- Premises to each rule form a tree.
   -- At each leaf is a premise, which binds one Ctx's worth of new variables.

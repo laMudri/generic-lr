@@ -53,8 +53,8 @@ module Data.LTree.Vector where
   [] (there () _)
 
   _++_ : Vector A s → Vector A t → Vector A (s <+> t)
-  (u ++ v) (go-left i) = u i
-  (u ++ v) (go-right j) = v j
+  (u ++ v) (↙ i) = u i
+  (u ++ v) (↘ j) = v j
 
   un[-] : Vector A [-] → A
   un[-] v = v here
@@ -62,12 +62,40 @@ module Data.LTree.Vector where
   un++ : Vector A (s <+> t) → Vector A s × Vector A t
   un++ v = v ∘ there left , v ∘ there right
 
+  module _ {R : Pred A r} where
+
+    [_]₁ : {u : Vector A [-]} → R (u here) → Lift₁ R u
+    [ r ]₁ .get here = r
+
+    []₁ : {u : Vector A ε} → Lift₁ R u
+    []₁ .get (there () _)
+
+    _++₁_ : {u : Vector A (s <+> t)} →
+            Lift₁ R (u ∘ ↙) → Lift₁ R (u ∘ ↘) → Lift₁ R u
+    (ru ++₁ rv) .get (↙ i) = ru .get i
+    (ru ++₁ rv) .get (↘ i) = rv .get i
+
+  module _ {R : REL A B r} where
+
+    [_]₂ : {u : Vector A [-]} {v : Vector B [-]} →
+           R (u here) (v here) → Lift₂ R u v
+    [ r ]₂ .get here = r
+
+    []₂ : {u : Vector A ε} {v : Vector B ε} → Lift₂ R u v
+    []₂ .get (there () _)
+
+    _++₂_ : {u : Vector A (s <+> t)} {v : Vector B (s <+> t)} →
+            Lift₂ R (u ∘ ↙) (v ∘ ↙) → Lift₂ R (u ∘ ↘) (v ∘ ↘) →
+            Lift₂ R u v
+    (ru ++₂ rv) .get (↙ i) = ru .get i
+    (ru ++₂ rv) .get (↘ i) = rv .get i
+
   module _ (b : A → B) (e : B) (a : B → B → B) where
 
     fold : Vector A s → B
     fold {[-]} u = b (u here)
     fold {ε} u = e
-    fold {s <+> t} u = a (fold (u ∘ go-left)) (fold (u ∘ go-right))
+    fold {s <+> t} u = a (fold (u ∘ ↙)) (fold (u ∘ ↘))
 
   module Sum (0# : A) (_+_ : Op₂ A) where
     ∑ = fold id 0# _+_

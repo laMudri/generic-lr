@@ -66,97 +66,71 @@ module Generic.Linear.Example.LTLC where
           {P = ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u0 ]) ++ []}
           {Q = ((([] ++ [ u0 ]) ++ [ u0 ]) ++ [ u1 ]) ++ []}
           (`var (lvar
-            (go-left (go-left (go-left (go-left (go-right here)))))
+            (↙ (↙ (↙ (↙ (↘ here)))))
             refl
             (mk λ where
-              (go-left (go-left (go-left (go-left (go-left (there () _))))))
-              (go-left (go-left (go-left (go-left (go-right here))))) → ⊴-refl
-              (go-left (go-left (go-left (go-right _)))) → ⊴-refl
-              (go-left (go-left (go-right _))) → ⊴-refl
-              (go-left (go-right (there () _)))
-              (go-right (there () _))
+              (↙ (↙ (↙ (↙ (↙ (there () _))))))
+              (↙ (↙ (↙ (↙ (↘ here))))) → ⊴-refl
+              (↙ (↙ (↙ (↘ _)))) → ⊴-refl
+              (↙ (↙ (↘ _))) → ⊴-refl
+              (↙ (↘ (there () _)))
+              (↘ (there () _))
             )))
           (mk λ where
-            (go-left (go-left (go-left (go-left (there () _)))))
-            (go-left (go-left (go-left (go-right _)))) → ⊴-refl
-            (go-left (go-left (go-right _))) → ⊴-refl
-            (go-left (go-right _)) → ⊴-refl
-            (go-right (there () _))
+            (↙ (↙ (↙ (↙ (there () _)))))
+            (↙ (↙ (↙ (↘ _)))) → ⊴-refl
+            (↙ (↙ (↘ _))) → ⊴-refl
+            (↙ (↘ _)) → ⊴-refl
+            (↘ (there () _))
           )
           (`var (lvar
-            (go-left (go-left (go-right here)))
+            (↙ (↙ (↘ here)))
             refl
             (mk λ where
-              (go-left (go-left (go-left (go-left (go-left (there () _))))))
-              (go-left (go-left (go-left (go-left (go-right _))))) → ⊴-refl
-              (go-left (go-left (go-left (go-right _)))) → ⊴-refl
-              (go-left (go-left (go-right here))) → ⊴-refl
-              (go-left (go-right (there () _)))
-              (go-right (there () _))
+              (↙ (↙ (↙ (↙ (↙ (there () _))))))
+              (↙ (↙ (↙ (↙ (↘ _))))) → ⊴-refl
+              (↙ (↙ (↙ (↘ _)))) → ⊴-refl
+              (↙ (↙ (↘ here))) → ⊴-refl
+              (↙ (↘ (there () _)))
+              (↘ (there () _))
             )))))
         (mk λ where
-          (go-left (go-left (go-left (there () _))))
-          (go-left (go-left (go-right _))) → ⊴-refl
-          (go-left (go-right _)) → ⊴-refl
-          (go-right _) → ⊴-refl
+          (↙ (↙ (↙ (there () _))))
+          (↙ (↙ (↘ _))) → ⊴-refl
+          (↙ (↘ _)) → ⊴-refl
+          (↘ _) → ⊴-refl
         )
         (`var (lvar
-          (go-left (go-left (go-right here)))
+          (↙ (↙ (↘ here)))
           refl
           (mk λ where
-            (go-left (go-left (go-left (go-left (there () _)))))
-            (go-left (go-left (go-left (go-right _)))) → ⊴-refl
-            (go-left (go-left (go-right here))) → ⊴-refl
-            (go-left (go-right _)) → ⊴-refl
-            (go-right (there () _))
+            (↙ (↙ (↙ (↙ (there () _)))))
+            (↙ (↙ (↙ (↘ _)))) → ⊴-refl
+            (↙ (↙ (↘ here))) → ⊴-refl
+            (↙ (↘ _)) → ⊴-refl
+            (↘ (there () _))
           )))))))
 
   pattern var i les = `var (lvar i refl les)
   pattern lam t = `con (`lam _ _ , refl , t)
   pattern app A P Q sp s t =
     `con (`app A _ , refl , _✴⟨_⟩_ {P = P} {Q = Q} s sp t)
-  pattern ↘ i = go-right i
-  pattern ↙ i = go-left i
 
   myC′ : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
   myC′ A B C = lam (lam (lam
     (app B ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u1 ])
            ((([] ++ [ u0 ]) ++ [ u1 ]) ++ [ u0 ])
-           (mk λ where
-             (↙ (↙ (↙ (there () _))))
-             (↙ (↙ (↘ _))) → ⊴-refl
-             (↙ (↘ _)) → ⊴-refl
-             (↘ _) → ⊴-refl
-           )
+           ((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
       (app A (((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u0 ]) ++ [])
              (((([] ++ [ u0 ]) ++ [ u0 ]) ++ [ u1 ]) ++ [])
-             (mk λ where
-               (↙ (↙ (↙ (↙ (there () _)))))
-               (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-               (↙ (↙ (↘ _))) → ⊴-refl
-               (↙ (↘ _)) → ⊴-refl
-               (↘ (there () _))
-             )
-        (var (↙ (↙ (↙ (↙ (↘ here))))) (mk λ where
-             (↙ (↙ (↙ (↙ (↙ (there () _))))))
-             (↙ (↙ (↙ (↙ (↘ here))))) → ⊴-refl
-             (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-             (↙ (↙ (↘ _))) → ⊴-refl
-             (↙ (↘ (there () _)))
-             (↘ (there () _))
-        ))
-        (var (↙ (↙ (↘ here))) (mk λ where
-             (↙ (↙ (↙ (↙ (↙ (there () _))))))
-             (↙ (↙ (↙ (↙ (↘ _))))) → ⊴-refl
-             (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-             (↙ (↙ (↘ here))) → ⊴-refl
-             (↙ (↘ (there () _)))
-             (↘ (there () _))
-        )))
-      (var (↙ (↙ (↘ here))) (mk λ where
-           (↙ (↙ (↙ (↙ (there () _)))))
-           (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-           (↙ (↙ (↘ here))) → ⊴-refl
-           (↙ (↘ _)) → ⊴-refl
-           (↘ (there () _))
-      )))))
+             (((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+               ++₂ []₂)
+        (var (↙ (↙ (↙ (↙ (↘ here)))))
+             ((((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+               ++₂ []₂) ++₂ []₂))
+        (var (↙ (↙ (↘ here)))
+             ((((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+               ++₂ []₂) ++₂ []₂)))
+      (var (↙ (↙ (↘ here)))
+           (((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+             ++₂ []₂)))))

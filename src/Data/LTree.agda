@@ -36,15 +36,15 @@ module Data.LTree where
     left : In-node s (s <+> t)
     right : In-node t (s <+> t)
 
-  pattern go-left s = there left s
-  pattern go-right s = there right s
+  pattern ↙ s = there left s
+  pattern ↘ s = there right s
 
   private
     example-ltree : LTree
     example-ltree = ([-] <+> [-]) <+> (ε <+> [-])
 
     example-ptr : Ptr example-ltree
-    example-ptr = go-left (go-right here)
+    example-ptr = ↙ (↘ here)
 
   there-injective :
     {d : In-node s t} {e : In-node s′ t} {i : Ptr s} {j : Ptr s′} →
@@ -52,20 +52,20 @@ module Data.LTree where
     Σ[ sq ∈ s ≡ s′ ] (subst (λ z → In-node z t) sq d ≡ e × subst Ptr sq i ≡ j)
   there-injective refl = refl , refl , refl
 
-  go-left-injective :
+  ↙-injective :
     {i j : Ptr s} → there (left {t = t}) i ≡ there left j → i ≡ j
-  go-left-injective refl = refl
+  ↙-injective refl = refl
 
-  go-right-injective :
+  ↘-injective :
     {i j : Ptr t} → there (right {s = s}) i ≡ there right j → i ≡ j
-  go-right-injective refl = refl
+  ↘-injective refl = refl
 
   _≟_ : (i j : Ptr s) → Dec (i ≡ j)
   here ≟ here = yes refl
-  go-left i ≟ go-left j = map′ (cong go-left) go-left-injective (i ≟ j)
-  go-left i ≟ go-right j = no λ ()
-  go-right i ≟ go-left j = no λ ()
-  go-right i ≟ go-right j = map′ (cong go-right) go-right-injective (i ≟ j)
+  ↙ i ≟ ↙ j = map′ (cong ↙) ↙-injective (i ≟ j)
+  ↙ i ≟ ↘ j = no λ ()
+  ↘ i ≟ ↙ j = no λ ()
+  ↘ i ≟ ↘ j = map′ (cong ↘) ↘-injective (i ≟ j)
 
   _==_ : (i j : Ptr s) → Bool
   i == j = does (i ≟ j)

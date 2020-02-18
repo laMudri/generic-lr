@@ -35,7 +35,7 @@ module Data.LTree.Vector.Properties where
     ∑-cong {[-]} (mk qs) = qs here
     ∑-cong {ε} (mk qs) = 0-cong
     ∑-cong {s <+> t} (mk qs) =
-      +-cong (∑-cong (mk (qs ∘ go-left))) (∑-cong (mk (qs ∘ go-right)))
+      +-cong (∑-cong (mk (qs ∘ ↙))) (∑-cong (mk (qs ∘ ↘)))
 
   module Sum0
     (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A)
@@ -69,8 +69,8 @@ module Data.LTree.Vector.Properties where
     ∑-+ {[-]} u v = refl
     ∑-+ {ε} u v = 0+0
     ∑-+ {s <+> t} u v =
-      trans (+-cong (∑-+ (u ∘ go-left) (v ∘ go-left))
-                    (∑-+ (u ∘ go-right) (v ∘ go-right)))
+      trans (+-cong (∑-+ (u ∘ ↙) (v ∘ ↙))
+                    (∑-+ (u ∘ ↘) (v ∘ ↘)))
             (exchange _ _ _ _)
 
   module SumLinear
@@ -92,8 +92,8 @@ module Data.LTree.Vector.Properties where
     ∑-linear {[-]} u = refl
     ∑-linear {ε} u = f-0
     ∑-linear {s <+> t} u =
-      trans (f-+ (∑A (u ∘ go-left)) (∑A (u ∘ go-right)))
-            (+-cong (∑-linear (u ∘ go-left)) (∑-linear (u ∘ go-right)))
+      trans (f-+ (∑A (u ∘ ↙)) (∑A (u ∘ ↘)))
+            (+-cong (∑-linear (u ∘ ↙)) (∑-linear (u ∘ ↘)))
 
   module SumComm
     (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A)
