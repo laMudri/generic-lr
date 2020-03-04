@@ -146,7 +146,7 @@ module Generic.Linear.Thinning.Properties
   extract t = t identity
 
   duplicate : ∀[ □ T ⇒ □ (□ T) ]
-  duplicate t ρ {RΘ} σ = t (select (LVar-psh {RΘ}) ρ σ)
+  duplicate t ρ σ = t (select LVar-psh ρ σ)
 
   th^□ : Thinnable (□ T)
   th^□ = duplicate

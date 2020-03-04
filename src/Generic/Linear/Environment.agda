@@ -30,7 +30,7 @@ module Generic.Linear.Environment
   -- TODO: this probably should be somewhere else.
   IsPresheaf : Scoped → Set
   IsPresheaf 𝓒 =
-    ∀ {RΓ : Ctx} {A P Q} → let ctx R Γ = RΓ in
+    ∀ {s} {Γ : Vector Ty s} {P Q} {A} →
     Q ⊴* P → 𝓒 A (ctx P Γ) → 𝓒 A (ctx Q Γ)
 
   record Var {s} (A : Ty) (Γ : Vector Ty s) : Set where
