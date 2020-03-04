@@ -21,8 +21,7 @@ module Generic.Linear.Syntax.Term
   open import Data.LTree.Vector
 
   open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
-  import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
-    as Interp
+  open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
 
@@ -32,6 +31,5 @@ module Generic.Linear.Syntax.Term
      sz : Size
 
   data Tm (d : System) : Size → Scoped where
-    `var : ∀[   LVar A ⇒ Tm d (↑ sz) A ]
-    `con : let open Interp (Scope (Tm d sz)) in
-           ∀[ ⟦ d ⟧s A ⇒ Tm d (↑ sz) A ]
+    `var : ∀[ LVar                     A ⇒ Tm d (↑ sz) A ]
+    `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]

@@ -9,7 +9,6 @@ import Generic.Linear.Syntax as Syntax
 module Generic.Linear.Syntax.Interpretation
   (Ty Ann : Set) (open Syntax Ty Ann) (_⊴_ : Rel Ann lzero)
   (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
-  (⟦_⊢_⟧ : Ctx → Scoped)
   where
 
   open import Data.Product
@@ -47,17 +46,28 @@ module Generic.Linear.Syntax.Interpretation
       split-+ : R +* R ⊴* R
       T-prf : T RΓ
 
-  ⟦_⟧p : Premises → Ctx → Set
-  ⟦ Γ `⊢ A ⟧p = ⟦ Γ ⊢ A ⟧
-  ⟦ `⊤ ⟧p = U
-  ⟦ `I ⟧p (ctx R Γ) = 0* ⊴* R
-  ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
-  ⟦ p `* q ⟧p = ⟦ p ⟧p ✴ ⟦ q ⟧p
-  ⟦ ρ `· p ⟧p = ρ · ⟦ p ⟧p
-  ⟦ `□ p ⟧p = Dup (⟦ p ⟧p)
+  module WithScope (⟦_⊢_⟧ : Ctx → Scoped) where
 
-  ⟦_⟧r : Rule → Scoped
-  ⟦ rule ps A′ ⟧r A = const (A′ ≡ A) ∩ ⟦ ps ⟧p
+    ⟦_⟧p′ : Premises → Ctx → Set
+    ⟦ Γ `⊢ A ⟧p′ = ⟦ Γ ⊢ A ⟧
+    ⟦ `⊤ ⟧p′ = U
+    ⟦ `I ⟧p′ (ctx R Γ) = 0* ⊴* R
+    ⟦ p `∧ q ⟧p′ = ⟦ p ⟧p′ ∩ ⟦ q ⟧p′
+    ⟦ p `* q ⟧p′ = ⟦ p ⟧p′ ✴ ⟦ q ⟧p′
+    ⟦ ρ `· p ⟧p′ = ρ · ⟦ p ⟧p′
+    ⟦ `□ p ⟧p′ = Dup (⟦ p ⟧p′)
 
-  ⟦_⟧s : System → Scoped
-  ⟦ system L rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
+    ⟦_⟧r′ : Rule → Scoped
+    ⟦ rule ps A′ ⟧r′ A = const (A′ ≡ A) ∩ ⟦ ps ⟧p′
+
+    ⟦_⟧s′ : System → Scoped
+    ⟦ system L rs ⟧s′ A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r′ A PΓ
+
+  ⟦_⟧p : Premises → (Ctx → Scoped) → (Ctx → Set)
+  ⟦ ps ⟧p Sc = let open WithScope Sc in ⟦ ps ⟧p′
+
+  ⟦_⟧r : Rule → (Ctx → Scoped) → Scoped
+  ⟦ r ⟧r Sc = let open WithScope Sc in ⟦ r ⟧r′
+
+  ⟦_⟧s : System → (Ctx → Scoped) → Scoped
+  ⟦ s ⟧s Sc = let open WithScope Sc in ⟦ s ⟧s′

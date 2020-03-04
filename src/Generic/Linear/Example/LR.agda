@@ -44,7 +44,6 @@ module Generic.Linear.Example.LR where
 
   open import Generic.Linear.Syntax.Term Conc Ann _⊴_ u0 _+_ u1 _*_
   open import Generic.Linear.Syntax.Interpretation Conc Ann _⊴_ u0 _+_ u1 _*_
-    as Interp
   open import Generic.Linear.Thinning Conc Ann _⊴_ u0 _+_ u1 _*_
 
   data `LR : Set where
@@ -69,7 +68,7 @@ module Generic.Linear.Example.LR where
                         `* (ctx [ ρ ] [ syn , A ] `⊢ (chk , Z)))
                        (syn , Z)
 
-  open Interp (Scope (Tm LR ∞)) hiding (_✴⟨_⟩_; ⟨_⟩·_)
+  open WithScope (Scope (Tm LR ∞))
 
   Term = Tm LR ∞
 

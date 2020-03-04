@@ -38,7 +38,6 @@ module Generic.Linear.Example.LTLC where
 
   open import Generic.Linear.Syntax.Term Ty Ann _⊴_ u0 _+_ u1 _*_
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ u0 _+_ u1 _*_
-    as Interp
   open import Generic.Linear.Thinning Ty Ann _⊴_ u0 _+_ u1 _*_
 
   data `LTLC : Set where
@@ -49,7 +48,7 @@ module Generic.Linear.Example.LTLC where
     (`lam A B) → rule (ctx [ u1 ] [ A ] `⊢ B) (A ⊸ B)
     (`app A B) → rule (([]ᶜ `⊢ (A ⊸ B)) `* ([]ᶜ `⊢ A)) B
 
-  open Interp (Scope (Tm LTLC ∞)) hiding (_✴⟨_⟩_)
+  open WithScope (Scope (Tm LTLC ∞))
 
   Term = Tm LTLC ∞
 
