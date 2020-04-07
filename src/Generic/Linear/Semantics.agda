@@ -54,11 +54,11 @@ module Generic.Linear.Semantics
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
 
     semantics : ∀ {PΓ QΔ} → (PΓ ─Env) 𝓥 QΔ → (PΓ ─Comp) 𝓒 QΔ
-    body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ RΘ A →
+    body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ {RΘ A} →
            Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
     semantics ρ (`var v) =
       var (𝓥-psh (⊴*-trans (ρ .sums) {!v .basis!}) (ρ .lookup (plain-var v)))
-    semantics ρ (`con t) = alg {!!}
+    semantics ρ (`con t) = alg (map-s d (body {!ρ!}) {!t!})
 
-    body ρ RΘ A t th σ = semantics {!!} t
+    body ρ t th σ = semantics {!σ!} t
