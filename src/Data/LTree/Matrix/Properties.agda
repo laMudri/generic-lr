@@ -60,6 +60,19 @@ module Data.LTree.Matrix.Properties where
     *ᴹ-cong MM NN .get i k =
       ∑-cong (mk λ j → *-cong (MM .get i j) (NN .get j k))
 
+  module Plus-cong
+    (_+_ : A → B → C)
+    (_∼A_ : Rel A x) (_∼B_ : Rel B y) (_∼C_ : Rel C z)
+    (+-cong : ∀ {a a′ b b′} → a ∼A a′ → b ∼B b′ → (a + b) ∼C (a′ + b′))
+    where
+
+    open Plus _+_
+
+    +ᴹ-cong : {M M′ : Matrix A s t} {N N′ : Matrix B s t} →
+              Lift₂ᴹ _∼A_ M M′ → Lift₂ᴹ _∼B_ N N′ →
+              Lift₂ᴹ _∼C_ (M +ᴹ N) (M′ +ᴹ N′)
+    +ᴹ-cong MM NN .get i j = +-cong (MM .get i j) (NN .get i j)
+
   module IdentMult
     (0A : A) (1A : A) (_≈_ : Rel B r) (0B : B) (_+_ : Op₂ B) (_*_ : A → B → B)
     (open Defs _≈_)
@@ -245,3 +258,70 @@ module Data.LTree.Matrix.Properties where
 
     *ᴹ-0ᴹ : (M : Matrix A s t) → M *ᴹ 0ᴹᵇ ≈ᴹ 0ᴹᶜ {s} {u}
     *ᴹ-0ᴹ M .get i k = 0ᴹ-*ᴹ (M ᵀ) .get k i
+
+  module PlusMult
+    (_+A_ : Op₂ A) (_≈_ : Rel C r) (0C : C) (_+C_ : Op₂ C) (_*_ : A → B → C)
+    (open Defs _≈_)
+    (refl : Reflexive _≈_)
+    (trans : Transitive _≈_)
+    (+C-cong : Congruent₂ _+C_)
+    (0+0 : 0C ≈ (0C +C 0C))
+    (+++ : Interchangable _+C_ _+C_)
+    (+-* : ∀ x y b → ((x +A y) * b) ≈ ((x * b) +C (y * b)))
+    where
+
+    open Rea _≈_ refl trans
+
+    open Plus _+A_ renaming (_+ᴹ_ to _+ᴹᵃ_)
+    open Plus _+C_ renaming (_+ᴹ_ to _+ᴹᶜ_)
+    open Mult 0C _+C_ _*_
+    open Sum 0C _+C_
+    open SumCong _≈_ 0C _+C_ refl +C-cong
+    open Sum+ _≈_ 0C _+C_ refl trans +C-cong 0+0 +++
+
+    infix 4 _≈ᴹ_
+    _≈ᴹ_ = Lift₂ᴹ _≈_
+
+    +ᴹ-*ᴹ : (M N : Matrix A s t) (O : Matrix B t u) →
+            (M +ᴹᵃ N) *ᴹ O ≈ᴹ M *ᴹ O +ᴹᶜ N *ᴹ O
+    +ᴹ-*ᴹ {t = t} M N O .get i k = begin
+      (∑ λ j → (M i j +A N i j) * O j k)
+                                      ∼⟨ ∑-cong {t} (mk λ j → +-* _ _ _) ⟩
+      (∑ λ j → (M i j * O j k) +C (N i j * O j k))        ∼⟨ ∑-+ {t} _ _ ⟩
+      (∑ λ j → M i j * O j k) +C (∑ λ j → N i j * O j k)  ∎
+
+  module LeftScaleMult
+    (_≈_ : Rel Z r) (0Y : Y) (_+Y_ : Op₂ Y) (0Z : Z) (_+Z_ : Op₂ Z)
+    (_*ᵃᵇ_ : A → B → X) (_*ᵇᶜ_ : B → C → Y)
+    (_*ˣᶜ_ : X → C → Z) (_*ᵃʸ_ : A → Y → Z)
+    (open Defs _≈_)
+    (refl : Reflexive _≈_)
+    (trans : Transitive _≈_)
+    (+Z-cong : Congruent₂ _+Z_)
+    (*-0 : ∀ x → 0Z ≈ (x *ᵃʸ 0Y))
+    (*-+ : ∀ x y z → ((x *ᵃʸ y) +Z (x *ᵃʸ z)) ≈ (x *ᵃʸ (y +Y z)))
+    (*-* : ∀ x y z → ((x *ᵃᵇ y) *ˣᶜ z) ≈ (x *ᵃʸ (y *ᵇᶜ z)))
+    where
+
+    open Rea _≈_ refl trans
+
+    open LeftScale _*ᵃᵇ_ renaming (_*ₗ_ to _*ₗᵃᵇ_)
+    open LeftScale _*ᵃʸ_ renaming (_*ₗ_ to _*ₗᵃʸ_)
+    open Mult 0Y _+Y_ _*ᵇᶜ_ renaming (_*ᴹ_ to _*ᴹᵇᶜ_)
+    open Mult 0Z _+Z_ _*ˣᶜ_ renaming (_*ᴹ_ to _*ᴹˣᶜ_)
+    open Sum 0Y _+Y_ renaming (∑ to ∑Y)
+    open Sum 0Z _+Z_ renaming (∑ to ∑Z)
+    open SumCong _≈_ 0Z _+Z_ refl +Z-cong
+
+    infix 4 _≈ᴹ_
+    _≈ᴹ_ = Lift₂ᴹ _≈_
+
+    *ₗ-*ᴹ : ∀ x (M : Matrix B s t) (N : Matrix C t u) →
+            (x *ₗᵃᵇ M) *ᴹˣᶜ N ≈ᴹ x *ₗᵃʸ (M *ᴹᵇᶜ N)
+    *ₗ-*ᴹ {t = t} x M N .get i k = begin
+      (∑Z λ j → (x *ᵃᵇ M i j) *ˣᶜ N j k)  ∼⟨ ∑-cong {t} (mk λ j → *-* _ _ _) ⟩
+      (∑Z λ j → x *ᵃʸ (M i j *ᵇᶜ N j k))  ∼⟨ ∑-linear {t} _ ⟩
+      x *ᵃʸ (∑Y λ j → M i j *ᵇᶜ N j k)    ∎
+      where
+      open SumLinear 0Y _+Y_ (flip _≈_) 0Z _+Z_ refl (flip trans) +Z-cong
+                     (x *ᵃʸ_) (*-0 x) (*-+ x)

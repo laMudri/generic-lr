@@ -66,9 +66,14 @@ module Data.LTree.Matrix where
   module Zero (0# : A) where
     0ᴹ = lift₀ᴹ 0#
 
-  module Plus (_+_ : A → A → A) where
+  module Plus (_+_ : A → B → C) where
     infixr 6 _+ᴹ_
     _+ᴹ_ = lift₂ᴹ _+_
+
+  module LeftScale (_*_ : A → B → C) where
+    infixr 7 _*ₗ_
+    _*ₗ_ : A → Matrix B s t → Matrix C s t
+    x *ₗ M = lift₁ᴹ (x *_) M
 
   -- Block matrix operations
 
@@ -77,10 +82,18 @@ module Data.LTree.Matrix where
   col : Vector A s → Matrix A s [-]
   col u = lift₁ [_] u
 
+  rowL₂ : {u : Vector A t} {v : Vector B t} →
+          Lift₂ R u v → Lift₂ᴹ R (row u) (row v)
+  rowL₂ uv .get _ i = uv .get i
+
   unrow : Matrix A [-] t → Vector A t
   unrow M = un[-] M
   uncol : Matrix A s [-] → Vector A s
   uncol M = lift₁ un[-] M
+
+  unrowL₂ : {u : Vector A t} {v : Vector B t} →
+            Lift₂ᴹ R (row u) (row v) → Lift₂ R u v
+  unrowL₂ uv .get i = uv .get here i
 
   [─] : Matrix A ε t
   [─] = []
