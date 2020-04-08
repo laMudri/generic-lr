@@ -75,6 +75,20 @@ module Data.LTree.Matrix where
     _*ₗ_ : A → Matrix B s t → Matrix C s t
     x *ₗ M = lift₁ᴹ (x *_) M
 
+  -- Accessing rows/cols
+
+  getrow : Matrix A s t → Ptr s → Vector A t
+  getrow M i = M i
+  getcol : Matrix A s t → Ptr t → Vector A s
+  getcol M j i = M i j
+
+  getrowL₂ : {M : Matrix A s t} {N : Matrix B s t} →
+             Lift₂ᴹ R M N → (i : Ptr s) → Lift₂ R (getrow M i) (getrow N i)
+  getrowL₂ MN i .get j = MN .get i j
+  getcolL₂ : {M : Matrix A s t} {N : Matrix B s t} →
+             Lift₂ᴹ R M N → (j : Ptr t) → Lift₂ R (getcol M j) (getcol N j)
+  getcolL₂ MN j .get i = MN .get i j
+
   -- Block matrix operations
 
   row : Vector A t → Matrix A [-] t
@@ -118,6 +132,7 @@ module Data.LTree.Matrix where
   rightᴹ M i j = M i (↘ j)
 
   -- Block matrix operations for equations
+  -- TODO: deprecate in favour of rowL₂, unrowL₂, &c.
 
   row-cong₂ : ∀ {u : Vector A t} {v : Vector B t} →
               Lift₂ R u v → Lift₂ᴹ R (row u) (row v)

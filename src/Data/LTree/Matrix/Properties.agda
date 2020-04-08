@@ -92,8 +92,9 @@ module Data.LTree.Matrix.Properties where
     open SumCong _≈_ 0B _+_ refl +-cong
     open Sum0 _≈_ 0B _+_ trans refl +-cong (+-identity .proj₁ 0B)
 
-    infix 4 _≈ᴹ_
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
     1ᴹ-*ᴹ : (M : Matrix B s t) → 1ᴹ *ᴹ M ≈ᴹ M
     1ᴹ-*ᴹ M .get here k = 1-* _
@@ -116,13 +117,13 @@ module Data.LTree.Matrix.Properties where
 
   module MultIdent
     (0A : A) (1A : A) (_≈_ : Rel B r) (0B : B) (_+_ : Op₂ B) (_*_ : B → A → B)
-    (open Defs _≈_)
+    (open Defs _≈_) (let module ⊵ = Defs (flip _≈_))
     (refl : Reflexive _≈_)
     (trans : Transitive _≈_)
     (+-cong : Congruent₂ _+_)
-    (+-identity : Identity 0B _+_)
-    (*-1 : ∀ b → (b * 1A) ≈ b)
-    (*-0 : ∀ b → (b * 0A) ≈ 0B)
+    (+-identity : ⊵.Identity 0B _+_)
+    (*-1 : ∀ b → b ≈ (b * 1A))
+    (*-0 : ∀ b → 0B ≈ (b * 0A))
     where
 
     open Rea _≈_ refl trans
@@ -131,29 +132,30 @@ module Data.LTree.Matrix.Properties where
     open Mult 0B _+_ _*_
     open Sum 0B _+_
     open SumCong _≈_ 0B _+_ refl +-cong
-    open Sum0 _≈_ 0B _+_ trans refl +-cong (+-identity .proj₁ 0B)
+    open Sum0 (flip _≈_) 0B _+_ (flip trans) refl +-cong (+-identity .proj₂ 0B)
 
-    infix 4 _≈ᴹ_
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
-    *ᴹ-1ᴹ : (M : Matrix B s t) → M *ᴹ 1ᴹ ≈ᴹ M
+    *ᴹ-1ᴹ : (M : Matrix B s t) → M ≈ᴹ M *ᴹ 1ᴹ
     *ᴹ-1ᴹ M .get i here = *-1 _
     *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (↙ k) = begin
-      (M *ᴹ 1ᴹ) i (↙ k)  ≡⟨⟩
-      (∑ λ j → leftᴹ M i j * 1ᴹ j k) + (∑ λ j → rightᴹ M i j * 0A)
+      M i (↙ k)          ≡⟨⟩
+      leftᴹ M i k        ∼⟨ +-identity .proj₂ _ ⟩
+      leftᴹ M i k + 0B
         ∼⟨ +-cong (*ᴹ-1ᴹ (leftᴹ M) .get i k)
-                  (trans (∑-cong (mk λ j → *-0 (rightᴹ M i j))) (∑-0 tr)) ⟩
-      leftᴹ M i k + 0B         ∼⟨ +-identity .proj₂ _ ⟩
-      leftᴹ M i k              ≡⟨⟩
-      M i (↙ k)          ∎
+                  (trans (∑-0 tr) (∑-cong (mk λ j → *-0 (rightᴹ M i j)))) ⟩
+      (∑ λ j → leftᴹ M i j * 1ᴹ j k) + (∑ λ j → rightᴹ M i j * 0A)  ≡⟨⟩
+      (M *ᴹ 1ᴹ) i (↙ k)  ∎
     *ᴹ-1ᴹ {s} {tl <+> tr} M .get i (↘ k) = begin
-      (M *ᴹ 1ᴹ) i (↘ k)  ≡⟨⟩
-      (∑ λ j → leftᴹ M i j * 0A) + (∑ λ j → rightᴹ M i j * 1ᴹ j k)
-        ∼⟨ +-cong (trans (∑-cong (mk λ j → *-0 (leftᴹ M i j))) (∑-0 tl))
+      M i (↘ k)          ≡⟨⟩
+      rightᴹ M i k       ∼⟨ +-identity .proj₁ _ ⟩
+      0B + rightᴹ M i k
+        ∼⟨ +-cong (trans (∑-0 tl) (∑-cong (mk λ j → *-0 (leftᴹ M i j))))
                   (*ᴹ-1ᴹ (rightᴹ M) .get i k) ⟩
-      0B + rightᴹ M i k         ∼⟨ +-identity .proj₁ _ ⟩
-      rightᴹ M i k              ≡⟨⟩
-      M i (↘ k)          ∎
+      (∑ λ j → leftᴹ M i j * 0A) + (∑ λ j → rightᴹ M i j * 1ᴹ j k)  ≡⟨⟩
+      (M *ᴹ 1ᴹ) i (↘ k)  ∎
 
   module MultMult
     (_≈_ : Rel Z r)
@@ -190,7 +192,8 @@ module Data.LTree.Matrix.Properties where
     open SumCong _≈_ 0# _+_ refl +-cong renaming (∑-cong to ∑-cong)
     open SumComm _≈_ 0# _+_ refl trans +-cong 0+0-→ 0+0-← exchange
 
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
     *ᴹ-*ᴹ-→ : (M : Matrix A s t) (N : Matrix B t u) (O : Matrix C u v) →
               multˣᶜ (multᵃᵇ M N) O ≈ᴹ multᵃʸ M (multᵇᶜ N O)
@@ -232,8 +235,9 @@ module Data.LTree.Matrix.Properties where
     open SumCong _≈_ 0C _+_ refl +-cong
     open Sum0 _≈_ 0C _+_ trans refl +-cong 0+0
 
-    infix 4 _≈ᴹ_
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
     0ᴹ-*ᴹ : (M : Matrix B t u) → 0ᴹᵃ *ᴹ M ≈ᴹ 0ᴹᶜ {s}
     0ᴹ-*ᴹ {t = t} M .get i k = begin
@@ -247,16 +251,21 @@ module Data.LTree.Matrix.Properties where
     (refl : Reflexive _≈_)
     (trans : Transitive _≈_)
     (+-cong : Congruent₂ _+_)
-    (0+0 : (0C + 0C) ≈ 0C)
-    (*-0 : ∀ a → (a * 0B) ≈ 0C)
+    (0+0 : 0C ≈ (0C + 0C))
+    (*-0 : ∀ a → 0C ≈ (a * 0B))
     where
 
     open Zero 0B renaming (0ᴹ to 0ᴹᵇ)
     open Zero 0C renaming (0ᴹ to 0ᴹᶜ)
     open Mult 0C _+_ _*_
-    open ZeroMult 0B _≈_ 0C _+_ (flip _*_) refl trans +-cong 0+0 *-0
+    open ZeroMult 0B (flip _≈_) 0C _+_ (flip _*_) refl (flip trans)
+      +-cong 0+0 *-0
 
-    *ᴹ-0ᴹ : (M : Matrix A s t) → M *ᴹ 0ᴹᵇ ≈ᴹ 0ᴹᶜ {s} {u}
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
+
+    *ᴹ-0ᴹ : (M : Matrix A s t) → 0ᴹᶜ {s} {u} ≈ᴹ M *ᴹ 0ᴹᵇ
     *ᴹ-0ᴹ M .get i k = 0ᴹ-*ᴹ (M ᵀ) .get k i
 
   module PlusMult
@@ -279,8 +288,9 @@ module Data.LTree.Matrix.Properties where
     open SumCong _≈_ 0C _+C_ refl +C-cong
     open Sum+ _≈_ 0C _+C_ refl trans +C-cong 0+0 +++
 
-    infix 4 _≈ᴹ_
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
     +ᴹ-*ᴹ : (M N : Matrix A s t) (O : Matrix B t u) →
             (M +ᴹᵃ N) *ᴹ O ≈ᴹ M *ᴹ O +ᴹᶜ N *ᴹ O
@@ -313,8 +323,9 @@ module Data.LTree.Matrix.Properties where
     open Sum 0Z _+Z_ renaming (∑ to ∑Z)
     open SumCong _≈_ 0Z _+Z_ refl +Z-cong
 
-    infix 4 _≈ᴹ_
-    _≈ᴹ_ = Lift₂ᴹ _≈_
+    private
+      infix 4 _≈ᴹ_
+      _≈ᴹ_ = Lift₂ᴹ _≈_
 
     *ₗ-*ᴹ : ∀ x (M : Matrix B s t) (N : Matrix C t u) →
             (x *ₗᵃᵇ M) *ᴹˣᶜ N ≈ᴹ x *ₗᵃʸ (M *ᴹᵇᶜ N)

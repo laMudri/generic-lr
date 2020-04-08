@@ -23,6 +23,13 @@ module Data.LTree.Vector.Properties where
       B : Set b
       s t : LTree
 
+  module Cong2
+    (_≈_ : Rel A r) {_+_ : Op₂ A} (+-cong : Defs.Congruent₂ _≈_ _+_)
+    where
+
+    cong₂ : Defs.Congruent₂ (Lift₂ _≈_ {s}) (lift₂ _+_)
+    cong₂ uu vv .get i = +-cong (uu .get i) (vv .get i)
+
   module SumCong
     (_≈_ : Rel A r) (0# : A) (_+_ : Op₂ A) (open Defs _≈_)
     (0-cong : 0# ≈ 0#)
