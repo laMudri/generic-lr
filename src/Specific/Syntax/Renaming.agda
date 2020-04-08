@@ -34,18 +34,19 @@ module Specific.Syntax.Renaming
   open Ident 0# 1#
   open Mult 0# _+_ _*_
   open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono
+    renaming (*ᴹ-cong to *ᴹ-mono)
+  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono renaming (+ᴹ-cong to +ᴹ-mono)
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
     +-mono +-identity-⊴ 1-* 0-*
-  open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
     +-mono +-identity-⊵ *-1 *-0
   open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
     +-mono (+-identity-⊵ .proj₂ 0#) +-interchange +-*
+  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
+    +-mono (+-identity-⊵ .proj₂ 0#) *-0
   open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
     +-mono *-0 *-+ *-*
-  open SumCong _⊴_ 0# _+_ ⊴-refl +-mono
-  open Sum0 (flip _⊴_) 0# _+_ (flip ⊴-trans)
-    ⊴-refl +-mono (+-identity-⊵ .proj₂ 0#)
+  open Cong2 _⊴_ +-mono renaming (cong₂ to +*-mono)
 
   ⊴*-refl : ∀ {s} → Reflexive (_⊴*_ {s = s})
   ⊴*-refl .get i = ⊴-refl
@@ -75,18 +76,12 @@ module Specific.Syntax.Renaming
   bindRen : Ren PΓ QΔ → Ren (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
   bindRen r .act (↙ j) = ↙ (r .act j)
   bindRen r .act (↘ j) = ↘ j
-  bindRen {PΓ = ctx {s} P Γ} {RΘ = ctx {t} R Θ} r .use-pres .get (↙ i) =
-    ⊴-trans (r .use-pres .get i)
-            (⊴-trans (+-identity-⊵ .proj₂ _)
-                     (+-mono ⊴-refl
-                             (⊴-trans (∑-0 t)
-                                      (∑-cong {t} (mk λ j → *-0 _)))))
-  bindRen {QΔ = ctx {s} Q Δ} {RΘ = ctx {t} R Θ} r .use-pres .get (↘ i) =
-    ⊴-trans (*ᴹ-1ᴹ (row R) .get here i)
-            (⊴-trans (+-identity-⊵ .proj₁ _)
-                     (+-mono (⊴-trans (∑-0 s)
-                                      (∑-cong {s} (mk λ j → *-0 _)))
-                             ⊴-refl))
+  bindRen {QΔ = ctx Q Δ} {RΘ = ctx R Θ} r .use-pres =
+    ⊴*-trans (mk λ i → +-identity-⊵ .proj₂ _)
+             (+*-mono (r .use-pres) (unrowL₂ (*ᴹ-0ᴹ (row R))))
+    ++₂
+    ⊴*-trans (mk λ i → +-identity-⊵ .proj₁ _)
+             (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
   bindRen r .ty-pres (↙ j) = r .ty-pres j
   bindRen r .ty-pres (↘ j) = refl
 
@@ -94,14 +89,16 @@ module Specific.Syntax.Renaming
   ren r (var j sp refl) = var
     (r .act j)
     (⊴*-trans (r .use-pres)
-              (⊴*-trans (unrowL₂ (*ᴹ-cong (rowL₂ sp) (mk λ j i → ⊴-refl {1ᴹ (r .act j) i})))
-                        (mk λ i → 1ᴹ-*ᴹ (λ j i → 1ᴹ (r .act j) i) .get j i)))
+              (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
+                        (getrowL₂ (1ᴹ-*ᴹ _) j)))
     (r .ty-pres j)
   ren {PΓ = ctx {s} Rs Γ} {ctx {t} Rt Δ} r (app {P = Pt} {Q = Qt} M N sp) =
     app (ren (record { Ren r; use-pres = ⊴*-refl }) M)
         (ren (record { Ren r; use-pres = ⊴*-refl }) N)
         (⊴*-trans (r .use-pres)
-                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-cong (rowL₂ sp) ⊴ᴹ-refl)
-                                     (⊴ᴹ-trans (+ᴹ-*ᴹ {t = t} _ _ _)
-                                               (+ᴹ-cong ⊴ᴹ-refl (*ₗ-*ᴹ {t = t} _ _ _))))))
+                  (unrowL₂
+                    (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
+                              (⊴ᴹ-trans
+                                (+ᴹ-*ᴹ {t = t} _ _ _)
+                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ {t = t} _ _ _))))))
   ren r (lam M) = lam (ren (bindRen r) M)
