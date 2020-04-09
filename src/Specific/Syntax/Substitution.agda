@@ -24,6 +24,9 @@ module Specific.Syntax.Substitution
   open import Specific.Syntax.Renaming Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
+  open import Specific.Syntax.Subuse Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Generic.Linear.Syntax Ty Ann
 
   open import Data.LTree
@@ -93,7 +96,11 @@ module Specific.Syntax.Substitution
 
   -- TODO: show that `Tm`s form a presheaf with respect to subusaging.
   sub : Sub PΓ QΔ → Tm QΔ A → Tm PΓ A
-  sub σ (var i sp refl) = {!σ .act i!}
+  sub σ (var i sp refl) = subuse
+    (⊴*-trans (σ .use-pres)
+              (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
+                        (getrowL₂ (1ᴹ-*ᴹ (σ .matrix)) i)))
+    (σ .act i)
   sub {PΓ = ctx {s} Rs Γ} {ctx {t} Rt Δ} σ (app M N sp) =
     -- Note: this clause is copied directly from ren
     app (sub (record { Sub σ; use-pres = ⊴*-refl }) M)
