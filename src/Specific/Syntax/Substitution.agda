@@ -80,7 +80,6 @@ module Specific.Syntax.Substitution
     ⊴*-trans (mk λ i → +-identity-⊵ .proj₁ _)
              (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
 
-  -- TODO: show that `Tm`s form a presheaf with respect to subusaging.
   sub : Sub PΓ QΔ → Tm QΔ A → Tm PΓ A
   sub σ (var i sp refl) = subuse
     (⊴*-trans (σ .use-pres)
