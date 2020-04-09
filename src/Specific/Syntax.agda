@@ -36,6 +36,7 @@ module Specific.Syntax
   data Ty : Set where
     tι : Ty
     [_·_]⊸_ : (ρ : Ann) (S T : Ty) → Ty
+    tI : Ty
 
   private
     variable
@@ -47,7 +48,13 @@ module Specific.Syntax
   data Tm (RΓ : Ctx) : Ty → Set where
     var : let ctx R Γ = RΓ in
           (i : Ptr _) (sp : R ⊴* (1ᴹ i)) (q : Γ i ≡ A) → Tm RΓ A
+
     app : let ctx R Γ = RΓ in
           (M : Tm (ctx P Γ) ([ ρ · A ]⊸ B)) (N : Tm (ctx Q Γ) A)
           (sp : R ⊴* P +* ρ *ₗ Q) → Tm RΓ B
     lam : (M : Tm (RΓ ++ᶜ [ ρ · A ]ᶜ) B) → Tm RΓ ([ ρ · A ]⊸ B)
+
+    unm : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) tI) (N : Tm (ctx Q Γ) C) (sp : R ⊴* P +* Q) →
+          Tm RΓ A
+    uni : let ctx R Γ = RΓ in (sp : R ⊴* 0*) → Tm RΓ tI

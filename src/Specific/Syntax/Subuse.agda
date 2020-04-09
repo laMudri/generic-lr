@@ -21,7 +21,7 @@ module Specific.Syntax.Subuse
   where
 
   open import Specific.Syntax Ann _⊴_ 0# _+_ 1# _*_
-  open import Specific.Syntax.Renaming Ann _⊴_ 0# _+_ 1# _*_
+  open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
   open import Generic.Linear.Syntax Ty Ann
@@ -34,23 +34,6 @@ module Specific.Syntax.Subuse
   open import Data.Product
   open import Relation.Binary.PropositionalEquality
 
-  open Ident 0# 1#
-  open Mult 0# _+_ _*_
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    renaming (*ᴹ-cong to *ᴹ-mono)
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono renaming (+ᴹ-cong to +ᴹ-mono)
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊴ 1-* 0-*
-  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊵ *-1 *-0
-  open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) +-interchange +-*
-  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) *-0
-  open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-    +-mono *-0 *-+ *-*
-  open Cong2 _⊴_ +-mono renaming (cong₂ to +*-mono)
-
   private
     variable
       A : Ty
@@ -62,3 +45,5 @@ module Specific.Syntax.Subuse
   subuse PQ (var i sp q) = var i (⊴*-trans PQ sp) q
   subuse PQ (app M N sp) = app M N (⊴*-trans PQ sp)
   subuse PQ (lam M) = lam (subuse (PQ ++₂ ⊴*-refl) M)
+  subuse PQ (unm M N sp) = unm M N (⊴*-trans PQ sp)
+  subuse PQ (uni sp) = uni (⊴*-trans PQ sp)

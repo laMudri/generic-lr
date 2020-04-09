@@ -21,6 +21,9 @@ module Specific.Syntax.Renaming
   where
 
   open import Specific.Syntax Ann _⊴_ 0# _+_ 1# _*_
+  open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Generic.Linear.Syntax Ty Ann
 
   open import Data.LTree
@@ -30,33 +33,6 @@ module Specific.Syntax.Renaming
   open import Data.LTree.Matrix.Properties
   open import Data.Product
   open import Relation.Binary.PropositionalEquality
-
-  open Ident 0# 1#
-  open Mult 0# _+_ _*_
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    renaming (*ᴹ-cong to *ᴹ-mono)
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono renaming (+ᴹ-cong to +ᴹ-mono)
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊴ 1-* 0-*
-  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊵ *-1 *-0
-  open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) +-interchange +-*
-  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) *-0
-  open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-    +-mono *-0 *-+ *-*
-  open Cong2 _⊴_ +-mono renaming (cong₂ to +*-mono)
-
-  ⊴*-refl : ∀ {s} → Reflexive (_⊴*_ {s = s})
-  ⊴*-refl .get i = ⊴-refl
-  ⊴*-trans : ∀ {s} → Transitive (_⊴*_ {s = s})
-  ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
-
-  ⊴ᴹ-refl : ∀ {s t} → Reflexive (_⊴ᴹ_ {s = s} {t})
-  ⊴ᴹ-refl .get i j = ⊴-refl
-  ⊴ᴹ-trans : ∀ {s t} → Transitive (_⊴ᴹ_ {s = s} {t})
-  ⊴ᴹ-trans MN NO .get i j = ⊴-trans (MN .get i j) (NO .get i j)
 
   private
     variable
@@ -92,13 +68,23 @@ module Specific.Syntax.Renaming
               (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
                         (getrowL₂ (1ᴹ-*ᴹ _) j)))
     (r .ty-pres j)
-  ren {PΓ = ctx {s} Rs Γ} {ctx {t} Rt Δ} r (app {P = Pt} {Q = Qt} M N sp) =
+  ren r (app M N sp) =
     app (ren (record { Ren r; use-pres = ⊴*-refl }) M)
         (ren (record { Ren r; use-pres = ⊴*-refl }) N)
         (⊴*-trans (r .use-pres)
                   (unrowL₂
                     (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
                               (⊴ᴹ-trans
-                                (+ᴹ-*ᴹ {t = t} _ _ _)
-                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ {t = t} _ _ _))))))
+                                (+ᴹ-*ᴹ _ _ (1ᴹ ∘ r .act))
+                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ _ _ (1ᴹ ∘ r .act)))))))
   ren r (lam M) = lam (ren (bindRen r) M)
+  ren r (unm M N sp) =
+    unm (ren (record { Ren r; use-pres = ⊴*-refl }) M)
+        (ren (record { Ren r; use-pres = ⊴*-refl }) N)
+        (⊴*-trans (r .use-pres)
+                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
+                                     (+ᴹ-*ᴹ _ _ (1ᴹ ∘ r .act)))))
+  ren r (uni sp) =
+    uni (⊴*-trans (r .use-pres)
+                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
+                                     (0ᴹ-*ᴹ (1ᴹ ∘ r .act)))))

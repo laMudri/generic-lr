@@ -21,6 +21,9 @@ module Specific.Syntax.Substitution
   where
 
   open import Specific.Syntax Ann _⊴_ 0# _+_ 1# _*_
+  open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Specific.Syntax.Renaming Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
@@ -36,23 +39,6 @@ module Specific.Syntax.Substitution
   open import Data.LTree.Matrix.Properties
   open import Data.Product
   open import Relation.Binary.PropositionalEquality
-
-  open Ident 0# 1#
-  open Mult 0# _+_ _*_
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    renaming (*ᴹ-cong to *ᴹ-mono)
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono renaming (+ᴹ-cong to +ᴹ-mono)
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊴ 1-* 0-*
-  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊵ *-1 *-0
-  open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) +-interchange +-*
-  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) *-0
-  open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-    +-mono *-0 *-+ *-*
-  open Cong2 _⊴_ +-mono renaming (cong₂ to +*-mono)
 
   private
     variable
@@ -101,7 +87,7 @@ module Specific.Syntax.Substitution
               (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
                         (getrowL₂ (1ᴹ-*ᴹ (σ .matrix)) i)))
     (σ .act i)
-  sub {PΓ = ctx {s} Rs Γ} {ctx {t} Rt Δ} σ (app M N sp) =
+  sub σ (app M N sp) =
     -- Note: this clause is copied directly from ren
     app (sub (record { Sub σ; use-pres = ⊴*-refl }) M)
         (sub (record { Sub σ; use-pres = ⊴*-refl }) N)
@@ -109,6 +95,16 @@ module Specific.Syntax.Substitution
                   (unrowL₂
                     (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
                               (⊴ᴹ-trans
-                                (+ᴹ-*ᴹ {t = t} _ _ _)
-                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ {t = t} _ _ _))))))
+                                (+ᴹ-*ᴹ _ _ (σ .matrix))
+                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ _ _ (σ .matrix)))))))
   sub σ (lam M) = lam (sub (bindSub σ) M)
+  sub σ (unm M N sp) =
+    unm (sub (record { Sub σ; use-pres = ⊴*-refl }) M)
+        (sub (record { Sub σ; use-pres = ⊴*-refl }) N)
+        (⊴*-trans (σ .use-pres)
+                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
+                                     (+ᴹ-*ᴹ _ _ (σ .matrix)))))
+  sub σ (uni sp) =
+    uni (⊴*-trans (σ .use-pres)
+                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
+                                     (0ᴹ-*ᴹ (σ .matrix)))))
