@@ -24,6 +24,9 @@ module Specific.Syntax.Renaming
   open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
+  open import Specific.Syntax.Traversal Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Generic.Linear.Syntax Ty Ann
 
   open import Data.LTree
@@ -49,42 +52,19 @@ module Specific.Syntax.Renaming
       ty-pres : ∀ j → Γ (act j) ≡ Δ j
   open Ren public
 
-  bindRen : Ren PΓ QΔ → Ren (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
-  bindRen r .act (↙ j) = ↙ (r .act j)
-  bindRen r .act (↘ j) = ↘ j
-  bindRen {QΔ = ctx Q Δ} {RΘ = ctx R Θ} r .use-pres =
-    ⊴*-trans (mk λ i → +-identity-⊵ .proj₂ _)
-             (+*-mono (r .use-pres) (unrowL₂ (*ᴹ-0ᴹ (row R))))
-    ++₂
-    ⊴*-trans (mk λ i → +-identity-⊵ .proj₁ _)
-             (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
-  bindRen r .ty-pres (↙ j) = r .ty-pres j
-  bindRen r .ty-pres (↘ j) = refl
+  LVar-kit : Kit LVar
+  LVar-kit .psh PQ v .idx = v .idx
+  LVar-kit .psh PQ v .basis = ⊴*-trans PQ (v .basis)
+  LVar-kit .psh PQ v .ty-eq = v .ty-eq
+  LVar-kit .vr = id
+  LVar-kit .tm = var
+  LVar-kit .wk v .idx = ↙ (v .idx)
+  LVar-kit .wk v .basis = v .basis ++₂ ⊴*-refl
+  LVar-kit .wk v .ty-eq = v .ty-eq
 
   ren : Ren PΓ QΔ → Tm QΔ A → Tm PΓ A
-  ren r (var j sp refl) = var
-    (r .act j)
-    (⊴*-trans (r .use-pres)
-              (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
-                        (getrowL₂ (1ᴹ-*ᴹ _) j)))
-    (r .ty-pres j)
-  ren r (app M N sp) =
-    app (ren (record { Ren r; use-pres = ⊴*-refl }) M)
-        (ren (record { Ren r; use-pres = ⊴*-refl }) N)
-        (⊴*-trans (r .use-pres)
-                  (unrowL₂
-                    (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                              (⊴ᴹ-trans
-                                (+ᴹ-*ᴹ _ _ (1ᴹ ∘ r .act))
-                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ _ _ (1ᴹ ∘ r .act)))))))
-  ren r (lam M) = lam (ren (bindRen r) M)
-  ren r (unm M N sp) =
-    unm (ren (record { Ren r; use-pres = ⊴*-refl }) M)
-        (ren (record { Ren r; use-pres = ⊴*-refl }) N)
-        (⊴*-trans (r .use-pres)
-                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                                     (+ᴹ-*ᴹ _ _ (1ᴹ ∘ r .act)))))
-  ren r (uni sp) =
-    uni (⊴*-trans (r .use-pres)
-                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                                     (0ᴹ-*ᴹ (1ᴹ ∘ r .act)))))
+  ren r = trav LVar-kit
+    (record { matrix = 1ᴹ ∘ r .act
+            ; act = λ j → lvar (r .act j) ⊴*-refl (r .ty-pres j)
+            ; use-pres = r .use-pres
+            })

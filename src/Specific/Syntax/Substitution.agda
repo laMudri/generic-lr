@@ -24,6 +24,9 @@ module Specific.Syntax.Substitution
   open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
+  open import Specific.Syntax.Traversal Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Specific.Syntax.Renaming Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
@@ -45,15 +48,7 @@ module Specific.Syntax.Substitution
       A B C : Ty
       PΓ QΔ RΘ : Ctx
 
-  record Sub (PΓ QΔ : Ctx) : Set where
-    private
-      s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
-      t = QΔ .shape ; Q = QΔ .use-ctx ; Δ = QΔ .ty-ctx
-    field
-      matrix : Matrix Ann t s
-      act : (j : Ptr t) → Tm (record PΓ { R = matrix j }) (Δ j)
-      use-pres : P ⊴* unrow (row Q *ᴹ matrix)
-  open Sub public
+  Sub = Trav Tm
 
   private
     variable
@@ -66,44 +61,11 @@ module Specific.Syntax.Substitution
     unrowL₂ (*ᴹ-1ᴹ _) ++₂ unrowL₂ (*ᴹ-0ᴹ (row P))
   weakenRen .ty-pres j = refl
 
-  bindSub : Sub PΓ QΔ → Sub (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
-  bindSub σ .matrix = [ [    σ .matrix │ (λ _ _ → 0#) ]
-                                       ─
-                        [ (λ _ _ → 0#) │          1ᴹ  ] ]
-  bindSub σ .act (↙ j) = ren weakenRen (σ .act j)
-  bindSub σ .act (↘ j) = var (↘ j) (⊴*-refl ++₂ ⊴*-refl) refl
-  bindSub {QΔ = ctx Q Δ} {RΘ = ctx R Θ} σ .use-pres =
-    -- Note: this clause is copied directly from bindRen
-    ⊴*-trans (mk λ i → +-identity-⊵ .proj₂ _)
-             (+*-mono (σ .use-pres) (unrowL₂ (*ᴹ-0ᴹ (row R))))
-    ++₂
-    ⊴*-trans (mk λ i → +-identity-⊵ .proj₁ _)
-             (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
+  Tm-kit : Kit Tm
+  Tm-kit .psh = subuse
+  Tm-kit .vr = var
+  Tm-kit .tm = id
+  Tm-kit .wk = ren weakenRen
 
   sub : Sub PΓ QΔ → Tm QΔ A → Tm PΓ A
-  sub σ (var i sp refl) = subuse
-    (⊴*-trans (σ .use-pres)
-              (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
-                        (getrowL₂ (1ᴹ-*ᴹ (σ .matrix)) i)))
-    (σ .act i)
-  sub σ (app M N sp) =
-    -- Note: this clause is copied directly from ren
-    app (sub (record { Sub σ; use-pres = ⊴*-refl }) M)
-        (sub (record { Sub σ; use-pres = ⊴*-refl }) N)
-        (⊴*-trans (σ .use-pres)
-                  (unrowL₂
-                    (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                              (⊴ᴹ-trans
-                                (+ᴹ-*ᴹ _ _ (σ .matrix))
-                                (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ _ _ (σ .matrix)))))))
-  sub σ (lam M) = lam (sub (bindSub σ) M)
-  sub σ (unm M N sp) =
-    unm (sub (record { Sub σ; use-pres = ⊴*-refl }) M)
-        (sub (record { Sub σ; use-pres = ⊴*-refl }) N)
-        (⊴*-trans (σ .use-pres)
-                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                                     (+ᴹ-*ᴹ _ _ (σ .matrix)))))
-  sub σ (uni sp) =
-    uni (⊴*-trans (σ .use-pres)
-                  (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
-                                     (0ᴹ-*ᴹ (σ .matrix)))))
+  sub σ = trav Tm-kit σ

@@ -24,6 +24,12 @@ module Specific.Syntax.Subuse
   open import Specific.Syntax.Prelude Ann _⊴_ 0# _+_ 1# _*_
     ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
     1-* *-1 *-* 0-* *-0 +-* *-+
+  open import Specific.Syntax.Traversal Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
+  open import Specific.Syntax.Renaming Ann _⊴_ 0# _+_ 1# _*_
+    ⊴-refl ⊴-trans +-mono *-mono +-identity-⊴ +-identity-⊵ +-interchange
+    1-* *-1 *-* 0-* *-0 +-* *-+
   open import Generic.Linear.Syntax Ty Ann
 
   open import Data.LTree
@@ -42,8 +48,8 @@ module Specific.Syntax.Subuse
       Γ : Vector Ty s
 
   subuse : P ⊴* Q → Tm (ctx Q Γ) A → Tm (ctx P Γ) A
-  subuse PQ (var i sp q) = var i (⊴*-trans PQ sp) q
-  subuse PQ (app M N sp) = app M N (⊴*-trans PQ sp)
-  subuse PQ (lam M) = lam (subuse (PQ ++₂ ⊴*-refl) M)
-  subuse PQ (unm M N sp) = unm M N (⊴*-trans PQ sp)
-  subuse PQ (uni sp) = uni (⊴*-trans PQ sp)
+  subuse PQ = trav LVar-kit (record
+    { matrix = 1ᴹ
+    ; act = λ j → lvar j ⊴*-refl refl
+    ; use-pres = ⊴*-trans PQ (unrowL₂ (*ᴹ-1ᴹ _))
+    })

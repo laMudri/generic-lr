@@ -19,8 +19,7 @@ module Specific.Syntax
   private
     variable
       π ρ : Ann
-      s t : LTree
-      P Q R : Vector Ann _
+      t : LTree
 
   infix 4 _⊴*_ _⊴ᴹ_
   infixr 6 _+*_
@@ -30,7 +29,7 @@ module Specific.Syntax
   _⊴ᴹ_ = Lift₂ᴹ _⊴_
   0* = lift₀ 0#
   _+*_ = lift₂ _+_
-  _*ₗ_ : Ann → Vector Ann s → Vector Ann s
+  _*ₗ_ : Ann → Vector Ann t → Vector Ann t
   ρ *ₗ R = lift₁ (ρ *_) R
 
   data Ty : Set where
@@ -45,9 +44,22 @@ module Specific.Syntax
   open import Generic.Linear.Syntax Ty Ann
   open Ctx public renaming (s to shape; R to use-ctx; Γ to ty-ctx)
 
+  record LVar (PΓ : Ctx) (A : Ty) : Set where
+    constructor lvar
+    private
+      s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
+    field
+      idx : Ptr s
+      basis : P ⊴* 1ᴹ idx
+      ty-eq : Γ idx ≡ A
+  open LVar public
+
+  private
+    variable
+      P Q R : Vector Ann _
+
   data Tm (RΓ : Ctx) : Ty → Set where
-    var : let ctx R Γ = RΓ in
-          (i : Ptr _) (sp : R ⊴* (1ᴹ i)) (q : Γ i ≡ A) → Tm RΓ A
+    var : LVar RΓ A → Tm RΓ A
 
     app : let ctx R Γ = RΓ in
           (M : Tm (ctx P Γ) ([ ρ · A ]⊸ B)) (N : Tm (ctx Q Γ) A)
