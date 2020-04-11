@@ -40,7 +40,7 @@ module Specific.Syntax.Traversal
       PΓ QΔ RΘ : Ctx
       T : Ctx → Ty → Set
 
-  record Trav (T : Ctx → Ty → Set) (PΓ QΔ : Ctx) : Set where
+  record Env (T : Ctx → Ty → Set) (PΓ QΔ : Ctx) : Set where
     private
       s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
       t = QΔ .shape ; Q = QΔ .use-ctx ; Δ = QΔ .ty-ctx
@@ -48,7 +48,7 @@ module Specific.Syntax.Traversal
       matrix : Matrix Ann t s
       act : (j : Ptr t) → T (record PΓ { R = matrix j }) (Δ j)
       use-pres : P ⊴* unrow (row Q *ᴹ matrix)
-  open Trav public
+  open Env public
 
   private
     variable
@@ -67,20 +67,20 @@ module Specific.Syntax.Traversal
 
   module _ (K : Kit T) where
 
-    bindTrav : Trav T PΓ QΔ → Trav T (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
-    bindTrav τ .matrix = [ [ τ .matrix │ lift₀ᴹ 0# ]
+    bindEnv : Env T PΓ QΔ → Env T (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
+    bindEnv τ .matrix = [ [ τ .matrix │ lift₀ᴹ 0# ]
                                        ─
                            [ lift₀ᴹ 0# │        1ᴹ ] ]
-    bindTrav τ .act (↙ j) = K .wk (τ .act j)
-    bindTrav τ .act (↘ j) = K .vr (lvar (↘ j) (⊴*-refl ++₂ ⊴*-refl) refl)
-    bindTrav {QΔ = ctx Q Δ} {RΘ = ctx R Θ} τ .use-pres =
+    bindEnv τ .act (↙ j) = K .wk (τ .act j)
+    bindEnv τ .act (↘ j) = K .vr (lvar (↘ j) (⊴*-refl ++₂ ⊴*-refl) refl)
+    bindEnv {QΔ = ctx Q Δ} {RΘ = ctx R Θ} τ .use-pres =
       ⊴*-trans (mk λ i → +-identity-⊵ .proj₂ _)
                (+*-mono (τ .use-pres) (unrowL₂ (*ᴹ-0ᴹ (row R))))
       ++₂
       ⊴*-trans (mk λ i → +-identity-⊵ .proj₁ _)
                (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
 
-    trav : Trav T PΓ QΔ → Tm QΔ A → Tm PΓ A
+    trav : Env T PΓ QΔ → Tm QΔ A → Tm PΓ A
     trav τ (var (lvar i sp refl)) = K .tm
       (K .psh
         (⊴*-trans (τ .use-pres)
@@ -88,18 +88,18 @@ module Specific.Syntax.Traversal
                             (getrowL₂ (1ᴹ-*ᴹ (τ .matrix)) i)))
         (τ .act i))
     trav τ (app M N sp) =
-      app (trav (record { Trav τ; use-pres = ⊴*-refl }) M)
-          (trav (record { Trav τ; use-pres = ⊴*-refl }) N)
+      app (trav (record { Env τ; use-pres = ⊴*-refl }) M)
+          (trav (record { Env τ; use-pres = ⊴*-refl }) N)
           (⊴*-trans (τ .use-pres)
                     (unrowL₂
                       (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
                                 (⊴ᴹ-trans
                                   (+ᴹ-*ᴹ _ _ (τ .matrix))
                                   (+ᴹ-mono ⊴ᴹ-refl (*ₗ-*ᴹ _ _ (τ .matrix)))))))
-    trav τ (lam M) = lam (trav (bindTrav τ) M)
+    trav τ (lam M) = lam (trav (bindEnv τ) M)
     trav τ (unm M N sp) =
-      unm (trav (record { Trav τ; use-pres = ⊴*-refl }) M)
-          (trav (record { Trav τ; use-pres = ⊴*-refl }) N)
+      unm (trav (record { Env τ; use-pres = ⊴*-refl }) M)
+          (trav (record { Env τ; use-pres = ⊴*-refl }) N)
           (⊴*-trans (τ .use-pres)
                     (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl)
                                        (+ᴹ-*ᴹ _ _ (τ .matrix)))))

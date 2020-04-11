@@ -48,7 +48,7 @@ module Specific.Syntax.Substitution
       A B C : Ty
       PΓ QΔ RΘ : Ctx
 
-  Sub = Trav Tm
+  Sub = Env Tm
 
   private
     variable
