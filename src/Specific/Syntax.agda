@@ -32,10 +32,15 @@ module Specific.Syntax
   _*ₗ_ : Ann → Vector Ann t → Vector Ann t
   ρ *ₗ R = lift₁ (ρ *_) R
 
+  infixr 5 _t⊸_
+  infixr 6 _t&_ _t⊕_
+  infixr 7 _t⊗_
+
   data Ty : Set where
     tι : Ty
-    [_·_]⊸_ : (ρ : Ann) (S T : Ty) → Ty
-    tI : Ty
+    tI t⊤ t0 : Ty
+    _t⊸_ _t⊗_ _t⊕_ _t&_ : (A B : Ty) → Ty
+    t! : (ρ : Ann) (A : Ty) → Ty
 
   private
     variable
@@ -62,11 +67,39 @@ module Specific.Syntax
     var : LVar RΓ A → Tm RΓ A
 
     app : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) ([ ρ · A ]⊸ B)) (N : Tm (ctx Q Γ) A)
-          (sp : R ⊴* P +* ρ *ₗ Q) → Tm RΓ B
-    lam : (M : Tm (RΓ ++ᶜ [ ρ · A ]ᶜ) B) → Tm RΓ ([ ρ · A ]⊸ B)
+          (M : Tm (ctx P Γ) (A t⊸ B)) (N : Tm (ctx Q Γ) A)
+          (sp : R ⊴* P +* Q) → Tm RΓ B
+    lam : (M : Tm (RΓ ++ᶜ [ 1# · A ]ᶜ) B) → Tm RΓ (A t⊸ B)
 
     unm : let ctx R Γ = RΓ in
           (M : Tm (ctx P Γ) tI) (N : Tm (ctx Q Γ) C) (sp : R ⊴* P +* Q) →
-          Tm RΓ A
+          Tm RΓ C
     uni : let ctx R Γ = RΓ in (sp : R ⊴* 0*) → Tm RΓ tI
+    prm : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) (A t⊗ B))
+          (N : Tm (ctx Q Γ ++ᶜ ([ 1# · A ]ᶜ ++ᶜ [ 1# · B ]ᶜ)) C)
+          (sp : R ⊴* P +* Q) → Tm RΓ C
+    ten : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) A) (N : Tm (ctx Q Γ) B) (sp : R ⊴* P +* Q) →
+          Tm RΓ (A t⊗ B)
+
+    exf : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) t0) (sp : R ⊴* P +* Q) → Tm RΓ C
+    -- no t0 introduction
+    cse : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) (A t⊕ B))
+          (N : Tm (ctx Q Γ ++ᶜ [ 1# · A ]ᶜ) C)
+          (O : Tm (ctx Q Γ ++ᶜ [ 1# · B ]ᶜ) C)
+          (sp : R ⊴* P +* Q) → Tm RΓ C
+    inl : (M : Tm RΓ A) → Tm RΓ (A t⊕ B)
+    inr : (M : Tm RΓ B) → Tm RΓ (A t⊕ B)
+
+    prl : (M : Tm RΓ (A t& B)) → Tm RΓ A
+    prr : (M : Tm RΓ (A t& B)) → Tm RΓ B
+    wth : (M : Tm RΓ A) (N : Tm RΓ B) → Tm RΓ (A t& B)
+
+    bam : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) (t! ρ A)) (N : Tm (ctx Q Γ ++ᶜ ([ ρ · A ]ᶜ)) C)
+          (sp : R ⊴* P +* Q) → Tm RΓ C
+    bng : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) A) (sp : R ⊴* ρ *ₗ P) → Tm RΓ (t! ρ A)
