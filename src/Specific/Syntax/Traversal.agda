@@ -131,6 +131,7 @@ module Specific.Syntax.Traversal
                                        (+ᴹ-*ᴹ _ _ (τ .matrix)))))
     trav τ (inl M) = inl (trav τ M)
     trav τ (inr M) = inr (trav τ M)
+    trav τ top = top
     trav τ (prl M) = prl (trav τ M)
     trav τ (prr M) = prr (trav τ M)
     trav τ (wth M N) = wth (trav τ M) (trav τ N)

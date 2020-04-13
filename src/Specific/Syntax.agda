@@ -94,6 +94,8 @@ module Specific.Syntax
     inl : (M : Tm RΓ A) → Tm RΓ (A t⊕ B)
     inr : (M : Tm RΓ B) → Tm RΓ (A t⊕ B)
 
+    -- no t⊤ elimination
+    top : Tm RΓ t⊤
     prl : (M : Tm RΓ (A t& B)) → Tm RΓ A
     prr : (M : Tm RΓ (A t& B)) → Tm RΓ B
     wth : (M : Tm RΓ A) (N : Tm RΓ B) → Tm RΓ (A t& B)
