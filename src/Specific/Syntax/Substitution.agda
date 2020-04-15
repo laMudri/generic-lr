@@ -56,10 +56,9 @@ module Specific.Syntax.Substitution
       Θ : Vector Ty t
 
   weakenRen : Ren (PΓ ++ᶜ ctx (λ _ → 0#) Θ) PΓ
-  weakenRen .act = ↙
+  weakenRen .act (ivar i q) = ivar (↙ i) q
   weakenRen {PΓ = ctx P Γ} .use-pres =
     unrowL₂ (*ᴹ-1ᴹ _) ++₂ unrowL₂ (*ᴹ-0ᴹ (row P))
-  weakenRen .ty-pres j = refl
 
   Tm-kit : Kit Tm
   Tm-kit .psh = subuse

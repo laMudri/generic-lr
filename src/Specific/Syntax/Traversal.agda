@@ -46,7 +46,7 @@ module Specific.Syntax.Traversal
       t = QΔ .shape ; Q = QΔ .use-ctx ; Δ = QΔ .ty-ctx
     field
       matrix : Matrix Ann t s
-      act : (j : Ptr t) → T (record PΓ { R = matrix j }) (Δ j)
+      act : (j : IVar Δ A) → T (record PΓ { R = matrix (j .idx) }) A
       use-pres : P ⊴* unrow (row Q *ᴹ matrix)
   open Env public
 
@@ -71,8 +71,8 @@ module Specific.Syntax.Traversal
     bindEnv τ .matrix = [ [ τ .matrix │ lift₀ᴹ 0# ]
                                        ─
                            [ lift₀ᴹ 0# │        1ᴹ ] ]
-    bindEnv τ .act (↙ j) = K .wk (τ .act j)
-    bindEnv τ .act (↘ j) = K .vr (lvar (↘ j) (⊴*-refl ++₂ ⊴*-refl) refl)
+    bindEnv τ .act (ivar! (↙ j)) = K .wk (τ .act (ivar! j))
+    bindEnv τ .act (ivar! (↘ j)) = K .vr (lvar! (↘ j) (⊴*-refl ++₂ ⊴*-refl))
     bindEnv {QΔ = ctx Q Δ} {RΘ = ctx R Θ} τ .use-pres =
       ⊴*-trans (mk λ i → +-identity-⊵ .proj₂ _)
                (+*-mono (τ .use-pres) (unrowL₂ (*ᴹ-0ᴹ (row R))))
@@ -81,12 +81,12 @@ module Specific.Syntax.Traversal
                (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row Q))) (unrowL₂ (*ᴹ-1ᴹ (row R))))
 
     trav : Env T PΓ QΔ → Tm QΔ A → Tm PΓ A
-    trav τ (var (lvar i sp refl)) = K .tm
+    trav τ (var (lvar! i sp)) = K .tm
       (K .psh
         (⊴*-trans (τ .use-pres)
                   (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp) ⊴ᴹ-refl))
                             (getrowL₂ (1ᴹ-*ᴹ (τ .matrix)) i)))
-        (τ .act i))
+        (τ .act (ivar! i)))
     trav τ (app M N sp) =
       app (trav (record { Env τ; use-pres = ⊴*-refl }) M)
           (trav (record { Env τ; use-pres = ⊴*-refl }) N)

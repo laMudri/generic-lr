@@ -48,8 +48,7 @@ module Specific.Syntax.Subuse
       Γ : Vector Ty s
 
   subuse : P ⊴* Q → Tm (ctx Q Γ) A → Tm (ctx P Γ) A
-  subuse PQ = trav LVar-kit (record
-    { matrix = 1ᴹ
-    ; act = λ j → lvar j ⊴*-refl refl
+  subuse PQ = ren record
+    { act = id
     ; use-pres = ⊴*-trans PQ (unrowL₂ (*ᴹ-1ᴹ _))
-    })
+    }

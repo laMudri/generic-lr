@@ -49,15 +49,36 @@ module Specific.Syntax
   open import Generic.Linear.Syntax Ty Ann
   open Ctx public renaming (s to shape; R to use-ctx; Γ to ty-ctx)
 
+  record IVar {s} (Γ : Vector Ty s) (A : Ty) : Set where
+    constructor ivar
+    field
+      idx : Ptr s
+      ty-eq : Γ idx ≡ A
+
   record LVar (PΓ : Ctx) (A : Ty) : Set where
     constructor lvar
     private
       s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
     field
       idx : Ptr s
-      basis : P ⊴* 1ᴹ idx
       ty-eq : Γ idx ≡ A
+      basis : P ⊴* 1ᴹ idx
+
+    iVar : IVar Γ A
+    iVar .IVar.idx = idx
+    iVar .IVar.ty-eq = ty-eq
+
+  pattern ivar! i = ivar i refl
+  pattern lvar! i sp = lvar i refl sp
+
+  open IVar public
   open LVar public
+
+  equip-var : ∀ {s Γ R} (i : IVar Γ A) → R ⊴* 1ᴹ (i .idx) →
+              LVar (ctx {s} R Γ) A
+  equip-var i sp .idx = i .idx
+  equip-var i sp .ty-eq = i .ty-eq
+  equip-var i sp .basis = sp
 
   private
     variable

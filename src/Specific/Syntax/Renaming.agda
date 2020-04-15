@@ -47,9 +47,8 @@ module Specific.Syntax.Renaming
       s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
       t = QΔ .shape ; Q = QΔ .use-ctx ; Δ = QΔ .ty-ctx
     field
-      act : Ptr t → Ptr s
-      use-pres : P ⊴* unrow (row Q *ᴹ λ j i → 1ᴹ (act j) i)
-      ty-pres : ∀ j → Γ (act j) ≡ Δ j
+      act : IVar Δ A → IVar Γ A
+      use-pres : P ⊴* unrow (row Q *ᴹ λ j i → 1ᴹ (act (ivar! j) .idx) i)
   open Ren public
 
   LVar-kit : Kit LVar
@@ -59,12 +58,12 @@ module Specific.Syntax.Renaming
   LVar-kit .vr = id
   LVar-kit .tm = var
   LVar-kit .wk v .idx = ↙ (v .idx)
-  LVar-kit .wk v .basis = v .basis ++₂ ⊴*-refl
   LVar-kit .wk v .ty-eq = v .ty-eq
+  LVar-kit .wk v .basis = v .basis ++₂ ⊴*-refl
 
   ren : Ren PΓ QΔ → Tm QΔ A → Tm PΓ A
   ren r = trav LVar-kit
-    (record { matrix = 1ᴹ ∘ r .act
-            ; act = λ j → lvar (r .act j) ⊴*-refl (r .ty-pres j)
+    (record { matrix = λ j i → 1ᴹ (r .act (ivar! j) .idx) i
+            ; act = λ { j@(ivar! _) → equip-var (r .act j) ⊴*-refl }
             ; use-pres = r .use-pres
             })
