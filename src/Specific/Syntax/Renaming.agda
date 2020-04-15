@@ -52,9 +52,7 @@ module Specific.Syntax.Renaming
   open Ren public
 
   LVar-kit : Kit LVar
-  LVar-kit .psh PQ v .idx = v .idx
-  LVar-kit .psh PQ v .basis = ⊴*-trans PQ (v .basis)
-  LVar-kit .psh PQ v .ty-eq = v .ty-eq
+  LVar-kit .psh PQ v = equip-var (iVar v) (⊴*-trans PQ (v .basis))
   LVar-kit .vr = id
   LVar-kit .tm = var
   LVar-kit .wk v .idx = ↙ (v .idx)
