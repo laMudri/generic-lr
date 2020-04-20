@@ -59,9 +59,10 @@ module Specific.Syntax.Renaming
   LVar-kit .wk v .ty-eq = v .ty-eq
   LVar-kit .wk v .basis = v .basis ++₂ ⊴*-refl
 
+  ren-env : Ren PΓ QΔ → Env LVar PΓ QΔ
+  ren-env r .matrix j i = 1ᴹ (r .act (ivar! j) .idx) i
+  ren-env r .act j@(ivar! _) = equip-var (r .act j) ⊴*-refl
+  ren-env r .use-pres = r .use-pres
+
   ren : Ren PΓ QΔ → Tm QΔ A → Tm PΓ A
-  ren r = trav LVar-kit
-    (record { matrix = λ j i → 1ᴹ (r .act (ivar! j) .idx) i
-            ; act = λ { j@(ivar! _) → equip-var (r .act j) ⊴*-refl }
-            ; use-pres = r .use-pres
-            })
+  ren r = trav LVar-kit (ren-env r)
