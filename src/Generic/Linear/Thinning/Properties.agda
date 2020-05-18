@@ -99,14 +99,14 @@ module Generic.Linear.Thinning.Properties
   open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
                  +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
-  open MultIdent 0# 1# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
                  +-mono +-identity-← *-identityʳ-← zeroʳ-←
   open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
                 +-mono (+-identity-→ .proj₁ 0#) (+-identity-← .proj₂ 0#)
                 +-interchange *-assoc-→
                 zeroˡ-→ (λ a b c → distribˡ-→ b c a)
                 zeroʳ-← distribʳ-←
-  open MultZero 0# (flip _⊴_) 0# _+_ _*_ ⊴-refl (flip ⊴-trans)
+  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
                 +-mono (+-identity-← .proj₂ 0#) zeroʳ-←
 
   identity : Thinning PΓ PΓ
