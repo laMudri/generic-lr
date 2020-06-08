@@ -6,7 +6,7 @@ module Algebra.Skew where
   import Algebra.Skew.Definitions as Defs
   open import Function.Base using (flip)
   open import Level
-  open import Relation.Binary.Core using (Rel)
+  open import Relation.Binary.Core using (Rel; _Preserves_⟶_)
   open import Relation.Binary.Definitions
 
   record IsProset {c ℓ} {C : Set c} (≤ : Rel C ℓ) : Set (c ⊔ ℓ) where
@@ -75,6 +75,7 @@ module Algebra.Skew where
       open S using (_≤_)
     field
       apply : R.Carrier → S.Carrier
+      hom-mono : apply Preserves R._≤_ ⟶ S._≤_
       hom-0# : apply R.0# ≤ S.0#
       hom-+ : ∀ x y → apply (x R.+ y) ≤ apply x S.+ apply y
       hom-1# : apply R.1# ≤ S.1#
