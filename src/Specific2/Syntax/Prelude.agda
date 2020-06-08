@@ -1,24 +1,13 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
-open import Algebra using (Op₂)
-import Algebra.Definitions as Defs
-open import Function.Base
+open import Algebra.Skew
 open import Level using (0ℓ)
-open import Relation.Binary using (Rel; Reflexive; Transitive)
 
-module Specific2.Syntax.Prelude
-  (Ann : Set) (_⊴_ : Rel Ann 0ℓ)
-  (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
-  (⊴-refl : Reflexive _⊴_) (⊴-trans : Transitive _⊴_)
-  (open Defs _⊴_) (let module ⊵ = Defs (flip _⊴_))
-  (+-mono : Congruent₂ _+_) (*-mono : Congruent₂ _*_)
-  (+-identity-⊴ : Identity 0# _+_) (+-identity-⊵ : ⊵.Identity 0# _+_)
-  (+-interchange : Interchangable _+_ _+_)
-  (1-* : ∀ x → (1# * x) ⊴ x) (*-1 : ∀ x → x ⊴ (x * 1#)) (*-* : Associative _*_)
-  (0-* : ∀ x → (0# * x) ⊴ 0#) (*-0 : ∀ x → 0# ⊴ (x * 0#))
-  (+-* : ∀ x y z → ((x + y) * z) ⊴ ((x * z) + (y * z)))
-  (*-+ : ∀ x y z → ((x * y) + (x * z)) ⊴ (x * (y + z)))
-  where
+module Specific2.Syntax.Prelude (algebra : SkewSemiring 0ℓ 0ℓ) where
+
+  open SkewSemiring algebra public
+    renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
+  open import Algebra.Skew.Definitions _⊴_
 
   open import Specific2.Syntax Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Syntax Ty Ann
@@ -29,26 +18,43 @@ module Specific2.Syntax.Prelude
   open import Data.LTree.Matrix
   open import Data.LTree.Matrix.Properties
   open import Data.Product
+  open import Relation.Binary.Definitions using (Reflexive; Transitive)
   open import Relation.Binary.PropositionalEquality
 
+  +-interchange : Interchangable _+_ _+_
+  +-interchange w x y z =
+    ⊴-trans
+      (+.assoc-→ w x (y + z))
+      (⊴-trans
+        (+.mono ⊴-refl
+                (⊴-trans
+                  (+.assoc-← x y z)
+                  (⊴-trans
+                    (+.mono (+.comm x y) ⊴-refl)
+                    (+.assoc-→ y x z))))
+        (+.assoc-← w y (x + z)))
+
+  open Zero 0# public
   open Ident 0# 1# public
   open Mult 0# _+_ _*_ public
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono public
+  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +.mono *.mono public
     renaming (*ᴹ-cong to *ᴹ-mono)
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono public renaming (+ᴹ-cong to +ᴹ-mono)
+  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +.mono public renaming (+ᴹ-cong to +ᴹ-mono)
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊴ 1-* 0-* public
+    +.mono (proj₁ +.identity-→ , proj₂ +.identity-←)
+    (proj₁ *.identity) (proj₁ annihil) public
   open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono +-identity-⊵ *-1 *-0 public
+    +.mono (proj₁ +.identity-← , proj₂ +.identity-→)
+    (proj₂ *.identity) (proj₂ annihil) public
   open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) +-interchange +-* public
+    +.mono (+.identity-← .proj₁ 0#) +-interchange (proj₁ distrib) public
   open ZeroMult 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊴ .proj₁ 0#) 0-* public
+    +.mono (+.identity-→ .proj₁ 0#) (proj₁ annihil) public
   open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +-mono (+-identity-⊵ .proj₂ 0#) *-0 public
+    +.mono (+.identity-← .proj₁ 0#) (proj₂ annihil) public
   open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-    +-mono *-0 *-+ *-* public
-  open Cong2 _⊴_ +-mono public renaming (cong₂ to +*-mono)
+    +.mono (proj₂ annihil) (proj₂ distrib) *.assoc public
+  open Cong2 _⊴_ +.mono public renaming (cong₂ to +*-mono)
 
   ⊴*-refl : ∀ {s} → Reflexive (_⊴*_ {s = s})
   ⊴*-refl .get i = ⊴-refl
