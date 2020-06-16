@@ -22,21 +22,39 @@ module Generic.Linear.Syntax.Interpretation
 
   open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
 
+  infixr 8 _─✴_
+  infixr 9 _✴_
+  infixr 10 _·_
+
+  record ✴1 (RΓ : Ctx) : Set where
+    constructor ✴1⟨_⟩
+    open Ctx RΓ
+    field
+      split : R ⊴* 0*
+
   record _✴_ (T U : Ctx → Set) (RΓ : Ctx) : Set where
     constructor _✴⟨_⟩_
     open Ctx RΓ
     field
       {P Q} : Vector Ann _
       T-prf : T record RΓ { R = P }
-      split : P +* Q ⊴* R
+      split : R ⊴* P +* Q
       U-prf : U record RΓ { R = Q }
+
+  record _─✴_ (T U : Ctx → Set) (RΓ : Ctx) : Set where
+    constructor lam✴
+    open Ctx RΓ
+    field
+      app✴ : ∀ {P Q} (split : Q ⊴* R +* P) (T-prf : T record RΓ { R = P }) →
+             U record RΓ { R = Q }
+  open _─✴_ public
 
   record _·_ (ρ : Ann) (T : Ctx → Set) (RΓ : Ctx) : Set where
     constructor ⟨_⟩·_
     open Ctx RΓ
     field
       {P} : Vector Ann _
-      split : ρ *ₗ P ⊴* R
+      split : R ⊴* ρ *ₗ P
       T-prf : T record RΓ { R = P }
 
   record Dup (T : Ctx → Set) (RΓ : Ctx) : Set where

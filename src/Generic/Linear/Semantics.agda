@@ -2,17 +2,31 @@
 
 open import Algebra.Core
 open import Level renaming (zero to lzero; suc to lsuc)
-open import Relation.Binary using (Rel)
+open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Semantics
   (Ty Ann : Set) (_⊴_ : Rel Ann 0ℓ)
   (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
+  -- (let module ⊴ = Defs _⊴_)
+  -- (let module ⊵ = Defs (flip _⊴_))
+  -- (open ⊴ using (Congruent₂; Interchangable))
+  -- ⊴:
+  (⊴-refl : Reflexive _⊴_)
+  (⊴-trans : Transitive _⊴_)
   where
 
   open import Data.LTree
   open import Data.LTree.Vector
+  0* = lift₀ 0#
   open import Data.LTree.Matrix
+  open import Data.LTree.Matrix.Properties
   open import Relation.Unary
+
+  open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
+  open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
+  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ {!!} {!!} {!!}
+  -- open MultIdent 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
+  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
@@ -35,6 +49,15 @@ module Generic.Linear.Semantics
     {!!}  -- distribˡ-→
     {!!}  -- zeroʳ-←
     {!!}  -- distribʳ-←
+  open import Generic.Linear.Environment.Properties
+    Ty Ann _⊴_ 0# _+_ 1# _*_ ⊴-refl ⊴-trans
+    {!!} {!!}
+    {!!} {!!}
+    {!!}
+    {!!} {!!} {!!}
+    {!!} {!!}
+    {!!}
+    {!!}
 
   private
     variable
@@ -55,10 +78,15 @@ module Generic.Linear.Semantics
 
     semantics : ∀ {PΓ QΔ} → (PΓ ─Env) 𝓥 QΔ → (PΓ ─Comp) 𝓒 QΔ
     body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ {RΘ A} →
-           Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
+           Scope (Tm d sz) record RΘ { R = 0* } A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
+    -- v .basis
     semantics ρ (`var v) =
-      var (𝓥-psh (⊴*-trans (ρ .sums) {!v .basis!}) (ρ .lookup (plain-var v)))
-    semantics ρ (`con t) = alg (map-s d (body {!ρ!}) {!t!})
+      var (𝓥-psh (⊴*-trans (ρ .sums)
+                           (⊴*-trans (unrowL₂ (*ᴹ-cong (rowL₂ (v .basis))
+                                                       ⊴ᴹ-refl))
+                                     (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
+                 (ρ .lookup (plain-var v)))
+    semantics ρ (`con t) = alg (map-s d (body {!!}) {!t!})
 
-    body ρ t th σ = semantics {!σ!} t
+    body ρ t {QΔ′} th σ = semantics (let foo = th^Env th^𝓥 ρ th in {!σ!}) t

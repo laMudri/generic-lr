@@ -60,7 +60,7 @@ module Generic.Linear.Thinning.Properties
       T : Ctx → Set
       𝓥 : Scoped
       s t u : LTree
-      P Q R : Vector Ann s
+      P P′ Q Q′ R : Vector Ann s
       A : Ty
 
   -- TODO: refactor
@@ -141,6 +141,10 @@ module Generic.Linear.Thinning.Properties
   tyq (lookup (extend les) v) = tyq v
   basis (lookup (extend les) v) .get (↙ j) = ⊴-refl
   basis (lookup (extend les) v) .get (↘ j) = ⊴-refl
+
+  -- reuse : (ren : Thinning PΓ QΔ) → P′ ⊴* unrow (row Q′ *ᴹ ren .M) →
+  --         Thinning (record PΓ { R = P′ }) (record QΔ { R = Q′ })
+  -- reuse ren
 
   extract : ∀[ □ T ⇒ T ]
   extract t = t identity
