@@ -108,8 +108,6 @@ module Algebra.Skew where
       *-isSkewMonoid : IsSkewMonoid ≤ 1# *
       annihil : Annihilates 0# *
       distrib : Distributes + *
-    module + = IsSkewCommutativeMonoid +-isSkewCommutativeMonoid
-    module * = IsSkewMonoid *-isSkewMonoid
 
   --
 
@@ -147,6 +145,14 @@ module Algebra.Skew where
       ; isSkewMonoid = isRightSkewMonoid
       }
 
+    inter : Defs.Interchangable _≤_ _∙_ _∙_
+    inter w x y z = trans
+      (assoc-→ _ _ _) (trans
+      (mono refl (assoc-← _ _ _)) (trans
+      (mono refl (mono (comm _ _) refl)) (trans
+      (mono refl (assoc-→ _ _ _))
+      (assoc-← _ _ _))))
+
   record SkewSemiring c ℓ : Set (suc (c ⊔ ℓ)) where
     field
       proset : Proset c ℓ
@@ -163,6 +169,20 @@ module Algebra.Skew where
     field
       isSkewSemiring : IsSkewSemiring _≤_ 0# _+_ 1# _*_
     open IsSkewSemiring isSkewSemiring public
+
+    module + where
+      skewCommutativeMonoid : SkewCommutativeMonoid c ℓ
+      skewCommutativeMonoid = record
+        { proset = proset; comp = plus
+        ; isSkewCommutativeMonoid = +-isSkewCommutativeMonoid
+        }
+      open SkewCommutativeMonoid skewCommutativeMonoid public
+
+    module * where
+      skewMonoid : SkewMonoid c ℓ
+      skewMonoid = record
+        { proset = proset; comp = mult; isSkewMonoid = *-isSkewMonoid }
+      open SkewMonoid skewMonoid public
 
   --
 
@@ -265,3 +285,68 @@ module Algebra.Skew where
         hom-+ₘ : ∀ x y → apply (x M₀.+ₘ y) M₁.≤ₘ apply x M₁.+ₘ apply y
         hom-*ₘ : ∀ x y → apply (x M₀.*ₘ y) M₁.≤ₘ r.apply x M₁.*ₘ apply y
         hom-ₘ* : ∀ x y → apply (x M₀.ₘ* y) M₁.≤ₘ apply x M₁.ₘ* s.apply y
+
+  --
+
+  module _ {cr ℓr} (R : SkewSemiring cr ℓr) where
+    private
+      module R = SkewSemiring R
+
+    record IsSkewLeftSemimodule
+      {cm ℓm} {M : Set cm} (≤ : Rel M ℓm) (0ₘ : M) (+ₘ : Op₂ M)
+      (*ₘ : Opₗ R.Carrier M) : Set (cr ⊔ cm ⊔ ℓm) where
+      open LeftDefs R.Carrier ≤
+      field
+        isSkewCommutativeMonoid : IsSkewCommutativeMonoid ≤ 0ₘ +ₘ
+      open IsSkewCommutativeMonoid isSkewCommutativeMonoid public
+        renaming ( identity-→ to +ₘ-identity-→
+                 ; assoc-→ to +ₘ-assoc-→
+                 ; identity-← to +ₘ-identity-←
+                 ; assoc-← to +ₘ-assoc-←
+                 ; comm to +ₘ-comm
+                 ; isLeftSkewMonoid to +ₘ-isLeftSkewMonoid
+                 ; isRightSkewMonoid to +ₘ-isRightSkewMonoid
+                 )
+      field
+        *ₘ-identityˡ : LeftIdentity R.1# *ₘ
+        *ₘ-assoc : Associative R._*_ *ₘ
+        *ₘ-annihil : Annihilates R.0# 0ₘ *ₘ
+        *ₘ-distrib : Distributes R._+_ +ₘ *ₘ
+
+    record SkewLeftSemimodule cm ℓm : Set (cr ⊔ ℓr ⊔ suc (cm ⊔ ℓm)) where
+      field
+        proset : Proset cm ℓm
+      open Proset proset public
+        renaming (Carrier to Carrierₘ; _≤_ to _≤ₘ_)
+      field
+        0ₘ : Carrierₘ
+        plusₘ : MonoOp₂ _≤ₘ_
+        left-scale : MonoOpₗ R._≤_ _≤ₘ_
+      open MonoOp₂ plusₘ public
+        renaming (_∙_ to infix 6 _+ₘ_; mono to +ₘ-mono)
+      open MonoOpₗ left-scale public
+      field
+        isSkewLeftSemimodule : IsSkewLeftSemimodule _≤ₘ_ 0ₘ _+ₘ_ _*ₘ_
+      open IsSkewLeftSemimodule isSkewLeftSemimodule public
+
+  module _ {cr₀ ℓr₀ cr₁ ℓr₁}
+    {R₀ : SkewSemiring cr₀ ℓr₀} {R₁ : SkewSemiring cr₁ ℓr₁}
+    where
+
+    record SkewLeftSemimoduleMor {cm₀ ℓm₀ cm₁ ℓm₁}
+      (r : SkewSemiringMor R₀ R₁)
+      (M₀ : SkewLeftSemimodule R₀ cm₀ ℓm₀)
+      (M₁ : SkewLeftSemimodule R₁ cm₁ ℓm₁)
+      : Set (cr₀ ⊔ cm₀ ⊔ ℓm₀ ⊔ cm₁ ⊔ ℓm₁)
+      where
+      private
+        module r = SkewSemiringMor r
+        module M₀ = SkewLeftSemimodule M₀
+        module M₁ = SkewLeftSemimodule M₁
+      field
+        prosetMor : ProsetMor M₀.proset M₁.proset
+      open ProsetMor prosetMor public
+      field
+        hom-0ₘ : apply M₀.0ₘ M₁.≤ₘ M₁.0ₘ
+        hom-+ₘ : ∀ x y → apply (x M₀.+ₘ y) M₁.≤ₘ apply x M₁.+ₘ apply y
+        hom-*ₘ : ∀ x y → apply (x M₀.*ₘ y) M₁.≤ₘ r.apply x M₁.*ₘ apply y

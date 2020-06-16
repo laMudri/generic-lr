@@ -5,10 +5,15 @@ module Algebra.Skew.Construct.Vector where
   open import Algebra.Skew
   open import Data.LTree
   open import Data.LTree.Vector
+  -- open import Data.Nat as N using (ℕ)
+  -- open import Data.Nat.Properties as NP
   open import Data.Product
   open import Data.Product.Relation.Binary.Pointwise.NonDependent
   open import Data.Unit.Polymorphic
+  open import Level using (Level; 0ℓ)
   open import Function.Base
+  -- open import Relation.Binary.PropositionalEquality as ≡
+  --   using (_≡_; cong; subst)
 
   infixl 2 _<*>_
 
@@ -20,110 +25,49 @@ module Algebra.Skew.Construct.Vector where
           ((a , b) : A × B) → X a × Y b
   (f , g) <*> (x , y) = f x , g y
 
-  ⊤-skewBisemimodule :
-    ∀ {cr ℓr cs ℓs c ℓ} {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs} →
-    SkewBisemimodule R S c ℓ
-  ⊤-skewBisemimodule = record
-    { proset = record { Carrier = ⊤ ; _≤_ = λ _ _ → ⊤ } }
-
-  ×-skewBisemimodule :
-    ∀ {cr ℓr cs ℓs c ℓ} {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs} →
-    SkewBisemimodule R S c ℓ → SkewBisemimodule R S c ℓ →
-    SkewBisemimodule R S c ℓ
-  ×-skewBisemimodule M N = record
+  {-
+  ℕ-skewSemiring : SkewSemiring 0ℓ 0ℓ
+  ℕ-skewSemiring = record
     { proset = record
-      { Carrier = M.Carrierₘ × N.Carrierₘ
-      ; _≤_ = Pointwise M._≤ₘ_ N._≤ₘ_
-      ; isProset = record
-        { refl = M.refl , N.refl
-        ; trans = zip M.trans N.trans
-        }
+      { Carrier = ℕ
+      ; _≤_ = N._≤_
+      ; isProset = record { refl = ≤-refl ; trans = ≤-trans }
       }
-    ; 0ₘ = M.0ₘ , N.0ₘ
-    ; plusₘ = record
-      { _∙_ = λ x y → (M._+ₘ_ , N._+ₘ_) <*> x <*> y
-      ; mono = λ x y → (M.+ₘ-mono , N.+ₘ-mono) <*> x <*> y
-      }
-    ; left-scale = record
-      { _*ₘ_ = λ r x → (M._*ₘ_ , N._*ₘ_) <*> pure r <*> x
-      ; *ₘ-mono = λ r x → (M.*ₘ-mono , N.*ₘ-mono) <*> pure r <*> x
-      }
-    ; right-scale = record
-      { _ₘ*_ = λ x s → (M._ₘ*_ , N._ₘ*_) <*> x <*> pure s
-      ; ₘ*-mono = λ x s → (M.ₘ*-mono , N.ₘ*-mono) <*> x <*> pure s
-      }
-    ; isSkewBisemimodule = record
-      { isSkewCommutativeMonoid = record
+    ; 0# = 0
+    ; plus = record { _∙_ = N._+_ ; mono = +-mono-≤ }
+    ; 1# = 1
+    ; mult = record { _∙_ = N._*_ ; mono = *-mono-≤ }
+    ; isSkewSemiring = record
+      { +-isSkewCommutativeMonoid = record
         { isLeftSkewMonoid = record
-          { identity =
-            (λ x → (pure (proj₁ ∘ +ₘ-identity-→) <*> (M , N)) <*> x)
-          , (λ x → (pure (proj₂ ∘ +ₘ-identity-→) <*> (M , N)) <*> x)
-          ; assoc = λ x y z → (pure +ₘ-assoc-→ <*> (M , N)) <*> x <*> y <*> z
+          { identity = (λ n → ≤-reflexive (+-identityˡ n))
+                     , (λ n → ≤-reflexive (≡.sym (+-identityʳ n)))
+          ; assoc = λ m n o → ≤-reflexive (+-assoc m n o)
           }
         ; isRightSkewMonoid = record
-          { identity =
-            (λ x → (pure (proj₁ ∘ +ₘ-identity-←) <*> (M , N)) <*> x)
-          , (λ x → (pure (proj₂ ∘ +ₘ-identity-←) <*> (M , N)) <*> x)
-          ; assoc = λ x y z → (pure +ₘ-assoc-← <*> (M , N)) <*> x <*> y <*> z
+          { identity = (λ n → ≤-reflexive (≡.sym (+-identityˡ n)))
+                     , (λ n → ≤-reflexive (+-identityʳ n))
+          ; assoc = λ m n o → ≤-reflexive (≡.sym (+-assoc m n o))
           }
-        ; comm = λ x y → (pure +ₘ-comm <*> (M , N)) <*> x <*> y
+        ; comm = λ m n → ≤-reflexive (+-comm m n)
         }
-      ; *ₘ-identityˡ = λ x → (pure *ₘ-identityˡ <*> (M , N)) <*> x
-      ; *ₘ-assoc = λ x y z →
-        (pure *ₘ-assoc <*> (M , N)) <*> pure x <*> pure y <*> z
-      ; *ₘ-annihil =
-        (λ x → (pure (proj₁ ∘ *ₘ-annihil) <*> (M , N)) <*> x)
-      , (λ x → (pure (proj₂ ∘ *ₘ-annihil) <*> (M , N)) <*> pure x)
-      ; *ₘ-distrib =
-        (λ x y z → (pure (proj₁ ∘ *ₘ-distrib) <*> (M , N))
-                   <*> pure x <*> pure y <*> z)
-      , (λ x y z → (pure (proj₂ ∘ *ₘ-distrib) <*> (M , N))
-                   <*> pure x <*> y <*> z)
-      ; ₘ*-identityʳ = λ x → (pure ₘ*-identityʳ <*> (M , N)) <*> x
-      ; ₘ*-assoc = λ x y z →
-        (pure ₘ*-assoc <*> (M , N)) <*> x <*> pure y <*> pure z
-      ; ₘ*-annihil =
-        (λ x → (pure (proj₁ ∘ ₘ*-annihil) <*> (M , N)) <*> pure x)
-      , (λ x → (pure (proj₂ ∘ ₘ*-annihil) <*> (M , N)) <*> x)
-      ; ₘ*-distrib = 
-        (λ x y z → (pure (proj₁ ∘ ₘ*-distrib) <*> (M , N))
-                   <*> x <*> y <*> pure z)
-      , (λ x y z → (pure (proj₂ ∘ ₘ*-distrib) <*> (M , N))
-                   <*> x <*> pure y <*> pure z)
-      ; *ₘ-ₘ*-assoc = λ x y z →
-        (pure *ₘ-ₘ*-assoc <*> (M , N)) <*> pure x <*> y <*> pure z
+      ; *-isSkewMonoid = record
+        { identity = (λ n → ≤-reflexive (*-identityˡ n))
+                   , (λ n → ≤-reflexive (≡.sym (*-identityʳ n)))
+        ; assoc = λ m n o → ≤-reflexive (*-assoc m n o)
+        }
+      ; annihil = (λ n → ≤-reflexive (*-zeroˡ n))
+                , (λ n → ≤-reflexive (≡.sym (*-zeroʳ n)))
+      ; distrib = (λ m n o → ≤-reflexive (*-distribʳ-+ o m n))
+                , (λ m n o → ≤-reflexive (≡.sym (*-distribˡ-+ m n o)))
       }
     }
-    where
-    module M = SkewBisemimodule M
-    module N = SkewBisemimodule N
-    open SkewBisemimodule
+  -}
 
-  I-skewBisemimodule :
-    ∀ {c ℓ} {R : SkewSemiring c ℓ} → SkewBisemimodule R R c ℓ
-  I-skewBisemimodule {R = R} = record
-    { proset = proset
-    ; 0ₘ = 0#
-    ; plusₘ = plus
-    ; left-scale = record { _*ₘ_ = _*_ ; *ₘ-mono = *-mono }
-    ; right-scale = record { _ₘ*_ = _*_ ; ₘ*-mono = *-mono }
-    ; isSkewBisemimodule = record
-      { isSkewCommutativeMonoid = +-isSkewCommutativeMonoid
-      ; *ₘ-identityˡ = proj₁ *.identity
-      ; *ₘ-assoc = *.assoc
-      ; *ₘ-annihil = annihil
-      ; *ₘ-distrib = distrib
-      ; ₘ*-identityʳ = proj₂ *.identity
-      ; ₘ*-assoc = *.assoc
-      ; ₘ*-annihil = annihil
-      ; ₘ*-distrib = distrib
-      ; *ₘ-ₘ*-assoc = *.assoc
-      }
-    } where open SkewSemiring R
-
-  Vector-skewBisemimodule :
-    ∀ {c ℓ} (R : SkewSemiring c ℓ) → LTree → SkewBisemimodule R R c ℓ
-  Vector-skewBisemimodule R s = record
+  Vector-skewLeftSemimodule :
+    ∀ {c ℓ} (R : SkewSemiring c ℓ) → LTree →
+    SkewLeftSemimodule R c ℓ
+  Vector-skewLeftSemimodule R s = record
     { proset = record
       { Carrier = Vector Carrier s
       ; _≤_ = Lift₂ _≤_
@@ -141,11 +85,7 @@ module Algebra.Skew.Construct.Vector where
       { _*ₘ_ = λ r v → lift₁ (r *_) v
       ; *ₘ-mono = λ rr (mk vv) → mk λ i → *-mono rr (vv i)
       }
-    ; right-scale = record
-      { _ₘ*_ = λ v r → lift₁ (_* r) v
-      ; ₘ*-mono = λ (mk vv) rr → mk λ i → *-mono (vv i) rr
-      }
-    ; isSkewBisemimodule = record
+    ; isSkewLeftSemimodule = record
       { isSkewCommutativeMonoid = record
         { isLeftSkewMonoid = record
           { identity = (λ v → mk λ i → +.identity-→ .proj₁ (v i))
@@ -165,18 +105,84 @@ module Algebra.Skew.Construct.Vector where
                    , (λ r → mk λ i → annihil .proj₂ r)
       ; *ₘ-distrib = (λ r s v → mk λ i → distrib .proj₁ r s (v i))
                    , (λ r u v → mk λ i → distrib .proj₂ r (u i) (v i))
-      ; ₘ*-identityʳ = λ v → mk λ i → *.identity .proj₂ (v i)
-      ; ₘ*-assoc = λ v r s → mk λ i → *.assoc (v i) r s
-      ; ₘ*-annihil = (λ r → mk λ i → annihil .proj₁ r)
-                   , (λ v → mk λ i → annihil .proj₂ (v i))
-      ; ₘ*-distrib = (λ u v r → mk λ i → distrib .proj₁ (u i) (v i) r)
-                   , (λ v r s → mk λ i → distrib .proj₂ (v i) r s)
-      ; *ₘ-ₘ*-assoc = λ r v s → mk λ i → *.assoc r (v i) s
       }
     } where open SkewSemiring R
+
+  module _ {cr ℓr cs ℓs cm ℓm cn ℓn}
+    {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs}
+    {f : SkewSemiringMor R S}
+    {M : SkewLeftSemimodule R cm ℓm} {N : SkewLeftSemimodule S cn ℓn}
+    where
+
+    open SkewLeftSemimoduleMor
+    open ProsetMor
+    open SkewSemiringMor
+
+    private
+      module M = SkewLeftSemimodule M
+      module N = SkewLeftSemimodule N
+
+    0ᴹ : SkewLeftSemimoduleMor f M N
+    0ᴹ .prosetMor .apply u = N.0ₘ
+    0ᴹ .prosetMor .hom-mono uu = N.refl
+    0ᴹ .hom-0ₘ = N.refl
+    0ᴹ .hom-+ₘ u v = N.+ₘ-identity-→ .proj₂ N.0ₘ
+    0ᴹ .hom-*ₘ r u = N.*ₘ-annihil .proj₂ (f .apply r)
 
   LinMap : ∀ {cr ℓr cs ℓs}
            {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs}
            (f : SkewSemiringMor R S) (s t : LTree) → Set _
-  LinMap {R = R} {S} f s t = SkewBisemimoduleMor
-    f f (Vector-skewBisemimodule R s) (Vector-skewBisemimodule S t)
+  LinMap {R = R} {S} f s t = SkewLeftSemimoduleMor
+    f (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule S t)
+
+  module _ {cr ℓr cs ℓs}
+    {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs}
+    {f : SkewSemiringMor R S}
+    where
+
+    open SkewLeftSemimoduleMor
+    open ProsetMor
+    open SkewSemiringMor
+
+    1ᴹ : ∀ {s} → LinMap f s s
+    1ᴹ .prosetMor .apply u i = f .apply (u i)
+    1ᴹ .prosetMor .hom-mono uu .get i = f .hom-mono (uu .get i)
+    1ᴹ .hom-0ₘ .get i = f .hom-0#
+    1ᴹ .hom-+ₘ u v .get i = f .hom-+ (u i) (v i)
+    1ᴹ .hom-*ₘ r u .get i = f .hom-* r (u i)
+
+  module _ {cr ℓr cs ℓs} {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs}
+           {f : SkewSemiringMor R S} where
+    open SkewLeftSemimoduleMor
+    open ProsetMor
+
+    private
+      module R = SkewSemiring R
+      module S = SkewSemiring S
+      variable
+        s s′ t t′ : LTree
+
+    [_─_] : LinMap f s t → LinMap f s′ t → LinMap f (s <+> s′) t
+    [ M ─ N ] .prosetMor .apply u j =
+      M .apply (u ∘ ↙) j S.+ N .apply (u ∘ ↘) j
+    [ M ─ N ] .prosetMor .hom-mono (mk uu) .get j =
+      S.+-mono (M .hom-mono (mk (uu ∘ ↙)) .get j)
+               (N .hom-mono (mk (uu ∘ ↘)) .get j)
+    [ M ─ N ] .hom-0ₘ .get j =
+      S.trans (S.+-mono (M .hom-0ₘ .get j) (N .hom-0ₘ .get j))
+              (S.+.identity-→ .proj₁ _)
+    [ M ─ N ] .hom-+ₘ u v .get j =
+      S.trans (S.+-mono (M .hom-+ₘ (u ∘ ↙) (v ∘ ↙) .get j)
+                        (N .hom-+ₘ (u ∘ ↘) (v ∘ ↘) .get j))
+              (S.+.inter _ _ _ _)
+    [ M ─ N ] .hom-*ₘ r u .get j =
+      S.trans (S.+-mono (M .hom-*ₘ r (u ∘ ↙) .get j)
+                        (N .hom-*ₘ r (u ∘ ↘) .get j))
+              (S.distrib .proj₂ _ _ _)
+
+    [_│_] : LinMap f s t → LinMap f s t′ → LinMap f s (t <+> t′)
+    [ M │ N ] .prosetMor .apply u = M .apply u ++ N .apply u
+    [ M │ N ] .prosetMor .hom-mono uu = M .hom-mono uu ++₂ N .hom-mono uu
+    [ M │ N ] .hom-0ₘ = M .hom-0ₘ ++₂ N .hom-0ₘ
+    [ M │ N ] .hom-+ₘ u v = M .hom-+ₘ u v ++₂ N .hom-+ₘ u v
+    [ M │ N ] .hom-*ₘ r u = M .hom-*ₘ r u ++₂ N .hom-*ₘ r u
