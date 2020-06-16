@@ -4,6 +4,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Data.Product using (_×_; _,_)
   open import Function.Base using (_∘_)
   open import Relation.Unary
 
@@ -34,6 +35,9 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   []ᶜ : Ctx
   []ᶜ = ctx [] []
+
+  [_]ᶜ : Ann × Ty → Ctx
+  [(r , A)]ᶜ = ctx [ r ] [ A ]
 
   [_·_]ᶜ : Ann → Ty → Ctx
   [ ρ · A ]ᶜ = ctx [ ρ ] [ A ]

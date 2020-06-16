@@ -26,35 +26,38 @@ module Specific2.Syntax.Prelude (algebra : SkewSemiring 0ℓ 0ℓ) where
     ⊴-trans
       (+.assoc-→ w x (y + z))
       (⊴-trans
-        (+.mono ⊴-refl
+        (+-mono ⊴-refl
                 (⊴-trans
                   (+.assoc-← x y z)
                   (⊴-trans
-                    (+.mono (+.comm x y) ⊴-refl)
+                    (+-mono (+.comm x y) ⊴-refl)
                     (+.assoc-→ y x z))))
         (+.assoc-← w y (x + z)))
 
   open Zero 0# public
   open Ident 0# 1# public
   open Mult 0# _+_ _*_ public
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +.mono *.mono public
+  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono public
     renaming (*ᴹ-cong to *ᴹ-mono)
-  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +.mono public renaming (+ᴹ-cong to +ᴹ-mono)
+  open Plus-cong _+_ _⊴_ _⊴_ _⊴_ +-mono public renaming (+ᴹ-cong to +ᴹ-mono)
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +.mono (proj₁ +.identity-→ , proj₂ +.identity-←)
+    +-mono (proj₁ +.identity-→ , proj₂ +.identity-←)
     (proj₁ *.identity) (proj₁ annihil) public
   open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +.mono (proj₁ +.identity-← , proj₂ +.identity-→)
+    +-mono (proj₁ +.identity-← , proj₂ +.identity-→)
     (proj₂ *.identity) (proj₂ annihil) public
   open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +.mono (+.identity-← .proj₁ 0#) +-interchange (proj₁ distrib) public
+    +-mono (+.identity-← .proj₁ 0#) +-interchange (proj₁ distrib) public
   open ZeroMult 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +.mono (+.identity-→ .proj₁ 0#) (proj₁ annihil) public
+    +-mono (+.identity-→ .proj₁ 0#) (proj₁ annihil) public
   open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-    +.mono (+.identity-← .proj₁ 0#) (proj₂ annihil) public
+    +-mono (+.identity-← .proj₁ 0#) (proj₂ annihil) public
   open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-    +.mono (proj₂ annihil) (proj₂ distrib) *.assoc public
-  open Cong2 _⊴_ +.mono public renaming (cong₂ to +*-mono)
+    +-mono (proj₂ annihil) (proj₂ distrib) *.assoc public
+  open Cong2 _⊴_ +-mono public renaming (cong₂ to +*-mono)
+
+  ⟨_∣ : ∀ {s} → Ptr s → Vector Ann s
+  ⟨ i ∣ j = 1ᴹ i j
 
   ⊴*-refl : ∀ {s} → Reflexive (_⊴*_ {s = s})
   ⊴*-refl .get i = ⊴-refl

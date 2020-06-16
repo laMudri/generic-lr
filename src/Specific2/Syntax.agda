@@ -12,13 +12,14 @@ module Specific2.Syntax
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
+  open import Data.Product using (_×_; _,_)
   open import Relation.Binary.PropositionalEquality
 
   open Ident 0# 1#
 
   private
     variable
-      π ρ : Ann
+      p q r : Ann
       t : LTree
 
   infix 4 _⊴*_ _⊴ᴹ_
@@ -39,12 +40,15 @@ module Specific2.Syntax
   data Ty : Set where
     tι : Ty
     tI t⊤ t0 : Ty
-    _t⊸_ _t⊗_ _t⊕_ _t&_ : (A B : Ty) → Ty
-    t! : (ρ : Ann) (A : Ty) → Ty
+    _t⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
+    _t⊗_ _t⊕_ : (pA qB : Ann × Ty) → Ty
+    _t&_ : (A B : Ty) → Ty
+    t! : (rA : Ann × Ty) → Ty
 
   private
     variable
       A B C : Ty
+      rA pA qB : Ann × Ty
 
   open import Generic.Linear.Syntax Ty Ann
   open Ctx public renaming (s to shape; R to use-ctx; Γ to ty-ctx)
@@ -88,32 +92,35 @@ module Specific2.Syntax
     var : LVar RΓ A → Tm RΓ A
 
     app : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) (A t⊸ B)) (N : Tm (ctx Q Γ) A)
-          (sp : R ⊴* P +* Q) → Tm RΓ B
-    lam : (M : Tm (RΓ ++ᶜ [ 1# · A ]ᶜ) B) → Tm RΓ (A t⊸ B)
+          (M : Tm (ctx P Γ) ((r , A) t⊸ B)) (N : Tm (ctx Q Γ) A)
+          (sp : R ⊴* P +* r *ₗ Q) → Tm RΓ B
+    lam : (M : Tm (RΓ ++ᶜ [ rA ]ᶜ) B) → Tm RΓ (rA t⊸ B)
 
     unm : let ctx R Γ = RΓ in
           (M : Tm (ctx P Γ) tI) (N : Tm (ctx Q Γ) C) (sp : R ⊴* P +* Q) →
           Tm RΓ C
     uni : let ctx R Γ = RΓ in (sp : R ⊴* 0*) → Tm RΓ tI
     prm : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) (A t⊗ B))
-          (N : Tm (ctx Q Γ ++ᶜ ([ 1# · A ]ᶜ ++ᶜ [ 1# · B ]ᶜ)) C)
+          (M : Tm (ctx P Γ) (pA t⊗ qB))
+          (N : Tm (ctx Q Γ ++ᶜ ([ pA ]ᶜ ++ᶜ [ qB ]ᶜ)) C)
           (sp : R ⊴* P +* Q) → Tm RΓ C
     ten : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) A) (N : Tm (ctx Q Γ) B) (sp : R ⊴* P +* Q) →
-          Tm RΓ (A t⊗ B)
+          (M : Tm (ctx P Γ) A) (N : Tm (ctx Q Γ) B)
+          (sp : R ⊴* p *ₗ P +* q *ₗ Q) →
+          Tm RΓ ((p , A) t⊗ (q , B))
 
     exf : let ctx R Γ = RΓ in
           (M : Tm (ctx P Γ) t0) (sp : R ⊴* P +* Q) → Tm RΓ C
     -- no t0 introduction
     cse : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) (A t⊕ B))
-          (N : Tm (ctx Q Γ ++ᶜ [ 1# · A ]ᶜ) C)
-          (O : Tm (ctx Q Γ ++ᶜ [ 1# · B ]ᶜ) C)
+          (M : Tm (ctx P Γ) (pA t⊕ qB))
+          (N : Tm (ctx Q Γ ++ᶜ [ pA ]ᶜ) C)
+          (O : Tm (ctx Q Γ ++ᶜ [ qB ]ᶜ) C)
           (sp : R ⊴* P +* Q) → Tm RΓ C
-    inl : (M : Tm RΓ A) → Tm RΓ (A t⊕ B)
-    inr : (M : Tm RΓ B) → Tm RΓ (A t⊕ B)
+    inl : let ctx R Γ = RΓ in
+          (M : Tm (ctx P Γ) A) (sp : R ⊴* p *ₗ P) → Tm RΓ ((p , A) t⊕ qB)
+    inr : let ctx R Γ = RΓ in
+          (M : Tm (ctx Q Γ) B) (sp : R ⊴* q *ₗ Q) → Tm RΓ (pA t⊕ (q , B))
 
     -- no t⊤ elimination
     top : Tm RΓ t⊤
@@ -122,7 +129,7 @@ module Specific2.Syntax
     wth : (M : Tm RΓ A) (N : Tm RΓ B) → Tm RΓ (A t& B)
 
     bam : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) (t! ρ A)) (N : Tm (ctx Q Γ ++ᶜ ([ ρ · A ]ᶜ)) C)
+          (M : Tm (ctx P Γ) (t! rA)) (N : Tm (ctx Q Γ ++ᶜ ([ rA ]ᶜ)) C)
           (sp : R ⊴* P +* Q) → Tm RΓ C
     bng : let ctx R Γ = RΓ in
-          (M : Tm (ctx P Γ) A) (sp : R ⊴* ρ *ₗ P) → Tm RΓ (t! ρ A)
+          (M : Tm (ctx P Γ) A) (sp : R ⊴* r *ₗ P) → Tm RΓ (t! (r , A))
