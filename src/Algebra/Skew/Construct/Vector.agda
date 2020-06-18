@@ -64,6 +64,22 @@ module Algebra.Skew.Construct.Vector where
     }
   -}
 
+  I-skewLeftSemimodule :
+    ∀ {c ℓ} {R : SkewSemiring c ℓ} → SkewLeftSemimodule R c ℓ
+  I-skewLeftSemimodule {R = R} = record
+    { proset = proset
+    ; 0ₘ = 0#
+    ; plusₘ = plus
+    ; left-scale = record { _*ₘ_ = _*_ ; *ₘ-mono = *-mono }
+    ; isSkewLeftSemimodule = record
+      { isSkewCommutativeMonoid = +-isSkewCommutativeMonoid
+      ; *ₘ-identityˡ = *.identity .proj₁
+      ; *ₘ-assoc = *.assoc
+      ; *ₘ-annihil = annihil
+      ; *ₘ-distrib = distrib
+      }
+    } where open SkewSemiring R
+
   Vector-skewLeftSemimodule :
     ∀ {c ℓ} (R : SkewSemiring c ℓ) → LTree →
     SkewLeftSemimodule R c ℓ
@@ -122,6 +138,7 @@ module Algebra.Skew.Construct.Vector where
       module M = SkewLeftSemimodule M
       module N = SkewLeftSemimodule N
 
+    -- TODO: this should be factored through the zero object
     0ᴹ : SkewLeftSemimoduleMor f M N
     0ᴹ .prosetMor .apply u = N.0ₘ
     0ᴹ .prosetMor .hom-mono uu = N.refl
@@ -143,6 +160,7 @@ module Algebra.Skew.Construct.Vector where
     open SkewLeftSemimoduleMor
     open ProsetMor
     open SkewSemiringMor
+    open SkewSemiring S
 
     1ᴹ : ∀ {s} → LinMap f s s
     1ᴹ .prosetMor .apply u i = f .apply (u i)
@@ -150,6 +168,30 @@ module Algebra.Skew.Construct.Vector where
     1ᴹ .hom-0ₘ .get i = f .hom-0#
     1ᴹ .hom-+ₘ u v .get i = f .hom-+ (u i) (v i)
     1ᴹ .hom-*ₘ r u .get i = f .hom-* r (u i)
+
+    -- TODO: could do more compositionally, particularly in + case.
+    ∑ᴹ : ∀ {s} → SkewLeftSemimoduleMor f (Vector-skewLeftSemimodule R s)
+                                         I-skewLeftSemimodule
+    ∑ᴹ {[-]} .prosetMor .apply v = f .apply (v here)
+    ∑ᴹ {[-]} .prosetMor .hom-mono (mk vv) = f .hom-mono (vv here)
+    ∑ᴹ {[-]} .hom-0ₘ = f .hom-0#
+    ∑ᴹ {[-]} .hom-+ₘ u v = f .hom-+ (u here) (v here)
+    ∑ᴹ {[-]} .hom-*ₘ r v = f .hom-* r (v here)
+    ∑ᴹ {ε} = 0ᴹ
+    ∑ᴹ {s <+> t} .prosetMor .apply v = ∑ᴹ .apply (v ∘ ↙) + ∑ᴹ .apply (v ∘ ↘)
+    ∑ᴹ {s <+> t} .prosetMor .hom-mono (mk vv) =
+      +-mono (∑ᴹ .hom-mono (mk (vv ∘ ↙))) (∑ᴹ .hom-mono (mk (vv ∘ ↘)))
+    ∑ᴹ {s <+> t} .hom-0ₘ = trans (+-mono (∑ᴹ {s} .hom-0ₘ) (∑ᴹ {t} .hom-0ₘ))
+                                 (+.identity-→ .proj₁ 0#)
+    ∑ᴹ {s <+> t} .hom-+ₘ u v =
+      trans (+-mono (∑ᴹ {s} .hom-+ₘ _ _) (∑ᴹ {t} .hom-+ₘ _ _))
+            (+.inter _ _ _ _)
+    ∑ᴹ {s <+> t} .hom-*ₘ r v =
+      trans (+-mono (∑ᴹ {s} .hom-*ₘ _ _) (∑ᴹ {t} .hom-*ₘ _ _))
+            (distrib .proj₂ _ _ _)
+
+  -- module _ where
+  -- ∑ : ∀ {s} → Vector Carrier s → Carrier
 
   module _ {cr ℓr cs ℓs} {R : SkewSemiring cr ℓr} {S : SkewSemiring cs ℓs}
            {f : SkewSemiringMor R S} where

@@ -6,7 +6,8 @@ open import Level using (0ℓ)
 module Specific2.Syntax.Traversal
   {Dom Cod : SkewSemiring 0ℓ 0ℓ} (f : SkewSemiringMor Dom Cod) where
 
-  open module f = SkewSemiringMor f
+  private
+    open module f = SkewSemiringMor f
   import Specific2.Syntax.Prelude as Pre
   open import Specific2.Syntax as Syn
     using (tι; tI; t⊤; t0; _t⊸_; _t⊗_; _t⊕_; _t&_; t!
@@ -39,8 +40,6 @@ module Specific2.Syntax.Traversal
   private
     variable
       s t u : LTree
-      -- A B C : Ty
-      -- PΓ QΔ RΘ : Ctx
       T : Cod.Ctx → Cod.Ty → Set
       M : LinMap f t s
 
