@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Skew
-open import Level using (0ℓ)
+open import Level using (0ℓ; _⊔_)
 
 module Specific2.Syntax.Traversal
   {Dom Cod : SkewSemiring 0ℓ 0ℓ} (f : SkewSemiringMor Dom Cod) where
@@ -14,7 +14,7 @@ module Specific2.Syntax.Traversal
           ; ivar; ivar!; lvar; lvar!
           ; var; app; lam; unm; uni; prm; ten
           ; exf; cse; inl; inr; top; prl; prr; wth; bam; bng)
-  open import Generic.Linear.Syntax as Gen using (ctx)
+  open import Generic.Linear.Syntax as Gen using (ctx; sctx)
 
   open import Algebra.Skew.Construct.Vector
   open import Data.Bool.Base using (Bool; true; false; if_then_else_)
@@ -22,7 +22,9 @@ module Specific2.Syntax.Traversal
   open import Data.LTree.Vector
   open import Data.LTree.Matrix using (lift₁ᴹ; Lift₂ᴹ; get)
   open import Data.Product
+  open import Data.Product.Relation.Binary.Pointwise.NonDependent
   open import Function.Base
+  open import Relation.Binary using (REL)
   open import Relation.Binary.PropositionalEquality
   open import Relation.Nullary using (Dec; does; proof)
 
@@ -43,33 +45,140 @@ module Specific2.Syntax.Traversal
       T : Cod.Ctx → Cod.Ty → Set
       M : LinMap f t s
 
+  infix 4 _Ty↦_
+
+  record MapsTo (A B : Set) : Set₁ where
+    constructor mk
+    infix 4 _↦_
+    field
+      _↦_ : REL A B 0ℓ
+
+  record TotalMapsTo {A B : Set} (mt : MapsTo A B) : Set where
+    constructor mk
+    open MapsTo mt
+    field
+      total : ∀ a → ∃ \ b → a ↦ b
+
+  record FunctionalMapsTo {A B : Set} (mt : MapsTo A B) : Set where
+    constructor mk
+    open MapsTo mt
+    field
+      func : ∀ a → ∃! _≡_ \ b → a ↦ b
+
+  open MapsTo {{...}} public
+  open TotalMapsTo {{...}} public
+  open FunctionalMapsTo {{...}} public
+
+  instance
+    AnnMapsTo : MapsTo Dom.Ann Cod.Ann
+    AnnMapsTo ._↦_ r s = apply r ≡ s
+
+    AnnTotal : TotalMapsTo AnnMapsTo
+    AnnTotal .total r = apply r , refl
+
+    AnnFunctional : FunctionalMapsTo AnnMapsTo
+    AnnFunctional .func r = apply r , refl , id
+
+    ×MapsTo : ∀ {A A′ B B′ : Set} →
+              {{MapsTo A A′}} → {{MapsTo B B′}} → MapsTo (A × B) (A′ × B′)
+    ×MapsTo {{mk R}} {{mk S}} = mk (λ (x , y) (x′ , y′) → R x x′ × S y y′)
+
+    ×Total : ∀ {A A′ B B′ : Set} {{ma : MapsTo A A′}} {{mb : MapsTo B B′}} →
+             {{TotalMapsTo ma}} → {{TotalMapsTo mb}} →
+             TotalMapsTo (×MapsTo {{ma}} {{mb}})
+    ×Total {{ma}} {{mb}} {{mk ta}} {{mk tb}} =
+      mk λ (x , x′) → let y , p = ta x; y′ , p′ = tb x′ in
+                      (y , y′) , (p , p′)
+
+    ×Functional : ∀ {A A′ B B′ : Set}
+                    {{ma : MapsTo A A′}} {{mb : MapsTo B B′}} →
+                  {{FunctionalMapsTo ma}} → {{FunctionalMapsTo mb}} →
+                  FunctionalMapsTo (×MapsTo {{ma}} {{mb}})
+    ×Functional {{ma}} {{mb}} {{mk fa}} {{mk fb}} = mk λ (x , x′) →
+      let y , e , u = fa x; y′ , e′ , u′ = fb x′ in
+      (y , y′) , (e , e′) , (λ (m , m′) → cong₂ _,_ (u m) (u′ m′))
+
+  data _Ty↦_ : REL Dom.Ty Cod.Ty 0ℓ
+
+  instance
+    TyMapsTo : MapsTo Dom.Ty Cod.Ty
+    TyMapsTo ._↦_ = _Ty↦_
+
+  data _Ty↦_ where
+    tι : tι Ty↦ tι
+    tI : tI Ty↦ tI
+    t0 : t0 Ty↦ t0
+    t⊤ : t⊤ Ty↦ t⊤
+    _t⊸_ : ∀ {rA rA′ B B′} → rA ↦ rA′ → B ↦ B′ → rA t⊸ B Ty↦ rA′ t⊸ B′
+    _t⊗_ : ∀ {pA pA′ qB qB′} → pA ↦ pA′ → qB ↦ qB′ → pA t⊗ qB Ty↦ pA′ t⊗ qB′
+    _t⊕_ : ∀ {pA pA′ qB qB′} → pA ↦ pA′ → qB ↦ qB′ → pA t⊕ qB Ty↦ pA′ t⊕ qB′
+    _t&_ : ∀ {A A′ B B′} → A ↦ A′ → B ↦ B′ → A t& B Ty↦ A′ t& B′
+    t! : ∀ {rA rA′} → rA ↦ rA′ → t! rA Ty↦ t! rA′
+
+  instance
+    TyTotal : TotalMapsTo TyMapsTo
+    TyTotal = mk go
+      where
+      go : ∀ A → ∃ \ A′ → A Ty↦ A′
+      go× : ∀ rA → ∃ \ rA′ → let mk _↦_ = ×MapsTo {{AnnMapsTo}} {{TyMapsTo}} in
+                             rA ↦ rA′
+
+      go tι = tι , tι
+      go tI = tI , tI
+      go t⊤ = t⊤ , t⊤
+      go t0 = t0 , t0
+      go (rA t⊸ B) = zip _t⊸_ _t⊸_ (go× rA) (go B)
+      go (pA t⊗ qB) = zip _t⊗_ _t⊗_ (go× pA) (go× qB)
+      go (pA t⊕ qB) = zip _t⊕_ _t⊕_ (go× pA) (go× qB)
+      go (A t& B) = zip _t&_ _t&_ (go A) (go B)
+      go (t! rA) = map t! t! (go× rA)
+
+      go× (r , A) = let r′ , rp = total r; A′ , Ap = go A in
+                    (r′ , A′) , (rp , Ap)
+
+  instance
+    VectorMapsTo : ∀ {A B s} → {{MapsTo A B}} →
+                   MapsTo (Vector A s) (Vector B s)
+    VectorMapsTo ._↦_ = Lift₂ _↦_
+
+    VectorTotal : ∀ {A B s} {{mt : MapsTo A B}} → {{TotalMapsTo mt}} →
+                  TotalMapsTo (VectorMapsTo {A} {B} {s} {{mt}})
+    VectorTotal .total v =
+      (λ i → total (v i) .proj₁) , (mk λ i → total (v i) .proj₂)
+
+    VectorFunctional :
+      ∀ {A B s} {{mt : MapsTo A B}} → {{FunctionalMapsTo mt}} →
+      FunctionalMapsTo (VectorMapsTo {A} {B} {s} {{mt}})
+    VectorFunctional .func v =
+      (λ i → func (v i) .proj₁) , (mk λ i → func (v i) .proj₂ .proj₁)
+        , {!λ vv → ?!}
+
+    SizedCtxMapsTo : ∀ {s} → MapsTo (Dom.SizedCtx s) (Cod.SizedCtx s)
+    SizedCtxMapsTo ._↦_ (sctx P Γ) (sctx Q Δ) = P ↦ Q × Γ ↦ Δ
+
+    SizedCtxTotal : ∀ {s} → TotalMapsTo (SizedCtxMapsTo {s})
+    SizedCtxTotal .total (sctx P Γ) = zip sctx _,_ (total P) (total Γ)
+
+    CtxMapsTo : MapsTo Dom.Ctx Cod.Ctx
+    CtxMapsTo ._↦_ (ctx {s} P Γ) (ctx {t} Q Δ) =
+      Σ (s ≡ t) \ { refl → sctx P Γ ↦ sctx Q Δ }
+
+    CtxTotal : TotalMapsTo CtxMapsTo
+    CtxTotal .total (ctx {s} P Γ) =
+      let PΓ′ , PΓp = total (sctx P Γ) in
+      Cod.sctx→ctx PΓ′ , (refl , PΓp)
+
   hom-⟨_∣ : ∀ {s} (i : Ptr s) → lift₁ apply Dom.⟨ i ∣ Cod.⊴* Cod.⟨ i ∣
   hom-⟨ i ∣ .get j with does (i ≟ j)
   ... | false = hom-0#
   ... | true = hom-1#
 
-  hom-ty : Dom.Ty → Cod.Ty
-  hom-ann×ty : Dom.Ann × Dom.Ty → Cod.Ann × Cod.Ty
-  hom-ty tι = tι
-  hom-ty tI = tI
-  hom-ty t⊤ = t⊤
-  hom-ty t0 = t0
-  hom-ty (rA t⊸ B) = hom-ann×ty rA t⊸ hom-ty B
-  hom-ty (pA t⊗ qB) = hom-ann×ty pA t⊗ hom-ann×ty qB
-  hom-ty (pA t⊕ qB) = hom-ann×ty pA t⊕ hom-ann×ty qB
-  hom-ty (A t& B) = hom-ty A t& hom-ty B
-  hom-ty (t! rA) = t! (hom-ann×ty rA)
-  hom-ann×ty (r , A) = apply r , hom-ty A
-
-  hom-ctx : Dom.Ctx → Cod.Ctx
-  hom-ctx (ctx R Γ) = ctx (lift₁ apply R) (lift₁ hom-ty Γ)
-
   record Env (T : Cod.Ctx → Cod.Ty → Set) (M : LinMap f t s)
          (Γ : Vector Cod.Ty s) (Δ : Vector Dom.Ty t) : Set where
     open SkewLeftSemimoduleMor M using () renaming (apply to _$M)
     open Dom.IVar
-    field act : ∀ {A} →
-            (j : Dom.IVar Δ A) → T (ctx (Dom.1ᴹ (j .idx) $M) Γ) (hom-ty A)
+    field act : ∀ {A A′} → A ↦ A′ →
+            (j : Dom.IVar Δ A) → T (ctx (Dom.1ᴹ (j .idx) $M) Γ) A′
   open Env public
 
   record Compat (M : LinMap f t s) P Q : Set where
@@ -92,6 +201,7 @@ module Specific2.Syntax.Traversal
   private
     variable
       r : Dom.Ann
+      r′ : Cod.Ann
       P P′ Pl Pr : Vector Cod.Ann s
       Q Q′ Ql Qr : Vector Dom.Ann t
       R : Vector _ u
@@ -120,10 +230,13 @@ module Specific2.Syntax.Traversal
   module _ {M : LinMap f t s} where
     open SkewLeftSemimoduleMor M
       renaming (apply to infixl 8 _$M; hom-mono to M-mono)
+    open Cod
+    open SkewLeftSemimodule (Vector-skewLeftSemimodule Cod s)
 
     obv : ∀ {Q} → Compat M (Q $M) Q
     obv = mk Cod.⊴*-refl
 
+    {-
     fixup-0 : Compat M P Q → Q Dom.⊴* Dom.0* → P Cod.⊴* Cod.0*
     fixup-0 (mk com) sp = Cod.⊴*-trans com (Cod.⊴*-trans (M-mono sp) hom-0ₘ)
 
@@ -131,11 +244,12 @@ module Specific2.Syntax.Traversal
               P Cod.⊴* Ql $M Cod.+* Qr $M
     fixup-+ (mk com) sp =
       Cod.⊴*-trans com (Cod.⊴*-trans (M-mono sp) (hom-+ₘ _ _))
+    -}
 
-    fixup-* : Compat M P Q → Q Dom.⊴* r Dom.*ₗ Q′ →
-              P Cod.⊴* apply r Cod.*ₗ Q′ $M
-    fixup-* (mk com) sp =
-      Cod.⊴*-trans com (Cod.⊴*-trans (M-mono sp) (hom-*ₘ _ _))
+    fixup-* : Compat M P Q → r ↦ r′ → Q Dom.⊴* r Dom.*ₗ Q′ →
+              P Cod.⊴* r′ Cod.*ₗ Q′ $M
+    fixup-* (mk com) refl sp =
+      ⊴*-trans com (⊴*-trans (M-mono sp) (hom-*ₘ _ _))
 
   module _ where
     open SkewLeftSemimoduleMor
@@ -151,11 +265,53 @@ module Specific2.Syntax.Traversal
     bindMap M .hom-*ₘ r v =
       M .hom-*ₘ r (v ∘ ↙) ++₂ mk λ k → hom-* r (v (↘ k))
 
-  bindCompat : (∀ k → fR k ≡ apply (R k)) →
-               Compat M P Q → Compat (bindMap M) (P ++ fR) (Q ++ R)
-  bindCompat q com .get =
-    com .get ++₂ mk λ k → subst (_ Cod.⊴_) (q k) Cod.⊴-refl
+  bindCompat : R ↦ fR → Compat M P Q → Compat (bindMap M) (P ++ fR) (Q ++ R)
+  bindCompat RR com .get =
+    com .get ++₂ mk λ k → subst (Cod._⊴ _) (RR .get k) Cod.⊴-refl
 
+  module _ (K : Kit T) where
+    open Kit K
+
+    private
+      variable
+        A : Dom.Ty
+        A′ : Cod.Ty
+
+    open SkewLeftSemimoduleMor
+
+    module _ {M : LinMap f t s} where
+
+      bindEnv : Θ ↦ fΘ → Env T M Γ Δ → Env T (bindMap M) (Γ ++ fΘ) (Δ ++ Θ)
+      bindEnv ΘΘ ρ .act AA (ivar! (↙ j)) = psh
+        (Cod.⊴*-refl ++₂ mk λ k → hom-0#)
+        (wk (ρ .act AA (ivar! j)))
+      bindEnv ΘΘ ρ .act AA (ivar! (↘ k)) =
+        vr (lvar (↘ k) {!ΘΘ .get k!} (M .hom-0ₘ ++₂ hom-⟨ k ∣))
+        -- vr (lvar (↘ k) (q k) (M .hom-0ₘ ++₂ hom-⟨ k ∣))
+
+    trav : Env T M Γ Δ → Compat M P Q → A ↦ A′ →
+           Dom.Tm (ctx Q Δ) A → Cod.Tm (ctx P Γ) A′
+    trav ρ com AA (var x) = {!!}
+    trav ρ com AA (app s t sp) = {!!}
+    trav {M = M} ρ com ((rr , AA) t⊸ BB) (lam s) =
+      lam (trav (bindEnv {M = M} [ AA ]₂ ρ) (bindCompat [ rr ]₂ com) BB s)
+    trav ρ com AA (unm s t sp) = {!!}
+    trav ρ com AA (uni sp) = {!!}
+    trav ρ com AA (prm s t sp) = {!!}
+    trav ρ com AA (ten s t sp) = {!!}
+    trav ρ com AA (exf s sp) = {!!}
+    trav ρ com AA (cse s t u sp) = {!!}
+    trav {M = M} ρ com ((pp , AA) t⊕ _) (inl s sp) =
+      inl (trav ρ (obv {M = M}) AA s) (fixup-* com pp sp)
+    trav ρ com AA (inr s sp) = {!!}
+    trav ρ com t⊤ top = top
+    trav ρ com AA (prl s) = prl (trav ρ com (AA t& total _ .proj₂) s)
+    trav ρ com AA (prr s) = {!!}
+    trav ρ com (AA t& BB) (wth s t) = wth (trav ρ com AA s) (trav ρ com BB t)
+    trav ρ com AA (bam s t sp) = {!!}
+    trav ρ com AA (bng s sp) = {!!}
+
+  {-
   module _ (K : Kit T) where
     open Kit K
 
@@ -164,16 +320,6 @@ module Specific2.Syntax.Traversal
         A : Dom.Ty
 
     open SkewLeftSemimoduleMor
-
-    module _ {M : LinMap f t s} where
-
-      bindEnv : (∀ k → fΘ k ≡ hom-ty (Θ k)) →
-                Env T M Γ Δ → Env T (bindMap M) (Γ ++ fΘ) (Δ ++ Θ)
-      bindEnv q ρ .act (ivar! (↙ j)) = psh
-        (Cod.⊴*-refl ++₂ mk λ k → hom-0#)
-        (wk (ρ .act (ivar! j)))
-      bindEnv q ρ .act (ivar! (↘ k)) =
-        vr (lvar (↘ k) (q k) (M .hom-0ₘ ++₂ hom-⟨ k ∣))
 
     trav : Env T M Γ Δ → Compat M P Q →
            Dom.Tm (ctx Q Δ) A → Cod.Tm (ctx P Γ) (hom-ty A)
@@ -215,3 +361,4 @@ module Specific2.Syntax.Traversal
           (trav (bindEnv (λ- refl) ρ) (bindCompat {M = M} (λ- refl) obv) t)
           (fixup-+ com sp)
     trav ρ com (bng s sp) = bng (trav ρ obv s) (fixup-* com sp)
+  -}

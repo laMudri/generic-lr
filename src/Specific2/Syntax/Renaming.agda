@@ -44,11 +44,6 @@ module Specific2.Syntax.Renaming
       open SumLinear 0# _+_ (flip _⊴_) 0# _+_ ⊴-refl (flip ⊴-trans) +-mono
         public
 
-  -- private
-  --   variable
-  --     A B C : Ty
-  --     PΓ QΔ RΘ : Ctx
-
   record Ren (PΓ : Cod.Ctx) (QΔ : Dom.Ctx) : Set where
     private
       s = PΓ .shape ; P = PΓ .use-ctx ; Γ = PΓ .ty-ctx
