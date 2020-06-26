@@ -228,3 +228,21 @@ module Algebra.Skew.Construct.Vector where
     [ M │ N ] .hom-0ₘ = M .hom-0ₘ ++₂ N .hom-0ₘ
     [ M │ N ] .hom-+ₘ u v = M .hom-+ₘ u v ++₂ N .hom-+ₘ u v
     [ M │ N ] .hom-*ₘ r u = M .hom-*ₘ r u ++₂ N .hom-*ₘ r u
+
+  module _ where
+    open ProsetMor
+
+    id-ProsetMor : ∀ {c ℓ P} → ProsetMor {c} {ℓ} P P
+    id-ProsetMor .apply = id
+    id-ProsetMor .hom-mono = id
+
+  module _ {c ℓ} {R : SkewSemiring c ℓ} where
+    open SkewSemiring R
+    open SkewSemiringMor
+
+    id-SkewSemiringMor : SkewSemiringMor R R
+    id-SkewSemiringMor .prosetMor = id-ProsetMor
+    id-SkewSemiringMor .hom-0# = refl
+    id-SkewSemiringMor .hom-+ _ _ = refl
+    id-SkewSemiringMor .hom-1# = refl
+    id-SkewSemiringMor .hom-* _ _ = refl
