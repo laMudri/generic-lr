@@ -9,7 +9,7 @@ module Specific2.Syntax.Traversal.IdHom (algebra : SkewSemiring 0ℓ 0ℓ) where
   open import Specific2.Syntax Ann _⊴_ 0# _+_ 1# _*_
   open import Algebra.Skew.Construct.Vector
   open import Specific2.Syntax.Traversal {algebra} id-SkewSemiringMor
-  open import Generic.Linear.Syntax
+  open import Generic.Linear.Syntax Ty Ann
 
   open import Data.LTree
   open import Data.LTree.Vector
@@ -39,9 +39,25 @@ module Specific2.Syntax.Traversal.IdHom (algebra : SkewSemiring 0ℓ 0ℓ) where
       go (A t& B) = cong₂ _t&_ (go A) (go B)
       go (t! (r , A)) = cong t! (cong (r ,_) (go A))
 
+  LinMap′ : (s t : LTree) → Set
+  LinMap′ = LinMap (id-SkewSemiringMor {R = algebra})
+
+  record Env′ {s t} (T : Ctx → Ty → Set) (M : LinMap′ t s)
+              (Γ : Vector Ty s) (Δ : Vector Ty t) : Set where
+    open SkewLeftSemimoduleMor M using () renaming (apply to _$M)
+    open IVar
+    field act : ∀ {A} → (j : IVar Δ A) → T (ctx (⟨ j .idx ∣ $M) Γ) A
+  open Env′ public
+
+  Env′⇒Env : ∀ {s t T} {M : LinMap′ t s} {Γ Δ} → Env′ T M Γ Δ → Env T M Γ Δ
+  Env′⇒Env {T = T} ρ .act j = subst (T _) (sym hom-id) (ρ .act j)
+
+  Env⇒Env′ : ∀ {s t T} {M : LinMap′ t s} {Γ Δ} → Env T M Γ Δ → Env′ T M Γ Δ
+  Env⇒Env′ {T = T} ρ .act j = subst (T _) hom-id (ρ .act j)
+
   module _ {T} (K : Kit T) where
     trav′ : ∀ {s t} {Γ : Vector Ty  s} {Δ : Vector Ty  t}
                     {P : Vector Ann s} {Q : Vector Ann t}
             {M : LinMap id-SkewSemiringMor t s} {A} →
-            Env T M Γ Δ → Compat M P Q → Tm (ctx Q Δ) A → Tm (ctx P Γ) A
-    trav′ ρ com M = subst (Tm _) hom-id (trav K ρ com M)
+            Env′ T M Γ Δ → Compat M P Q → Tm (ctx Q Δ) A → Tm (ctx P Γ) A
+    trav′ ρ com M = subst (Tm _) hom-id (trav K (Env′⇒Env ρ) com M)

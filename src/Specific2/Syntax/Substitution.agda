@@ -15,13 +15,14 @@ module Specific2.Syntax.Substitution
   open import Generic.Linear.Syntax as Gen using (ctx)
 
   open import Specific2.Syntax.Traversal f
-  open import Specific2.Syntax.Renaming
+  open import Specific2.Syntax.Renaming.IdHom Cod
+  open import Specific2.Syntax.Subuse Cod
 
   open import Algebra.Skew.Construct.Vector
   open import Data.LTree
   open import Data.LTree.Vector using (Vector; mk; get; _++₂_; module Sum)
   open import Data.LTree.Vector.Properties
-  open import Data.LTree.Matrix using (unrow; row)
+  open import Data.LTree.Matrix using (unrow; row; unrowL₂)
   open import Data.Product
   open import Function.Base
   open import Relation.Binary.PropositionalEquality
@@ -29,13 +30,13 @@ module Specific2.Syntax.Substitution
   private
     module Dom where
       open Pre Dom public
-      open Syn Ann _⊴_ 0# _+_ 1# _*_ public
-      open Gen Ty Ann public hiding (ctx→sctx)
+      open Syn Ann _⊴_ 0# _+_ 1# _*_ public hiding (ivar)
+      open Gen Ty Ann public hiding (ctx; ctx→sctx)
 
     module Cod where
       open Pre Cod public
-      open Syn Ann _⊴_ 0# _+_ 1# _*_ public
-      open Gen Ty Ann public hiding (ctx→sctx)
+      open Syn Ann _⊴_ 0# _+_ 1# _*_ public hiding (ivar)
+      open Gen Ty Ann public hiding (ctx; ctx→sctx)
       open Sum 0# _+_ public
       open SumCong _⊴_ 0# _+_ ⊴-refl +-mono public renaming (∑-cong to ∑-mono)
       open Sum0 _⊴_ 0# _+_ ⊴-trans ⊴-refl +-mono (+.identity-→ .proj₁ 0#)
@@ -52,15 +53,16 @@ module Specific2.Syntax.Substitution
       t : LTree
       Θ : Vector _ t
 
-  {-
-  weakenRen : Ren (PΓ ++ᶜ ctx (λ _ → 0#) Θ) PΓ
-  weakenRen .act (ivar i q) = ivar (↙ i) q
-  weakenRen {PΓ = ctx P Γ} .use-pres =
-    unrowL₂ (*ᴹ-1ᴹ _) ++₂ unrowL₂ (*ᴹ-0ᴹ (row P))
-  -}
+  module _ where
+    open Cod
+
+    weakenRen : ∀ {PΓ} → Ren′ (PΓ ++ᶜ ctx (λ _ → 0#) Θ) PΓ
+    weakenRen .act (ivar i q) = ivar (↙ i) q
+    weakenRen {PΓ = ctx P Γ} .use-pres =
+      unrowL₂ (*ᴹ-1ᴹ _) ++₂ unrowL₂ (*ᴹ-0ᴹ (row P))
 
   Tm-kit : Kit Cod.Tm
-  Tm-kit = record { psh = subuse ; vr = var ; tm = id ; wk = ren ? }
+  Tm-kit = record { psh = subuse ; vr = var ; tm = id ; wk = ren′ weakenRen }
 
-  sub : Sub PΓ QΔ → Tm QΔ A → Tm PΓ A
+  sub : ∀ {PΓ QΔ A} → Sub PΓ QΔ → Dom.Tm QΔ A → Cod.Tm PΓ (hom A)
   sub σ = travD Tm-kit σ

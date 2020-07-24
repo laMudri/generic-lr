@@ -95,7 +95,7 @@ module Specific2.Syntax.Traversal
     open SkewLeftSemimoduleMor M using () renaming (apply to _$M)
     open Dom.IVar
     field act : ∀ {A} → (j : Dom.IVar Δ A)
-                      → T (ctx (Dom.1ᴹ (j .idx) $M) Γ) (hom A)
+                      → T (ctx (Dom.⟨ j .idx ∣ $M) Γ) (hom A)
   open Env public
 
   record Compat (M : LinMap f t s) P Q : Set where
@@ -189,11 +189,6 @@ module Specific2.Syntax.Traversal
   module _ (K : Kit T) where
     open Kit K
 
-    private
-      variable
-        A : Dom.Ty
-        A′ : Cod.Ty
-
     open SkewLeftSemimoduleMor
 
     module _ {M : LinMap f t s} where
@@ -206,7 +201,7 @@ module Specific2.Syntax.Traversal
       bindEnv Θq ρ .act (ivar! (↘ k)) =
         vr (lvar (↘ k) (Θq .get k) (M .hom-0ₘ ++₂ hom-⟨ k ∣))
 
-    trav : Env T M Γ Δ → Compat M P Q →
+    trav : Env T M Γ Δ → Compat M P Q → ∀ {A} →
            Dom.Tm (ctx Q Δ) A → Cod.Tm (ctx P Γ) (hom A)
     trav {M = M} ρ (mk com) (var (lvar! j sp)) =
       tm (psh (Cod.⊴*-trans com (M .hom-mono sp)) (ρ .act (ivar! j)))
@@ -246,3 +241,7 @@ module Specific2.Syntax.Traversal
           (trav (bindEnv [ refl ]₂ ρ) (bindCompat {M = M} [ refl ]₂ obv) t)
           (fixup-+ com sp)
     trav ρ com (bng s sp) = bng (trav ρ obv s) (fixup-* com sp)
+
+    travD : ∀ {PΓ QΔ} → DeployedEnv T PΓ QΔ →
+            ∀ {A} → Dom.Tm QΔ A → Cod.Tm PΓ (hom A)
+    travD ρ = trav (ρ .env) (ρ .compat)
