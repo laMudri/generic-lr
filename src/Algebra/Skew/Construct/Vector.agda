@@ -236,13 +236,73 @@ module Algebra.Skew.Construct.Vector where
     id-ProsetMor .apply = id
     id-ProsetMor .hom-mono = id
 
+    >>-ProsetMor : ∀ {p pℓ q qℓ r rℓ P Q R} →
+                   ProsetMor P Q → ProsetMor {q} {qℓ} Q R →
+                   ProsetMor {p} {pℓ} {r} {rℓ} P R
+    >>-ProsetMor f g .apply = g .apply ∘ f .apply
+    >>-ProsetMor f g .hom-mono = g .hom-mono ∘ f .hom-mono
+
   module _ {c ℓ} {R : SkewSemiring c ℓ} where
-    open SkewSemiring R
+
+    module _ where
+      open SkewSemiringMor
+      open SkewSemiring R
+
+      id-SkewSemiringMor : SkewSemiringMor R R
+      id-SkewSemiringMor .prosetMor = id-ProsetMor
+      id-SkewSemiringMor .hom-0# = refl
+      id-SkewSemiringMor .hom-+ _ _ = refl
+      id-SkewSemiringMor .hom-1# = refl
+      id-SkewSemiringMor .hom-* _ _ = refl
+
+    module _ {m mℓ} {M : SkewLeftSemimodule R m mℓ} where
+      open SkewLeftSemimoduleMor
+      open SkewLeftSemimodule M
+
+      ──-SkewLeftSemimoduleMor :
+        SkewLeftSemimoduleMor id-SkewSemiringMor M M
+      ──-SkewLeftSemimoduleMor .prosetMor = id-ProsetMor
+      ──-SkewLeftSemimoduleMor .hom-0ₘ = refl
+      ──-SkewLeftSemimoduleMor .hom-+ₘ _ _ = refl
+      ──-SkewLeftSemimoduleMor .hom-*ₘ _ _ = refl
+
+  module _ {r rℓ s sℓ t tℓ} {R : SkewSemiring r rℓ}
+           {S : SkewSemiring s sℓ} {T : SkewSemiring t tℓ} where
+
     open SkewSemiringMor
 
-    id-SkewSemiringMor : SkewSemiringMor R R
-    id-SkewSemiringMor .prosetMor = id-ProsetMor
-    id-SkewSemiringMor .hom-0# = refl
-    id-SkewSemiringMor .hom-+ _ _ = refl
-    id-SkewSemiringMor .hom-1# = refl
-    id-SkewSemiringMor .hom-* _ _ = refl
+    module _ where
+      open SkewSemiring T
+
+      >>-SkewSemiringMor : SkewSemiringMor R S → SkewSemiringMor S T →
+                           SkewSemiringMor R T
+      >>-SkewSemiringMor f g .prosetMor =
+        >>-ProsetMor (f .prosetMor) (g .prosetMor)
+      >>-SkewSemiringMor f g .hom-0# =
+        trans (g .hom-mono (f .hom-0#)) (g .hom-0#)
+      >>-SkewSemiringMor f g .hom-+ _ _ =
+        trans (g .hom-mono (f .hom-+ _ _)) (g .hom-+ _ _)
+      >>-SkewSemiringMor f g .hom-1# =
+        trans (g .hom-mono (f .hom-1#)) (g .hom-1#)
+      >>-SkewSemiringMor f g .hom-* _ _ =
+        trans (g .hom-mono (f .hom-* _ _)) (g .hom-* _ _)
+
+    module _
+      {f : SkewSemiringMor R S} {g : SkewSemiringMor S T} {m mℓ n nℓ o oℓ}
+      {M : SkewLeftSemimodule R m mℓ} {N : SkewLeftSemimodule S n nℓ}
+      {O : SkewLeftSemimodule T o oℓ} where
+
+      open SkewLeftSemimoduleMor
+      open SkewLeftSemimodule O
+
+      vv-SkewLeftSemimoduleMor :
+        SkewLeftSemimoduleMor f M N → SkewLeftSemimoduleMor g N O →
+        SkewLeftSemimoduleMor (>>-SkewSemiringMor f g) M O
+      vv-SkewLeftSemimoduleMor F G .prosetMor =
+        >>-ProsetMor (F .prosetMor) (G .prosetMor)
+      vv-SkewLeftSemimoduleMor F G .hom-0ₘ =
+        trans (G .hom-mono (F .hom-0ₘ)) (G .hom-0ₘ)
+      vv-SkewLeftSemimoduleMor F G .hom-+ₘ _ _ =
+        trans (G .hom-mono (F .hom-+ₘ _ _)) (G .hom-+ₘ _ _)
+      vv-SkewLeftSemimoduleMor F G .hom-*ₘ _ _ =
+        trans (G .hom-mono (F .hom-*ₘ _ _)) (G .hom-*ₘ _ _)
