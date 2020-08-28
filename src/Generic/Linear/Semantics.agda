@@ -33,7 +33,7 @@ module Generic.Linear.Semantics
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Syntax.Interpretation.Map Ty {!!}
+  open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
   open import Generic.Linear.Syntax.Term Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_ hiding (var)
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
@@ -68,7 +68,7 @@ module Generic.Linear.Semantics
       A : Ty
 
   Kripke : (𝓥 𝓒 : Scoped) (PΓ : Ctx) (A : Ty) → Ctx → Set
-  Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ⇒ 𝓒 A)
+  Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ 𝓒 A)
 
   record Semantics (d : System) (𝓥 𝓒 : Scoped) (𝓥-psh : IsPresheaf 𝓥)
                    : Set where
@@ -82,7 +82,7 @@ module Generic.Linear.Semantics
 
     semantics : ∀ {PΓ QΔ} → (PΓ ─Env) 𝓥 QΔ → (PΓ ─Comp) 𝓒 QΔ
     body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ {RΘ A} →
-           Scope (Tm d sz) record RΘ { R = 0* } A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
+           Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
     semantics ρ (`var v) =
       var (𝓥-psh (⊴*-trans (ρ .sums)
@@ -92,20 +92,23 @@ module Generic.Linear.Semantics
                  (ρ .lookup (plain-var v)))
     semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
       alg (map-s {_} {_} {Γ} {Δ}
-                 (record
-                   { prosetRel = record
-                     { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
-                     ; rel-mono = {!!}
-                     }
-                   ; rel-0ₘ = {!!}
-                   ; rel-+ₘ = {!!}
-                   ; rel-*ₘ = {!Kripke 𝓥 𝓒!} })
-                 {X = Scope (Tm d sz)} {Kripke 𝓥 𝓒}
-                 d
-                 (λ {RΘ} {A} r x → body {ctx {!!} Γ} {ctx {!!} Δ} {sz = sz} {!ρ!} {{!!}} {A} x {!!})
-                 {_} {P} {Q}
-                 (ρ .sums)
+                 linRel {Scope (Tm d sz)} {Kripke 𝓥 𝓒} d
+                 (λ {RΘ} {A} {P′} {Q′} r →
+                   body {ctx P′ Γ} {ctx Q′ Δ} {sz} (pack (ρ .M) r (ρ .lookup)))
+                 {_} {P} {Q} (ρ .sums)
                  t)
-      -- alg (map-s d (body {sz = sz} {!ρ!}) {!t!})
+      where
+      linRel : LinRel skewSemiring _ _
+      linRel = record
+        { prosetRel = record
+          { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
+          ; rel-mono = {!!}
+          }
+        ; rel-0ₘ = {!!}
+        ; rel-+ₘ = {!!}
+        ; rel-*ₘ = {!!}
+        }
 
-    body ρ t {QΔ′} th σ = semantics (let foo = th^Env th^𝓥 ρ th in {!σ!}) t
+    body ρ t {QΔ′} th .app✴ r σ =
+      let ρ′ = th^Env th^𝓥 ρ th in
+      semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) t
