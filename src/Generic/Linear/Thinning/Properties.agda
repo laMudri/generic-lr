@@ -1,39 +1,16 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Algebra.Core
-import Algebra.Definitions as Defs
+open import Algebra.Skew
 open import Function.Base using (flip; _∘_)
 open import Level using (0ℓ)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Thinning.Properties
-  (Ty Ann : Set) (_⊴_ : Rel Ann 0ℓ)
-  (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
-  (let module ⊴ = Defs _⊴_)
-  (let module ⊵ = Defs (flip _⊴_))
-  (open ⊴ using (Congruent₂; Interchangable))
-  -- ⊴:
-  (⊴-refl : Reflexive _⊴_)
-  (⊴-trans : Transitive _⊴_)
-  -- +:
-  (+-mono : Congruent₂ _+_)
-  (+-identity-→ : ⊴.Identity 0# _+_)
-  (+-identity-← : ⊵.Identity 0# _+_)
-  (+-interchange : Interchangable _+_ _+_)
-  -- ↑ Note: interchange + identity gives rise to assoc and comm.
-  -- *:
-  (*-mono : Congruent₂ _*_)
-  (*-identityˡ-→ : ⊴.LeftIdentity 1# _*_)
-  (*-identityʳ-← : ⊵.RightIdentity 1# _*_)
-  (*-assoc-→ : ⊴.Associative _*_)
-  -- both:
-  (zeroˡ-→ : ∀ a → (0# * a) ⊴ 0#)
-  (distribˡ-→ : ∀ a b c → ((a + b) * c) ⊴ ((a * c) + (b * c)))
-  (zeroʳ-← : ∀ a → 0# ⊴ (a * 0#))
-  (distribʳ-← : ∀ a b c → ((a * b) + (a * c)) ⊴ (a * (b + c)))
-  -- ↑ Note: stdlib (and common mathematical) names for left/right
-  -- distributivity are the wrong way round. I fix this.
+  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
   where
+
+  open SkewSemiring skewSemiring
+    renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
 
   open import Data.Product
   open import Data.Sum
@@ -98,16 +75,18 @@ module Generic.Linear.Thinning.Properties
 
   open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono +-identity-→ *-identityˡ-→ zeroˡ-→
+                 +-mono (+.identity-→ .proj₁ , +.identity-← .proj₂)
+                 (*.identity .proj₁) (annihil .proj₁)
   open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono +-identity-← *-identityʳ-← zeroʳ-←
+                 +-mono (+.identity-← .proj₁ , +.identity-→ .proj₂)
+                 (*.identity .proj₂) (annihil .proj₂)
   open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-                +-mono (+-identity-→ .proj₁ 0#) (+-identity-← .proj₂ 0#)
-                +-interchange *-assoc-→
-                zeroˡ-→ (λ a b c → distribˡ-→ b c a)
-                zeroʳ-← distribʳ-←
+                +-mono (+.identity-→ .proj₁ 0#) (+.identity-← .proj₁ 0#)
+                +.inter *.assoc
+                (annihil .proj₁) (λ a b c → distrib .proj₁ b c a)
+                (annihil .proj₂) (distrib .proj₂)
   open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                +-mono (+-identity-← .proj₂ 0#) zeroʳ-←
+                +-mono (+.identity-← .proj₁ 0#) (annihil .proj₂)
 
   identity : Thinning PΓ PΓ
   M identity = 1ᴹ

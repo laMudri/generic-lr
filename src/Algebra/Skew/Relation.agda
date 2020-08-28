@@ -8,6 +8,7 @@ module Algebra.Skew.Relation where
   open import Level
   open import Relation.Binary using (REL; _⇒_)
 
+  -- NOTE: not actually used, at least for syntax `map`s.
   record ProsetRel {p pℓ q qℓ} (P : Proset p pℓ) (Q : Proset q qℓ) r
                    : Set (p ⊔ pℓ ⊔ q ⊔ qℓ ⊔ suc r) where
     private
@@ -89,9 +90,7 @@ module Algebra.Skew.Relation where
       : Set (c ⊔ cm ⊔ cn ⊔ ℓm ⊔ ℓn ⊔ suc r)
       where
       field
-        prosetRel : ProsetRel M.proset N.proset r
-      open ProsetRel prosetRel public
-      field
+        rel : REL M.Carrierₘ N.Carrierₘ r
         rel-0ₘ : 0ThenRel rel ⇒ λ _ z → z N.≤ₘ N.0ₘ
         rel-+ₘ : +ThenRel rel ⇒ RelThen+ rel
         rel-*ₘ : *ThenRel rel ⇒ RelThen* rel

@@ -1,6 +1,5 @@
 {-# OPTIONS --safe --sized-types --without-K #-}
 
-open import Algebra.Core
 open import Algebra.Skew
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
@@ -15,11 +14,13 @@ module Generic.Linear.Semantics
              ; refl to ⊴-refl; trans to ⊴-trans
              )
 
+  open import Algebra.Skew.Relation
   open import Data.LTree
   open import Data.LTree.Vector
   0* = lift₀ 0#
   open import Data.LTree.Matrix
   open import Data.LTree.Matrix.Properties
+  open import Data.Product
   open import Size
   open import Relation.Unary
 
@@ -27,9 +28,17 @@ module Generic.Linear.Semantics
   open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
   open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
   open Mult 0# _+_ _*_
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ {!!} {!!} {!!}
-  -- open MultIdent 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
+  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
+    renaming (*ᴹ-cong to *ᴹ-mono)
+  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
+                 (+.identity-→ .proj₁ , +.identity-← .proj₂)
+                 (*.identity .proj₁) (annihil .proj₁)
+  open ZeroMult 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
+                (+.identity-→ .proj₁ 0#) (annihil .proj₁)
+  open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
+                (+.identity-← .proj₁ 0#) +.inter (distrib .proj₁)
+  open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans +-mono
+                     (annihil .proj₂) (distrib .proj₂) *.assoc
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
@@ -38,30 +47,8 @@ module Generic.Linear.Semantics
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_ hiding (var)
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
   open _─Env
-  open import Generic.Linear.Thinning.Properties Ty Ann _⊴_ 0# _+_ 1# _*_
-    {!!}  -- ⊴-refl
-    {!!}  -- ⊴-trans
-    {!!}  -- +-mono
-    {!!}  -- +-identity-→
-    {!!}  -- +-identity-←
-    {!!}  -- +-interchange
-    {!!}  -- *-mono
-    {!!}  -- *-identityˡ-→
-    {!!}  -- *-identityʳ-←
-    {!!}  -- *-assoc-→
-    {!!}  -- zeroˡ-→
-    {!!}  -- distribˡ-→
-    {!!}  -- zeroʳ-←
-    {!!}  -- distribʳ-←
-  open import Generic.Linear.Environment.Properties
-    Ty Ann _⊴_ 0# _+_ 1# _*_ ⊴-refl ⊴-trans
-    {!!} {!!}
-    {!!} {!!}
-    {!!}
-    {!!} {!!} {!!}
-    {!!} {!!}
-    {!!}
-    {!!}
+  open import Generic.Linear.Thinning.Properties Ty skewSemiring
+  open import Generic.Linear.Environment.Properties Ty skewSemiring
 
   private
     variable
@@ -86,13 +73,12 @@ module Generic.Linear.Semantics
 
     semantics ρ (`var v) =
       var (𝓥-psh (⊴*-trans (ρ .sums)
-                           (⊴*-trans (unrowL₂ (*ᴹ-cong (rowL₂ (v .basis))
+                           (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis))
                                                        ⊴ᴹ-refl))
                                      (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
                  (ρ .lookup (plain-var v)))
     semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
-      alg (map-s {_} {_} {Γ} {Δ}
-                 linRel {Scope (Tm d sz)} {Kripke 𝓥 𝓒} d
+      alg (map-s linRel {Scope (Tm d sz)} {Kripke 𝓥 𝓒} d
                  (λ {RΘ} {A} {P′} {Q′} r →
                    body {ctx P′ Γ} {ctx Q′ Δ} {sz} (pack (ρ .M) r (ρ .lookup)))
                  {_} {P} {Q} (ρ .sums)
@@ -100,13 +86,18 @@ module Generic.Linear.Semantics
       where
       linRel : LinRel skewSemiring _ _
       linRel = record
-        { prosetRel = record
-          { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
-          ; rel-mono = {!!}
-          }
-        ; rel-0ₘ = {!!}
-        ; rel-+ₘ = {!!}
-        ; rel-*ₘ = {!!}
+        { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
+        ; rel-0ₘ = λ (sp0 , is-rel) →
+          ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl)
+                                             (0ᴹ-*ᴹ (ρ .M))))
+        ; rel-+ₘ = λ (sp+ , is-rel) →
+          ⟨ ⊴*-refl , ⊴*-refl ⟩
+            ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl)
+                                               (+ᴹ-*ᴹ _ _ (ρ .M))))
+        ; rel-*ₘ = λ (sp* , is-rel) →
+          ⊴*-refl ,
+            ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp*) ⊴ᴹ-refl)
+                                               (*ₗ-*ᴹ _ _ (ρ .M))))
         }
 
     body ρ t {QΔ′} th .app✴ r σ =
