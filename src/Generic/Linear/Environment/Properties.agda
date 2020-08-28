@@ -34,7 +34,7 @@ module Generic.Linear.Environment.Properties
     *-* 0-* (λ z x y → +-* x y z) *-0 *-+
 
   open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Syntax Ty Ann
+  open import Generic.Linear.Syntax Ty Ann hiding ([_]ᶜ)
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_
   open _─Env

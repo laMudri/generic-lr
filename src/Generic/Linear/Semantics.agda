@@ -1,35 +1,39 @@
 {-# OPTIONS --safe --sized-types --without-K #-}
 
 open import Algebra.Core
+open import Algebra.Skew
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Semantics
-  (Ty Ann : Set) (_⊴_ : Rel Ann 0ℓ)
-  (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
-  -- (let module ⊴ = Defs _⊴_)
-  -- (let module ⊵ = Defs (flip _⊴_))
-  -- (open ⊴ using (Congruent₂; Interchangable))
-  -- ⊴:
-  (⊴-refl : Reflexive _⊴_)
-  (⊴-trans : Transitive _⊴_)
+  (Ty : Set) (skewSemiring : SkewSemiring lzero lzero)
   where
+
+  open SkewSemiring skewSemiring
+    renaming (Carrier to Ann
+             ; _≤_ to _⊴_
+             ; refl to ⊴-refl; trans to ⊴-trans
+             )
 
   open import Data.LTree
   open import Data.LTree.Vector
   0* = lift₀ 0#
   open import Data.LTree.Matrix
   open import Data.LTree.Matrix.Properties
+  open import Size
   open import Relation.Unary
 
+  _⊴*_ = Lift₂ _⊴_
   open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
   open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
+  open Mult 0# _+_ _*_
   open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ {!!} {!!} {!!}
   -- open MultIdent 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
   open IdentMult 0# 1# _⊴_ 0# _+_ _*_ {!!} {!!} {!!} {!!} {!!} {!!}
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Syntax.Interpretation.Map Ty {!!}
   open import Generic.Linear.Syntax.Term Ty Ann _⊴_ 0# _+_ 1# _*_
   open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_ hiding (var)
   open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
@@ -80,13 +84,28 @@ module Generic.Linear.Semantics
     body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ {RΘ A} →
            Scope (Tm d sz) record RΘ { R = 0* } A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
-    -- v .basis
     semantics ρ (`var v) =
       var (𝓥-psh (⊴*-trans (ρ .sums)
                            (⊴*-trans (unrowL₂ (*ᴹ-cong (rowL₂ (v .basis))
                                                        ⊴ᴹ-refl))
                                      (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
                  (ρ .lookup (plain-var v)))
-    semantics ρ (`con t) = alg (map-s d (body {!!}) {!t!})
+    semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
+      alg (map-s {_} {_} {Γ} {Δ}
+                 (record
+                   { prosetRel = record
+                     { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
+                     ; rel-mono = {!!}
+                     }
+                   ; rel-0ₘ = {!!}
+                   ; rel-+ₘ = {!!}
+                   ; rel-*ₘ = {!Kripke 𝓥 𝓒!} })
+                 {X = Scope (Tm d sz)} {Kripke 𝓥 𝓒}
+                 d
+                 (λ {RΘ} {A} r x → body {ctx {!!} Γ} {ctx {!!} Δ} {sz = sz} {!ρ!} {{!!}} {A} x {!!})
+                 {_} {P} {Q}
+                 (ρ .sums)
+                 t)
+      -- alg (map-s d (body {sz = sz} {!ρ!}) {!t!})
 
     body ρ t {QΔ′} th σ = semantics (let foo = th^Env th^𝓥 ρ th in {!σ!}) t

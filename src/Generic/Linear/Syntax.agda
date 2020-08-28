@@ -65,7 +65,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
     `⊤ `I : Premises
     _`∧_ _`*_ : (p q : Premises) → Premises
     _`·_ : (ρ : Ann) (p : Premises) → Premises
-    `□ : (p : Premises) → Premises
+    -- `□ : (p : Premises) → Premises
 
   record Rule : Set where
     constructor rule

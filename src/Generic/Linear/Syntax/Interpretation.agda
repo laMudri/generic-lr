@@ -11,7 +11,7 @@ module Generic.Linear.Syntax.Interpretation
   (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
   where
 
-  open import Data.Product
+  open import Data.Product as ×
   open import Data.Unit
   open import Function
   open import Relation.Binary.PropositionalEquality
@@ -61,8 +61,8 @@ module Generic.Linear.Syntax.Interpretation
     constructor □⟨_,_⟩_
     open Ctx RΓ
     field
-      split-0 : 0* ⊴* R
-      split-+ : R +* R ⊴* R
+      split-0 : R ⊴* 0*
+      split-+ : R ⊴* R +* R
       T-prf : T RΓ
 
   module WithScope (⟦_⊢_⟧ : Ctx → Scoped) where
@@ -70,11 +70,11 @@ module Generic.Linear.Syntax.Interpretation
     ⟦_⟧p′ : Premises → Ctx → Set
     ⟦ Γ `⊢ A ⟧p′ = ⟦ Γ ⊢ A ⟧
     ⟦ `⊤ ⟧p′ = U
-    ⟦ `I ⟧p′ (ctx R Γ) = 0* ⊴* R
+    ⟦ `I ⟧p′ (ctx R Γ) = R ⊴* 0*
     ⟦ p `∧ q ⟧p′ = ⟦ p ⟧p′ ∩ ⟦ q ⟧p′
     ⟦ p `* q ⟧p′ = ⟦ p ⟧p′ ✴ ⟦ q ⟧p′
     ⟦ ρ `· p ⟧p′ = ρ · ⟦ p ⟧p′
-    ⟦ `□ p ⟧p′ = Dup (⟦ p ⟧p′)
+    -- ⟦ `□ p ⟧p′ = Dup (⟦ p ⟧p′)
 
     ⟦_⟧r′ : Rule → Scoped
     ⟦ rule ps A′ ⟧r′ A = const (A′ ≡ A) ∩ ⟦ ps ⟧p′
@@ -91,6 +91,7 @@ module Generic.Linear.Syntax.Interpretation
   ⟦_⟧s : System → (Ctx → Scoped) → Scoped
   ⟦ s ⟧s Sc = let open WithScope Sc in ⟦ s ⟧s′
 
+  {-
   map-p : {X Y : Ctx → Scoped} (ps : Premises) →
           (∀ {PΓ A} → ∀[ X PΓ A ⇒ Y PΓ A ]) →
           ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
@@ -112,3 +113,4 @@ module Generic.Linear.Syntax.Interpretation
           (∀ {PΓ A} → ∀[ X PΓ A ⇒ Y PΓ A ]) →
           ∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ]
   map-s (system L rs) f (l , t) = l , (map-r (rs l) f t)
+  -}
