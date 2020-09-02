@@ -12,6 +12,28 @@ module Algebra.Skew where
   open import Relation.Binary.Core using (Rel; _Preserves_⟶_)
   open import Relation.Binary.Definitions
 
+  -- Structures without properties
+
+  record RawProset c ℓ : Set (suc (c ⊔ ℓ)) where
+    infix 4 _≤_
+    field
+      Carrier : Set c
+      _≤_ : Rel Carrier ℓ
+
+  record RawSkewSemiring c ℓ : Set (suc (c ⊔ ℓ)) where
+    infix 6 _+_
+    infix 7 _*_
+    field
+      rawProset : RawProset c ℓ
+    open RawProset rawProset public
+    field
+      0# : Carrier
+      _+_ : Op₂ Carrier
+      1# : Carrier
+      _*_ : Op₂ Carrier
+
+  -- Structures with properties
+
   record IsProset {c ℓ} {C : Set c} (≤ : Rel C ℓ) : Set (c ⊔ ℓ) where
     field
       refl : Reflexive ≤
@@ -24,6 +46,10 @@ module Algebra.Skew where
       _≤_ : Rel Carrier ℓ
       isProset : IsProset _≤_
     open IsProset isProset public
+
+    rawProset : RawProset c ℓ
+    rawProset .RawProset.Carrier = Carrier
+    rawProset .RawProset._≤_ = _≤_
 
   record ProsetMor {p pℓ q qℓ} (P : Proset p pℓ) (Q : Proset q qℓ)
                    : Set (p ⊔ pℓ ⊔ q ⊔ qℓ) where
@@ -183,6 +209,13 @@ module Algebra.Skew where
       skewMonoid = record
         { proset = proset; comp = mult; isSkewMonoid = *-isSkewMonoid }
       open SkewMonoid skewMonoid public
+
+    rawSkewSemiring : RawSkewSemiring c ℓ
+    rawSkewSemiring .RawSkewSemiring.rawProset = rawProset
+    rawSkewSemiring .RawSkewSemiring.0# = 0#
+    rawSkewSemiring .RawSkewSemiring._+_ = _+_
+    rawSkewSemiring .RawSkewSemiring.1# = 1#
+    rawSkewSemiring .RawSkewSemiring._*_ = _*_
 
   --
 

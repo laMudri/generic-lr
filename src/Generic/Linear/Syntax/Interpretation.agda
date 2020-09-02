@@ -1,15 +1,14 @@
 {-# OPTIONS --safe --without-K #-}
 
-open import Algebra
+open import Algebra.Skew
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary using (Rel)
 
-import Generic.Linear.Syntax as Syntax
-
 module Generic.Linear.Syntax.Interpretation
-  (Ty Ann : Set) (open Syntax Ty Ann) (_⊴_ : Rel Ann lzero)
-  (0# : Ann) (_+_ : Op₂ Ann) (1# : Ann) (_*_ : Op₂ Ann)
+  (Ty : Set) (rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ)
   where
+
+  open RawSkewSemiring rawSkewSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
   open import Data.Product as ×
   open import Data.Unit
@@ -20,7 +19,8 @@ module Generic.Linear.Syntax.Interpretation
   open import Data.LTree
   open import Data.LTree.Vector
 
-  open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Syntax Ty Ann
 
   infixr 8 _─✴_
   infixr 9 _✴_

@@ -17,35 +17,20 @@ module Generic.Linear.Semantics
   open import Algebra.Skew.Relation
   open import Data.LTree
   open import Data.LTree.Vector
-  0* = lift₀ 0#
   open import Data.LTree.Matrix
   open import Data.LTree.Matrix.Properties
   open import Data.Product
   open import Size
   open import Relation.Unary
 
-  _⊴*_ = Lift₂ _⊴_
-  open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
-  open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
-  open Mult 0# _+_ _*_
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    renaming (*ᴹ-cong to *ᴹ-mono)
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
-                 (+.identity-→ .proj₁ , +.identity-← .proj₂)
-                 (*.identity .proj₁) (annihil .proj₁)
-  open ZeroMult 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
-                (+.identity-→ .proj₁ 0#) (annihil .proj₁)
-  open PlusMult _+_ _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans +-mono
-                (+.identity-← .proj₁ 0#) +.inter (distrib .proj₁)
-  open LeftScaleMult _⊴_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans +-mono
-                     (annihil .proj₂) (distrib .proj₂) *.assoc
-
+  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Algebra skewSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
   open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
-  open import Generic.Linear.Syntax.Term Ty Ann _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_ hiding (var)
-  open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
+  open import Generic.Linear.Environment Ty rawSkewSemiring hiding (var)
+  open import Generic.Linear.Thinning Ty rawSkewSemiring
   open _─Env
   open import Generic.Linear.Thinning.Properties Ty skewSemiring
   open import Generic.Linear.Environment.Properties Ty skewSemiring

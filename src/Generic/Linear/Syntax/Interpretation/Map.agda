@@ -16,7 +16,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open SkewSemiring skewSemiring renaming (Carrier to Ann)
 
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty Ann _≤_ 0# _+_ 1# _*_
+  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
 
   LinRel : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
   LinRel R s t = SkewLeftSemimoduleRel

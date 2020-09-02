@@ -21,34 +21,13 @@ module Generic.Linear.Environment.Properties
   open import Relation.Unary
   open import Relation.Binary.PropositionalEquality
 
-  open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
-  open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
-  open Mult 0# _+_ _*_
-  open Cong2 _⊴_ +-mono public renaming (cong₂ to +*-mono)
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-    renaming (*ᴹ-cong to *ᴹ-mono)
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono (+.identity-→ .proj₁ , +.identity-← .proj₂)
-                 (*.identity .proj₁) (annihil .proj₁)
-  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono (+.identity-← .proj₁ , +.identity-→ .proj₂)
-                 (*.identity .proj₂) (annihil .proj₂)
-  open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-                +-mono (+.identity-→ .proj₁ 0#) (+.identity-← .proj₁ 0#)
-                +.inter *.assoc
-                (annihil .proj₁) (λ a b c → distrib .proj₁ b c a)
-                (annihil .proj₂) (distrib .proj₂)
-  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                +-mono (+.identity-← .proj₁ 0#) (annihil .proj₂)
-
-  open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Algebra skewSemiring
   open import Generic.Linear.Syntax Ty Ann hiding ([_]ᶜ)
-  open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
+  open import Generic.Linear.Environment Ty rawSkewSemiring
   open _─Env
-  open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Thinning.Properties Ty skewSemiring
-    using (⊴*-refl; ⊴*-trans)
+  open import Generic.Linear.Thinning Ty rawSkewSemiring
 
   private
     variable

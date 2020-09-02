@@ -21,13 +21,12 @@ module Generic.Linear.Thinning.Properties
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
   open import Data.LTree.Matrix.Properties
-  open Ident 0# 1#
-  open Mult 0# _+_ _*_
 
-  open import Generic.Linear.Operations _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Algebra skewSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Environment Ty Ann _⊴_ 0# _+_ 1# _*_
-  open import Generic.Linear.Thinning Ty Ann _⊴_ 0# _+_ 1# _*_
+  open import Generic.Linear.Environment Ty rawSkewSemiring
+  open import Generic.Linear.Thinning Ty rawSkewSemiring
 
   open _─Env
 
@@ -39,14 +38,6 @@ module Generic.Linear.Thinning.Properties
       s t u : LTree
       P P′ Q Q′ R : Vector Ann s
       A : Ty
-
-  -- TODO: refactor
-  ⊴*-refl : P ⊴* P
-  ⊴*-refl .get i = ⊴-refl
-  ⊴*-trans : P ⊴* Q → Q ⊴* R → P ⊴* R
-  ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
-  open Reflᴹ _⊴_ ⊴-refl renaming (reflᴹ to ⊴ᴹ-refl)
-  open Transᴹ _⊴_ ⊴-trans renaming (transᴹ to ⊴ᴹ-trans)
 
   LVar-psh : IsPresheaf LVar
   idx (LVar-psh QP lv) = idx lv
@@ -73,21 +64,6 @@ module Generic.Linear.Thinning.Properties
       record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
 
-  open Mult-cong 0# _+_ _*_ _⊴_ _⊴_ _⊴_ ⊴-refl +-mono *-mono
-  open IdentMult 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono (+.identity-→ .proj₁ , +.identity-← .proj₂)
-                 (*.identity .proj₁) (annihil .proj₁)
-  open MultIdent 0# 1# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                 +-mono (+.identity-← .proj₁ , +.identity-→ .proj₂)
-                 (*.identity .proj₂) (annihil .proj₂)
-  open MultMult _⊴_ 0# _+_ 0# _+_ 0# _+_ _*_ _*_ _*_ _*_ ⊴-refl ⊴-trans
-                +-mono (+.identity-→ .proj₁ 0#) (+.identity-← .proj₁ 0#)
-                +.inter *.assoc
-                (annihil .proj₁) (λ a b c → distrib .proj₁ b c a)
-                (annihil .proj₂) (distrib .proj₂)
-  open MultZero 0# _⊴_ 0# _+_ _*_ ⊴-refl ⊴-trans
-                +-mono (+.identity-← .proj₁ 0#) (annihil .proj₂)
-
   identity : Thinning PΓ PΓ
   M identity = 1ᴹ
   sums (identity {PΓ}) .get j = *ᴹ-1ᴹ (row (Ctx.R PΓ)) .get here j
@@ -101,10 +77,10 @@ module Generic.Linear.Thinning.Properties
   M (select 𝓥-psh th ρ) = M th *ᴹ M ρ
   sums (select {PΓ = PΓ} {QΔ} 𝓥-psh th ρ) =
     ⊴*-trans (sums ρ)
-             (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-cong (row-cong₂ (sums th)) ⊴ᴹ-refl)
+             (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-mono (row-cong₂ (sums th)) ⊴ᴹ-refl)
                                     (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
   lookup (select 𝓥-psh th ρ) v =
-    𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-cong
+    𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-mono
                                     (row-cong₂ (thinning-sub-1ᴹ th v))
                                     ⊴ᴹ-refl))
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
