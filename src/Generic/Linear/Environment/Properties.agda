@@ -14,9 +14,7 @@ module Generic.Linear.Environment.Properties
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Vector.Properties
   open import Data.LTree.Matrix
-  open import Data.LTree.Matrix.Properties
   open import Data.Product
   open import Relation.Unary
   open import Relation.Binary.PropositionalEquality

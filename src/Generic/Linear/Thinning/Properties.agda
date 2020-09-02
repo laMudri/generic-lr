@@ -20,7 +20,6 @@ module Generic.Linear.Thinning.Properties
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
-  open import Data.LTree.Matrix.Properties
 
   open import Generic.Linear.Operations rawSkewSemiring
   open import Generic.Linear.Algebra skewSemiring

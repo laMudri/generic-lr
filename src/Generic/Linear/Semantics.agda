@@ -18,7 +18,6 @@ module Generic.Linear.Semantics
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
-  open import Data.LTree.Matrix.Properties
   open import Data.Product
   open import Size
   open import Relation.Unary
