@@ -38,10 +38,22 @@ module Generic.Linear.Thinning.Properties
       P P′ Q Q′ R : Vector Ann s
       A : Ty
 
-  LVar-psh : IsPresheaf LVar
-  idx (LVar-psh QP lv) = idx lv
-  tyq (LVar-psh QP lv) = tyq lv
-  basis (LVar-psh QP lv) = ⊴*-trans QP (basis lv)
+  -- Also, Thinnable ⇒ IsPresheaf via subuse-th
+  psh^LVar : IsPresheaf LVar
+  idx (psh^LVar QP lv) = idx lv
+  tyq (psh^LVar QP lv) = tyq lv
+  basis (psh^LVar QP lv) = ⊴*-trans QP (basis lv)
+
+  -- Possible lemma: if we have `Thinning PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
+  th^LVar : Thinnable (LVar A)
+  th^LVar v th = record
+    { LVar (th .lookup (plain-var v))
+    ; basis = ⊴*-trans
+      (th .sums) (⊴*-trans
+      (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis)) ⊴ᴹ-refl)) (⊴*-trans
+      (getrowL₂ (1ᴹ-*ᴹ (th .M)) (v .idx))
+      (th .lookup (plain-var v) .basis)))
+    }
 
   -- The rows of a thinning's matrix are a selection of standard basis vectors
   -- (i.e, rows from the identity matrix).
@@ -85,7 +97,7 @@ module Generic.Linear.Thinning.Properties
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
           (lookup ρ (plain-var (lookup th v)))
 
-  extend : ∀ {QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
+  extend : ∀ {PΓ QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
   M (extend les) i (↙ j) = 1ᴹ i j
   M (extend les) i (↘ j) = 0#
   sums (extend les) .get (↙ j) = *ᴹ-1ᴹ (row _) .get here j
@@ -96,15 +108,26 @@ module Generic.Linear.Thinning.Properties
   basis (lookup (extend les) v) .get (↙ j) = ⊴-refl
   basis (lookup (extend les) v) .get (↘ j) = ⊴-refl
 
-  -- reuse : (ren : Thinning PΓ QΔ) → P′ ⊴* unrow (row Q′ *ᴹ ren .M) →
-  --         Thinning (record PΓ { R = P′ }) (record QΔ { R = Q′ })
-  -- reuse ren
+  extend′ : ∀ {PΓ QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (QΔ ++ᶜ PΓ)
+  extend′ les .M i (↙ j) = 0#
+  extend′ les .M i (↘ j) = 1ᴹ i j
+  extend′ {PΓ} {QΔ} les .sums .get (↙ j) =
+    ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
+  extend′ les .sums .get (↘ j) = *ᴹ-1ᴹ (row _) .get here j
+  extend′ les .lookup v .idx = ↘ (v .idx)
+  extend′ les .lookup v .tyq = v .tyq
+  extend′ les .lookup v .basis = ⊴*-refl ++₂ ⊴*-refl
+
+  subuse-th : ∀ {Γ} → Q ⊴* P → Thinning (ctx P Γ) (ctx Q Γ)
+  subuse-th QP .M = 1ᴹ
+  subuse-th QP .sums = ⊴*-trans QP (unrowL₂ (*ᴹ-1ᴹ (row _)))
+  subuse-th QP .lookup v = record { Var v; basis = ⊴*-refl }
 
   extract : ∀[ □ T ⇒ T ]
   extract t = t identity
 
   duplicate : ∀[ □ T ⇒ □ (□ T) ]
-  duplicate t ρ σ = t (select LVar-psh ρ σ)
+  duplicate t ρ σ = t (select psh^LVar ρ σ)
 
   th^□ : Thinnable (□ T)
   th^□ = duplicate

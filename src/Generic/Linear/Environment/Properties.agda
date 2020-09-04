@@ -63,14 +63,3 @@ module Generic.Linear.Environment.Properties
   [-]ᵉ (⟨ sp ⟩· v) .M = row _
   [-]ᵉ (⟨ sp ⟩· v) .sums = sp
   [-]ᵉ (⟨ sp ⟩· v) .lookup (var _ refl) = v
-
-  -- _<$>_ : ((∀ {A} → 𝓥 A record QΔ { R = N i } → 𝓦 A RΘ) ×
-  --          ∃ \ N → Ctx.R RΘ ⊴* unrow (row (Ctx.R QΔ) *ᴹ N)) →
-  --         (PΓ ─Env) 𝓥 QΔ → (PΓ ─Env) 𝓦 RΘ
-  -- ((f , N , sp) <$> ρ) .M = ρ .M *ᴹ N
-  -- ((f , N , sp) <$> ρ) .sums =
-  --   ⊴*-trans sp (unrowL₂
-  --   (⊴ᴹ-trans (*ᴹ-mono (rowL₂ (ρ .sums)) ⊴ᴹ-refl)
-  --             (*ᴹ-*ᴹ-→ _ (ρ .M) N)))
-  -- ((f , N , sp) <$> ρ) .lookup v =
-  --   {!(ρ .lookup v)!}

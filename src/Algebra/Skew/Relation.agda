@@ -7,6 +7,7 @@ module Algebra.Skew.Relation where
   open import Data.Unit
   open import Level
   open import Relation.Binary using (REL; _⇒_)
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
   -- NOTE: not actually used, at least for syntax `map`s.
   record ProsetRel {p pℓ q qℓ} (P : Proset p pℓ) (Q : Proset q qℓ) r
@@ -94,3 +95,19 @@ module Algebra.Skew.Relation where
         rel-0ₘ : 0ThenRel rel ⇒ λ _ z → z N.≤ₘ N.0ₘ
         rel-+ₘ : +ThenRel rel ⇒ RelThen+ rel
         rel-*ₘ : *ThenRel rel ⇒ RelThen* rel
+
+  module _ {c ℓ cm ℓm} {R : SkewSemiring c ℓ}
+           {M : SkewLeftSemimodule R cm ℓm}
+    where
+
+    open SkewSemiring R
+    private
+      module M = SkewLeftSemimodule M
+
+    id-SkewLeftSemimoduleRel : SkewLeftSemimoduleRel M M cm
+    id-SkewLeftSemimoduleRel = record
+      { rel = _≡_
+      ; rel-0ₘ = λ where (sp0 , ≡.refl) → sp0
+      ; rel-+ₘ = λ where (sp+ , ≡.refl) → ⟨ ≡.refl , ≡.refl ⟩ sp+
+      ; rel-*ₘ = λ where (sp* , ≡.refl) → ≡.refl , sp*
+      }

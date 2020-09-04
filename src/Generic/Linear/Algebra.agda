@@ -31,6 +31,15 @@ module Generic.Linear.Algebra (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
   ⊴*-trans : P ⊴* Q → Q ⊴* R → P ⊴* R
   ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
 
+  +*-identity↖ : (P : Vector Ann s) → 0* +* P ⊴* P
+  +*-identity↖ P .get _ = +.identity-→ .proj₁ _
+  +*-identity↗ : (P : Vector Ann s) → P +* 0* ⊴* P
+  +*-identity↗ P .get _ = +.identity-← .proj₂ _
+  +*-identity↙ : (P : Vector Ann s) → P ⊴* 0* +* P
+  +*-identity↙ P .get _ = +.identity-← .proj₁ _
+  +*-identity↘ : (P : Vector Ann s) → P ⊴* P +* 0*
+  +*-identity↘ P .get _ = +.identity-→ .proj₂ _
+
   open Reflᴹ _⊴_ ⊴-refl public renaming (reflᴹ to ⊴ᴹ-refl)
   open Transᴹ _⊴_ ⊴-trans public renaming (transᴹ to ⊴ᴹ-trans)
   open Cong2 _⊴_ +-mono public renaming (cong₂ to +*-mono) public

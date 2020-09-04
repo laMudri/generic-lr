@@ -23,5 +23,7 @@ module Generic.Linear.Operations (rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ) w
   _*ₗ_ : Ann → ∀ {s} → Vector Ann s → Vector Ann s
   ρ *ₗ R = lift₁ (ρ *_) R
 
+  open Zero 0# public
+  open Plus _+_ public
   open Ident 0# 1# public
   open Mult 0# _+_ _*_ public

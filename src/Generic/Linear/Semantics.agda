@@ -1,11 +1,10 @@
 {-# OPTIONS --safe --sized-types --without-K #-}
 
 open import Algebra.Skew
-open import Level renaming (zero to lzero; suc to lsuc)
-open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
+open import Level using (0ℓ)
 
 module Generic.Linear.Semantics
-  (Ty : Set) (skewSemiring : SkewSemiring lzero lzero)
+  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
   where
 
   open SkewSemiring skewSemiring
@@ -41,12 +40,14 @@ module Generic.Linear.Semantics
   Kripke : (𝓥 𝓒 : Scoped) (PΓ : Ctx) (A : Ty) → Ctx → Set
   Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ 𝓒 A)
 
-  record Semantics (d : System) (𝓥 𝓒 : Scoped) (𝓥-psh : IsPresheaf 𝓥)
-                   : Set where
+  record Semantics (d : System) (𝓥 𝓒 : Scoped) : Set where
     field
       th^𝓥 : Thinnable (𝓥 A)
       var : ∀[ 𝓥 A ⇒ 𝓒 A ]
       alg : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) A ⇒ 𝓒 A ]
+
+    psh^𝓥 : IsPresheaf 𝓥
+    psh^𝓥 QP v = th^𝓥 v (subuse-th QP)
 
     _─Comp : Ctx → Scoped → Ctx → Set
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
@@ -56,7 +57,7 @@ module Generic.Linear.Semantics
            Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
     semantics ρ (`var v) =
-      var (𝓥-psh (⊴*-trans (ρ .sums)
+      var (psh^𝓥 (⊴*-trans (ρ .sums)
                            (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis))
                                                        ⊴ᴹ-refl))
                                      (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
