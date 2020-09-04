@@ -1,0 +1,89 @@
+\documentclass[a4paper]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{cmll}
+\usepackage{mathtools}
+\usepackage{stmaryrd}
+\usepackage{xcolor}
+
+\def\newelims{1}
+\def\multnotation{1}
+\input{../macros}
+
+\begin{document}
+\section{Bunched functions}
+
+Suppose we have a left $R$-semimodule $M$.
+Then we can define the following connectives on indexed type families.
+
+\begin{align*}
+  \top~z &:= \top \\
+  (P \wedge Q)~z &:= P~z \wedge Q~z \\
+  (P \to Q)~z &:= P~z \to Q~z \\
+  I~z &:= z \subres 0 \\
+  (P * Q)~z &:= \exists x,y.~z \subres x+y \wedge P~x \wedge Q~y \\
+  (P \wand Q)~y &:= \forall x,z.~z \subres x+y \to P~x \to Q~z \\
+  (r \cdot P)~z &:= \exists x.~z \subres rx \wedge P~x
+\end{align*}
+
+The first six of these connectives are somewhat standard, the first three
+corresponding to the usual sharing connectives and the second three
+corresponding to the usual separating connectives.
+The final connective, $r \cdot P$, is new.
+We choose $\exists$ rather than $\forall$ because scaling will usually occur in
+premises, i.e., to the left of arrows, and we want to avoid anything
+higher-order.
+
+\section{Generic syntax}
+
+Rules $R$, premises $P$ and $Q$.
+
+\begin{align*}
+  R &::= P/A \\
+  P,Q &::= \ctx \Theta R \vdash A \mid \top \mid P \wedge Q \mid I \mid P * Q
+        \mid r \cdot P
+\end{align*}
+
+Example rules:
+
+\begin{itemize}
+  \item With-introduction: ${\vdash A} \wedge {\vdash B} / \withT{A}{B}$
+  \item Annotated arrow introduction:
+    ${\rescomment rA \vdash B} / \fun{\rescomment rA}{B}$
+  \item Annotated arrow elimination:
+    ${\vdash \fun{\rescomment rA}{B}} * \rescomment r \cdot {\vdash A} / B$
+  \item Cases of annotated sum:
+    ${\vdash \sumT{\rescomment rA}{\rescomment sB}}
+    * ({\rescomment rA \vdash C} \wedge {\rescomment sB \vdash C}) / C$
+\end{itemize}
+
+Interpretation as syntax.
+We can say something like ``premise connectives are interpreted as the
+corresponding bunched connectives, where appropriate''.
+
+\begin{align*}
+  \sem{P/A} &:= \sem P \to {- \vdash A} \\
+  \sem{\ctx \Theta R \vdash A} &:= {-, \ctx \Theta R \vdash A} \\
+  \sem{\top} &:= \top \\
+  \sem{P \wedge Q} &:= \sem P \wedge \sem Q \\
+  \sem{I} &:= I \\
+  \sem{P * Q} &:= \sem P * \sem Q \\
+  &\ldots
+\end{align*}
+
+\section{Environments}
+
+An environment is a linear map from plain variables in one context to semantic
+variables in another.
+
+\section{Thinnings}
+
+A thinning is an environment of syntactic variables.
+In effect, thinning allows for permutation and slackening of existing
+variables, and introduction of new discardable variables at any position.
+
+Given this definition, $\square$ and \texttt{Thinnable} are as in AACMM.
+\texttt{Kripke} is modified to use separating implication.
+
+\end{document}
