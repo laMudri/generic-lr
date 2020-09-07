@@ -26,6 +26,7 @@ module Generic.Linear.Thinning.Properties
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Environment Ty rawSkewSemiring
   open import Generic.Linear.Thinning Ty rawSkewSemiring
+  open import Generic.Linear.Extend Ty skewSemiring
 
   open _─Env
 
@@ -97,13 +98,12 @@ module Generic.Linear.Thinning.Properties
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
           (lookup ρ (plain-var (lookup th v)))
 
-  extend : ∀ {PΓ QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
-  extend les .M = [ 1ᴹ │ 0ᴹ ]
-  extend {ctx P Γ} {QΔ} les .sums =
-    unrowL₂ (*ᴹ-1ᴹ (row _)) ++₂ ⊴*-trans les (unrowL₂ (*ᴹ-0ᴹ (row P)))
-  extend les .lookup v .idx = ↙ (v .idx)
-  extend les .lookup v .tyq = v .tyq
-  extend les .lookup v .basis = ⊴*-refl ++₂ ⊴*-refl
+  instance
+    re^LVar : RightExtend LVar
+    re^LVar .embedVarʳ (var i q) = lvar (↙ i) q (⊴*-refl ++₂ ⊴*-refl)
+
+    le^LVar : LeftExtend LVar
+    le^LVar .embedVarˡ (var i q) = lvar (↘ i) q (⊴*-refl ++₂ ⊴*-refl)
 
   subuse-th : ∀ {Γ} → Q ⊴* P → Thinning (ctx P Γ) (ctx Q Γ)
   subuse-th QP .M = 1ᴹ

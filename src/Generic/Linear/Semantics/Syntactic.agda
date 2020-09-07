@@ -33,6 +33,7 @@ module Generic.Linear.Semantics.Syntactic
     renaming (var to ivar)
   open import Generic.Linear.Thinning Ty rawSkewSemiring
   open _─Env
+  open import Generic.Linear.Extend Ty skewSemiring
   open import Generic.Linear.Thinning.Properties Ty skewSemiring
   open import Generic.Linear.Environment.Properties Ty skewSemiring
   open import Generic.Linear.Semantics Ty skewSemiring
@@ -44,43 +45,29 @@ module Generic.Linear.Semantics.Syntactic
       𝓥 𝓒 : Scoped
       RΘ : Ctx
 
-  record VarLike (𝓥 : Scoped) : Set where
-    constructor varLike
-    field
-      embedVarʳ : ∀ {s u Γ Θ A} (v : Var A Θ) →
-                 𝓥 A (ctx {s} 0* Γ ++ᶜ ctx {u} (1ᴹ (v .idx)) Θ)
-
-    embedʳ : ∀ {RΘ s Γ} → (RΘ ─Env) 𝓥 (ctx {s} 0* Γ ++ᶜ RΘ)
-    embedʳ .M = [ 0ᴹ │ 1ᴹ ]
-    embedʳ {ctx R Θ} .sums = unrowL₂ (*ᴹ-0ᴹ (row R)) ++₂ unrowL₂ (*ᴹ-1ᴹ _)
-    embedʳ .lookup = embedVarʳ
-  open VarLike public
-
   open Semantics
 
-  reify : VarLike 𝓥 → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
-  reify vl^𝓥 b =
-    b (extend ⊴*-refl) .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) (embedʳ vl^𝓥)
-
-  vl^LVar : VarLike LVar
-  vl^LVar .embedVarʳ (ivar i q) = lvar (↘ i) q (⊴*-refl ++₂ ⊴*-refl)
+  reify : {{LeftExtend 𝓥}} → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
+  reify b = b extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
 
   Ren : Semantics d LVar (Tm d ∞)
   Ren .th^𝓥 = th^LVar
   Ren .var = `var
   Ren {d} .alg = `con ∘
-    map-s id-SkewLeftSemimoduleRel d
-          (λ where refl → reify {𝓒 = Tm d ∞} vl^LVar) refl
+    map-s id-SkewLeftSemimoduleRel d (λ { refl → reify {𝓒 = Tm d ∞} }) refl
 
   th^Tm : Thinnable (Tm d ∞ A)
   th^Tm t th = semantics Ren th t
 
-  vl^Tm : VarLike (Tm d ∞)
-  vl^Tm .embedVarʳ (ivar i q) = `var (lvar (↘ i) q (⊴*-refl ++₂ ⊴*-refl))
+  instance
+    re^Tm : RightExtend (Tm d ∞)
+    re^Tm .embedVarʳ v = `var (embedVarʳ v)
+
+    le^Tm : LeftExtend (Tm d ∞)
+    le^Tm .embedVarˡ v = `var (embedVarˡ v)
 
   Sub : Semantics d (Tm d ∞) (Tm d ∞)
   Sub .th^𝓥 = th^Tm
   Sub .var = id
   Sub {d} .alg = `con ∘
-    map-s id-SkewLeftSemimoduleRel d
-          (λ where refl → reify {𝓒 = Tm d ∞} vl^Tm) refl
+    map-s id-SkewLeftSemimoduleRel d (λ { refl → reify {𝓒 = Tm d ∞} }) refl
