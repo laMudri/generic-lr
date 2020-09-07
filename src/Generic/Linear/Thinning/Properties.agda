@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Skew
 open import Function.Base using (flip; _∘_)
@@ -98,25 +98,12 @@ module Generic.Linear.Thinning.Properties
           (lookup ρ (plain-var (lookup th v)))
 
   extend : ∀ {PΓ QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (PΓ ++ᶜ QΔ)
-  M (extend les) i (↙ j) = 1ᴹ i j
-  M (extend les) i (↘ j) = 0#
-  sums (extend les) .get (↙ j) = *ᴹ-1ᴹ (row _) .get here j
-  sums (extend {PΓ} {QΔ} les) .get (↘ j) =
-    ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
-  idx (lookup (extend les) v) = ↙ (idx v)
-  tyq (lookup (extend les) v) = tyq v
-  basis (lookup (extend les) v) .get (↙ j) = ⊴-refl
-  basis (lookup (extend les) v) .get (↘ j) = ⊴-refl
-
-  extend′ : ∀ {PΓ QΔ} → Ctx.R QΔ ⊴* 0* → Thinning PΓ (QΔ ++ᶜ PΓ)
-  extend′ les .M i (↙ j) = 0#
-  extend′ les .M i (↘ j) = 1ᴹ i j
-  extend′ {PΓ} {QΔ} les .sums .get (↙ j) =
-    ⊴-trans (les .get j) (*ᴹ-0ᴹ (row (Ctx.R PΓ)) .get here j)
-  extend′ les .sums .get (↘ j) = *ᴹ-1ᴹ (row _) .get here j
-  extend′ les .lookup v .idx = ↘ (v .idx)
-  extend′ les .lookup v .tyq = v .tyq
-  extend′ les .lookup v .basis = ⊴*-refl ++₂ ⊴*-refl
+  extend les .M = [ 1ᴹ │ 0ᴹ ]
+  extend {ctx P Γ} {QΔ} les .sums =
+    unrowL₂ (*ᴹ-1ᴹ (row _)) ++₂ ⊴*-trans les (unrowL₂ (*ᴹ-0ᴹ (row P)))
+  extend les .lookup v .idx = ↙ (v .idx)
+  extend les .lookup v .tyq = v .tyq
+  extend les .lookup v .basis = ⊴*-refl ++₂ ⊴*-refl
 
   subuse-th : ∀ {Γ} → Q ⊴* P → Thinning (ctx P Γ) (ctx Q Γ)
   subuse-th QP .M = 1ᴹ
