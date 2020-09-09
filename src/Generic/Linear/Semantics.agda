@@ -20,6 +20,7 @@ module Generic.Linear.Semantics
   open import Data.Product
   open import Size
   open import Relation.Unary
+  open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawSkewSemiring
   open import Generic.Linear.Algebra skewSemiring
@@ -38,7 +39,7 @@ module Generic.Linear.Semantics
       A : Ty
 
   Kripke : (𝓥 𝓒 : Scoped) (PΓ : Ctx) (A : Ty) → Ctx → Set
-  Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ 𝓒 A)
+  Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
 
   record Semantics (d : System) (𝓥 𝓒 : Scoped) : Set where
     field

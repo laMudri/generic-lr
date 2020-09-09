@@ -12,6 +12,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Data.Product
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Relation.Unary.Bunched
 
   open SkewSemiring skewSemiring renaming (Carrier to Ann)
 
@@ -33,7 +34,7 @@ module Generic.Linear.Syntax.Interpretation.Map
             (∀ {P Q} → rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (PΓ `⊢ A) f r t = f r t
     map-p `⊤ f r t = t
-    map-p `I f r t = rel-0ₘ (t , r)
+    map-p `I f r ✴1⟨ t ⟩ = ✴1⟨ rel-0ₘ (t , r) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
     map-p (ps `* qs) f r (s ✴⟨ sp ⟩ t) =
       let ⟨ rs , rt ⟩ sp′ = rel-+ₘ (sp , r) in

@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Skew
-open import Level renaming (zero to lzero; suc to lsuc)
+open import Level using (0ℓ)
 open import Relation.Binary using (Rel)
 
 module Generic.Linear.Syntax.Interpretation
@@ -10,6 +10,7 @@ module Generic.Linear.Syntax.Interpretation
 
   open RawSkewSemiring rawSkewSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
+  open import Algebra using (Op₂; Opₗ)
   open import Data.Product as ×
   open import Data.Unit
   open import Function
@@ -22,41 +23,31 @@ module Generic.Linear.Syntax.Interpretation
   open import Generic.Linear.Operations rawSkewSemiring
   open import Generic.Linear.Syntax Ty Ann
 
-  infixr 8 _─✴_
-  infixr 9 _✴_
-  infixr 10 _·_
+  open import Relation.Unary.Bunched
+  private
+    open module Dummy0 {s} = BunchedUnit (_⊴* 0* {s})
+    open module Dummy+ {s} =
+      BunchedConjunction (λ (R P Q : Vector _ s) → R ⊴* P +* Q)
+    open module Dummy* {s} =
+      BunchedScaling (λ (R : Vector _ s) r P → R ⊴* r *ₗ P)
 
-  record ✴1 (RΓ : Ctx) : Set where
-    constructor ✴1⟨_⟩
-    open Ctx RΓ
-    field
-      split : R ⊴* 0*
+  infixr 8 _─✴ᶜ_
+  infixr 9 _✴ᶜ_
+  infixr 10 _·ᶜ_
 
-  record _✴_ (T U : Ctx → Set) (RΓ : Ctx) : Set where
-    constructor _✴⟨_⟩_
-    open Ctx RΓ
-    field
-      {P Q} : Vector Ann _
-      T-prf : T record RΓ { R = P }
-      split : R ⊴* P +* Q
-      U-prf : U record RΓ { R = Q }
+  ✴1ᶜ : Ctx → Set
+  ✴1ᶜ (ctx R Γ) = ✴1 R
 
-  record _─✴_ (T U : Ctx → Set) (RΓ : Ctx) : Set where
-    constructor lam✴
-    open Ctx RΓ
-    field
-      app✴ : ∀ {P Q} (split : Q ⊴* R +* P) (T-prf : T record RΓ { R = P }) →
-             U record RΓ { R = Q }
-  open _─✴_ public
+  _✴ᶜ_ : (T U : Ctx → Set) (RΓ : Ctx) → Set
+  (T ✴ᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ✴ (λ Q → U (ctx Q Γ))) R
 
-  record _·_ (ρ : Ann) (T : Ctx → Set) (RΓ : Ctx) : Set where
-    constructor ⟨_⟩·_
-    open Ctx RΓ
-    field
-      {P} : Vector Ann _
-      split : R ⊴* ρ *ₗ P
-      T-prf : T record RΓ { R = P }
+  _─✴ᶜ_ : (T U : Ctx → Set) (RΓ : Ctx) → Set
+  (T ─✴ᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ─✴ (λ Q → U (ctx Q Γ))) R
 
+  _·ᶜ_ : (ρ : Ann) (T : Ctx → Set) (RΓ : Ctx) → Set
+  (ρ ·ᶜ T) (ctx R Γ) = (ρ · (λ P → T (ctx P Γ))) R
+
+  {-
   record Dup (T : Ctx → Set) (RΓ : Ctx) : Set where
     constructor □⟨_,_⟩_
     open Ctx RΓ
@@ -64,16 +55,17 @@ module Generic.Linear.Syntax.Interpretation
       split-0 : R ⊴* 0*
       split-+ : R ⊴* R +* R
       T-prf : T RΓ
+  -}
 
   module WithScope (⟦_⊢_⟧ : Ctx → Scoped) where
 
     ⟦_⟧p′ : Premises → Ctx → Set
     ⟦ Γ `⊢ A ⟧p′ = ⟦ Γ ⊢ A ⟧
     ⟦ `⊤ ⟧p′ = U
-    ⟦ `I ⟧p′ (ctx R Γ) = R ⊴* 0*
+    ⟦ `I ⟧p′ = ✴1ᶜ
     ⟦ p `∧ q ⟧p′ = ⟦ p ⟧p′ ∩ ⟦ q ⟧p′
-    ⟦ p `* q ⟧p′ = ⟦ p ⟧p′ ✴ ⟦ q ⟧p′
-    ⟦ ρ `· p ⟧p′ = ρ · ⟦ p ⟧p′
+    ⟦ p `* q ⟧p′ = ⟦ p ⟧p′ ✴ᶜ ⟦ q ⟧p′
+    ⟦ ρ `· p ⟧p′ = ρ ·ᶜ ⟦ p ⟧p′
     -- ⟦ `□ p ⟧p′ = Dup (⟦ p ⟧p′)
 
     ⟦_⟧r′ : Rule → Scoped
@@ -90,27 +82,3 @@ module Generic.Linear.Syntax.Interpretation
 
   ⟦_⟧s : System → (Ctx → Scoped) → Scoped
   ⟦ s ⟧s Sc = let open WithScope Sc in ⟦ s ⟧s′
-
-  {-
-  map-p : {X Y : Ctx → Scoped} (ps : Premises) →
-          (∀ {PΓ A} → ∀[ X PΓ A ⇒ Y PΓ A ]) →
-          ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
-  map-p (PΓ `⊢ A) f t = f t
-  map-p `⊤ f t = t
-  map-p `I f t = t
-  map-p (ps `∧ qs) f (s , t) = map-p ps f s , map-p qs f t
-  map-p (ps `* qs) f (s ✴⟨ split ⟩ t) = map-p ps f s ✴⟨ split ⟩ map-p qs f t
-  map-p (ρ `· ps) f (⟨ split ⟩· t) = ⟨ split ⟩· map-p ps f t
-  map-p (`□ ps) f (□⟨ split-0 , split-+ ⟩ t) =
-    □⟨ split-0 , split-+ ⟩ (map-p ps f t)
-
-  map-r : {X Y : Ctx → Scoped} (r : Rule) →
-          (∀ {PΓ A} → ∀[ X PΓ A ⇒ Y PΓ A ]) →
-          ∀ {A} → ∀[ ⟦ r ⟧r X A ⇒ ⟦ r ⟧r Y A ]
-  map-r (rule ps A) f (q , t) = q , map-p ps f t
-
-  map-s : {X Y : Ctx → Scoped} (s : System) →
-          (∀ {PΓ A} → ∀[ X PΓ A ⇒ Y PΓ A ]) →
-          ∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ]
-  map-s (system L rs) f (l , t) = l , (map-r (rs l) f t)
-  -}

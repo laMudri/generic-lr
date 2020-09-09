@@ -17,6 +17,7 @@ module Generic.Linear.Environment.Properties
   open import Data.LTree.Matrix
   open import Data.Product
   open import Relation.Unary
+  open import Relation.Unary.Bunched
   open import Relation.Binary.PropositionalEquality
 
   open import Generic.Linear.Operations rawSkewSemiring
@@ -46,12 +47,12 @@ module Generic.Linear.Environment.Properties
   th^Env th^𝓥 {QΔ} ρ {RΘ} ren .lookup v =
     th^𝓥 (ρ .lookup v) record { _─Env ren; sums = ⊴*-refl }
 
-  []ᵉ : ∀[ ✴1 ⇒ ([]ᶜ ─Env) 𝓥 ]
+  []ᵉ : ∀[ ✴1ᶜ ⇒ ([]ᶜ ─Env) 𝓥 ]
   []ᵉ ✴1⟨ sp ⟩ .M = [─]
   []ᵉ ✴1⟨ sp ⟩ .sums = sp
   []ᵉ ✴1⟨ sp ⟩ .lookup (var (there () _) _)
 
-  ++ᵉ : ∀[ (PΓ ─Env) 𝓥 ✴ (QΔ ─Env) 𝓥 ⇒ ((PΓ ++ᶜ QΔ) ─Env) 𝓥 ]
+  ++ᵉ : ∀[ (PΓ ─Env) 𝓥 ✴ᶜ (QΔ ─Env) 𝓥 ⇒ ((PΓ ++ᶜ QΔ) ─Env) 𝓥 ]
   ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M
                              ─
                            σ .M ]
@@ -59,7 +60,7 @@ module Generic.Linear.Environment.Properties
   ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (var (↙ i) q) = ρ .lookup (var i q)
   ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (var (↘ i) q) = σ .lookup (var i q)
 
-  [-]ᵉ : ∀[ r · 𝓥 A ⇒ ([ r · A ]ᶜ ─Env) 𝓥 ]
+  [-]ᵉ : ∀[ r ·ᶜ 𝓥 A ⇒ ([ r · A ]ᶜ ─Env) 𝓥 ]
   [-]ᵉ (⟨ sp ⟩· v) .M = row _
   [-]ᵉ (⟨ sp ⟩· v) .sums = sp
   [-]ᵉ (⟨ sp ⟩· v) .lookup (var _ refl) = v
