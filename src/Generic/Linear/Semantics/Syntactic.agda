@@ -21,6 +21,7 @@ module Generic.Linear.Semantics.Syntactic
   open import Function.Base using (id; _∘_)
   open import Size
   open import Relation.Unary
+  open import Relation.Unary.Bunched
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; refl)
 
   open import Generic.Linear.Operations rawSkewSemiring
