@@ -129,5 +129,16 @@ module Generic.Linear.Example.AnnotatedArrow
     ⟦Tm⟧ᴿ : (A : Ty) (RΓ : Ctx) → WRel W (⟦Tm⟧ A RΓ)
     ⟦Tm⟧ᴿ A RΓ m n = ⋂ (_ × _) \ (γ , δ) → ⟦ RΓ ⟧ᴿᶜ γ δ ─✴ ⟦ A ⟧ᴿ (m γ) (n δ)
 
-    wrel : Semantics AnnArr LVar {!⟦Tm⟧ᴿ!}
-    wrel = {!!}
+    record ⟦Tm⟧ᴿ′ (A : Ty) (RΓ : Ctx) : Set where
+      field
+        m n : ⟦Tm⟧ A RΓ
+        w : W
+        r : ⟦Tm⟧ᴿ A RΓ m n w
+
+    wrel : Semantics AnnArr LVar ⟦Tm⟧ᴿ′
+    wrel .th^𝓥 = th^LVar
+    wrel .var v .⟦Tm⟧ᴿ′.m = set .var v
+    wrel .var v .⟦Tm⟧ᴿ′.n = set .var v
+    wrel .var v .⟦Tm⟧ᴿ′.w = {!!}
+    wrel .var v .⟦Tm⟧ᴿ′.r (γ , δ) .app✴ sp γδ = {!!}
+    wrel .alg = {!!}
