@@ -1,9 +1,7 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Skew
-open import Function.Base using (flip; _∘_)
 open import Level using (0ℓ)
-open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Environment.Properties
   (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
