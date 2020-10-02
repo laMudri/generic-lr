@@ -1,4 +1,4 @@
-{ stdenv, texlive }:
+{ stdenv, lib, texlive }:
 let
   tex-env = texlive.combine {
     inherit (texlive) scheme-small latexmk chktex stmaryrd mathpartir rsfs
@@ -6,7 +6,8 @@ let
   };
 in stdenv.mkDerivation {
   name = "notes";
-  src = [ ./pkg.nix ./default.nix ./shell.nix ];
+  src = lib.sourceFilesBySuffices ./. [ ".nix" ".tex" ];
+  # [ ./pkg.nix ./default.nix ./shell.nix ];
   buildInputs = [ tex-env ];
   buildPhase = ''
     latexmk notes.tex
