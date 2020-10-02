@@ -2,6 +2,7 @@
 
 module Relation.Unary.Bunched {a} {A : Set a} where
 
+  open import Data.Product
   open import Level
   open import Relation.Unary
 
@@ -34,6 +35,11 @@ module Relation.Unary.Bunched {a} {A : Set a} where
       field
         app✴ : ∀ {y z} (split : z ∼ x + y) (T-prf : T y) → U z
     open _─✴_ public
+
+    map-✴ : ∀ {t t′ u u′} {T : A → Set t} {T′ : A → Set t′}
+                          {U : A → Set u} {U′ : A → Set u′} →
+            ∀[ T ⇒ T′ ] × ∀[ U ⇒ U′ ] → ∀[ T ✴ U ⇒ T′ ✴ U′ ]
+    map-✴ (f , g) (t ✴⟨ sp ⟩ u) = f t ✴⟨ sp ⟩ g u
 
   open BunchedConjunction public using (_✴⟨_⟩_; lam✴; app✴)
 
