@@ -21,12 +21,14 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Data.Product
   open import Data.Unit using (⊤; tt)
   open import Function.Base using (id; _∘_; _∘′_; _$_; λ-; _$-)
+  open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
   open import Size
   open import Relation.Unary
   open import Relation.Unary.Bunched
   open import Relation.Unary.Bunched.Properties
+  open import Relation.Binary using (Setoid)
   open import Relation.Binary.PropositionalEquality as ≡
-    using (_≡_; refl; subst; subst₂)
+    using (_≡_; subst; subst₂)
 
   infixr 5 _⊸_
 
@@ -79,19 +81,19 @@ module Generic.Linear.Example.AnnotatedArrow
 
   set : Semantics AnnArr LVar ⟦Tm⟧
   set .th^𝓥 = th^LVar
-  set .var (lvar i refl _) γ = γ .get i
-  set .alg {_} {ctx P Γ} (`lam (r , A) B , refl , m) γ x =
+  set .var (lvar i ≡.refl _) γ = γ .get i
+  set .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) γ x =
     m {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
-      .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) refl ⊴*-refl))
+      .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
       (γ ++₁ [ x ]₁)
-  set .alg (`app rA B , refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ =
+  set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ =
     (m identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) γ)
     (n identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) γ)
 
   myConst : (A B : Ty) → Term ((1# , A) ⊸ (0# , B) ⊸ A) []ᶜ
   myConst A B =
-    `con (`lam _ _ , refl , `con (`lam _ _ , refl ,
-      `var (lvar (↙ (↘ here)) refl (([]₂ ++₂ [ ⊴-refl ]₂) ++₂ ⊴*-refl))))
+    `con (`lam _ _ , ≡.refl , `con (`lam _ _ , ≡.refl ,
+      `var (lvar (↙ (↘ here)) ≡.refl (([]₂ ++₂ [ ⊴-refl ]₂) ++₂ ⊴*-refl))))
 
   ⟦myConst⟧ : (A B : Ty) → ⟦ A ⟧ → ⟦ B ⟧ → ⟦ A ⟧
   ⟦myConst⟧ A B = semantics set {[]ᶜ} {[]ᶜ} ([]ᵉ ✴1⟨ []₂ ⟩) (myConst A B) []₁
@@ -99,10 +101,48 @@ module Generic.Linear.Example.AnnotatedArrow
   test : (x y : Base) → Set
   test x y = {!⟦myConst⟧ base base x y!}
 
+  -- Setoid semantics
+
+  ⟦_⟧ˢ : Ty → Setoid 0ℓ 0ℓ
+  ⟦ base ⟧ˢ = ≡.setoid Base  -- TODO: Base should be a Setoid.
+  ⟦ (_ , A) ⊸ B ⟧ˢ = ⟦ A ⟧ˢ ⇨ ⟦ B ⟧ˢ
+
+  ⟦_⟧ˢᶜ : Ctx → Setoid 0ℓ 0ℓ
+  ⟦ ctx _ Γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ Γ
+
+  ⟦Tm⟧ˢ : Scoped
+  ⟦Tm⟧ˢ A PΓ = ⟦ PΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
+
+  module _ where
+
+    open Setoid
+
+    setoid : Semantics AnnArr LVar ⟦Tm⟧ˢ
+    setoid .th^𝓥 = th^LVar
+    setoid .var (lvar i ≡.refl _) ⟨$⟩ γ = γ .get i
+    setoid .var (lvar i ≡.refl _) .cong γγ = γγ .get i
+    -- TODO: lam case could be made better by Setoid currying.
+    setoid .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ ⟨$⟩ x =
+      m {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
+        .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
+        ⟨$⟩ (γ ++₁ [ x ]₁)
+    setoid .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ .cong xx =
+      m _ .app✴ _ _ .cong (setoidL₁ ⟦_⟧ˢ _ .refl ++₁∼ [ xx ]₁∼)
+    setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
+      m _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
+    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ =
+      (m identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) ⟨$⟩ γ) ⟨$⟩
+      (n identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) ⟨$⟩ γ)
+    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
+      m _ .app✴ _ _ .cong γγ (n _ .app✴ _ _ .cong γγ)
+
   -- Relational semantics
 
-  WRel : Set → Set → Set1
-  WRel W A = A → A → W → Set
+  record WRel (W : Set) (A : Setoid 0ℓ 0ℓ) : Set1 where
+    open Setoid A
+    field
+      rel : (a b : Carrier) → W → Set
+      resp-≈ : ∀ {a a′ b b′} → a ≈ a′ → b ≈ b′ → ∀[ rel a b ⇒ rel a′ b′ ]
 
   -- TODO: move somewhere else (Relation.Unary.Extras?)
 
@@ -111,9 +151,14 @@ module Generic.Linear.Example.AnnotatedArrow
 
   record WRelMor {W A B} (R : WRel W A) (S : WRel W B) : Set where
     constructor wRelMor
+    open WRel
+    private
+      module A = Setoid A
+      module B = Setoid B
     field
-      sem0 sem1 : A → B
-      semsem : ∀[ (I⋂ (_ × _) \ (x , y) → R x y ⇒ S (sem0 x) (sem1 y)) ]
+      sem0 sem1 : A ⟶ B
+      semsem : ∀[ (I⋂ (_ × _) \ (x , y) →
+                   R .rel x y ⇒ S .rel (sem0 ⟨$⟩ x) (sem1 ⟨$⟩ y)) ]
   open WRelMor public
 
   module WithStuff
@@ -122,23 +167,26 @@ module Generic.Linear.Example.AnnotatedArrow
       renaming (Carrier to W; _≤ε to _≤0; _≤[_∙_] to _≤[_+_]))
     (open BunchedUnit _≤0 hiding (✴1⟨_⟩))
     (open BunchedConjunction _≤[_+_] hiding (_✴⟨_⟩_))
-    (Baseᴿ : WRel W Base)
+    (Baseᴿ : WRel W (≡.setoid Base)) (open WRel)
     (!ᴿ : Ann → ∀[ WRel W ⇒ WRel W ])
     (!ᴿ-map : ∀ {r A B R S} (f : WRelMor R S) →
-              (∀ {x y} → ∀[ !ᴿ r {A} R x y ⇒ !ᴿ r {B} S (f .sem0 x) (f .sem1 y) ]))
-    (!ᴿ-⊴ : ∀ {r s A R x y} → r ⊴ s → ∀[ !ᴿ r {A} R x y ⇒ !ᴿ s R x y ])
-    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R x y ⇒ ✴1 ])
+              (∀ {x y} → ∀[ !ᴿ r {A} R .rel x y ⇒
+                            !ᴿ r {B} S .rel (f .sem0 ⟨$⟩ x) (f .sem1 ⟨$⟩ y) ]))
+    (!ᴿ-⊴ : ∀ {r s A R x y} → r ⊴ s →
+            ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ s R .rel x y ])
+    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R .rel x y ⇒ ✴1 ])
     (!ᴿ-+ : ∀ {r p q A R x y} → r ⊴ p + q →
-            ∀[ !ᴿ r {A} R x y ⇒ !ᴿ p R x y ✴ !ᴿ q R x y ])
-    (!ᴿ-1 : ∀ {r A R x y} → r ⊴ 1# → ∀[ !ᴿ r {A} R x y ⇒ R x y ])
+            ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ p R .rel x y ✴ !ᴿ q R .rel x y ])
+    (!ᴿ-1 : ∀ {r A R x y} → r ⊴ 1# → ∀[ !ᴿ r {A} R .rel x y ⇒ R .rel x y ])
     (!ᴿ-* : ∀ {r p q A R x y} → r ⊴ p * q →
-            ∀[ !ᴿ r {A} R x y ⇒ !ᴿ p (!ᴿ q R) x y ])
-    (!ᴿ-✴1 : ∀ {r A x y} → ∀[ ✴1 ⇒ !ᴿ r {A} (λ _ _ → ✴1) x y ])
-    (!ᴿ-✴ : ∀ {r A B R S} {x@(xr , xs) : _ × _} {y@(yr , ys) : _ × _} →
-            ∀[ !ᴿ r {A} R xr yr ✴ !ᴿ r {B} S xs ys ⇒
-               !ᴿ r (λ (xr , xs) (yr , ys) → R xr yr ✴ S xs ys) x y ])
+            ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ p (!ᴿ q R) .rel x y ])
+    -- (!ᴿ-✴1 : ∀ {r A x y} → ∀[ ✴1 ⇒ !ᴿ r {A} (λ _ _ → ✴1) .rel x y ])
+    -- (!ᴿ-✴ : ∀ {r A B R S} {x@(xr , xs) : _ × _} {y@(yr , ys) : _ × _} →
+    --         ∀[ !ᴿ r {A} R .rel xr yr ✴ !ᴿ r {B} S .rel xs ys ⇒
+    --            !ᴿ r (λ (xr , xs) (yr , ys) → R xr yr ✴ S xs ys) .rel x y ])
     where
 
+  {-
     -- open BunchedScaling _≤[_*ₗ_] hiding (⟨_⟩·_)
     open BunchedCommutativeMonoid worlds
 
@@ -233,3 +281,4 @@ module Generic.Linear.Example.AnnotatedArrow
         (!ᴿ-map
           (nn _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩))
           (lemma-!ᴿ sp* rQγγ))
+-}

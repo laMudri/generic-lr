@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 -- Functional vectors indexed by tree sizes
 
@@ -10,18 +10,18 @@ module Data.LTree.Vector where
   open import Data.Product using (_×_; _,_)
   open import Function.Base using (id; _∘_)
   open import Level using (Level; _⊔_)
-  open import Relation.Binary using (REL)
+  open import Relation.Binary using (REL; Rel; Setoid; IsEquivalence)
   open import Relation.Unary using (Pred)
 
   private
     variable
-      a b c r : Level
+      a b c r ℓ : Level
       A : Set a
       B : Set b
       C : Set c
       s t : LTree
 
-  infixr 5 _++_
+  infix 5 _++_
 
   Vector : Set a → LTree → Set a
   Vector A s = Ptr s → A
@@ -64,6 +64,8 @@ module Data.LTree.Vector where
 
   module _ {R : Pred A r} where
 
+    infix 5 _++₁_
+
     [_]₁ : {u : Vector A [-]} → R (u here) → Lift₁ R u
     [ r ]₁ .get here = r
 
@@ -76,6 +78,8 @@ module Data.LTree.Vector where
     (ru ++₁ rv) .get (↘ i) = rv .get i
 
   module _ {R : REL A B r} where
+
+    infix 5 _++₂_
 
     [_]₂ : {u : Vector A [-]} {v : Vector B [-]} →
            R (u here) (v here) → Lift₂ R u v
@@ -99,3 +103,38 @@ module Data.LTree.Vector where
 
   module Sum (0# : A) (_+_ : Op₂ A) where
     ∑ = fold id 0# _+_
+
+  module _ where
+    open Setoid
+    open IsEquivalence
+
+    infix 5 _++₁∼_
+
+    record Lift₁∼ {R : Pred A r} (_∼_ : ∀ {x} → Rel (R x) ℓ)
+                  {s} {xs : Vector A s} (ρ σ : Lift₁ R xs) : Set ℓ where
+      constructor mk
+      field get : ∀ i → ρ .get i ∼ σ .get i
+    open Lift₁∼ public
+
+    setoidL₁ : (A → Setoid r ℓ) → (Vector A s → Setoid r ℓ)
+    setoidL₁ S xs .Carrier = Lift₁ (Carrier ∘ S) xs
+    setoidL₁ S xs ._≈_ ρ σ = Lift₁∼ (S _ ._≈_) ρ σ
+    setoidL₁ S xs .isEquivalence .refl .get i = S _ .refl
+    setoidL₁ S xs .isEquivalence .sym p .get i = S _ .sym (p .get i)
+    setoidL₁ S xs .isEquivalence .trans p q .get i =
+      S _ .trans (p .get i) (q .get i)
+
+    [_]₁∼ : ∀ {R : Pred A r} {_∼_ : ∀ {x} → Rel (R x) ℓ} {xs a b} →
+            a ∼ b → Lift₁∼ {R = R} _∼_ {xs = xs} [ a ]₁ [ b ]₁
+    [ p ]₁∼ .get here = p
+
+    []₁∼ : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ} {xs} →
+           Lift₁∼ {R = R} ∼ {xs = xs} []₁ []₁
+    []₁∼ .get (there () i)
+
+    _++₁∼_ : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ} {s t xs ρl ρr σl σr} →
+             Lift₁∼ ∼ {s} {xs ∘ ↙} ρl σl →
+             Lift₁∼ ∼ {t} {xs ∘ ↘} ρr σr →
+             Lift₁∼ {R = R} ∼ {xs = xs} (ρl ++₁ ρr) (σl ++₁ σr)
+    (pl ++₁∼ pr) .get (↙ i) = pl .get i
+    (pl ++₁∼ pr) .get (↘ i) = pr .get i
