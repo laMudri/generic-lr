@@ -12,6 +12,8 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Data.Product
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Relation.Binary.PropositionalEquality as ≡
+  open import Relation.Unary
   open import Relation.Unary.Bunched
 
   open SkewSemiring skewSemiring renaming (Carrier to Ann)
@@ -56,3 +58,8 @@ module Generic.Linear.Syntax.Interpretation.Map
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {A P Q} → rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
     map-s (system L rs) f r (l , t) = l , map-r (rs l) f r t
+
+  map-s′ : ∀ {X Y : Ctx → Scoped} (s : System) →
+           (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
+           (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
+  map-s′ s f t = map-s id-SkewLeftSemimoduleRel s (λ { ≡.refl → f }) ≡.refl t
