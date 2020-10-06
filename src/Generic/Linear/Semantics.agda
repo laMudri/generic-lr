@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K #-}
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Skew
 open import Level using (0ℓ)
@@ -40,6 +40,10 @@ module Generic.Linear.Semantics
 
   Kripke : (𝓥 𝓒 : Scoped) (PΓ : Ctx) (A : Ty) → Ctx → Set
   Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
+
+  mapK𝓒 : ∀ {𝓥 𝓒 𝓒′} → (∀ {A} → ∀[ 𝓒 A ⇒ 𝓒′ A ]) →
+          ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
+  mapK𝓒 f b th .app✴ sp ρ = f (b th .app✴ sp ρ)
 
   record Semantics (d : System) (𝓥 𝓒 : Scoped) : Set where
     field
