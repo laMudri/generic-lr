@@ -1,9 +1,12 @@
 module Generic.Linear.Example.LR where
 
+  open import Algebra.Skew
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product
+  open import Level
   open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+  open import Relation.Unary.Bunched
   open import Size
 
   infixr 5 _⊸_
@@ -42,9 +45,18 @@ module Generic.Linear.Example.LR where
   uω * u1 = uω
   uω * uω = uω
 
-  open import Generic.Linear.Syntax.Term Conc Ann _⊴_ u0 _+_ u1 _*_
-  open import Generic.Linear.Syntax.Interpretation Conc Ann _⊴_ u0 _+_ u1 _*_
-  open import Generic.Linear.Thinning Conc Ann _⊴_ u0 _+_ u1 _*_
+  rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ
+  rawSkewSemiring = record
+    { rawProset = record { Carrier = Ann; _≤_ = _⊴_ }
+    ; 0# = u0
+    ; _+_ = _+_
+    ; 1# = u1
+    ; _*_ = _*_
+    }
+
+  open import Generic.Linear.Syntax.Term Conc rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
+  open import Generic.Linear.Thinning Conc rawSkewSemiring
 
   data `LR : Set where
     `emb `ann : (A : Ty) → `LR
@@ -77,10 +89,10 @@ module Generic.Linear.Example.LR where
   pattern ann S s = `con (`ann S , refl , s)
   pattern lam t = `con (`lam _ _ , refl , t)
   pattern app P Q sp f s =
-    `con (`app _ _ , refl , _✴⟨_⟩_ {P = P} {Q = Q} f sp s)
-  pattern bang P sp s = `con (`bang _ _ , refl , ⟨_⟩·_ {P = P} sp s)
+    `con (`app _ _ , refl , _✴⟨_⟩_ {y = P} {z = Q} f sp s)
+  pattern bang P sp s = `con (`bang _ _ , refl , ⟨_⟩·_ {z = P} sp s)
   pattern bm T P Q sp e t =
-    `con (`bm _ _ T , refl , _✴⟨_⟩_ {P = P} {Q = Q} e sp t)
+    `con (`bm _ _ T , refl , _✴⟨_⟩_ {y = P} {z = Q} e sp t)
 
   myK : ∀ A B → Term _ []ᶜ
   myK A B =

@@ -1,9 +1,12 @@
 module Generic.Linear.Example.LTLC where
 
+  open import Algebra.Skew
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product
+  open import Level
   open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+  open import Relation.Unary.Bunched
   open import Size
 
   infixr 5 _⊸_
@@ -36,9 +39,18 @@ module Generic.Linear.Example.LTLC where
   uω * u1 = uω
   uω * uω = uω
 
-  open import Generic.Linear.Syntax.Term Ty Ann _⊴_ u0 _+_ u1 _*_
-  open import Generic.Linear.Syntax.Interpretation Ty Ann _⊴_ u0 _+_ u1 _*_
-  open import Generic.Linear.Thinning Ty Ann _⊴_ u0 _+_ u1 _*_
+  rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ
+  rawSkewSemiring = record
+    { rawProset = record { Carrier = Ann; _≤_ = _⊴_ }
+    ; 0# = u0
+    ; _+_ = _+_
+    ; 1# = u1
+    ; _*_ = _*_
+    }
+
+  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
+  open import Generic.Linear.Thinning Ty rawSkewSemiring
 
   data `LTLC : Set where
     `lam `app : (A B : Ty) → `LTLC
@@ -59,11 +71,11 @@ module Generic.Linear.Example.LTLC where
     `con (`lam A C , refl ,                      -- a
     `con (`app B C , refl ,
       _✴⟨_⟩_
-        {P = (([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u1 ]}
-        {Q = (([] ++ [ u0 ]) ++ [ u1 ]) ++ [ u0 ]}
+        {y = (([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u1 ]}
+        {z = (([] ++ [ u0 ]) ++ [ u1 ]) ++ [ u0 ]}
         (`con (`app A (B ⊸ C) , refl , _✴⟨_⟩_
-          {P = ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u0 ]) ++ []}
-          {Q = ((([] ++ [ u0 ]) ++ [ u0 ]) ++ [ u1 ]) ++ []}
+          {y = ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u0 ]) ++ []}
+          {z = ((([] ++ [ u0 ]) ++ [ u0 ]) ++ [ u1 ]) ++ []}
           (`var (lvar
             (↙ (↙ (↙ (↙ (↘ here)))))
             refl
@@ -113,7 +125,7 @@ module Generic.Linear.Example.LTLC where
   pattern var i les = `var (lvar i refl les)
   pattern lam t = `con (`lam _ _ , refl , t)
   pattern app A P Q sp s t =
-    `con (`app A _ , refl , _✴⟨_⟩_ {P = P} {Q = Q} s sp t)
+    `con (`app A _ , refl , _✴⟨_⟩_ {y = P} {z = Q} s sp t)
 
   myC′ : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
   myC′ A B C = lam (lam (lam
