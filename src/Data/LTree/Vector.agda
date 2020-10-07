@@ -7,10 +7,16 @@ module Data.LTree.Vector where
   open import Data.LTree
 
   open import Algebra.Core using (Op₂)
-  open import Data.Product using (_×_; _,_)
+  open import Data.Product using (_×_; _,_; uncurry)
+  open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×PW
+    using (×-setoid)
+  open import Data.Unit using (⊤; tt)
   open import Function.Base using (id; _∘_)
-  open import Level using (Level; _⊔_)
-  open import Relation.Binary using (REL; Rel; Setoid; IsEquivalence)
+  open import Function.Equality using (_⟶_; _⟨$⟩_; cong)
+  open import Level using (Level; _⊔_; 0ℓ)
+  open import Relation.Binary
+    using (REL; Rel; Setoid; IsEquivalence; Reflexive)
+  open import Relation.Binary.Construct.Always as ⊤ using ()
   open import Relation.Unary using (Pred)
 
   private
@@ -138,3 +144,35 @@ module Data.LTree.Vector where
              Lift₁∼ {R = R} ∼ {xs = xs} (ρl ++₁ ρr) (σl ++₁ σr)
     (pl ++₁∼ pr) .get (↙ i) = pl .get i
     (pl ++₁∼ pr) .get (↘ i) = pr .get i
+
+    [-]₁ˢ : ∀ {S xs} → S (xs here) ⟶ setoidL₁ {A = A} {r} {ℓ} S xs
+    [-]₁ˢ ._⟨$⟩_ = [_]₁
+    [-]₁ˢ .cong = [_]₁∼
+
+    []₁ˢ : ∀ {S xs} → ⊤.setoid ⊤ 0ℓ ⟶ setoidL₁ {A = A} {r} {ℓ} {ε} S xs
+    []₁ˢ ⟨$⟩ _ = []₁
+    []₁ˢ .cong _ = []₁∼
+
+    ++₁ˢ :
+      ∀ {S xs} →
+      ×-setoid (setoidL₁ {s = s} S (xs ∘ ↙)) (setoidL₁ {s = t} S (xs ∘ ↘)) ⟶
+      setoidL₁ {A = A} {r} {ℓ} S xs
+    ++₁ˢ ._⟨$⟩_ = uncurry _++₁_
+    ++₁ˢ .cong = uncurry _++₁∼_
+
+    []₁η : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ}
+           (refl : ∀ {x} → Reflexive (∼ {x})) {xs ρ} →
+           Lift₁∼ {R = R} ∼ {ε} {xs} []₁ ρ
+    []₁η refl .get (there () i)
+
+    [-]₁η : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ}
+            (refl : ∀ {x} → Reflexive (∼ {x})) {xs ρ} →
+            Lift₁∼ {R = R} ∼ {[-]} {xs} [ ρ .get here ]₁ ρ
+    [-]₁η refl .get here = refl
+
+    ++₁η :
+      ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ}
+      (refl : ∀ {x} → Reflexive (∼ {x})) {xs ρ} →
+      Lift₁∼ {R = R} ∼ {s <+> t} {xs} (mk (ρ .get ∘ ↙) ++₁ mk (ρ .get ∘ ↘)) ρ
+    ++₁η refl .get (↙ i) = refl
+    ++₁η refl .get (↘ i) = refl
