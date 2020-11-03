@@ -1,0 +1,500 @@
+\documentclass[fleqn,aspectratio=169]{beamer}
+\usetheme{Rochester}
+
+\usepackage{cmll}
+\usepackage{mathpartir}
+\usepackage{mathtools}
+\usepackage{stmaryrd}
+\usepackage[style=alphabetic,citestyle=authoryear]{biblatex}
+\addbibresource{../quantitative.bib}
+
+\definecolor{use}{HTML}{008000}
+\newcommand\gr[1]{{\color{use}#1}}
+\newcommand\grctx[1]{\gr{\mathcal{#1}}}
+\newcommand\grP{\grctx P}
+\newcommand\grQ{\grctx Q}
+\newcommand\grR{\grctx R}
+\newcommand\grctxsub[2]{\grctx{#1}_{\gr{#2}}}
+\newcommand\grPe{\grctxsub P e}
+\newcommand\grPf{\grctxsub P f}
+\newcommand\grQe{\grctxsub Q e}
+\newcommand\grQf{\grctxsub Q f}
+\newcommand\sem[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand\ps{\mathit{ps}}
+\newcommand\qs{\mathit{qs}}
+\newcommand\rs{\mathit{rs}}
+\newcommand\wand{\mathrel{\mathord{-}\hspace{-0.75ex}*}}
+\newcommand\env[1]{(#1\mathrm{-Env})}
+\newcommand\thinningN{\mathrm{Thinning}}
+\newcommand\thinning[2]{\thinningN~#1~#2}
+\newcommand\V{\mathcal V}
+\newcommand\C{\mathcal C}
+\newcommand\sqin{\mathrel{\mathrlap{\sqsubset}{\mathord{-}}}}
+\newcommand\sqni{\mathrel{\mathrlap{\sqsupset}{\mathord{-}}}}
+\newcommand\Ctx{\mathrm{Ctx}}
+\newcommand\Ty{\mathrm{Ty}}
+\newcommand\Set{\mathrm{Set}}
+
+%\newenvironment{thinarray}%
+%{\hskip -\arraycolsep\begin{array}[b]{c}}{\hskip -\arraycolsep\end{array}}
+
+% Beamer hacks
+
+\makeatletter
+
+% Detect mode. mathpalette is used to detect the used math style
+\newcommand<>\Alt[2]{%
+  \begingroup
+  \ifmmode
+  \expandafter\mathpalette
+  \expandafter\math@Alt
+  \else
+  \expandafter\make@Alt
+  \fi
+  {{#1}{#2}{#3}}%
+  \endgroup
+}
+
+% Un-brace the second argument (required because \mathpalette reads the three arguments as one
+\newcommand\math@Alt[2]{\math@@Alt{#1}#2}
+
+% Set the two arguments in boxes. The math style is given by #1. \m@th sets \mathsurround to 0.
+\newcommand\math@@Alt[3]{%
+  \setbox\z@ \hbox{$\m@th #1{#2}$}%
+  \setbox\@ne\hbox{$\m@th #1{#3}$}%
+  \@Alt
+}
+
+% Un-brace the argument
+\newcommand\make@Alt[1]{\make@@Alt#1}
+
+% Set the two arguments into normal boxes
+\newcommand\make@@Alt[2]{%
+  \sbox\z@ {#1}%
+  \sbox\@ne{#2}%
+  \@Alt
+}
+
+% Place one of the two boxes using \rlap and place a \phantom box with the maximum of the two boxes
+\newcommand\@Alt[1]{%
+  \alt#1%
+  {\rlap{\usebox0}}%
+  {\rlap{\usebox1}}%
+  \setbox\tw@\null
+  \ht\tw@\ifnum\ht\z@>\ht\@ne\ht\z@\else\ht\@ne\fi
+  \dp\tw@\ifnum\dp\z@>\dp\@ne\dp\z@\else\dp\@ne\fi
+  \wd\tw@\ifnum\wd\z@>\wd\@ne\wd\z@\else\wd\@ne\fi
+  \box\tw@
+}
+
+\makeatother
+
+\title{A Hygiene and Framework for Linear Calculi with Binding}
+\author{James Wood\inst{1} \and Bob Atkey\inst{1}}
+\institute{\inst{1}University of Strathclyde}
+\date{Tallinn, October 2020}
+
+\begin{document}
+\frame{\titlepage}
+\begin{frame}
+  \frametitle{Plan}
+  \begin{enumerate}
+    \item Solve syntax (up to and including substitution)
+    \item Leave interesting stuff (semantics\footfullcite{AACMM20}) to the user
+  \end{enumerate}
+
+  Which syntaxes?
+  \begin{itemize}
+    \item Variables annotated by elements of a (skew) semiring describing
+      \emph{usage}
+    \item $\gr rx : A, \ldots, \gr sy : B \vdash \mathcal J$
+    \item $(0, +)$ --- weakening/contraction, delete/duplicate
+    \item $(1, *)$ --- use/modality, change of context
+    \item $\trianglelefteq$ --- general/specific, if
+      $\gr r \trianglelefteq \gr s$ and we have $\gr rx : A$, we can have
+      $\gr sx : A$.
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{A syntax for syntaxes}
+  \only<1>{
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {\ps}
+      {\mathcal J}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {\grR\Gamma \vdash \ps}
+      {\grR\Gamma \vdash \mathcal J}
+    \end{mathpar}
+  }
+  \only<2>{
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {\ps \\ * \\ \qs}
+      {\mathcal J}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {
+        \grP\Gamma \vdash \ps
+        \\ \grR \trianglelefteq \grP + \grQ \\
+        \grQ\Gamma \vdash \qs
+      }
+      {\grR\Gamma \vdash \mathcal J}
+    \end{mathpar}
+  }
+  \only<3>{
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {\ps \\ * \\ (\qs \\ \wedge \\ \rs)}
+      {\mathcal J}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {
+        \grP\Gamma \vdash \ps
+        \\ \grR \trianglelefteq \grP + \grQ \\
+        {\hskip -\arraycolsep
+          \begin{array}[b]{c}
+            \grQ\Gamma \vdash \qs \\
+            \grQ\Gamma \vdash \rs
+          \end{array}
+          \hskip -\arraycolsep}
+      }
+      {\grR\Gamma \vdash \mathcal J}
+    \end{mathpar}
+  }
+  \only<4>{
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {A \oplus B \\ * \\ (\qs \\ \wedge \\ \rs)}
+      {C}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {
+        \grP\Gamma \vdash A \oplus B
+        \\ \grR \trianglelefteq \grP + \grQ \\
+        {\hskip -\arraycolsep
+          \begin{array}[b]{c}
+            \grQ\Gamma \vdash \qs \\
+            \grQ\Gamma \vdash \rs
+          \end{array}
+          \hskip -\arraycolsep}
+     }
+     {\grR\Gamma \vdash C}
+    \end{mathpar}
+  }
+  \only<5>{
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {
+        {\hskip -\arraycolsep
+          \begin{array}{c}\\\vphantom\vdots\\A \oplus B\end{array}
+          \hskip -\arraycolsep}
+        \\ {\hskip -\arraycolsep
+          \begin{array}{c}\\\vphantom\vdots\\ *\end{array}
+          \hskip -\arraycolsep} \\
+        \left({\hskip -\arraycolsep
+            \begin{array}[c]{ccc}
+              \text{\footnotesize\([\gr1A]\)}
+                     & & \text{\footnotesize\([\gr1B]\)} \\
+              \vdots & & \vdots \\
+              C & \wedge & C
+            \end{array}
+            \hskip -\arraycolsep}\right)
+      }
+      {C}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {
+        \grP\Gamma \vdash A \oplus B
+        \\ \grR \trianglelefteq \grP + \grQ \\
+        {\hskip -\arraycolsep
+          \begin{array}[b]{c}
+            \grQ\Gamma, \gr1A \vdash C \\
+            \grQ\Gamma, \gr1B \vdash C
+          \end{array}
+          \hskip -\arraycolsep}
+      }
+      {\grR\Gamma \vdash C}
+    \end{mathpar}
+  }
+\end{frame}
+\begin{frame}
+  \frametitle{Premise combinators\footfullcite{RPKV20}}
+  \begin{align*}
+    \sem{\hskip -\arraycolsep
+    \begin{array}{c}
+      \text{\footnotesize\([\grQ\Delta]\)} \\
+      \vdots \\
+      \mathcal J
+    \end{array}\hskip -\arraycolsep}~\grR\Gamma
+                          &\coloneqq \grR\Gamma, \grQ\Delta \vdash \mathcal J \\
+    \sem{\top}~\grR\Gamma &\coloneqq \top \\
+    \sem{\ps \wedge \qs}~\grR\Gamma
+                          &\coloneqq \sem\ps~\grR\Gamma
+                            \;\wedge\; \sem\qs~\grR\Gamma \\
+    \sem{I}~\grR\Gamma    &\coloneqq \grR \trianglelefteq \gr0 \\
+    \sem{\ps * \qs}~\grR\Gamma
+                          &\coloneqq \exists\grP,\grQ.~
+                            \grR \trianglelefteq \grP + \grQ
+                            \;\wedge\; \sem\ps~\grP\Gamma
+                            \;\wedge\; \sem\qs~\grQ\Gamma \\
+    \sem{\gr r \cdot \ps}~\grR\Gamma
+                          &\coloneqq \exists\grP.~
+                            \grR \trianglelefteq \gr r \grP
+                            \;\wedge\; \sem\ps~\grP\Gamma
+  \end{align*}
+\end{frame}
+\begin{frame}
+  \frametitle{Bang!}
+  \begin{align*}
+    &\mathcal J \Coloneqq A \\
+    &\{\gr0 \triangleright \gr\omega \triangleleft \gr1\},~
+      \gr\omega \trianglelefteq \gr\omega + \gr\omega,~
+      \gr\omega \trianglelefteq \gr0
+  \end{align*}
+  \begin{mathpar}
+    \inferrule*
+    {\gr\omega \cdot (M : A)}
+    {[M] : \oc_{\gr\omega}A}
+    \and
+    \inferrule*
+    {\Gamma; {\cdot} \vdash M : A}
+    {\Gamma; {\cdot} \vdash [M] : \oc A}
+  \end{mathpar}
+
+  \begin{mathpar}
+    \inferrule*[sep=1em]
+    {
+      M : \oc_{\gr\omega}A
+      \\ * \\
+      \overset{[\gr\omega x : A]}{\overset\vdots{N : C}}
+    }
+    {\textrm{let }x = [M]\textrm{ in }N : C}
+    \and
+    \inferrule*
+    {\Gamma; \Delta_M \vdash M : \oc A \\ \Gamma, x : A; \Delta_N \vdash N : C}
+    {\Gamma; \Delta_M, \Delta_N \vdash \textrm{let }x = [M]\textrm{ in }N : C}
+  \end{mathpar}
+\end{frame}
+\begin{frame}
+  \frametitle{Justifying the ancients of $\mu\tilde\mu$}
+  $\mathcal J \Coloneqq
+  \mathrm{command} \mid A~\mathrm{term} \mid A~\mathrm{coterm}$
+
+  \only<1>{
+    \begin{mathpar}
+      \inferrule*
+      {
+        \overset{[\gr1\alpha : A~\mathrm{coterm}]}
+        {
+          \overset{\vdots}
+          {c~\mathrm{command}}
+        }
+      }
+      {\mu\alpha.~c : A~\mathrm{term}}
+      \and
+      \inferrule*
+      {c : (\grP\Gamma \vdash \gr1\alpha : A, \grQ\Delta)}
+      {\grP\Gamma \vdash \mu\alpha.~c : A \mid \grQ\Delta}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*
+      {
+        \overset{[\gr1x : A~\mathrm{term}]}
+        {
+          \overset{\vdots}
+          {c~\mathrm{command}}
+        }
+      }
+      {\tilde\mu x.~c : A~\mathrm{coterm}}
+      \and
+      \inferrule*
+      {c : (\grP\Gamma, 1x : A \vdash \grQ\Delta)}
+      {\grP\Gamma \mid \tilde\mu x.~c : A \vdash \grQ\Delta}
+    \end{mathpar}
+  }
+  \only<2>{
+    \begin{mathpar}
+      \inferrule*
+      {
+        \overset{
+          [\gr1\alpha : A~\mathrm{coterm},~\gr1\beta : B~\mathrm{coterm}]
+        }
+        {
+          \overset{\vdots}
+          {c~\mathrm{command}}
+        }
+      }
+      {\mu(\alpha,\beta).~c : A \parr B~\mathrm{term}}
+      \and
+      \inferrule*
+      {c : (\grP\Gamma \vdash \gr1\alpha : A, \gr1\beta : B, \grQ\Delta)}
+      {\grP\Gamma \vdash \mu(\alpha,\beta).~c : A \parr B \mid \grQ\Delta}
+    \end{mathpar}
+
+    \begin{mathpar}
+      \inferrule*[sep=1em]
+      {
+        e : A~\mathrm{coterm}
+        \\ * \\
+        f : B~\mathrm{coterm}
+      }
+      {(e,f) : A \parr B~\mathrm{coterm}}
+      \and
+      \inferrule*
+      {
+        \grPe\Gamma \mid e : A \vdash \grQe\Delta
+        \\
+        \grPf\Gamma \mid f : A \vdash \grQf\Delta
+      }
+      {(\grPe + \grPf)\Gamma \mid (e,f) : A \parr B \vdash
+        (\grQe + \grQf)\Delta}
+    \end{mathpar}
+  }
+\end{frame}
+\begin{frame}
+  \frametitle{The variable rule}
+  \begin{mathpar}
+    \inferrule*
+    {(x : \mathcal J) \in \Gamma \\ \grP \trianglelefteq \langle x \rvert}
+    {\grP\Gamma \vdash x : \mathcal J}
+  \end{mathpar}
+
+  We write $\mathcal J \sqin \grP\Gamma$.
+\end{frame}
+\begin{frame}
+  \frametitle{Generic semantics (easy mode)}
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      Let $d$ be our collection of rules.
+
+      \begin{align*}
+        \mathit{var} &: \only<1>{\forall \grR\Gamma.~
+                       \V~A~\grR\Gamma \to \C~A~\grR\Gamma}
+                       \only<2->{\forall[~\V~A \to \C~A~]} \\
+        \mathit{alg} &: \only<1>{\forall \grR\Gamma.~
+                       \sem d\,\C~A~\grR\Gamma \to \C~A~\grR\Gamma}
+                       \only<2->{\forall[~\sem d\,\C~A \to \C~A~]} \\
+      \end{align*}
+
+      We want to derive:
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \only<3>{
+        \begin{block}{Examples}
+          ``Syntactic'': $\C~A~\grR\Gamma \coloneqq \grR\Gamma \vdash_d A$
+          \begin{itemize}
+            \item Renaming: $\V~A~\grR\Gamma \coloneqq A \sqin \grR\Gamma$
+            \item Substitution:
+              $\V~A~\grR\Gamma \coloneqq \grR\Gamma \vdash_d A$
+          \end{itemize}
+
+          ``Semantic'':
+          \vspace{-1em}
+          \begin{align*}
+            \C~A~\grR\Gamma &\coloneqq \sem{\grR\Gamma} \to \sem A \\
+            \V~A~\grR\Gamma &\coloneqq A \sqin \grR\Gamma
+          \end{align*}
+          \vspace{-2em}
+        \end{block}
+      }
+    \end{column}
+  \end{columns}
+
+  \begin{align*}
+    \mathit{semantics} &: \forall \grP\Gamma, \grQ\Delta, A.~
+                         \env{\grP\Gamma}~\V~\grQ\Delta \to
+                         \grP\Gamma \vdash_d A \to \C~A~\grQ\Delta
+  \end{align*}
+
+  Intuitionistically, $\env{\Gamma}~\V~\Delta = A \in \Gamma \to \V~A~\Delta$.
+\end{frame}
+\begin{frame}
+  \frametitle{Environments, linearly}
+  Intuitionistically, $\env{\Gamma}~\V~\Delta = A \in \Gamma \to \V~A~\Delta$.
+
+  To make $\env{\grP\Gamma}~\V~\grQ\Delta$, we add:
+  \begin{itemize}
+    \item a matrix $\gr\Psi$
+    \item such that $\grQ \trianglelefteq \grP\gr\Psi$.
+  \end{itemize}
+  The lookup function now has type
+  $(x : A) \in \Gamma \to \V~A~\gr\Psi_x\Delta$. \pause
+
+  Special environments:
+  $\thinning{\grP\Gamma}{\grQ\Delta} \coloneqq
+  \env{\grP\Gamma}~(\sqin)~\grQ\Delta$
+
+  Example: $\thinning{(\gr2x : A, \gr1x' : A, \gr2y : B)}%
+  {(\gr0w : D, \gr2y : B, \gr0z : C, \gr3x : A)}$
+  \begin{itemize}
+    \item $\gr\Psi \coloneqq
+      \begin{pmatrix}
+        \gr0&\gr0&\gr0&\gr1\\
+        \gr0&\gr0&\gr0&\gr1\\
+        \gr0&\gr1&\gr0&\gr0
+      \end{pmatrix}
+      \begin{matrix}
+        {} \sqni A \\ {} \sqni A \\ {} \sqni B
+      \end{matrix}$
+  \end{itemize}
+\end{frame}
+\begin{frame}
+  \frametitle{Thinnings, linearly}
+  \[\thinning{\grP\Gamma}{\grQ\Delta} \coloneqq
+  \env{\grP\Gamma}~(\sqin)~\grQ\Delta\]
+  \begin{align*}
+    (\square T)~\grP\Gamma &\coloneqq \forall[~\thinningN~\grP\Gamma \to T~] \\
+    \mathrm{Thinnable}~T   &\coloneqq \forall[~T \to \square T~] \\
+    (S \wand T)~\grP\Gamma &\coloneqq \forall\grR,\grQ.~
+                             \grR \trianglelefteq \grP + \grQ \to
+                             S~\grQ\Gamma \to T~\grR\Gamma \\
+    \mathrm{Kripke}~\grR\Theta~A
+                           &\coloneqq \square(\env{\grR\Theta}~\V \wand \C~A)
+  \end{align*}
+\end{frame}
+\begin{frame}
+  \frametitle{Generic semantics (hard mode)}
+  \begin{align*}
+    \mathrm{Kripke}~\grR\Theta &: \Ty \to \Ctx \to \Set \\
+    \mathrm{Kripke}~\grR\Theta~A~\grQ\Delta
+    &\coloneqq \square(\env{\grR\Theta}~\V \wand \C~A)~\grQ\Delta
+  \end{align*}
+
+  A semantics respecting variable binding needs:
+  \begin{align*}
+    \mathit{th}^\V &: \forall A.~\mathrm{Thinnable}~(\V~A) \\
+    \mathit{var} &: \forall[~\V~A \to \C~A~] \\
+    \mathit{alg} &: \forall[~\sem d\,\mathrm{Kripke}~A \to \C~A~] \\
+    \\
+    \sem d &: (\Ctx \to \Ty \to \Ctx \to \Set) \to \Ty \to \Ctx \to \Set
+  \end{align*}
+\end{frame}
+\begin{frame}
+  \frametitle{Conclusion}
+  \begin{itemize}
+    \item Generalise AACMM20 to linear and modal systems.
+    \item Syntax --- bunched logic
+    \item Semantics --- linear algebra
+    \item Future work:
+      \begin{itemize}
+        \item First order definition of environments
+        \item Generic usage checking
+        \item Partial/relational algebra
+        \item Fusion properties
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+\end{document}
