@@ -22,7 +22,6 @@ module Generic.Linear.Extend
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Environment Ty rawSkewSemiring
     renaming (var to ivar)
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
   open _─Env
 
   -- Classes for extensions by 0-use contexts
