@@ -28,10 +28,11 @@ module Generic.Linear.Environment.Recursive
     open module Dummy* {s} =
       BunchedScaling (λ (R : Vector _ s) r P → R ⊴* r *ₗ P)
 
-  _─Envᵣ : (PΓ : Ctx) (𝓥 : Scoped) (QΔ : Ctx) → Set
-  (ctx P Γ ─Envᵣ) 𝓥 QΔ = go P Γ QΔ
-    where
+  module _─Envᵣ (𝓥 : Scoped) where
     go : ∀ {s} → Vector Ann s → Vector Ty s → Ctx → Set
     go {[-]} P Γ = P here ·ᶜ 𝓥 (Γ here)
     go {ε} P Γ = ✴1ᶜ
     go {s <+> t} P Γ = go (P ∘ ↙) (Γ ∘ ↙) ✴ᶜ go (P ∘ ↘) (Γ ∘ ↘)
+
+  _─Envᵣ : (PΓ : Ctx) (𝓥 : Scoped) (QΔ : Ctx) → Set
+  (ctx P Γ ─Envᵣ) 𝓥 QΔ = _─Envᵣ.go 𝓥 P Γ QΔ
