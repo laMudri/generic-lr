@@ -83,8 +83,7 @@ module Generic.Linear.Thinning.Properties
   tyq (lookup identity v) = tyq v
   basis (lookup identity v) = ⊴*-refl
 
-  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in
-           (∀ {A P Q} → Q ⊴* P → 𝓥 A (ctx P Θ) → 𝓥 A (ctx Q Θ)) →
+  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in IsPresheaf 𝓥 →
            Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
   M (select 𝓥-psh th ρ) = M th *ᴹ M ρ
   sums (select {PΓ = PΓ} {QΔ} 𝓥-psh th ρ) =
