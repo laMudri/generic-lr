@@ -100,6 +100,15 @@ module Data.LTree.Vector where
     (ru ++₂ rv) .get (↙ i) = ru .get i
     (ru ++₂ rv) .get (↘ i) = rv .get i
 
+    un[-]₂ : {u : Vector A [-]} {v : Vector B [-]} →
+             Lift₂ R u v → R (u here) (v here)
+    un[-]₂ r = r .get here
+
+    un++₂ : {u : Vector A (s <+> t)} {v : Vector B (s <+> t)} →
+            Lift₂ R u v →
+            Lift₂ R (u ∘ ↙) (v ∘ ↙) × Lift₂ R (u ∘ ↘) (v ∘ ↘)
+    un++₂ (mk r) = mk (r ∘ ↙) , mk (r ∘ ↘)
+
   module _ (b : A → B) (e : B) (a : B → B → B) where
 
     fold : Vector A s → B
@@ -113,6 +122,27 @@ module Data.LTree.Vector where
   module _ where
     open Setoid
     open IsEquivalence
+
+    setoid : Setoid a ℓ → LTree → Setoid a ℓ
+    setoid S s .Carrier = Vector (S .Carrier) s
+    setoid S s ._≈_ = Lift₂ (S ._≈_)
+    setoid S s .isEquivalence .refl .get i = S .refl
+    setoid S s .isEquivalence .sym p .get i = S .sym (p .get i)
+    setoid S s .isEquivalence .trans p q .get i =
+      S .trans (p .get i) (q .get i)
+
+    [-]ˢ : ∀ {S} → S ⟶ setoid {a} {ℓ} S [-]
+    [-]ˢ ._⟨$⟩_ = [_]
+    [-]ˢ .cong = [_]₂
+
+    []ˢ : ∀ {S} → ⊤.setoid ⊤ 0ℓ ⟶ setoid {a} {ℓ} S ε
+    []ˢ ⟨$⟩ _ = []
+    []ˢ .cong _ = []₂
+
+    ++ˢ : ∀ {S} →
+          ×-setoid (setoid S s) (setoid S t) ⟶ setoid {a} {ℓ} S (s <+> t)
+    ++ˢ ⟨$⟩ (xs , ys) = xs ++ ys
+    ++ˢ .cong (p , q) = p ++₂ q
 
     infix 5 _++₁∼_
 
