@@ -8,7 +8,7 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
 
-    record ✴1 (x : A) : Set ℓ where
+    record ✴1 {v} (x : A) : Set (ℓ ⊔ v) where
       constructor ✴1⟨_⟩
       field
         split : x ∼0
