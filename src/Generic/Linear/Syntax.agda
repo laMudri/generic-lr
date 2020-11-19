@@ -5,6 +5,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product using (_×_; _,_)
+  open import Level
   open import Function.Base using (_∘_)
   open import Relation.Unary
 
@@ -81,8 +82,8 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
       rules : (l : Label) → Rule
   open System public
 
-  Scoped : Set₁
-  Scoped = Ty → Ctx → Set
+  Scoped : ∀ ℓ → Set (suc ℓ)
+  Scoped ℓ = Ty → Ctx → Set ℓ
 
-  Scope : Scoped → Ctx → Scoped
+  Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
   Scope T QΔ A = (_++ᶜ QΔ) ⊢ T A

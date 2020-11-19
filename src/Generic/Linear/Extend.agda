@@ -4,7 +4,7 @@ open import Algebra.Skew
 open import Level using (0ℓ)
 
 module Generic.Linear.Extend
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ) {ℓ}
   where
 
   open SkewSemiring skewSemiring
@@ -26,7 +26,7 @@ module Generic.Linear.Extend
 
   -- Classes for extensions by 0-use contexts
 
-  record LeftExtend (𝓥 : Scoped) : Set where
+  record LeftExtend (𝓥 : Scoped ℓ) : Set ℓ where
     constructor mk
     field
       embedVarˡ : ∀ {s u Γ Θ A} (v : Var A Θ) →
@@ -38,7 +38,7 @@ module Generic.Linear.Extend
     extendˡ .lookup = embedVarˡ
   open LeftExtend {{...}} public
 
-  record RightExtend (𝓥 : Scoped) : Set where
+  record RightExtend (𝓥 : Scoped ℓ) : Set ℓ where
     constructor mk
     field
       embedVarʳ : ∀ {s u Γ Θ A} (v : Var A Θ) →

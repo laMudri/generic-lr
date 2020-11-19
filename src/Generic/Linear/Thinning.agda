@@ -21,6 +21,10 @@ module Generic.Linear.Thinning
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Environment Ty rawSkewSemiring
 
+  private
+    variable
+      ℓ : Level
+
   record LVar (A : Ty) (PΓ : Ctx) : Set where
     constructor lvar
 
@@ -39,8 +43,8 @@ module Generic.Linear.Thinning
   Thinning : (PΓ QΔ : Ctx) → Set
   Thinning PΓ QΔ = (PΓ ─Env) LVar QΔ
 
-  □ : (Ctx → Set) → (Ctx → Set)
+  □ : (Ctx → Set ℓ) → (Ctx → Set ℓ)
   (□ T) PΓ = ∀[ Thinning PΓ ⇒ T ]
 
-  Thinnable : (Ctx → Set) → Set
+  Thinnable : (Ctx → Set ℓ) → Set ℓ
   Thinnable T = ∀[ T ⇒ □ T ]

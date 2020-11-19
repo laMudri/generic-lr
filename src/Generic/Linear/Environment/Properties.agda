@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Skew
-open import Level using (0ℓ)
+open import Level using (Level; 0ℓ)
 
 module Generic.Linear.Environment.Properties
   (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
@@ -14,8 +14,9 @@ module Generic.Linear.Environment.Properties
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
   open import Data.Product
-  open import Relation.Unary
-  open import Relation.Unary.Bunched
+  open import Relation.Unary using (IUniversal)
+  open import Relation.Unary.Checked
+  open import Relation.Unary.Bunched.Checked
   open import Relation.Binary.PropositionalEquality
 
   open import Generic.Linear.Operations rawSkewSemiring
@@ -30,7 +31,8 @@ module Generic.Linear.Environment.Properties
     variable
       PΓ QΔ RΘ : Ctx
       T : Ctx → Set
-      𝓥 𝓦 : Scoped
+      ℓ : Level
+      𝓥 𝓦 : Scoped ℓ
       s t u : LTree
       P Q R : Vector Ann s
       A : Ty

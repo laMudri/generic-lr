@@ -30,6 +30,6 @@ module Generic.Linear.Syntax.Term
      A : Ty
      sz : Size
 
-  data Tm (d : System) : Size → Scoped where
+  data Tm (d : System) : Size → Scoped 0ℓ where
     `var : ∀[ LVar                     A ⇒ Tm d (↑ sz) A ]
     `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]

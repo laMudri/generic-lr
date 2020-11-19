@@ -2,7 +2,7 @@
 
 open import Algebra.Skew
 open import Function.Base using (flip; _∘_)
-open import Level using (0ℓ)
+open import Level using (Level; 0ℓ)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Thinning.Properties
@@ -34,7 +34,8 @@ module Generic.Linear.Thinning.Properties
     variable
       PΓ QΔ RΘ : Ctx
       T : Ctx → Set
-      𝓥 : Scoped
+      ℓ : Level
+      𝓥 : Scoped ℓ
       s t u : LTree
       P P′ Q Q′ R : Vector Ann s
       A : Ty

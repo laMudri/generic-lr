@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Skew
-open import Level using (0ℓ)
+open import Level using (Level; 0ℓ; _⊔_)
 
 module Generic.Linear.Semantics
   (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
@@ -37,15 +37,19 @@ module Generic.Linear.Semantics
   private
     variable
       A : Ty
+      ℓ v c : Level
 
-  Kripke : (𝓥 𝓒 : Scoped) (PΓ : Ctx) (A : Ty) → Ctx → Set
+  Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) (PΓ : Ctx) (A : Ty) →
+           Ctx → Set (v ⊔ c)
   Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
 
-  mapK𝓒 : ∀ {𝓥 𝓒 𝓒′} → (∀ {A} → ∀[ 𝓒 A ⇒ 𝓒′ A ]) →
+  mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
+          (∀ {A} → ∀[ 𝓒 A ⇒ 𝓒′ A ]) →
           ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
   mapK𝓒 f b th .app✴ sp ρ = f (b th .app✴ sp ρ)
 
-  record Semantics (d : System) (𝓥 𝓒 : Scoped) : Set where
+  record Semantics (d : System) (𝓥 : Scoped v) (𝓒 : Scoped c)
+                   : Set (v ⊔ c) where
     field
       th^𝓥 : Thinnable (𝓥 A)
       var : ∀[ 𝓥 A ⇒ 𝓒 A ]
@@ -54,7 +58,7 @@ module Generic.Linear.Semantics
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 QP v = th^𝓥 v (subuse-th QP)
 
-    _─Comp : Ctx → Scoped → Ctx → Set
+    _─Comp : Ctx → Scoped ℓ → Ctx → Set ℓ
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
 
     semantics : ∀ {PΓ QΔ} → (PΓ ─Env) 𝓥 QΔ → (PΓ ─Comp) 𝓒 QΔ
@@ -68,7 +72,7 @@ module Generic.Linear.Semantics
                                      (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
                  (ρ .lookup (plain-var v)))
     semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
-      alg (map-s linRel {Scope (Tm d sz)} {Kripke 𝓥 𝓒} d
+      alg (map-s linRel {X = Scope (Tm d sz)} {Y = Kripke 𝓥 𝓒} d
                  (λ {RΘ} {A} {P′} {Q′} r →
                    body {ctx P′ Γ} {ctx Q′ Δ} {sz} (pack (ρ .M) r (ρ .lookup)))
                  {_} {P} {Q} (ρ .sums)

@@ -8,7 +8,8 @@ module Generic.Linear.Syntax.Interpretation.Map
   where
 
   open import Algebra.Skew.Relation
-  open import Algebra.Skew.Construct.Vector
+  open import Algebra.Skew.Construct.Vector hiding (pure; _<*>_)
+  open import Data.Unit.Polymorphic
   open import Data.Product
   open import Data.LTree
   open import Data.LTree.Vector
@@ -21,6 +22,10 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
 
+  private
+    variable
+      x y : Level
+
   LinRel : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
   LinRel R s t = SkewLeftSemimoduleRel
     (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t) lzero
@@ -31,11 +36,11 @@ module Generic.Linear.Syntax.Interpretation.Map
 
     open SkewLeftSemimoduleRel R
 
-    map-p : ∀ {X Y : Ctx → Scoped} (ps : Premises) →
+    map-p : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (ps : Premises) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {P Q} → rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (PΓ `⊢ A) f r t = f r t
-    map-p `⊤ f r t = t
+    map-p `⊤ f r tt = tt
     map-p `I f r ✴1⟨ t ⟩ = ✴1⟨ rel-0ₘ (t , r) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
     map-p (ps `* qs) f r (s ✴⟨ sp ⟩ t) =
@@ -49,17 +54,17 @@ module Generic.Linear.Syntax.Interpretation.Map
     --   let ⟨ r0 , r1 ⟩ sp+′ = rel-+ₘ (sp+ , r) in
     --   □⟨ sp0′ , {!sp+′!} ⟩ map-p ps f r t
 
-    map-r : ∀ {X Y : Ctx → Scoped} (r : Rule) →
+    map-r : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (r : Rule) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {A P Q} → rel P Q → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
     map-r (rule ps A) f r (q , t) = q , map-p ps f r t
 
-    map-s : ∀ {X Y : Ctx → Scoped} (s : System) →
+    map-s : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {A P Q} → rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
     map-s (system L rs) f r (l , t) = l , map-r (rs l) f r t
 
-  map-s′ : ∀ {X Y : Ctx → Scoped} (s : System) →
+  map-s′ : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
            (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
            (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
   map-s′ s f t = map-s id-SkewLeftSemimoduleRel s (λ { ≡.refl → f }) ≡.refl t

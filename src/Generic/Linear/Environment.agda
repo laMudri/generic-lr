@@ -26,10 +26,11 @@ module Generic.Linear.Environment
     variable
       PΓ QΔ RΘ : Ctx
       T : Ctx → Set
-      𝓥 : Scoped
+      ℓ : Level
+      𝓥 : Scoped ℓ
 
   -- TODO: this probably should be somewhere else.
-  IsPresheaf : Scoped → Set
+  IsPresheaf : Scoped ℓ → Set ℓ
   IsPresheaf 𝓒 =
     ∀ {s} {Γ : Vector Ty s} {P Q} {A} →
     Q ⊴* P → 𝓒 A (ctx P Γ) → 𝓒 A (ctx Q Γ)
@@ -41,7 +42,7 @@ module Generic.Linear.Environment
       tyq : Γ idx ≡ A
   open Var public
 
-  record _─Env (PΓ : Ctx) (𝓥 : Scoped) (QΔ : Ctx) : Set where
+  record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set ℓ where
     constructor pack
 
     open Ctx PΓ renaming (s to s; Γ to Γ; R to P)

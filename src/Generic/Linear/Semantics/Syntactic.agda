@@ -1,7 +1,7 @@
 {-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Skew
-open import Level using (0ℓ)
+open import Level using (Level; 0ℓ)
 
 module Generic.Linear.Semantics.Syntactic
   (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
@@ -43,7 +43,9 @@ module Generic.Linear.Semantics.Syntactic
     variable
       d : System
       A : Ty
-      𝓥 𝓒 : Scoped
+      v c : Level
+      𝓥 : Scoped v
+      𝓒 : Scoped c
       RΘ : Ctx
 
   open Semantics
@@ -54,8 +56,7 @@ module Generic.Linear.Semantics.Syntactic
   Ren : Semantics d LVar (Tm d ∞)
   Ren .th^𝓥 = th^LVar
   Ren .var = `var
-  Ren {d} .alg = `con ∘
-    map-s id-SkewLeftSemimoduleRel d (λ { refl → reify {𝓒 = Tm d ∞} }) refl
+  Ren {d} .alg = `con ∘ map-s′ d (reify {𝓒 = Tm d ∞})
 
   th^Tm : Thinnable (Tm d ∞ A)
   th^Tm t th = semantics Ren th t
@@ -70,5 +71,4 @@ module Generic.Linear.Semantics.Syntactic
   Sub : Semantics d (Tm d ∞) (Tm d ∞)
   Sub .th^𝓥 = th^Tm
   Sub .var = id
-  Sub {d} .alg = `con ∘
-    map-s id-SkewLeftSemimoduleRel d (λ { refl → reify {𝓒 = Tm d ∞} }) refl
+  Sub {d} .alg = `con ∘ map-s′ d (reify {𝓒 = Tm d ∞})
