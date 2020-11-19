@@ -13,6 +13,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Data.Product
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Function.Base
   open import Relation.Binary.PropositionalEquality as ≡
   open import Relation.Unary
   open import Relation.Unary.Bunched
@@ -68,3 +69,32 @@ module Generic.Linear.Syntax.Interpretation.Map
            (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
            (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
   map-s′ s f t = map-s id-SkewLeftSemimoduleRel s (λ { ≡.refl → f }) ≡.refl t
+
+  open import Category.Applicative
+
+  module _ {F : Set x → Set x} {{appF : RawApplicative F}} where
+
+    open RawApplicative appF
+
+    sequence-p :
+      ∀ {X : Ctx → Scoped x} (ps : Premises) →
+      ∀[ ⟦ ps ⟧p (λ QΔ B PΓ → F (X QΔ B PΓ)) ⇒ F ∘ ⟦ ps ⟧p X ]
+    sequence-p (PΓ `⊢ A) t = t
+    sequence-p `⊤ tt = pure tt
+    sequence-p `I t = pure t
+    sequence-p (ps `∧ qs) (s , t) = _,_ <$> sequence-p ps s ⊛ sequence-p qs t
+    sequence-p (ps `* qs) (s ✴⟨ sp ⟩ t) =
+      _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
+    sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
+      ⟨ sp ⟩·_ <$> sequence-p ps t
+
+    sequence-r :
+      ∀ {X : Ctx → Scoped x} (r : Rule) →
+      ∀ {A} → ∀[ ⟦ r ⟧r (λ QΔ B PΓ → F (X QΔ B PΓ)) A ⇒ F ∘ ⟦ r ⟧r X A ]
+    sequence-r (rule ps A) (q , t) = (q ,_) <$> sequence-p ps t
+
+    sequence-s :
+      ∀ {X : Ctx → Scoped x} (s : System) →
+      ∀ {A} → ∀[ ⟦ s ⟧s (λ QΔ B PΓ → F (X QΔ B PΓ)) A ⇒ F ∘ ⟦ s ⟧s X A ]
+    sequence-s (system L rs) (l , t) =
+      (l ,_) <$> sequence-r (rs l) t
