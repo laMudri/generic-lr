@@ -3,6 +3,7 @@ module Generic.Linear.Example.LR where
   open import Algebra.Skew
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Data.LTree.Automation
   open import Data.Product
   open import Level
   open import Relation.Binary.PropositionalEquality using (_≡_; refl)
@@ -14,8 +15,7 @@ module Generic.Linear.Example.LR where
   data Dir : Set where
     syn chk : Dir
 
-  data Ann : Set where
-    u0 u1 uω : Ann
+  open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
 
   data Ty : Set where
     ι : Ty
@@ -25,34 +25,6 @@ module Generic.Linear.Example.LR where
   Conc = Dir × Ty
 
   open import Generic.Linear.Syntax Conc Ann
-
-  data _⊴_ : (a b : Ann) → Set where
-    ⊴-refl : ∀ {a} → a ⊴ a
-    ω⊴0 : uω ⊴ u0
-    ω⊴1 : uω ⊴ u1
-
-  _+_ : (a b : Ann) → Ann
-  u0 + b = b
-  u1 + u0 = u1
-  u1 + u1 = uω
-  u1 + uω = uω
-  uω + b = uω
-
-  _*_ : (a b : Ann) → Ann
-  u0 * b = u0
-  u1 * b = u1
-  uω * u0 = u0
-  uω * u1 = uω
-  uω * uω = uω
-
-  rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ
-  rawSkewSemiring = record
-    { rawProset = record { Carrier = Ann; _≤_ = _⊴_ }
-    ; 0# = u0
-    ; _+_ = _+_
-    ; 1# = u1
-    ; _*_ = _*_
-    }
 
   open import Generic.Linear.Syntax.Term Conc rawSkewSemiring
   open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
@@ -94,6 +66,33 @@ module Generic.Linear.Example.LR where
   pattern bm T P Q sp e t =
     `con (`bm _ _ T , refl , _✴⟨_⟩_ {y = P} {z = Q} e sp t)
 
+  open import Generic.Linear.Example.UsageCheck Conc
+  open WithSkewSemiring skewSemiring
+  open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹
+
+  module V where
+
+    open import Generic.Linear.Syntax.Term Conc U.0-rawSkewSemiring public
+    open import Generic.Linear.Syntax.Interpretation Conc U.0-rawSkewSemiring
+      public
+    open import Generic.Linear.Thinning Conc U.0-rawSkewSemiring public
+
+  pattern uvar i = V.`var (V.lvar i refl _)
+  pattern uemb e = V.`con (`emb _ , refl , e)
+  pattern uann S s = V.`con (`ann S , refl , s)
+  pattern ulam t = V.`con (`lam _ _ , refl , t)
+  pattern uapp f s = V.`con (`app _ _ , refl , f ✴⟨ _ ⟩ s)
+  pattern ubang s = V.`con (`bang _ _ , refl , ⟨ _ ⟩· s)
+  pattern ubm T e t = V.`con (`bm _ _ T , refl , e ✴⟨ _ ⟩ t)
+
+  myK : ∀ A B → Term _ []ᶜ
+  myK A B = elab-unique LR
+    (uann (! uω (A ⊸ B) ⊸ ! uω A ⊸ ! uω B)
+          (ulam (ulam (uemb (ubm _ (uvar (# 0)) (uemb (ubm _ (uvar (# 1))
+            (ubang (uemb (uapp (uvar (# 2)) (uemb (uvar (# 3)))))))))))))
+    []
+
+  {-
   myK : ∀ A B → Term _ []ᶜ
   myK A B =
     ann (! uω (A ⊸ B) ⊸ ! uω A ⊸ ! uω B)
@@ -133,3 +132,4 @@ module Generic.Linear.Example.LR where
                   ((((((((((([]₂ ++₂ []₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
                     ++₂ []₂) ++₂ [ ω⊴0 ]₂) ++₂ []₂) ++₂ [ ω⊴1 ]₂) ++₂ []₂)
                     ++₂ []₂) ++₂ []₂) ++₂ []₂))))))))))))
+  -}

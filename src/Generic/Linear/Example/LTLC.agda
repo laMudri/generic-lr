@@ -7,6 +7,7 @@ module Generic.Linear.Example.LTLC where
   open import Data.List as L using (List; _∷_) renaming ([] to []L)
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Data.LTree.Automation
   open import Data.Product
   open import Data.Unit
   open import Function.Base
@@ -64,17 +65,12 @@ module Generic.Linear.Example.LTLC where
 
   myC : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
   myC A B C = elab-unique LTLC
-    (ulam (ulam (ulam
-      (uapp (uapp (uvar (↙ (↙ (↙ (↙ (↘ here))))))
-                  (uvar (↙ (↙ (↘ here)))))
-            (uvar (↙ (↙ (↘ here))))))))
+    (ulam (ulam (ulam (uapp (uapp (uvar (# 0)) (uvar (# 2))) (uvar (# 1))))))
     []
 
   myB : (A B C : Ty) → Term ((B ⊸ C) ⊸ (A ⊸ B) ⊸ (A ⊸ C)) []ᶜ
   myB A B C = elab-unique LTLC
-    (ulam (ulam (ulam
-      (uapp (uvar (↙ (↙ (↙ (↘ here)))))
-        (uapp (uvar (↙ (↙ (↙ (↘ here))))) (uvar (↙ (↙ (↘ here)))))))))
+    (ulam (ulam (ulam (uapp (uvar (# 0)) (uapp (uvar (# 1)) (uvar (# 2)))))))
     []
 
   {- Commenting out old stuff because it takes forever to check.
