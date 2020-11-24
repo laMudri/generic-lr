@@ -246,7 +246,8 @@ module Generic.Linear.Example.LTLC where
   *⁻¹ uω u1 = []L
   *⁻¹ uω uω = (uω , ⊴-refl) ∷ []L
 
-  open import Generic.Linear.Example.UsageCheck Ty skewSemiring
+  open import Generic.Linear.Example.UsageCheck Ty
+  open WithSkewSemiring skewSemiring
   open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹
 
   module V where
@@ -261,24 +262,20 @@ module Generic.Linear.Example.LTLC where
   pattern uapp s t =
     V.`con (`app _ _ , refl , s ✴⟨ _ ⟩ t)
 
-  Lone : ∀ {a} {A : Set a} → List A → Set
-  Lone []L = ⊥
-  Lone (x ∷ []L) = ⊤
-  Lone (x ∷ y ∷ _) = ⊥
-
-  getLone : ∀ {a} {A : Set a} (xs : List A) {_ : Lone xs} → A
-  getLone (x ∷ []L) = x
-
   myC : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
-  myC A B C = getLone foo
-    where
-    foo : List (Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ)
-    foo = elab LTLC
-      (ulam (ulam (ulam
-        (uapp (uapp (uvar (↙ (↙ (↙ (↙ (↘ here))))))
-                    (uvar (↙ (↙ (↘ here)))))
-              (uvar (↙ (↙ (↘ here))))))))
-      []
+  myC A B C = elab-unique LTLC
+    (ulam (ulam (ulam
+      (uapp (uapp (uvar (↙ (↙ (↙ (↙ (↘ here))))))
+                  (uvar (↙ (↙ (↘ here)))))
+            (uvar (↙ (↙ (↘ here))))))))
+    []
+
+  myB : (A B C : Ty) → Term ((B ⊸ C) ⊸ (A ⊸ B) ⊸ (A ⊸ C)) []ᶜ
+  myB A B C = elab-unique LTLC
+    (ulam (ulam (ulam
+      (uapp (uvar (↙ (↙ (↙ (↘ here)))))
+        (uapp (uvar (↙ (↙ (↙ (↘ here))))) (uvar (↙ (↙ (↘ here)))))))))
+    []
 
   {- Commenting out old stuff because it takes forever to check.
   myC : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
