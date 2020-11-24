@@ -1,5 +1,8 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
+-- PRINCIPLE: properties should be usable with both synthesising and checked
+-- level versions of the bunched combinators.
+
 module Relation.Unary.Bunched.Properties where
 
   open import Algebra.Relational
@@ -18,18 +21,18 @@ module Relation.Unary.Bunched.Properties where
     open BunchedUnit _≤ε
     open BunchedConjunction _≤[_∙_]
 
-    module _ {t} {T : Pred Carrier t} where
+    module _ {t} {T : Pred Carrier t} {v : Level} where
 
-      1-✴→ : ∀[ ✴1 ✴ T ⇒ T ]
+      1-✴→ : ∀[ ✴1 {v} ✴ T ⇒ T ]
       1-✴→ (✴1⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t) = subst T (identityˡ→ (sp0 , sp+)) t
 
-      1-✴← : ∀[ T ⇒ ✴1 ✴ T ]
+      1-✴← : ∀[ T ⇒ ✴1 {v} ✴ T ]
       1-✴← t = let sp0 , sp+ = identityˡ← refl in ✴1⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t
 
-      ✴-1→ : ∀[ T ✴ ✴1 ⇒ T ]
+      ✴-1→ : ∀[ T ✴ ✴1 {v} ⇒ T ]
       ✴-1→ (t ✴⟨ sp+ ⟩ ✴1⟨ sp0 ⟩) = subst T (identityʳ→ (sp+ , sp0)) t
 
-      ✴-1← : ∀[ T ⇒ T ✴ ✴1 ]
+      ✴-1← : ∀[ T ⇒ T ✴ ✴1 {v} ]
       ✴-1← t = let sp+ , sp0 = identityʳ← refl in t ✴⟨ sp+ ⟩ ✴1⟨ sp0 ⟩
 
     module _
