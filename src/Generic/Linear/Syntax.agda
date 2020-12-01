@@ -9,10 +9,10 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Function.Base using (_∘_)
   open import Relation.Unary
 
-  infix 2 _`⊢_
-  infixr 3 _`*_
-  infixr 4 _`∧_
-  infixr 5 _`·_
+  infixr 2 _`*_
+  infixr 2 _`∧_
+  infixr 3 _`·_
+  infix 4 _`⊢_
 
   record SizedCtx (s : LTree) : Set where
     constructor sctx

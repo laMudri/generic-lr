@@ -68,28 +68,28 @@ module Generic.Linear.Syntax.Interpretation
       T-prf : T RΓ
   -}
 
-  module WithScope (⟦_⊢_⟧ : Ctx → Scoped ℓ) where
+  module WithScope (⟦-,_⊢_⟧ : Ctx → Scoped ℓ) where
 
-    ⟦_⟧p′ : Premises → Ctx → Set ℓ
-    ⟦ Γ `⊢ A ⟧p′ = ⟦ Γ ⊢ A ⟧
-    ⟦ `⊤ ⟧p′ = U
-    ⟦ `I ⟧p′ = ✴1ᶜ
-    ⟦ p `∧ q ⟧p′ = ⟦ p ⟧p′ ∩ ⟦ q ⟧p′
-    ⟦ p `* q ⟧p′ = ⟦ p ⟧p′ ✴ᶜ ⟦ q ⟧p′
-    ⟦ ρ `· p ⟧p′ = ρ ·ᶜ ⟦ p ⟧p′
-    -- ⟦ `□ p ⟧p′ = Dup (⟦ p ⟧p′)
+    ⟦_⟧p : Premises → Ctx → Set ℓ
+    ⟦ Γ `⊢ A ⟧p = ⟦-, Γ ⊢ A ⟧
+    ⟦ `⊤ ⟧p = U
+    ⟦ `I ⟧p = ✴1ᶜ
+    ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
+    ⟦ p `* q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
+    ⟦ ρ `· p ⟧p = ρ ·ᶜ ⟦ p ⟧p
+    -- ⟦ `□ p ⟧p = Dup (⟦ p ⟧p)
 
-    ⟦_⟧r′ : Rule → Scoped ℓ
-    ⟦ rule ps A′ ⟧r′ A = const (A′ ≡ A) Syn.∩ ⟦ ps ⟧p′
+    ⟦_⟧r : Rule → Scoped ℓ
+    ⟦ rule ps A′ ⟧r A = const (A′ ≡ A) Syn.∩ ⟦ ps ⟧p
 
-    ⟦_⟧s′ : System → Scoped ℓ
-    ⟦ system L rs ⟧s′ A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r′ A PΓ
+    ⟦_⟧s : System → Scoped ℓ
+    ⟦ system L rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
 
   ⟦_⟧p : Premises → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
-  ⟦ ps ⟧p Sc = let open WithScope Sc in ⟦ ps ⟧p′
+  ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
 
   ⟦_⟧r : Rule → (Ctx → Scoped ℓ) → Scoped ℓ
-  ⟦ r ⟧r Sc = let open WithScope Sc in ⟦ r ⟧r′
+  ⟦ r ⟧r Sc = let module W = WithScope Sc in W.⟦ r ⟧r
 
   ⟦_⟧s : System → (Ctx → Scoped ℓ) → Scoped ℓ
-  ⟦ s ⟧s Sc = let open WithScope Sc in ⟦ s ⟧s′
+  ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s

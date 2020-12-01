@@ -52,8 +52,6 @@ module Generic.Linear.Example.LR where
                         `* (ctx [ ρ ] [ syn , A ] `⊢ (chk , Z)))
                        (syn , Z)
 
-  open WithScope (Scope (Tm LR ∞))
-
   Term = Tm LR ∞
 
   pattern var i les = `var (lvar i refl les)
