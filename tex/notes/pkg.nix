@@ -2,7 +2,10 @@
 let
   tex-env = texlive.combine {
     inherit (texlive) scheme-small latexmk chktex stmaryrd mathpartir rsfs
-                      cmll xcolor paralist makecell tikz-cd ncctools biblatex;
+                      cmll xcolor paralist makecell tikz-cd ncctools biblatex
+                      xifthen ifmtarg polytable etoolbox environ xkeyval
+                      lazylist trimspaces newunicodechar
+                      catchfilebetweentags catchfile;
   };
 in stdenv.mkDerivation {
   name = "notes";

@@ -1,4 +1,5 @@
 *.agdai
+src/latex/
 
 *.pdf
 
@@ -14,6 +15,7 @@
 *.run.xml
 *.snm
 *.toc
+*.ptb
 
 *.auctex-auto
 

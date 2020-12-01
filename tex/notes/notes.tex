@@ -2,7 +2,10 @@
 
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{catchfilebetweentags}
 \usepackage{cmll}
+\usepackage[utf8]{inputenc}
+\usepackage{mathpartir}
 \usepackage{mathtools}
 \usepackage{stmaryrd}
 \usepackage{xcolor}
@@ -10,6 +13,29 @@
 \def\newelims{1}
 \def\multnotation{1}
 \input{../macros}
+
+\usepackage[conor]{agda}
+\CatchFileBetweenTags{\exItypes}%
+{../../src/latex/Generic/Linear/Example/PaperExamples.tex}{exItypes}
+\CatchFileBetweenTags{\exIlabels}%
+{../../src/latex/Generic/Linear/Example/PaperExamples.tex}{exIlabels}
+\CatchFileBetweenTags{\exIfunrules}%
+{../../src/latex/Generic/Linear/Example/PaperExamples.tex}{exIfunrules}
+\CatchFileBetweenTags{\exIsumrules}%
+{../../src/latex/Generic/Linear/Example/PaperExamples.tex}{exIsumrules}
+
+\usepackage{newunicodechar}
+\newunicodechar{λ}{\ensuremath{\mathnormal\lambda}}
+\newunicodechar{→}{\ensuremath{\mathnormal\to}}
+\newunicodechar{∀}{\ensuremath{\mathnormal\forall}}
+\newunicodechar{ι}{\ensuremath{\mathnormal\iota}}
+\newunicodechar{·}{\ensuremath{\mathnormal\cdot}}
+\newunicodechar{⊸}{\ensuremath{\mathnormal\multimap}}
+\newunicodechar{⊕}{\ensuremath{\mathnormal\oplus}}
+\newunicodechar{─}{\textrm{---}}
+\newunicodechar{ᶜ}{\ensuremath{\mathnormal{^c}}}
+\newunicodechar{⊢}{\ensuremath{\mathnormal\vdash}}
+\newunicodechar{∧}{\ensuremath{\mathnormal\wedge}}
 
 \begin{document}
 \section{Bunched functions}
@@ -27,6 +53,9 @@ Then we can define the following connectives on indexed type families.
   (r \cdot P)~z &:= \exists x.~z \subres rx \wedge P~x
 \end{align*}
 
+\paragraph{Agda definitions}
+To follow.
+
 The first six of these connectives are somewhat standard, the first three
 corresponding to the usual sharing connectives and the second three
 corresponding to the usual separating connectives.
@@ -42,7 +71,7 @@ Rules $R$, premises $P$ and $Q$.
 \begin{align*}
   R &::= P/A \\
   P,Q &::= \ctx \Theta R \vdash A \mid \top \mid P \wedge Q \mid I \mid P * Q
-        \mid r \cdot P
+        \mid \rescomment r \cdot P
 \end{align*}
 
 Example rules:
@@ -58,7 +87,55 @@ Example rules:
     * ({\rescomment rA \vdash C} \wedge {\rescomment sB \vdash C}) / C$
 \end{itemize}
 
-Interpretation as syntax.
+\paragraph{Agda example}
+
+We start by defining our types \AgdaDatatype{Ty}, which in this case will be the
+conclusions of our judgements.
+\AgdaFunction{Ann} is the type of usage annotations, which for now is an
+arbitrary skew semiring.
+We also have a type of rule labels \AgdaDatatype{`Sys}, which specifies all of
+the parameters of a typing rule except for its conclusion and premises.
+For example, in the \AgdaInductiveConstructor{`case} label, we need to fill in
+the two summands (types \AgdaBound{A} and \AgdaBound{B}), as well as the return
+type \AgdaBound{C}.
+The actual form of the rule will be specified later.
+
+\exItypes{} \exIlabels{}
+
+We are then ready to build a system \AgdaFunction{Sys} with conclusions
+\AgdaDatatype{Ty}, usage annotations \AgdaFunction{Ann}, and labels
+\AgdaDatatype{`Sys}.
+The rule corresponding to each label is given in the following.
+
+The \AgdaInductiveConstructor{`lam} rule has one premise, which binds one
+variable with usage annotation \AgdaBound{r} and type \AgdaBound{A}.
+The \AgdaInductiveConstructor{`app} rule has two premises combined with
+separating conjunction.
+Furthermore, the second premise (corresponding to the argument of the function)
+is subject to scaling by \AgdaBound{r}.
+Intuitively, this description means that we must have enough of each variable to
+use some in building a function, and then use some more \AgdaBound{r} times to
+build enough arguments.
+
+\exIfunrules{}
+
+In the rules for sums, we use an alternative notation for rule descriptions,
+with \AgdaFunction{{---}{---}} being an infix version of
+\AgdaInductiveConstructor{rule}.
+The introduction rules \AgdaInductiveConstructor{`inl} and
+\AgdaInductiveConstructor{`inr} are straightforward --- each has one
+premise which binds no new variables.
+The \AgdaInductiveConstructor{`case} rule is more complicated.
+The premises are first split into the eliminand and the continuations, using the
+separating conjunction we saw for \AgdaInductiveConstructor{`app}.
+However, the continuations are connected via the sharing conjunction, reflecting
+the fact that in any given run of the program, only one of the branches will be
+taken, so usages from each individually should be added to usages of the
+eliminand.
+
+\exIsumrules{}
+
+\paragraph{Interpretation as syntax}
 We can say something like ``premise connectives are interpreted as the
 corresponding bunched connectives, where appropriate''.
 
