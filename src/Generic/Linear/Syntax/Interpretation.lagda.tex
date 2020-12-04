@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Skew
@@ -15,7 +16,6 @@ module Generic.Linear.Syntax.Interpretation
   open import Data.Unit
   open import Function
   open import Relation.Binary.PropositionalEquality
-  open import Relation.Unary as Syn using ()
   open import Relation.Unary.Checked
 
   open import Data.LTree
@@ -46,8 +46,8 @@ module Generic.Linear.Syntax.Interpretation
   infixr 9 _✴ᶜ_
   infixr 10 _·ᶜ_
 
-  ✴1ᶜ : Ctx → Set ℓ
-  ✴1ᶜ (ctx R Γ) = ✴1 R
+  ℑᶜ : Ctx → Set ℓ
+  ℑᶜ (ctx R Γ) = ℑ R
 
   _✴ᶜ_ : (T U : Ctx → Set ℓ) (RΓ : Ctx) → Set ℓ
   (T ✴ᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ✴ (λ Q → U (ctx Q Γ))) R
@@ -69,22 +69,38 @@ module Generic.Linear.Syntax.Interpretation
   -}
 
   module WithScope (⟦-,_⊢_⟧ : Ctx → Scoped ℓ) where
+\end{code}
 
+%<*semp>
+\begin{code}
     ⟦_⟧p : Premises → Ctx → Set ℓ
-    ⟦ Γ `⊢ A ⟧p = ⟦-, Γ ⊢ A ⟧
+    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p = ⟦-, Γ ⊢ A ⟧
     ⟦ `⊤ ⟧p = U
-    ⟦ `I ⟧p = ✴1ᶜ
+    ⟦ `ℑ ⟧p = ℑᶜ
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
-    ⟦ p `* q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
-    ⟦ ρ `· p ⟧p = ρ ·ᶜ ⟦ p ⟧p
+    ⟦ p `✴ q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
+    ⟦ r `· p ⟧p = r ·ᶜ ⟦ p ⟧p
+\end{code}
+%</semp>
+\begin{code}
     -- ⟦ `□ p ⟧p = Dup (⟦ p ⟧p)
+\end{code}
 
+%<*semr>
+\begin{code}
     ⟦_⟧r : Rule → Scoped ℓ
-    ⟦ rule ps A′ ⟧r A = const (A′ ≡ A) Syn.∩ ⟦ ps ⟧p
+    ⟦ ps =⇒ A′ ⟧r A PΓ = A′ ≡ A × ⟦ ps ⟧p PΓ
+\end{code}
+%</semr>
 
+%<*sems>
+\begin{code}
     ⟦_⟧s : System → Scoped ℓ
-    ⟦ system L rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
+    ⟦ L ▹ rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
+\end{code}
+%</sems>
 
+\begin{code}
   ⟦_⟧p : Premises → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
   ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
 
@@ -93,3 +109,4 @@ module Generic.Linear.Syntax.Interpretation
 
   ⟦_⟧s : System → (Ctx → Scoped ℓ) → Scoped ℓ
   ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s
+\end{code}

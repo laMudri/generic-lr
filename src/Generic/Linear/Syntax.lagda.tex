@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K #-}
 
 module Generic.Linear.Syntax (Ty Ann : Set) where
@@ -9,10 +10,11 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Function.Base using (_∘_)
   open import Relation.Unary
 
-  infixr 2 _`*_
+  infix 1 _=⇒_ _▹_
+  infixr 2 _`✴_
   infixr 2 _`∧_
   infixr 3 _`·_
-  infix 4 _`⊢_
+  -- infix 4 _`⊢_
 
   record SizedCtx (s : LTree) : Set where
     constructor sctx
@@ -51,39 +53,56 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   rightᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
   rightᶜ (sctx P Γ) = ctx (P ∘ ↘) (Γ ∘ ↘)
+\end{code}
 
-  -- Premises to each rule form a tree.
-  -- At each leaf is a premise, which binds one Ctx's worth of new variables.
-  -- Annotations are shared out to the premises via separation logic
-  -- connectives:
-  -- * separating conjunction (`I, _`*_) – e.g, ⊗-introduction
-  -- * sharing conjunction (`⊤, _`∧_)    – e.g, &-introduction
-  -- * scaling (_`·_)                    – e.g, !-introduction
-  -- * the duplicable modality (`□)      – e.g, recursion rules
+Premises to each rule form a tree.
+At each leaf is a premise, which binds one Ctx's worth of new variables.
+Annotations are shared out to the premises via separation logic
+connectives:
+\begin{itemize}
+\item separating conjunction (`I, _`*_) – e.g, ⊗-introduction
+\item sharing conjunction (`⊤, _`∧_)    – e.g, &-introduction
+\item scaling (_`·_)                    – e.g, !-introduction
+\item the duplicable modality (`□)      – e.g, recursion rules
+\end{itemize}
 
+%<*Premises>
+\begin{code}
   data Premises : Set where
-    _`⊢_ : (PΓ : Ctx) (A : Ty) → Premises
-    `⊤ `I : Premises
-    _`∧_ _`*_ : (p q : Premises) → Premises
+    ⟨_`⊢_⟩ : (PΓ : Ctx) (A : Ty) → Premises
+    `⊤ `ℑ : Premises
+    _`∧_ _`✴_ : (p q : Premises) → Premises
     _`·_ : (ρ : Ann) (p : Premises) → Premises
     -- `□ : (p : Premises) → Premises
+\end{code}
+%</Premises>
 
+%<*Rule>
+\begin{code}
   record Rule : Set where
-    constructor rule
+    constructor _=⇒_
     field
       premises : Premises
       conclusion : Ty
   open Rule public
+\end{code}
+%</Rule>
 
+%<*System>
+\begin{code}
   record System : Set₁ where
-    constructor system
+    constructor _▹_
     field
       Label : Set
       rules : (l : Label) → Rule
   open System public
+\end{code}
+%</System>
 
+\begin{code}
   Scoped : ∀ ℓ → Set (suc ℓ)
   Scoped ℓ = Ty → Ctx → Set ℓ
 
   Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
   Scope T QΔ A = (_++ᶜ QΔ) ⊢ T A
+\end{code}

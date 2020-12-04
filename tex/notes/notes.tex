@@ -24,6 +24,20 @@
 \CatchFileBetweenTags{\exIsumrules}%
 {../../src/latex/Generic/Linear/Example/PaperExamples.tex}{exIsumrules}
 
+\CatchFileBetweenTags{\Premises}%
+{../../src/latex/Generic/Linear/Syntax.tex}{Premises}
+\CatchFileBetweenTags{\Rule}%
+{../../src/latex/Generic/Linear/Syntax.tex}{Rule}
+\CatchFileBetweenTags{\System}%
+{../../src/latex/Generic/Linear/Syntax.tex}{System}
+
+\CatchFileBetweenTags{\semp}%
+{../../src/latex/Generic/Linear/Syntax/Interpretation.tex}{semp}
+\CatchFileBetweenTags{\semr}%
+{../../src/latex/Generic/Linear/Syntax/Interpretation.tex}{semr}
+\CatchFileBetweenTags{\sems}%
+{../../src/latex/Generic/Linear/Syntax/Interpretation.tex}{sems}
+
 \usepackage{newunicodechar}
 \newunicodechar{λ}{\ensuremath{\mathnormal\lambda}}
 \newunicodechar{→}{\ensuremath{\mathnormal\to}}
@@ -36,8 +50,51 @@
 \newunicodechar{ᶜ}{\ensuremath{\mathnormal{^c}}}
 \newunicodechar{⊢}{\ensuremath{\mathnormal\vdash}}
 \newunicodechar{∧}{\ensuremath{\mathnormal\wedge}}
+\newunicodechar{⟦}{\ensuremath{\mathnormal\llbracket}}
+\newunicodechar{⟧}{\ensuremath{\mathnormal\rrbracket}}
+\newunicodechar{∩}{\ensuremath{\mathnormal\cap}}
+\newunicodechar{✴}{\ensuremath{\mathnormal*}}
+\newunicodechar{ℓ}{\ensuremath{\mathnormal\ell}}
+\newunicodechar{Γ}{\ensuremath{\mathnormal\Gamma}}
+\newunicodechar{Σ}{\ensuremath{\mathnormal\Sigma}}
+\newunicodechar{∈}{\ensuremath{\mathnormal\in}}
+\newunicodechar{′}{\ensuremath{\mathnormal'}}
+\newunicodechar{≡}{\ensuremath{\mathnormal\equiv}}
+\newunicodechar{⊤}{\ensuremath{\mathnormal\top}}
+\newunicodechar{⊥}{\ensuremath{\mathnormal\bot}}
+\newunicodechar{⇒}{\ensuremath{\mathnormal\Rightarrow}}
+\newunicodechar{▹}{\ensuremath{\mathnormal\triangleright}}
+\newunicodechar{₁}{\ensuremath{\mathnormal{_1}}}
+\newunicodechar{ℑ}{\ensuremath{\mathfrak I}}
 
 \begin{document}
+\section{Building up}
+
+We assume that a type system comprises a set of (unparametrised) rules, each
+of which has a conclusion and several premises containing subterms.
+The primary investigation of this work is into what form the premises can take
+while maintaining useful features of syntax.
+We shall start with simple forms, allowing just for multiple subterms, and
+then build on resource-sensitive bunches, variable binding, and modalities.
+
+\System{}
+\Rule{}
+
+Given some way \AgdaFunction{⟦\AgdaUnderscore{}⟧p} of interpreting
+\AgdaDatatype{Premises} in a \AgdaRecord{Ctx}, we can interpret a
+\AgdaDatatype{Rule} against a conclusion and a context by checking that its
+stated conclusion matches and then interpreting its premises.
+Then, the entire \AgdaDatatype{System} can be interpreted by picking a rule
+label (including parameters) \AgdaBound{l} and interpreting the selected rule
+\AgdaBound{rs}\AgdaSpace{}\AgdaBound{l}.
+
+\semr{}
+\sems{}
+
+\subsection{The language of Cartesian products}
+
+\ldots
+
 \section{Bunched functions}
 
 Suppose we have a left $R$-semimodule $M$.
@@ -148,6 +205,25 @@ corresponding bunched connectives, where appropriate''.
   \sem{P * Q} &:= \sem P * \sem Q \\
   &\ldots
 \end{align*}
+
+\paragraph{Agda version}
+The interpretation of a system is the selection of a rule, together with the
+interpretation of that rule.
+
+\sems{}
+
+The interpretation of a rule is a check that the rule targets the desired
+conclusion, together with the interpretation of the rules premises.
+
+\semr{}
+
+For the premises, connectives are interpreted in the obvious way.
+Premises can ask for subterms via the $\AgdaInductiveConstructor{\_`⊢\_}$
+constructor, which supplies the new variables (in particular, each variable's
+type and usage annotation) \AgdaBound{Γ} and the desired conclusion
+\AgdaBound{A} of the subterm.
+
+\semp{}
 
 \section{Environments}
 
