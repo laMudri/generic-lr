@@ -5,7 +5,7 @@ module Relation.Unary.Bunched.Checked {a} {A : Set a} where
   import Relation.Unary.Bunched {a} {A} as B
   open B public using
     ( module BunchedUnit; module BunchedScaling
-    ; ✴1⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_
+    ; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_
     )
 
   open import Data.Product

@@ -23,17 +23,17 @@ module Relation.Unary.Bunched.Properties where
 
     module _ {t} {T : Pred Carrier t} {v : Level} where
 
-      1-✴→ : ∀[ ✴1 {v} ✴ T ⇒ T ]
-      1-✴→ (✴1⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t) = subst T (identityˡ→ (sp0 , sp+)) t
+      1-✴→ : ∀[ ℑ {v} ✴ T ⇒ T ]
+      1-✴→ (ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t) = subst T (identityˡ→ (sp0 , sp+)) t
 
-      1-✴← : ∀[ T ⇒ ✴1 {v} ✴ T ]
-      1-✴← t = let sp0 , sp+ = identityˡ← refl in ✴1⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t
+      1-✴← : ∀[ T ⇒ ℑ {v} ✴ T ]
+      1-✴← t = let sp0 , sp+ = identityˡ← refl in ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t
 
-      ✴-1→ : ∀[ T ✴ ✴1 {v} ⇒ T ]
-      ✴-1→ (t ✴⟨ sp+ ⟩ ✴1⟨ sp0 ⟩) = subst T (identityʳ→ (sp+ , sp0)) t
+      ✴-1→ : ∀[ T ✴ ℑ {v} ⇒ T ]
+      ✴-1→ (t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩) = subst T (identityʳ→ (sp+ , sp0)) t
 
-      ✴-1← : ∀[ T ⇒ T ✴ ✴1 {v} ]
-      ✴-1← t = let sp+ , sp0 = identityʳ← refl in t ✴⟨ sp+ ⟩ ✴1⟨ sp0 ⟩
+      ✴-1← : ∀[ T ⇒ T ✴ ℑ {v} ]
+      ✴-1← t = let sp+ , sp0 = identityʳ← refl in t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩
 
     module _
       {t u v} {T : Pred Carrier t} {U : Pred Carrier u} {V : Pred Carrier v}

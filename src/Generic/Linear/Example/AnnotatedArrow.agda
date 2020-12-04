@@ -16,7 +16,7 @@ module Generic.Linear.Example.AnnotatedArrow
 
   open import Algebra.Relational
   open import Data.LTree
-  open import Data.LTree.Vector
+  open import Data.LTree.Vector hiding (setoid)
   open import Data.LTree.Matrix
   open import Data.Product as ×
   open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×PW
@@ -25,8 +25,9 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Function.Base using (id; _∘_; _∘′_; _$_; λ-; _$-)
   open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
   open import Size
-  open import Relation.Unary
-  open import Relation.Unary.Bunched
+  open import Relation.Unary using (IUniversal)
+  open import Relation.Unary.Checked
+  open import Relation.Unary.Bunched.Checked
   open import Relation.Unary.Bunched.Properties
   open import Relation.Binary using (Setoid)
   open import Relation.Binary.Construct.Always as ⊤ using ()
@@ -58,11 +59,9 @@ module Generic.Linear.Example.AnnotatedArrow
     `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
 
   AnnArr : System
-  AnnArr = system `AnnArr λ where
-    (`lam rA B) → rule ([ rA ]ᶜ `⊢ B)
-                       (rA ⊸ B)
-    (`app rA@(r , A) B) → rule (([]ᶜ `⊢ rA ⊸ B) `* (r `· ([]ᶜ `⊢ A)))
-                               B
+  AnnArr = `AnnArr ▹ λ where
+    (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
+    (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
   Term = Tm AnnArr ∞
   open WithScope (Scope Term)
@@ -77,7 +76,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ᶜ : Ctx → Set
   ⟦ ctx _ Γ ⟧ᶜ = Lift₁ ⟦_⟧ Γ
 
-  ⟦Tm⟧ : Scoped
+  ⟦Tm⟧ : Scoped 0ℓ
   ⟦Tm⟧ A PΓ = ⟦ PΓ ⟧ᶜ → ⟦ A ⟧
 
   open Semantics
@@ -90,8 +89,8 @@ module Generic.Linear.Example.AnnotatedArrow
       .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
       (γ ++₁ [ x ]₁)
   set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ =
-    (m identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) γ)
-    (n identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) γ)
+    (m identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
+    (n identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
 
   myConst : (A B : Ty) → Term ((1# , A) ⊸ (0# , B) ⊸ A) []ᶜ
   myConst A B =
@@ -99,7 +98,7 @@ module Generic.Linear.Example.AnnotatedArrow
       `var (lvar (↙ (↘ here)) ≡.refl (([]₂ ++₂ [ ⊴-refl ]₂) ++₂ ⊴*-refl))))
 
   ⟦myConst⟧ : (A B : Ty) → ⟦ A ⟧ → ⟦ B ⟧ → ⟦ A ⟧
-  ⟦myConst⟧ A B = semantics set {[]ᶜ} {[]ᶜ} ([]ᵉ ✴1⟨ []₂ ⟩) (myConst A B) []₁
+  ⟦myConst⟧ A B = semantics set {[]ᶜ} {[]ᶜ} ([]ᵉ ℑ⟨ []₂ ⟩) (myConst A B) []₁
 
   test : (x y : Base) → Set
   test x y = {!⟦myConst⟧ base base x y!}
@@ -113,7 +112,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ˢᶜ : Ctx → Setoid 0ℓ 0ℓ
   ⟦ ctx _ Γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ Γ
 
-  ⟦Tm⟧ˢ : Scoped
+  ⟦Tm⟧ˢ : Scoped 0ℓ
   ⟦Tm⟧ˢ A PΓ = ⟦ PΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
 
   module _ where
@@ -134,8 +133,8 @@ module Generic.Linear.Example.AnnotatedArrow
     setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
       m _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
     setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ =
-      (m identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) ⟨$⟩ γ) ⟨$⟩
-      (n identity .app✴ (+*-identity↘ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩) ⟨$⟩ γ)
+      (m identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ) ⟨$⟩
+      (n identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ)
     setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
       m _ .app✴ _ _ .cong γγ (n _ .app✴ _ _ .cong γγ)
 
@@ -168,12 +167,12 @@ module Generic.Linear.Example.AnnotatedArrow
     (worlds : SkewCommutativeRelMonoid 0ℓ 0ℓ)
     (open SkewCommutativeRelMonoid worlds
       renaming (Carrier to W; _≤ε to _≤0; _≤[_∙_] to _≤[_+_]))
-    (open BunchedUnit _≤0 hiding (✴1⟨_⟩))
-    (open BunchedConjunction _≤[_+_] hiding (_✴⟨_⟩_))
+    (open BunchedUnit _≤0 hiding (ℑ⟨_⟩))
+    (open BunchedConjunction _≤[_+_])
     where
 
     Iᴿ : WRel W (⊤.setoid ⊤ 0ℓ)
-    Iᴿ .rel _ _ = ✴1
+    Iᴿ .rel _ _ = ℑ
     Iᴿ .resp-≈ _ _ = id
 
     _⊗ᴿ_ : ∀ {A B} → WRel W A → WRel W B → WRel W (×-setoid A B)
@@ -185,8 +184,8 @@ module Generic.Linear.Example.AnnotatedArrow
     (worlds : SkewCommutativeRelMonoid 0ℓ 0ℓ)
     (open SkewCommutativeRelMonoid worlds
       renaming (Carrier to W; _≤ε to _≤0; _≤[_∙_] to _≤[_+_]))
-    (open BunchedUnit _≤0 hiding (✴1⟨_⟩))
-    (open BunchedConjunction _≤[_+_] hiding (_✴⟨_⟩_))
+    (open BunchedUnit _≤0 hiding (ℑ⟨_⟩))
+    (open BunchedConjunction _≤[_+_])
     (open WithWorlds worlds)
     (Baseᴿ : WRel W (≡.setoid Base))
     (!ᴿ : Ann → ∀[ WRel W ⇒ WRel W ])
@@ -195,13 +194,13 @@ module Generic.Linear.Example.AnnotatedArrow
                             !ᴿ r {B} S .rel (f .sem0 ⟨$⟩ x) (f .sem1 ⟨$⟩ y) ]))
     (!ᴿ-⊴ : ∀ {r s A R x y} → r ⊴ s →
             ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ s R .rel x y ])
-    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R .rel x y ⇒ ✴1 ])
+    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R .rel x y ⇒ ℑ ])
     (!ᴿ-+ : ∀ {r p q A R x y} → r ⊴ p + q →
             ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ p R .rel x y ✴ !ᴿ q R .rel x y ])
     (!ᴿ-1 : ∀ {r A R x y} → r ⊴ 1# → ∀[ !ᴿ r {A} R .rel x y ⇒ R .rel x y ])
     (!ᴿ-* : ∀ {r p q A R x y} → r ⊴ p * q →
             ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ p (!ᴿ q R) .rel x y ])
-    (!ᴿ-✴1 : ∀ {r x y} → ∀[ ✴1 ⇒ !ᴿ r Iᴿ .rel x y ])
+    (!ᴿ-ℑ : ∀ {r x y} → ∀[ ℑ ⇒ !ᴿ r Iᴿ .rel x y ])
     (!ᴿ-✴ : ∀ {r A B R S} {x@(xr , xs) : _ × _} {y@(yr , ys) : _ × _} →
             ∀[ !ᴿ r {A} R .rel xr yr ✴ !ᴿ r {B} S .rel xs ys ⇒
                !ᴿ r (R ⊗ᴿ S) .rel x y ])
@@ -224,7 +223,7 @@ module Generic.Linear.Example.AnnotatedArrow
         !ᴿ (R here) ⟦ Γ here ⟧ᴿ .rel (γ0 here) (γ1 here)
       go {[-]} R Γ .resp-≈ (mk p0) (mk p1) =
         !ᴿ (R here) ⟦ Γ here ⟧ᴿ .resp-≈ (p0 here) (p1 here)
-      go {ε} R Γ .rel γ0 γ1 = ✴1
+      go {ε} R Γ .rel γ0 γ1 = ℑ
       go {ε} R Γ .resp-≈ p0 p1 = id
       go {s <+> t} R Γ .rel (mk γ0) (mk γ1) =
         go (R ∘ ↙) (Γ ∘ ↙) .rel (mk (γ0 ∘ ↙)) (mk (γ1 ∘ ↙)) ✴
@@ -252,11 +251,11 @@ module Generic.Linear.Example.AnnotatedArrow
       ⟦ A ⟧ᴿ .resp-≈ (p0 refl) (p1 refl) (mm γγ)
       where open Setoid ⟦ RΓ ⟧ˢᶜ
 
-    lemma-✴1 : ∀ {s R Γ γ δ} → R ⊴* 0* → ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ δ ⇒ ✴1 ]
-    lemma-✴1 {[-]} (mk sp) = !ᴿ-0 (sp here)
-    lemma-✴1 {ε} sp = id
-    lemma-✴1 {s <+> t} (mk sp) =
-      1-✴→ ∘ map-✴ (lemma-✴1 (mk (sp ∘ ↙)) , lemma-✴1 (mk (sp ∘ ↘)))
+    lemma-ℑ : ∀ {s R Γ γ δ} → R ⊴* 0* → ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ δ ⇒ ℑ ]
+    lemma-ℑ {[-]} (mk sp) = !ᴿ-0 (sp here)
+    lemma-ℑ {ε} sp = id
+    lemma-ℑ {s <+> t} (mk sp) =
+      1-✴→ ∘ map-✴ (lemma-ℑ (mk (sp ∘ ↙)) , lemma-ℑ (mk (sp ∘ ↘)))
 
     lemma-✴ : ∀ {s R P Q Γ γ δ} → R ⊴* P +* Q →
               ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ δ ⇒
@@ -280,7 +279,7 @@ module Generic.Linear.Example.AnnotatedArrow
       f .sem0 = [-]₁ˢ {S = ⟦_⟧ˢ}
       f .sem1 = [-]₁ˢ {S = ⟦_⟧ˢ}
       f .semsem = id
-    lemma-!ᴿ {ε} {Q = Q} {Γ} sp = !ᴿ-map f ∘ !ᴿ-✴1
+    lemma-!ᴿ {ε} {Q = Q} {Γ} sp = !ᴿ-map f ∘ !ᴿ-ℑ
       where
       open Setoid ⟦ ctx Q Γ ⟧ˢᶜ
 
@@ -302,7 +301,7 @@ module Generic.Linear.Example.AnnotatedArrow
       f .sem1 = ++₁ˢ {S = ⟦_⟧ˢ}
       f .semsem = id
 
-    ⟦Tm⟧ᴿ′ : Scoped
+    ⟦Tm⟧ᴿ′ : Scoped 0ℓ
     ⟦Tm⟧ᴿ′ A RΓ = WRelMor ⟦ RΓ ⟧ᴿᶜ ⟦ A ⟧ᴿ
 
     wrel : Semantics AnnArr LVar ⟦Tm⟧ᴿ′
@@ -317,10 +316,10 @@ module Generic.Linear.Example.AnnotatedArrow
       go (lvar here ≡.refl (mk le)) = !ᴿ-1 (le here)
       go (lvar (↙ i) ≡.refl (mk le)) =
         ✴-1→ ∘ map-✴ ( go (lvar i ≡.refl (mk (le ∘ ↙)))
-                     , lemma-✴1 (mk (le ∘ ↘))
+                     , lemma-ℑ (mk (le ∘ ↘))
                      )
       go (lvar (↘ i) ≡.refl (mk le)) =
-        1-✴→ ∘ map-✴ ( lemma-✴1 (mk (le ∘ ↙))
+        1-✴→ ∘ map-✴ ( lemma-ℑ (mk (le ∘ ↙))
                      , go (lvar i ≡.refl (mk (le ∘ ↘)))
                      )
     wrel .alg mm .sem0 =
@@ -342,5 +341,5 @@ module Generic.Linear.Example.AnnotatedArrow
       let Pγγ ✴⟨ ⟦sp+⟧ ⟩ rQγγ = lemma-✴ sp+ γγ in
       mm _ .app✴ _ _ .semsem Pγγ .app✴ ⟦sp+⟧
         (!ᴿ-map
-          (nn _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ✴1⟨ ⊴*-refl ⟩))
+          (nn _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
           (lemma-!ᴿ sp* rQγγ))

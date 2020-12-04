@@ -47,10 +47,10 @@ module Generic.Linear.Environment.Properties
   th^Env th^𝓥 {QΔ} ρ {RΘ} ren .lookup v =
     th^𝓥 (ρ .lookup v) record { _─Env ren; sums = ⊴*-refl }
 
-  []ᵉ : ∀[ ✴1ᶜ ⇒ ([]ᶜ ─Env) 𝓥 ]
-  []ᵉ ✴1⟨ sp ⟩ .M = [─]
-  []ᵉ ✴1⟨ sp ⟩ .sums = sp
-  []ᵉ ✴1⟨ sp ⟩ .lookup (var (there () _) _)
+  []ᵉ : ∀[ ℑᶜ ⇒ ([]ᶜ ─Env) 𝓥 ]
+  []ᵉ ℑ⟨ sp ⟩ .M = [─]
+  []ᵉ ℑ⟨ sp ⟩ .sums = sp
+  []ᵉ ℑ⟨ sp ⟩ .lookup (var (there () _) _)
 
   ++ᵉ : ∀[ (PΓ ─Env) 𝓥 ✴ᶜ (QΔ ─Env) 𝓥 ⇒ ((PΓ ++ᶜ QΔ) ─Env) 𝓥 ]
   ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M

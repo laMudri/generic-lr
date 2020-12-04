@@ -43,34 +43,28 @@ module Example1 (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
 %</exIlabels>
 
 \begin{code}
-  infix 1 _──_
-  _──_ : Premises → Ty → Rule
-  _──_ = rule
-\end{code}
-
-\begin{code}
   Sys : System
   Sys .Label = `Sys
 \end{code}
 %<*exIfunrules>
 \begin{code}
-  Sys .rules (`lam r A B) = rule ([ r , A ]ᶜ `⊢ B) (r · A ⊸ B)
-  Sys .rules (`app r A B) = rule ([]ᶜ `⊢ r · A ⊸ B `* r `· ([]ᶜ `⊢ A)) B
+  Sys .rules (`lam r A B) = ⟨ [ r , A ]ᶜ `⊢ B ⟩ =⇒ r · A ⊸ B
+  Sys .rules (`app r A B) = ⟨ []ᶜ `⊢ r · A ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 \end{code}
 %</exIfunrules>
 %<*exIsumrules>
 \begin{code}
   Sys .rules (`inl A B) =
-    []ᶜ `⊢ A
-    ── -----
+    ⟨ []ᶜ `⊢ A ⟩
+    =⇒
     A ⊕ B
   Sys .rules (`inr A B) =
-    []ᶜ `⊢ B
-    ── -----
+    ⟨ []ᶜ `⊢ B ⟩
+    =⇒
     A ⊕ B
   Sys .rules (`case A B C) =
-    []ᶜ `⊢ A ⊕ B `* ([ 1# , A ]ᶜ `⊢ C `∧ [ 1# , B ]ᶜ `⊢ C)
-    ── ---------------------------------------------------
+    ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# , A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# , B ]ᶜ `⊢ C ⟩)
+    =⇒
     C
 \end{code}
 %</exIsumrules>

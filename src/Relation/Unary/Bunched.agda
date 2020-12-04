@@ -8,12 +8,12 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
 
-    record ✴1 {v} (x : A) : Set (ℓ ⊔ v) where
-      constructor ✴1⟨_⟩
+    record ℑ {v} (x : A) : Set (ℓ ⊔ v) where
+      constructor ℑ⟨_⟩
       field
         split : x ∼0
 
-  open BunchedUnit public using (✴1⟨_⟩)
+  open BunchedUnit public using (ℑ⟨_⟩)
 
   module BunchedConjunction {ℓ} (_∼_+_ : A → A → A → Set ℓ) where
 

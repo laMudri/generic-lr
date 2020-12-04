@@ -40,11 +40,11 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (ps : Premises) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {P Q} → rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
-    map-p (PΓ `⊢ A) f r t = f r t
+    map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
     map-p `⊤ f r tt = tt
-    map-p `I f r ✴1⟨ t ⟩ = ✴1⟨ rel-0ₘ (t , r) ⟩
+    map-p `ℑ f r ℑ⟨ t ⟩ = ℑ⟨ rel-0ₘ (t , r) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
-    map-p (ps `* qs) f r (s ✴⟨ sp ⟩ t) =
+    map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
       let ⟨ rs , rt ⟩ sp′ = rel-+ₘ (sp , r) in
       map-p ps f rs s ✴⟨ sp′ ⟩ map-p qs f rt t
     map-p (ρ `· ps) f r (⟨ sp ⟩· t) =
@@ -58,12 +58,12 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-r : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (r : Rule) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {A P Q} → rel P Q → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
-    map-r (rule ps A) f r (q , t) = q , map-p ps f r t
+    map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
 
     map-s : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
             (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
             (∀ {A P Q} → rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
-    map-s (system L rs) f r (l , t) = l , map-r (rs l) f r t
+    map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
   map-s′ : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
            (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
@@ -79,11 +79,11 @@ module Generic.Linear.Syntax.Interpretation.Map
     sequence-p :
       ∀ {X : Ctx → Scoped x} (ps : Premises) →
       ∀[ ⟦ ps ⟧p (λ QΔ B PΓ → F (X QΔ B PΓ)) ⇒ F ∘ ⟦ ps ⟧p X ]
-    sequence-p (PΓ `⊢ A) t = t
+    sequence-p (⟨ PΓ `⊢ A ⟩) t = t
     sequence-p `⊤ tt = pure tt
-    sequence-p `I t = pure t
+    sequence-p `ℑ t = pure t
     sequence-p (ps `∧ qs) (s , t) = _,_ <$> sequence-p ps s ⊛ sequence-p qs t
-    sequence-p (ps `* qs) (s ✴⟨ sp ⟩ t) =
+    sequence-p (ps `✴ qs) (s ✴⟨ sp ⟩ t) =
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
@@ -91,10 +91,10 @@ module Generic.Linear.Syntax.Interpretation.Map
     sequence-r :
       ∀ {X : Ctx → Scoped x} (r : Rule) →
       ∀ {A} → ∀[ ⟦ r ⟧r (λ QΔ B PΓ → F (X QΔ B PΓ)) A ⇒ F ∘ ⟦ r ⟧r X A ]
-    sequence-r (rule ps A) (q , t) = (q ,_) <$> sequence-p ps t
+    sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
       ∀ {X : Ctx → Scoped x} (s : System) →
       ∀ {A} → ∀[ ⟦ s ⟧s (λ QΔ B PΓ → F (X QΔ B PΓ)) A ⇒ F ∘ ⟦ s ⟧s X A ]
-    sequence-s (system L rs) (l , t) =
+    sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t
