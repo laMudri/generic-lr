@@ -20,6 +20,8 @@ module Generic.Linear.Syntax.Interpretation.Map
 
   open SkewSemiring skewSemiring renaming (Carrier to Ann)
 
+  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Algebra skewSemiring
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
 
@@ -50,6 +52,10 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p (ρ `· ps) f r (⟨ sp ⟩· t) =
       let r′ , sp′ = rel-*ₘ (sp , r) in
       ⟨ sp′ ⟩· map-p ps f r′ t
+    map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
+      let foo = rel-0ₘ (⊴*-trans str sp0 , r) in
+      let ⟨ rl , rr ⟩ sp+′ = rel-+ₘ (⊴*-trans str sp+ , r) in
+      □⟨ ⊴*-refl , foo , {!sp+′!} ⟩ map-p ps f {!r!} t
     -- map-p (`□ ps) f r (□⟨ sp0 , sp+ ⟩ t) =
     --   let sp0′ = rel-0ₘ (sp0 , r) in
     --   let ⟨ r0 , r1 ⟩ sp+′ = rel-+ₘ (sp+ , r) in
@@ -87,6 +93,7 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
+    sequence-p (`□ p) t = {!!}
 
     sequence-r :
       ∀ {X : Ctx → Scoped x} (r : Rule) →

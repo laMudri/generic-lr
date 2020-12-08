@@ -58,15 +58,15 @@ module Generic.Linear.Syntax.Interpretation
   _·ᶜ_ : (ρ : Ann) (T : Ctx → Set ℓ) (RΓ : Ctx) → Set ℓ
   (ρ ·ᶜ T) (ctx R Γ) = (ρ · (λ P → T (ctx P Γ))) R
 
-  {-
-  record Dup (T : Ctx → Set) (RΓ : Ctx) : Set where
-    constructor □⟨_,_⟩_
+  record Dupᶜ (T : Ctx → Set ℓ) (RΓ : Ctx) : Set ℓ where
+    constructor □⟨_,_,_⟩_
     open Ctx RΓ
     field
-      split-0 : R ⊴* 0*
-      split-+ : R ⊴* R +* R
-      T-prf : T RΓ
-  -}
+      {P} : _
+      strengthen : R ⊴* P
+      split-0 : P ⊴* 0*
+      split-+ : P ⊴* P +* P
+      T-prf : T record { Ctx RΓ; R = P }
 
   module WithScope (⟦-,_⊢_⟧ : Ctx → Scoped ℓ) where
 \end{code}
@@ -80,6 +80,7 @@ module Generic.Linear.Syntax.Interpretation
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
     ⟦ p `✴ q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
     ⟦ r `· p ⟧p = r ·ᶜ ⟦ p ⟧p
+    ⟦ `□ p ⟧p = Dupᶜ ⟦ p ⟧p
 \end{code}
 %</semp>
 \begin{code}
