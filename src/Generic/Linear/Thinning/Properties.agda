@@ -33,8 +33,8 @@ module Generic.Linear.Thinning.Properties
   private
     variable
       PΓ QΔ RΘ : Ctx
-      T : Ctx → Set
       ℓ : Level
+      T : Ctx → Set ℓ
       𝓥 : Scoped ℓ
       s t u : LTree
       P P′ Q Q′ R : Vector Ann s

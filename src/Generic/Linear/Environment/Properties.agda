@@ -30,11 +30,8 @@ module Generic.Linear.Environment.Properties
   private
     variable
       PΓ QΔ RΘ : Ctx
-      T : Ctx → Set
       ℓ : Level
-      𝓥 𝓦 : Scoped ℓ
-      s t u : LTree
-      P Q R : Vector Ann s
+      𝓥 : Scoped ℓ
       A : Ty
       r : Ann
 

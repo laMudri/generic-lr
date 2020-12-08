@@ -10,19 +10,11 @@ module Generic.Linear.Syntax.Term
 
   open RawSkewSemiring rawSkewSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
-  open import Data.Product
-  open import Function
   open import Size
-  open import Relation.Binary.PropositionalEquality
   open import Relation.Unary
 
-  open import Data.LTree
-  open import Data.LTree.Vector
-
-  open import Generic.Linear.Operations rawSkewSemiring
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Environment Ty rawSkewSemiring
   open import Generic.Linear.Thinning Ty rawSkewSemiring
 
   private
