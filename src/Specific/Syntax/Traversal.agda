@@ -69,8 +69,8 @@ module Specific.Syntax.Traversal
 
     bindEnv : Env T PΓ QΔ → Env T (PΓ ++ᶜ RΘ) (QΔ ++ᶜ RΘ)
     bindEnv τ .matrix = [ [ τ .matrix │ lift₀ᴹ 0# ]
-                                       ─
-                           [ lift₀ᴹ 0# │        1ᴹ ] ]
+                                      ─
+                          [ lift₀ᴹ 0# │        1ᴹ ] ]
     bindEnv τ .act (ivar! (↙ j)) = K .wk (τ .act (ivar! j))
     bindEnv τ .act (ivar! (↘ j)) = K .vr (lvar! (↘ j) (⊴*-refl ++₂ ⊴*-refl))
     bindEnv {QΔ = ctx Q Δ} {RΘ = ctx R Θ} τ .use-pres =
