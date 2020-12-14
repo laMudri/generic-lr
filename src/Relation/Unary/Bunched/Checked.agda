@@ -12,6 +12,16 @@ module Relation.Unary.Bunched.Checked {a} {A : Set a} where
   open import Level
   open import Relation.Unary
 
+  module BunchedOrder {ℓ} (_≤_ : A → A → Set ℓ) where
+
+    private
+      module Syn = B.BunchedOrder _≤_
+
+    infixr 8 _⇒ᵏ_
+
+    _⇒ᵏ_ : ∀ {v} (T U : A → Set v) → A → Set (a ⊔ ℓ ⊔ v)
+    _⇒ᵏ_ = Syn._⇒ᵏ_
+
   module BunchedConjunction {ℓ} (_∼_+_ : A → A → A → Set ℓ) where
 
     private

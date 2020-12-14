@@ -31,50 +31,75 @@ module Generic.Linear.Syntax.Interpretation.Map
 
   LinRel : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
   LinRel R s t = SkewLeftSemimoduleRel
-    (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t) lzero
+    (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t) 0ℓ
+
+  LinMor : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
+  LinMor R s t = SkewLeftSemimoduleMor id-SkewSemiringMor
+    (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t)
 
   module _ {s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
-           (R : LinRel skewSemiring s t)
+           (F : LinMor skewSemiring s t)
+           {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
     where
 
-    open SkewLeftSemimoduleRel R
+    open SkewLeftSemimoduleMor F
 
-    map-p : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (ps : Premises) →
-            (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-            (∀ {P Q} → rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
+    map-p : (ps : Premises) →
+      (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {P Q} → Q ⊴* apply P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
     map-p `⊤ f r tt = tt
-    map-p `ℑ f r ℑ⟨ t ⟩ = ℑ⟨ rel-0ₘ (t , r) ⟩
+    map-p `ℑ f r ℑ⟨ t ⟩ =
+      ℑ⟨ (⊴*-trans r (⊴*-trans (hom-mono t) hom-0ₘ)) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
     map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let ⟨ rs , rt ⟩ sp′ = rel-+ₘ (sp , r) in
-      map-p ps f rs s ✴⟨ sp′ ⟩ map-p qs f rt t
+      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (hom-+ₘ _ _)) in
+      map-p ps f ⊴*-refl s ✴⟨ sp′ ⟩ map-p qs f ⊴*-refl t
     map-p (ρ `· ps) f r (⟨ sp ⟩· t) =
-      let r′ , sp′ = rel-*ₘ (sp , r) in
-      ⟨ sp′ ⟩· map-p ps f r′ t
+      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (hom-*ₘ _ _)) in
+      ⟨ sp′ ⟩· map-p ps f ⊴*-refl t
     map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      let foo = rel-0ₘ (⊴*-trans str sp0 , r) in
-      let ⟨ rl , rr ⟩ sp+′ = rel-+ₘ (⊴*-trans str sp+ , r) in
-      □⟨ ⊴*-refl , foo , {!sp+′!} ⟩ map-p ps f {!r!} t
-    -- map-p (`□ ps) f r (□⟨ sp0 , sp+ ⟩ t) =
-    --   let sp0′ = rel-0ₘ (sp0 , r) in
-    --   let ⟨ r0 , r1 ⟩ sp+′ = rel-+ₘ (sp+ , r) in
-    --   □⟨ sp0′ , {!sp+′!} ⟩ map-p ps f r t
+      □⟨ ⊴*-trans r (hom-mono str)
+       , ⊴*-trans (hom-mono sp0) hom-0ₘ
+       , ⊴*-trans (hom-mono sp+) (hom-+ₘ _ _)
+       ⟩ map-p ps f ⊴*-refl t
 
-    map-r : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (r : Rule) →
-            (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-            (∀ {A P Q} → rel P Q → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
+    map-r : (r : Rule) →
+      (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → Q ⊴* apply P → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
 
-    map-s : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
-            (∀ {RΘ A P Q} → rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-            (∀ {A P Q} → rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
+    map-s : (s : System) →
+       (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+       (∀ {A P Q} → Q ⊴* apply P → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
-  map-s′ : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
-           (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
-           (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
-  map-s′ s f t = map-s id-SkewLeftSemimoduleRel s (λ { ≡.refl → f }) ≡.refl t
+  -- map-s′ : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System) →
+  --   (∀ {RΘ A u Γ P Q} → Q ⊴* P → X RΘ A (ctx P Γ) → Y RΘ A (ctx {u} Q Γ)) →
+  --   (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
+  -- map-s′ s f t = map-s ──-SkewLeftSemimoduleMor s f ⊴*-refl t
+
+  module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
+
+    map-p′ : (ps : Premises) → (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
+             ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
+    map-p′ ⟨ PΓ `⊢ A ⟩ f t = f t
+    map-p′ `⊤ f tt = tt
+    map-p′ `ℑ f ℑ⟨ sp ⟩ = ℑ⟨ sp ⟩
+    map-p′ (ps `∧ qs) f (s , t) = map-p′ ps f s , map-p′ qs f t
+    map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =
+      map-p′ ps f s ✴⟨ sp ⟩ map-p′ qs f t
+    map-p′ (r `· ps) f (⟨ sp ⟩· t) = ⟨ sp ⟩· map-p′ ps f t
+    map-p′ (`□ ps) f (□⟨ str , sp0 , sp+ ⟩ t) =
+      □⟨ str , sp0 , sp+ ⟩ map-p′ ps f t
+
+    map-r′ : (r : Rule) → (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
+             (∀ {A} → ∀[ ⟦ r ⟧r X A ⇒ ⟦ r ⟧r Y A ])
+    map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
+
+    map-s′ : (s : System) → (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
+             (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
+    map-s′ (L ▹ rs) f (l , t) = l , map-r′ (rs l) f t
 
   open import Category.Applicative
 
@@ -93,7 +118,8 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
-    sequence-p (`□ p) t = {!!}
+    sequence-p (`□ ps) (□⟨ str , sp0 , sp+ ⟩ t) =
+      □⟨ str , sp0 , sp+ ⟩_ <$> sequence-p ps t
 
     sequence-r :
       ∀ {X : Ctx → Scoped x} (r : Rule) →

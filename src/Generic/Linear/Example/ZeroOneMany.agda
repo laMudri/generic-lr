@@ -211,3 +211,8 @@ module Generic.Linear.Example.ZeroOneMany where
   *⁻¹ uω u0 = (u0 , ⊴-refl) ∷ []
   *⁻¹ uω u1 = []
   *⁻¹ uω uω = (uω , ⊴-refl) ∷ []
+
+  rep : ∀ x → List (∃ \ y → x ⊴ y × y ⊴ u0 × y ⊴ y + y)
+  rep u0 = (u0 , ⊴-refl , ⊴-refl , ⊴-refl) ∷ []
+  rep u1 = []
+  rep uω = (uω , ⊴-refl , ω⊴0 , ⊴-refl) ∷ []

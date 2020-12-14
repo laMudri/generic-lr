@@ -6,6 +6,13 @@ module Relation.Unary.Bunched {a} {A : Set a} where
   open import Level
   open import Relation.Unary
 
+  module BunchedOrder {ℓ} (_≤_ : A → A → Set ℓ) where
+
+    infixr 8 _⇒ᵏ_
+
+    _⇒ᵏ_ : ∀ {t u} (T : A → Set t) (U : A → Set u) → A → Set (a ⊔ ℓ ⊔ t ⊔ u)
+    (T ⇒ᵏ U) x = ∀ {y} → y ≤ x → T y → U y
+
   module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
 
     record ℑ {v} (x : A) : Set (ℓ ⊔ v) where

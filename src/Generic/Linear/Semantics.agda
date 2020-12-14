@@ -72,27 +72,36 @@ module Generic.Linear.Semantics
                                      (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
                  (ρ .lookup (plain-var v)))
     semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
-      alg (map-s linRel {X = Scope (Tm d sz)} {Y = Kripke 𝓥 𝓒} d
+      alg (map-s linMor {X = Scope (Tm d sz)} {Y = Kripke 𝓥 𝓒} d
                  (λ {RΘ} {A} {P′} {Q′} r →
                    body {ctx P′ Γ} {ctx Q′ Δ} {sz} (pack (ρ .M) r (ρ .lookup)))
                  {_} {P} {Q} (ρ .sums)
                  t)
       where
-      linRel : LinRel skewSemiring _ _
-      linRel = record
-        { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
-        ; rel-0ₘ = λ (sp0 , is-rel) →
-          ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl)
-                                             (0ᴹ-*ᴹ (ρ .M))))
-        ; rel-+ₘ = λ (sp+ , is-rel) →
-          ⟨ ⊴*-refl , ⊴*-refl ⟩
-            ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl)
-                                               (+ᴹ-*ᴹ _ _ (ρ .M))))
-        ; rel-*ₘ = λ (sp* , is-rel) →
-          ⊴*-refl ,
-            ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp*) ⊴ᴹ-refl)
-                                               (*ₗ-*ᴹ _ _ (ρ .M))))
-        }
+      open SkewLeftSemimoduleMor
+      open ProsetMor
+
+      linMor : LinMor skewSemiring _ _
+      linMor .prosetMor .apply P = unrow (row P *ᴹ ρ .M)
+      linMor .prosetMor .hom-mono PP = unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl)
+      linMor .hom-0ₘ = unrowL₂ (0ᴹ-*ᴹ (ρ .M))
+      linMor .hom-+ₘ P Q = unrowL₂ (+ᴹ-*ᴹ _ _ (ρ .M))
+      linMor .hom-*ₘ r P = unrowL₂ (*ₗ-*ᴹ _ _ (ρ .M))
+      -- linRel : LinRel skewSemiring _ _
+      -- linRel = record
+      --   { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
+      --   ; rel-0ₘ = λ (sp0 , is-rel) →
+      --     ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl)
+      --                                        (0ᴹ-*ᴹ (ρ .M))))
+      --   ; rel-+ₘ = λ (sp+ , is-rel) →
+      --     ⟨ ⊴*-refl , ⊴*-refl ⟩
+      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl)
+      --                                          (+ᴹ-*ᴹ _ _ (ρ .M))))
+      --   ; rel-*ₘ = λ (sp* , is-rel) →
+      --     ⊴*-refl ,
+      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp*) ⊴ᴹ-refl)
+      --                                          (*ₗ-*ᴹ _ _ (ρ .M))))
+      --   }
 
     body ρ t {QΔ′} th .app✴ r σ =
       let ρ′ = th^Env th^𝓥 ρ th in

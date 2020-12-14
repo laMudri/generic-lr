@@ -34,6 +34,7 @@ module Generic.Linear.Syntax.Interpretation
       BunchedScaling (λ (R : Vector _ s) r P → R ⊴* r *ₗ P)
   import Relation.Unary.Bunched as Syn
   private
+    open module Syn⊴ {s} = Syn.BunchedOrder (_⊴*_ {s})
     open module Syn+ {s} =
       Syn.BunchedConjunction (λ (R P Q : Vector _ s) → R ⊴* P +* Q)
         using (_─✴_)
@@ -42,9 +43,20 @@ module Generic.Linear.Syntax.Interpretation
     variable
       ℓ t u : Level
 
-  infixr 8 _─✴ᶜ_
+  infix 4 _⊴ᶜ_
+  infixr 5 !!_
+  infixr 8 _⇒ᵏᶜ_ _─✴ᶜ_
   infixr 9 _✴ᶜ_
   infixr 10 _·ᶜ_
+
+  _⊴ᶜ_ : (PΓ QΔ : Ctx) → Set
+  ctx {s} P Γ ⊴ᶜ ctx {t} Q Δ = Σ (s ≡ t) λ where
+    refl → P ⊴* Q × Γ ≡ Δ
+
+  pattern !!_ PQ = refl , PQ , refl
+
+  _⇒ᵏᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (RΓ : Ctx) → Set (t ⊔ u)
+  (T ⇒ᵏᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ⇒ᵏ (λ Q → U (ctx Q Γ))) R
 
   ℑᶜ : Ctx → Set ℓ
   ℑᶜ (ctx R Γ) = ℑ R

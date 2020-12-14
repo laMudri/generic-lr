@@ -37,20 +37,15 @@ module Generic.Linear.Example.LR where
     `bm : (ρ : Ann) (A Z : Ty) → `LR
 
   LR : System
-  LR = system `LR λ where
-    (`emb A) → rule ([]ᶜ `⊢ (syn , A))
-                    (chk , A)
-    (`ann A) → rule ([]ᶜ `⊢ (chk , A))
-                    (syn , A)
-    (`lam A B) → rule (ctx [ u1 ] [ syn , A ] `⊢ (chk , B))
-                      (chk , A ⊸ B)
-    (`app A B) → rule (([]ᶜ `⊢ (syn , A ⊸ B)) `* ([]ᶜ `⊢ (chk , A)))
-                      (syn , B)
-    (`bang ρ A) → rule (ρ `· ([]ᶜ `⊢ (chk , A)))
-                       (chk , ! ρ A)
-    (`bm ρ A Z) → rule (([]ᶜ `⊢ (syn , ! ρ A))
-                        `* (ctx [ ρ ] [ syn , A ] `⊢ (chk , Z)))
-                       (syn , Z)
+  LR = `LR ▹ λ where
+    (`emb A) → ⟨ []ᶜ `⊢ (syn , A) ⟩ =⇒ (chk , A)
+    (`ann A) → ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , A)
+    (`lam A B) → ⟨ ctx [ u1 ] [ syn , A ] `⊢ (chk , B) ⟩ =⇒ (chk , A ⊸ B)
+    (`app A B) → ⟨ []ᶜ `⊢ (syn , A ⊸ B) ⟩ `✴ ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , B)
+    (`bang ρ A) → ρ `· ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (chk , ! ρ A)
+    (`bm ρ A Z) →
+      ⟨ []ᶜ `⊢ (syn , ! ρ A) ⟩ `✴ ⟨ ctx [ ρ ] [ syn , A ] `⊢ (chk , Z) ⟩
+      =⇒ (syn , Z)
 
   Term = Tm LR ∞
 
@@ -66,7 +61,7 @@ module Generic.Linear.Example.LR where
 
   open import Generic.Linear.Example.UsageCheck Conc
   open WithSkewSemiring skewSemiring
-  open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹
+  open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹ rep
 
   module V where
 
