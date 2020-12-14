@@ -21,6 +21,7 @@ module Generic.Linear.Example.LR where
     ι : Ty
     _⊸_ : (A B : Ty) → Ty
     ! : (ρ : Ann) (A : Ty) → Ty
+    nat : Ty
 
   Conc = Dir × Ty
 
@@ -35,17 +36,24 @@ module Generic.Linear.Example.LR where
     `lam `app : (A B : Ty) → `LR
     `bang : (ρ : Ann) (A : Ty) → `LR
     `bm : (ρ : Ann) (A Z : Ty) → `LR
+    `ze `su : `LR
+    `iter : (Z : Ty) → `LR
 
   LR : System
   LR = `LR ▹ λ where
     (`emb A) → ⟨ []ᶜ `⊢ (syn , A) ⟩ =⇒ (chk , A)
     (`ann A) → ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , A)
-    (`lam A B) → ⟨ ctx [ u1 ] [ syn , A ] `⊢ (chk , B) ⟩ =⇒ (chk , A ⊸ B)
+    (`lam A B) → ⟨ [ u1 , syn , A ]ᶜ `⊢ (chk , B) ⟩ =⇒ (chk , A ⊸ B)
     (`app A B) → ⟨ []ᶜ `⊢ (syn , A ⊸ B) ⟩ `✴ ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , B)
     (`bang ρ A) → ρ `· ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (chk , ! ρ A)
     (`bm ρ A Z) →
-      ⟨ []ᶜ `⊢ (syn , ! ρ A) ⟩ `✴ ⟨ ctx [ ρ ] [ syn , A ] `⊢ (chk , Z) ⟩
+      ⟨ []ᶜ `⊢ (syn , ! ρ A) ⟩ `✴ ⟨ [ ρ , syn , A ]ᶜ `⊢ (chk , Z) ⟩
       =⇒ (syn , Z)
+    `ze → `ℑ =⇒ (chk , nat)
+    `su → ⟨ []ᶜ `⊢ (chk , nat) ⟩ =⇒ (chk , nat)
+    (`iter Z) → ⟨ []ᶜ `⊢ (syn , nat) ⟩ `✴
+                `□ (⟨ []ᶜ `⊢ (chk , Z) ⟩ `∧ ⟨ [ u1 , syn , Z ]ᶜ `⊢ (chk , Z) ⟩)
+                =⇒ (syn , Z)
 
   Term = Tm LR ∞
 
@@ -77,12 +85,34 @@ module Generic.Linear.Example.LR where
   pattern uapp f s = V.`con (`app _ _ , refl , f ✴⟨ _ ⟩ s)
   pattern ubang s = V.`con (`bang _ _ , refl , ⟨ _ ⟩· s)
   pattern ubm T e t = V.`con (`bm _ _ T , refl , e ✴⟨ _ ⟩ t)
+  pattern uze = V.`con (`ze , refl , ℑ⟨ _ ⟩)
+  pattern usu s = V.`con (`su , refl , s)
+  pattern uiter T e s t =
+    V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ ⟩ (s , t)))
 
   myK : ∀ A B → Term _ []ᶜ
   myK A B = elab-unique LR
     (uann (! uω (A ⊸ B) ⊸ ! uω A ⊸ ! uω B)
           (ulam (ulam (uemb (ubm _ (uvar (# 0)) (uemb (ubm _ (uvar (# 1))
             (ubang (uemb (uapp (uvar (# 2)) (uemb (uvar (# 3)))))))))))))
+    []
+
+  deepid : Term _ []ᶜ
+  deepid = elab-unique LR
+    (uann (nat ⊸ nat)
+          (ulam (uemb (uiter _ (uvar (# 0))
+            uze
+            (usu (uemb (uvar (# 1))))))))
+    []
+
+  dupNat : Term (syn , nat ⊸ ! uω nat) []ᶜ
+  dupNat = elab-unique LR
+    (uann (nat ⊸ ! uω nat)
+          (ulam (uemb
+            (uiter (! uω nat) (uvar (# 0))
+              (ubang uze)
+              (uemb (ubm (! uω nat) (uvar (# 1))
+                (ubang (usu (uemb (uvar (# 2)))))))))))
     []
 
   {-

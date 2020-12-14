@@ -4,8 +4,8 @@ module Relation.Unary.Bunched.Checked {a} {A : Set a} where
 
   import Relation.Unary.Bunched {a} {A} as B
   open B public using
-    ( module BunchedUnit; module BunchedScaling
-    ; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_
+    ( module BunchedUnit; module BunchedScaling; module BunchedDuplicable
+    ; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_; □⟨_,_,_⟩_
     )
 
   open import Data.Product

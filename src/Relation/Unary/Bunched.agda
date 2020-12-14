@@ -62,3 +62,18 @@ module Relation.Unary.Bunched {a} {A : Set a} where
         T-prf : T z
 
   open BunchedScaling public using (⟨_⟩·_)
+
+  module BunchedDuplicable
+    {ℓ} (_≤_ : A → A → Set ℓ) (0# : A) (_+_ : A → A → A)
+    where
+
+    record Dup {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
+      constructor □⟨_,_,_⟩_
+      field
+        {y} : _
+        strengthen : x ≤ y
+        split-0 : y ≤ 0#
+        split-+ : y ≤ (y + y)
+        T-prf : T y
+
+  open BunchedDuplicable public using (□⟨_,_,_⟩_)
