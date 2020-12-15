@@ -101,61 +101,61 @@ module Generic.Linear.Example.ZeroOneMany where
   +-assoc u1 uω z = refl
   +-assoc uω y z = refl
 
-  +-comm : ∀ x y → x + y ⊴ y + x
-  +-comm u0 u0 = ⊴-refl
-  +-comm u0 u1 = ⊴-refl
-  +-comm u0 uω = ⊴-refl
-  +-comm u1 u0 = ⊴-refl
-  +-comm u1 u1 = ⊴-refl
-  +-comm u1 uω = ⊴-refl
-  +-comm uω u0 = ⊴-refl
-  +-comm uω u1 = ⊴-refl
-  +-comm uω uω = ⊴-refl
+  +-comm : ∀ x y → x + y ≡ y + x
+  +-comm u0 u0 = refl
+  +-comm u0 u1 = refl
+  +-comm u0 uω = refl
+  +-comm u1 u0 = refl
+  +-comm u1 u1 = refl
+  +-comm u1 uω = refl
+  +-comm uω u0 = refl
+  +-comm uω u1 = refl
+  +-comm uω uω = refl
 
-  ⊴*u1 : ∀ x → x ⊴ x * u1
-  ⊴*u1 u0 = ⊴-refl
-  ⊴*u1 u1 = ⊴-refl
-  ⊴*u1 uω = ⊴-refl
+  *-identityʳ : ∀ x → x ≡ x * u1
+  *-identityʳ u0 = refl
+  *-identityʳ u1 = refl
+  *-identityʳ uω = refl
 
-  *-assoc : ∀ x y z → (x * y) * z ⊴ x * (y * z)
-  *-assoc u0 y z = ⊴-refl
-  *-assoc u1 y z = ⊴-refl
-  *-assoc uω u0 z = ⊴-refl
-  *-assoc uω u1 z = ⊴-refl
-  *-assoc uω uω u0 = ⊴-refl
-  *-assoc uω uω u1 = ⊴-refl
-  *-assoc uω uω uω = ⊴-refl
+  *-assoc : ∀ x y z → (x * y) * z ≡ x * (y * z)
+  *-assoc u0 y z = refl
+  *-assoc u1 y z = refl
+  *-assoc uω u0 z = refl
+  *-assoc uω u1 z = refl
+  *-assoc uω uω u0 = refl
+  *-assoc uω uω u1 = refl
+  *-assoc uω uω uω = refl
 
-  annihilʳ : ∀ x → u0 ⊴ x * u0
-  annihilʳ u0 = ⊴-refl
-  annihilʳ u1 = ⊴-refl
-  annihilʳ uω = ⊴-refl
+  annihilʳ : ∀ x → u0 ≡ x * u0
+  annihilʳ u0 = refl
+  annihilʳ u1 = refl
+  annihilʳ uω = refl
 
-  distribˡ : ∀ x y z → (x + y) * z ⊴ x * z + y * z
-  distribˡ u0 y z = ⊴-refl
-  distribˡ u1 u0 u0 = ⊴-refl
-  distribˡ u1 u0 u1 = ⊴-refl
-  distribˡ u1 u0 uω = ⊴-refl
-  distribˡ u1 u1 u0 = ⊴-refl
-  distribˡ u1 u1 u1 = ⊴-refl
-  distribˡ u1 u1 uω = ⊴-refl
-  distribˡ u1 uω u0 = ⊴-refl
-  distribˡ u1 uω u1 = ⊴-refl
-  distribˡ u1 uω uω = ⊴-refl
-  distribˡ uω u0 u0 = ⊴-refl
-  distribˡ uω u1 u0 = ⊴-refl
-  distribˡ uω uω u0 = ⊴-refl
-  distribˡ uω y u1 = ⊴-refl
-  distribˡ uω y uω = ⊴-refl
+  distribˡ : ∀ x y z → (x + y) * z ≡ x * z + y * z
+  distribˡ u0 y z = refl
+  distribˡ u1 u0 u0 = refl
+  distribˡ u1 u0 u1 = refl
+  distribˡ u1 u0 uω = refl
+  distribˡ u1 u1 u0 = refl
+  distribˡ u1 u1 u1 = refl
+  distribˡ u1 u1 uω = refl
+  distribˡ u1 uω u0 = refl
+  distribˡ u1 uω u1 = refl
+  distribˡ u1 uω uω = refl
+  distribˡ uω u0 u0 = refl
+  distribˡ uω u1 u0 = refl
+  distribˡ uω uω u0 = refl
+  distribˡ uω y u1 = refl
+  distribˡ uω y uω = refl
 
-  distribʳ : ∀ x y z → x * y + x * z ⊴ x * (y + z)
-  distribʳ u0 y z = ⊴-refl
-  distribʳ u1 y z = ⊴-refl
-  distribʳ uω u0 z = ⊴-refl
-  distribʳ uω u1 u0 = ⊴-refl
-  distribʳ uω u1 u1 = ⊴-refl
-  distribʳ uω u1 uω = ⊴-refl
-  distribʳ uω uω z = ⊴-refl
+  distribʳ : ∀ x y z → x * y + x * z ≡ x * (y + z)
+  distribʳ u0 y z = refl
+  distribʳ u1 y z = refl
+  distribʳ uω u0 z = refl
+  distribʳ uω u1 u0 = refl
+  distribʳ uω u1 u1 = refl
+  distribʳ uω u1 uω = refl
+  distribʳ uω uω z = refl
 
   skewSemiring : SkewSemiring 0ℓ 0ℓ
   skewSemiring = record
@@ -177,14 +177,15 @@ module Generic.Linear.Example.ZeroOneMany where
           { identity = λ- ⊴-refl , ≡⇒⊴ ∘ +-identityʳ
           ; assoc = λ x y z → ≡⇒⊴ (sym (+-assoc x y z))
           }
-        ; comm = +-comm
+        ; comm = λ x y → ≡⇒⊴ (+-comm x y)
         }
       ; *-isSkewMonoid = record
-        { identity = λ- ⊴-refl , ⊴*u1
-        ; assoc = *-assoc
+        { identity = λ- ⊴-refl , ≡⇒⊴ ∘ *-identityʳ
+        ; assoc = λ x y z → ≡⇒⊴ (*-assoc x y z)
         }
-      ; annihil = λ- ⊴-refl , annihilʳ
-      ; distrib = distribˡ , distribʳ
+      ; annihil = λ- ⊴-refl , ≡⇒⊴ ∘ annihilʳ
+      ; distrib = (λ x y z → ≡⇒⊴ (distribˡ x y z))
+                , (λ x y z → ≡⇒⊴ (distribʳ x y z))
       }
     }
 
