@@ -105,6 +105,12 @@ module Generic.Linear.Example.LR where
             (usu (uemb (uvar (# 1))))))))
     []
 
+  -- dupNat : nat ⊸ ! uω nat
+  -- dupNat = λn. iter n return ! uω nat where
+  --   0          ↦ bang 0
+  --   suc _ | ih ↦ let bang m = ih return ! uω nat in
+  --                bang (suc m)
+
   dupNat : Term (syn , nat ⊸ ! uω nat) []ᶜ
   dupNat = elab-unique LR
     (uann (nat ⊸ ! uω nat)
