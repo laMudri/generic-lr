@@ -48,15 +48,32 @@ module Generic.Linear.Semantics.Syntactic
       𝓒 : Scoped c
       RΘ : Ctx
 
+  record Kit (d : System) (𝓥 : Scoped v) : Set v where
+    field
+      th^𝓥 : ∀ {A} → Thinnable (𝓥 A)
+      var : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]
+      trm : ∀ {A} → ∀[ 𝓥 A ⇒ Tm d ∞ A ]
+
+    instance
+      leftExtend : LeftExtend 𝓥
+      leftExtend .embedVarˡ v = var (embedVarˡ v)
+
   open Semantics
 
   reify : {{LeftExtend 𝓥}} → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
   reify b = b extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
 
+  module _ where
+    open Kit
+
+    kit→sem : Kit d 𝓥 → Semantics d 𝓥 (Tm d ∞)
+    kit→sem K .th^𝓥 = K .th^𝓥
+    kit→sem K .var = K .trm
+    kit→sem {d = d} K .alg =
+      `con ∘ map-s′ d (reify {𝓒 = Tm d ∞} {{leftExtend K}})
+
   Ren : Semantics d LVar (Tm d ∞)
-  Ren .th^𝓥 = th^LVar
-  Ren .var = `var
-  Ren {d} .alg = `con ∘ map-s′ d (reify {𝓒 = Tm d ∞})
+  Ren = kit→sem record { th^𝓥 = th^LVar ; var = id ; trm = `var }
 
   th^Tm : Thinnable (Tm d ∞ A)
   th^Tm t th = semantics Ren th t
@@ -69,6 +86,4 @@ module Generic.Linear.Semantics.Syntactic
     le^Tm .embedVarˡ v = `var (embedVarˡ v)
 
   Sub : Semantics d (Tm d ∞) (Tm d ∞)
-  Sub .th^𝓥 = th^Tm
-  Sub .var = id
-  Sub {d} .alg = `con ∘ map-s′ d (reify {𝓒 = Tm d ∞})
+  Sub = kit→sem record { th^𝓥 = th^Tm ; var = `var ; trm = id }
