@@ -1,10 +1,12 @@
 module Generic.Linear.Example.LR where
 
   open import Algebra.Skew
+  open import Data.Bool
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Automation
   open import Data.Product
+  open import Data.Unit
   open import Level
   open import Relation.Binary.PropositionalEquality using (_≡_; refl)
   open import Relation.Unary.Bunched
@@ -39,7 +41,11 @@ module Generic.Linear.Example.LR where
     `ze `su : `LR
     `iter : (Z : Ty) → `LR
 
-  LR : System
+  LR-flags : PremisesFlags
+  LR-flags = record noPremisesFlags
+    { ∧? = true ; ℑ? = true ; ✴? = true ; ·? = true ; □? = true }
+
+  LR : System LR-flags
   LR = `LR ▹ λ where
     (`emb A) → ⟨ []ᶜ `⊢ (syn , A) ⟩ =⇒ (chk , A)
     (`ann A) → ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , A)
@@ -69,7 +75,8 @@ module Generic.Linear.Example.LR where
 
   open import Generic.Linear.Example.UsageCheck Conc
   open WithSkewSemiring skewSemiring
-  open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹ rep
+  open WithInverses LR-flags record
+    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 
   module V where
 

@@ -21,7 +21,8 @@ module Generic.Linear.Syntax.Term
     variable
      A : Ty
      sz : Size
+     fl : PremisesFlags
 
-  data Tm (d : System) : Size → Scoped 0ℓ where
+  data Tm (d : System fl) : Size → Scoped 0ℓ where
     `var : ∀[ LVar                     A ⇒ Tm d (↑ sz) A ]
     `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]

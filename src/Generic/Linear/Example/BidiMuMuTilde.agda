@@ -7,6 +7,7 @@ open import Relation.Binary using (Rel)
 module Generic.Linear.Example.BidiMuMuTilde where
 
   open import Algebra.Relational
+  open import Data.Bool
   open import Data.Empty
   open import Data.LTree
   open import Data.LTree.Vector
@@ -27,12 +28,17 @@ module Generic.Linear.Example.BidiMuMuTilde where
   open import Relation.Binary.PropositionalEquality as ≡
     using (_≡_; subst; subst₂; _≗_)
 
+  open import Generic.Linear.Syntax.Core
+
   data Dir : Set where syn chk : Dir
 
   data Pol : Set where trm cot : Pol
   neg : Pol → Pol
   neg trm = cot
   neg cot = trm
+
+  flags : PremisesFlags
+  flags = record noPremisesFlags { ✴? = true }
 
   module WithSkewSemiring (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
 
@@ -87,30 +93,30 @@ module Generic.Linear.Example.BidiMuMuTilde where
           ann : ∀ {p} (A : Ty p) → `Untyped
           emb : (p : Pol) → `Untyped
 
-        Untyped : System
-        Untyped = system `Untyped λ where
-          (`cut p) → rule
-            (([]ᶜ `⊢ just (syn , p)) `* ([]ᶜ `⊢ just (chk , neg p)))
-            nothing
-          (`μ p) → rule
-            ([ 1# , just (syn , neg p) ]ᶜ `⊢ nothing)
-            (just (chk , p))
-          (`λ p) → rule
-            ([]ᶜ `⊢ just (chk , neg p))
-            (just (chk , p))
-          (`⟨-,-⟩ p) → rule
-            (([]ᶜ `⊢ just (chk , p)) `* ([]ᶜ `⊢ just (chk , p)))
-            (just (chk , p))
-          (`μ⟨-,-⟩ p) → rule
-            (([ 1# , just (syn , neg p) ]ᶜ ++ᶜ
-              [ 1# , just (syn , neg p) ]ᶜ) `⊢ nothing)
-            (just (chk , p))
-          (ann {p} A) → rule
-            ([]ᶜ `⊢ just (chk , p))
-            (just (syn , p))
-          (emb p) → rule
-            ([]ᶜ `⊢ just (syn , p))
-            (just (chk , p))
+        Untyped : System flags
+        Untyped = `Untyped ▹ λ where
+          (`cut p) →
+            ⟨ []ᶜ `⊢ just (syn , p) ⟩ `✴ ⟨ []ᶜ `⊢ just (chk , neg p) ⟩
+            =⇒ nothing
+          (`μ p) →
+            ⟨ [ 1# , just (syn , neg p) ]ᶜ `⊢ nothing ⟩
+            =⇒ just (chk , p)
+          (`λ p) →
+            ⟨ []ᶜ `⊢ just (chk , neg p) ⟩
+            =⇒ just (chk , p)
+          (`⟨-,-⟩ p) →
+            ⟨ []ᶜ `⊢ just (chk , p) ⟩ `✴ ⟨ []ᶜ `⊢ just (chk , p) ⟩
+            =⇒ just (chk , p)
+          (`μ⟨-,-⟩ p) →
+            ⟨ [ 1# , just (syn , neg p) ]ᶜ ++ᶜ [ 1# , just (syn , neg p) ]ᶜ
+              `⊢ nothing ⟩
+            =⇒ just (chk , p)
+          (ann {p} A) →
+            ⟨ []ᶜ `⊢ just (chk , p) ⟩
+            =⇒ just (syn , p)
+          (emb p) →
+            ⟨ []ᶜ `⊢ just (syn , p) ⟩
+            =⇒ just (chk , p)
 
         UntypedTm = Tm Untyped ∞
 
@@ -145,29 +151,29 @@ module Generic.Linear.Example.BidiMuMuTilde where
           `ann : ∀ {p} (A : Ty p) → `Typed
           `emb : ∀ {p} (A : Ty p) → `Typed
 
-        Typed : System
-        Typed = system `Typed λ where
-          (`cut {p} A) → rule
-            (([]ᶜ `⊢ syn A) `* ([]ᶜ `⊢ chk A (neg p)))
-            com
-          (`μ {p} A) → rule
-            ([ 1# , syn A ]ᶜ `⊢ com)
-            (chk A p)
-          (`λ A q) → rule
-            ([]ᶜ `⊢ chk A (neg q))
-            (chk (A ^⊥) q)
-          (`⟨-,-⟩ {p} A B) → rule
-            (([]ᶜ `⊢ chk A p) `* ([]ᶜ `⊢ chk B p))
-            (chk (A ⊗ B) p)
-          (`μ⟨-,-⟩ {p} A B) → rule
-            (([ 1# , syn A ]ᶜ ++ᶜ [ 1# , syn B ]ᶜ) `⊢ com)
-            (chk (A ⊗ B) (neg p))
-          (`ann {p} A) → rule
-            ([]ᶜ `⊢ chk A p)
-            (syn A)
-          (`emb {p} A) → rule
-            ([]ᶜ `⊢ syn A)
-            (chk A p)
+        Typed : System flags
+        Typed = `Typed ▹ λ where
+          (`cut {p} A) →
+            ⟨ []ᶜ `⊢ syn A ⟩ `✴ ⟨ []ᶜ `⊢ chk A (neg p) ⟩
+            =⇒ com
+          (`μ {p} A) →
+            ⟨ [ 1# , syn A ]ᶜ `⊢ com ⟩
+            =⇒ chk A p
+          (`λ A q) →
+            ⟨ []ᶜ `⊢ chk A (neg q) ⟩
+            =⇒ chk (A ^⊥) q
+          (`⟨-,-⟩ {p} A B) →
+            ⟨ []ᶜ `⊢ chk A p ⟩ `✴ ⟨ []ᶜ `⊢ chk B p ⟩
+            =⇒ chk (A ⊗ B) p
+          (`μ⟨-,-⟩ {p} A B) →
+            ⟨ [ 1# , syn A ]ᶜ ++ᶜ [ 1# , syn B ]ᶜ `⊢ com ⟩
+            =⇒ chk (A ⊗ B) (neg p)
+          (`ann {p} A) →
+            ⟨ []ᶜ `⊢ chk A p ⟩
+            =⇒ syn A
+          (`emb {p} A) →
+            ⟨ []ᶜ `⊢ syn A ⟩
+            =⇒ chk A p
 
         TypedTm = Tm Typed ∞
 

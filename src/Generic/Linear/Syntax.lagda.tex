@@ -10,11 +10,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Function.Base using (_∘_)
   open import Relation.Unary
 
-  infix 1 _=⇒_ _▹_
-  infixr 2 _`✴_
-  infixr 2 _`∧_
-  infixr 3 _`·_
-  -- infix 4 _`⊢_
+  open import Generic.Linear.Syntax.Core public
 
   record SizedCtx (s : LTree) : Set where
     constructor sctx
@@ -59,43 +55,54 @@ Premises to each rule form a tree.
 At each leaf is a premise, which binds one Ctx's worth of new variables.
 Annotations are shared out to the premises via separation logic
 connectives:
-\begin{itemize}
+\begin{verbatim}
 \item separating conjunction (`I, _`*_) – e.g, ⊗-introduction
 \item sharing conjunction (`⊤, _`∧_)    – e.g, &-introduction
 \item scaling (_`·_)                    – e.g, !-introduction
 \item the duplicable modality (`□)      – e.g, recursion rules
-\end{itemize}
+\end{verbatim}
+
+\begin{code}
+  module _ (fl : PremisesFlags) (open PremisesFlags fl) where
+
+    infix 1 _=⇒_ _▹_
+    infixr 2 _`✴_
+    infixr 2 _`∧_
+    infixr 3 _`·_
+\end{code}
 
 %<*Premises>
 \begin{code}
-  data Premises : Set where
-    ⟨_`⊢_⟩ : (PΓ : Ctx) (A : Ty) → Premises
-    `⊤ `ℑ : Premises
-    _`∧_ _`✴_ : (p q : Premises) → Premises
-    _`·_ : (r : Ann) (p : Premises) → Premises
-    `□ : (p : Premises) → Premises
+    data Premises : Set where
+      ⟨_`⊢_⟩ : (PΓ : Ctx) (A : Ty) → Premises
+      `⊤ : {{_ : Has-⊤}} → Premises
+      _`∧_ : {{_ : Has-∧}} (p q : Premises) → Premises
+      `ℑ : {{_ : Has-ℑ}} → Premises
+      _`✴_ : {{_ : Has-✴}} (p q : Premises) → Premises
+      _`·_ : {{_ : Has-·}} (r : Ann) (p : Premises) → Premises
+      `□ : {{_ : Has-□}} (p : Premises) → Premises
 \end{code}
 %</Premises>
 
 %<*Rule>
 \begin{code}
-  record Rule : Set where
-    constructor _=⇒_
-    field
-      premises : Premises
-      conclusion : Ty
-  open Rule public
+    record Rule : Set where
+      constructor _=⇒_
+      field
+        premises : Premises
+        conclusion : Ty
+    open Rule public
 \end{code}
 %</Rule>
 
 %<*System>
 \begin{code}
-  record System : Set₁ where
-    constructor _▹_
-    field
-      Label : Set
-      rules : (l : Label) → Rule
-  open System public
+    record System : Set₁ where
+      constructor _▹_
+      field
+        Label : Set
+        rules : (l : Label) → Rule
+    open System public
 \end{code}
 %</System>
 

@@ -38,6 +38,7 @@ module Generic.Linear.Semantics
     variable
       A : Ty
       ℓ v c : Level
+      fl : PremisesFlags
 
   Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) (PΓ : Ctx) (A : Ty) →
            Ctx → Set (v ⊔ c)
@@ -48,7 +49,7 @@ module Generic.Linear.Semantics
           ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
   mapK𝓒 f b th .app✴ sp ρ = f (b th .app✴ sp ρ)
 
-  record Semantics (d : System) (𝓥 : Scoped v) (𝓒 : Scoped c)
+  record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
                    : Set (v ⊔ c) where
     field
       th^𝓥 : Thinnable (𝓥 A)

@@ -3,6 +3,7 @@
 module Generic.Linear.Example.LTLC where
 
   open import Algebra.Skew
+  open import Data.Bool
   open import Data.Empty
   open import Data.List as L using (List; _∷_) renaming ([] to []L)
   open import Data.LTree
@@ -33,10 +34,13 @@ module Generic.Linear.Example.LTLC where
   data `LTLC : Set where
     `lam `app : (A B : Ty) → `LTLC
 
-  LTLC : System
-  LTLC = system `LTLC λ where
-    (`lam A B) → rule ([(u1 , A)]ᶜ `⊢ B) (A ⊸ B)
-    (`app A B) → rule (([]ᶜ `⊢ (A ⊸ B)) `* ([]ᶜ `⊢ A)) B
+  flags : PremisesFlags
+  flags = record noPremisesFlags { ✴? = true }
+
+  LTLC : System flags
+  LTLC = `LTLC ▹ λ where
+    (`lam A B) → ⟨ [(u1 , A)]ᶜ `⊢ B ⟩ =⇒ A ⊸ B
+    (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
   open WithScope (Scope (Tm LTLC ∞))
 
@@ -49,7 +53,8 @@ module Generic.Linear.Example.LTLC where
 
   open import Generic.Linear.Example.UsageCheck Ty
   open WithSkewSemiring skewSemiring
-  open WithInverses u0⁻¹ +⁻¹ u1⁻¹ *⁻¹
+  open WithInverses flags record
+    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = λ { {{()}} } }
 
   module V where
 

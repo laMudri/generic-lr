@@ -44,6 +44,7 @@ module Generic.Linear.Syntax.Interpretation
   private
     variable
       ℓ t u : Level
+      fl : PremisesFlags
 
   infix 4 _⊴ᶜ_
   infixr 5 !!_
@@ -80,7 +81,7 @@ module Generic.Linear.Syntax.Interpretation
 
 %<*semp>
 \begin{code}
-    ⟦_⟧p : Premises → Ctx → Set ℓ
+    ⟦_⟧p : Premises fl → Ctx → Set ℓ
     ⟦ ⟨ Γ `⊢ A ⟩ ⟧p = ⟦-, Γ ⊢ A ⟧
     ⟦ `⊤ ⟧p = U
     ⟦ `ℑ ⟧p = ℑᶜ
@@ -96,25 +97,25 @@ module Generic.Linear.Syntax.Interpretation
 
 %<*semr>
 \begin{code}
-    ⟦_⟧r : Rule → Scoped ℓ
+    ⟦_⟧r : Rule fl → Scoped ℓ
     ⟦ ps =⇒ A′ ⟧r A PΓ = A′ ≡ A × ⟦ ps ⟧p PΓ
 \end{code}
 %</semr>
 
 %<*sems>
 \begin{code}
-    ⟦_⟧s : System → Scoped ℓ
+    ⟦_⟧s : System fl → Scoped ℓ
     ⟦ L ▹ rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
 \end{code}
 %</sems>
 
 \begin{code}
-  ⟦_⟧p : Premises → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
+  ⟦_⟧p : Premises fl → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
   ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
 
-  ⟦_⟧r : Rule → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧r : Rule fl → (Ctx → Scoped ℓ) → Scoped ℓ
   ⟦ r ⟧r Sc = let module W = WithScope Sc in W.⟦ r ⟧r
 
-  ⟦_⟧s : System → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧s : System fl → (Ctx → Scoped ℓ) → Scoped ℓ
   ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s
 \end{code}

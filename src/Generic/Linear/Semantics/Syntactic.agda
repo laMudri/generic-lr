@@ -41,14 +41,15 @@ module Generic.Linear.Semantics.Syntactic
 
   private
     variable
-      d : System
+      fl : PremisesFlags
+      d : System fl
       A : Ty
       v c : Level
       𝓥 : Scoped v
       𝓒 : Scoped c
       RΘ : Ctx
 
-  record Kit (d : System) (𝓥 : Scoped v) : Set v where
+  record Kit (d : System fl) (𝓥 : Scoped v) : Set v where
     field
       th^𝓥 : ∀ {A} → Thinnable (𝓥 A)
       var : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]

@@ -65,24 +65,27 @@ module Generic.Linear.Example.MuMuTilde
     `λ `λ∼ : (A : Ty) → `MMT
     `⟨-,-⟩ `μ⟨-,-⟩ : (rA sB : Ann × Ty) → `MMT
 
-  MMT : System
-  MMT = system `MMT λ where
-    (`cut A) → rule (([]ᶜ `⊢ trm A) `* ([]ᶜ `⊢ cot A))
-                    com
-    (`μ A) → rule ([ 1# , cot A ]ᶜ `⊢ com)
-                  (trm A)
-    (`μ∼ A) → rule ([ 1# , trm A ]ᶜ `⊢ com)
-                   (cot A)
-    (`λ A) → rule ([]ᶜ `⊢ cot A)
-                  (trm (A ^⊥))
-    (`λ∼ A) → rule ([]ᶜ `⊢ trm A)
-                   (cot (A ^⊥))
+  flags : PremisesFlags
+  flags = allPremisesFlags
+
+  MMT : System flags
+  MMT = `MMT ▹ λ where
+    (`cut A) → ⟨ []ᶜ `⊢ trm A ⟩ `✴ ⟨ []ᶜ `⊢ cot A ⟩
+               =⇒ com
+    (`μ A) → ⟨ [ 1# , cot A ]ᶜ `⊢ com ⟩
+             =⇒ trm A
+    (`μ∼ A) → ⟨ [ 1# , trm A ]ᶜ `⊢ com ⟩
+              =⇒ cot A
+    (`λ A) → ⟨ []ᶜ `⊢ cot A ⟩
+             =⇒ trm (A ^⊥)
+    (`λ∼ A) → ⟨ []ᶜ `⊢ trm A ⟩
+              =⇒ cot (A ^⊥)
     (`⟨-,-⟩ rA@(r , A) sB@(s , B)) →
-      rule ((r `· ([]ᶜ `⊢ cot A)) `* (s `· ([]ᶜ `⊢ cot B)))
-           (cot (rA ⅋ sB))
+      r `· ⟨ []ᶜ `⊢ cot A ⟩ `✴ s `· ⟨ []ᶜ `⊢ cot B ⟩
+      =⇒ cot (rA ⅋ sB)
     (`μ⟨-,-⟩ rA@(r , A) sB@(s , B)) →
-      rule (([ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ) `⊢ com)
-           (trm (rA ⅋ sB))
+      ⟨ [ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ `⊢ com ⟩
+      =⇒ trm (rA ⅋ sB)
 
   Drv = Tm MMT ∞
   open WithScope (Scope Drv)

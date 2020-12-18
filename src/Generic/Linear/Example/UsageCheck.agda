@@ -68,10 +68,14 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Semantics Ty skewSemiring
     open import Generic.Linear.Semantics.Syntactic Ty skewSemiring using (reify)
 
+    private
+      variable
+        fl : PremisesFlags
+
     uCtx : Ctx → U.Ctx
     uCtx (ctx P Γ) = U.ctx _ Γ
 
-    uPremises : Premises → U.Premises
+    uPremises : Premises fl → U.Premises fl
     uPremises ⟨ PΓ `⊢ A ⟩ = U.⟨ uCtx PΓ `⊢ A ⟩
     uPremises `⊤ = U.`⊤
     uPremises `ℑ = U.`ℑ
@@ -79,9 +83,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uPremises (ps `✴ qs) = uPremises ps U.`✴ uPremises qs
     uPremises (r `· ps) = _ U.`· uPremises ps
     uPremises (`□ ps) = U.`□ (uPremises ps)
-    uRule : Rule → U.Rule
+    uRule : Rule fl → U.Rule fl
     uRule (ps =⇒ A) = uPremises ps U.=⇒ A
-    uSystem : System → U.System
+    uSystem : System fl → U.System fl
     uSystem (L ▹ rs) = L U.▹ λ l → uRule (rs l)
 
     open import Category.Functor
@@ -100,13 +104,20 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Relation.Unary.Bunched
     open import Size
 
-    module WithInverses
-      (0#⁻¹ : (r : Ann) → List (r ⊴ 0#))
-      (+⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ⊴ p + q))
-      (`ℑ#⁻¹ : (r : Ann) → List (r ⊴ 1#))
-      (*⁻¹ : (r q : Ann) → List (∃ \ p → q ⊴ r * p))
-      (rep : (r : Ann) → List (∃ \ p → r ⊴ p × p ⊴ 0# × p ⊴ p + p))
-      where
+    record NonDetInverses (fl : PremisesFlags) : Set where
+      open PremisesFlags fl
+      field
+        0#⁻¹ : (r : Ann) → List (r ⊴ 0#)
+        +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ⊴ p + q)
+        1#⁻¹ : (r : Ann) → List (r ⊴ 1#)
+        *⁻¹ : (r q : Ann) → List (∃ \ p → q ⊴ r * p)
+        rep : {{_ : Has-□}} (r : Ann) →
+              List (∃ \ p → r ⊴ p × p ⊴ 0# × p ⊴ p + p)
+
+    module WithInverses (fl : PremisesFlags) (invs : NonDetInverses fl) where
+
+      open PremisesFlags fl
+      open NonDetInverses invs
 
       0*⁻¹ : ∀ {s} (R : Vector Ann s) → List (R ⊴* 0*)
       0*⁻¹ {[-]} R = (| [_]₂ (0#⁻¹ (R here)) |)
@@ -121,7 +132,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         (| (×.zip (×.zip V._++_ V._++_) _++₂_) (+*⁻¹ (R ∘ ↙)) (+*⁻¹ (R ∘ ↘)) |)
 
       ⟨_∣⁻¹ : ∀ {s} (i : Ptr s) R → List (R ⊴* 1ᴹ i)
-      ⟨ here ∣⁻¹ R = (| [_]₂ (`ℑ#⁻¹ (R here)) |)
+      ⟨ here ∣⁻¹ R = (| [_]₂ (1#⁻¹ (R here)) |)
       ⟨ ↙ i ∣⁻¹ R = (| _++₂_ (⟨ i ∣⁻¹ (R ∘ ↙)) (0*⁻¹ (R ∘ ↘)) |)
       ⟨ ↘ i ∣⁻¹ R = (| _++₂_ (0*⁻¹ (R ∘ ↙)) (⟨ i ∣⁻¹ (R ∘ ↘)) |)
 
@@ -131,7 +142,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++₂_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
 
-      rep* : ∀ {s} (R : Vector Ann s) →
+      rep* : ∀ {{_ : Has-□}} {s} (R : Vector Ann s) →
              List (∃ \ P → R ⊴* P × P ⊴* 0* × P ⊴* P +* P)
       rep* {[-]} R =
         (| (×.map V.[_] (×.map [_]₂ (×.map [_]₂ [_]₂))) (rep (R here)) |)
@@ -141,7 +152,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
              (rep* (R ∘ ↙)) (rep* (R ∘ ↘)) |)
 
       lemma-p :
-        ∀ (sys : System) (ps : Premises) {PΓ} →
+        ∀ (sys : System fl) (ps : Premises fl) {PΓ} →
         U.⟦ uPremises ps ⟧p
           (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
           (uCtx PΓ) →
@@ -162,7 +173,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         (| □⟨ str , sp0 , sp+ ⟩_ (lemma-p sys ps t) |)
 
       lemma-r :
-        ∀ (sys : System) (r : Rule) {A PΓ} →
+        ∀ (sys : System fl) (r : Rule fl) {A PΓ} →
         U.⟦ uRule r ⟧r
           (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
           A (uCtx PΓ) →
@@ -170,14 +181,14 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
 
       lemma :
-        ∀ (sys : System) {A PΓ} →
+        ∀ (sys : System fl) {A PΓ} →
         U.⟦ uSystem sys ⟧s
           (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
           A (uCtx PΓ) →
         List (⟦ sys ⟧s (Scope (Tm sys ∞)) A PΓ)
       lemma sys@(L ▹ rs) (l , t) = (| (l ,_) (lemma-r sys (rs l) t) |)
 
-      module _ (sys : System) where
+      module _ (sys : System fl) where
 
         𝓒 : U.Scoped _
         𝓒 A (U.ctx _ Γ) = ∀ R → List (Tm sys ∞ A (ctx R Γ))

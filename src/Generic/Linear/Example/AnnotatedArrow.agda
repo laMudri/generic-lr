@@ -15,6 +15,7 @@ module Generic.Linear.Example.AnnotatedArrow
              )
 
   open import Algebra.Relational
+  open import Data.Bool
   open import Data.LTree
   open import Data.LTree.Vector hiding (setoid)
   open import Data.LTree.Matrix
@@ -58,7 +59,10 @@ module Generic.Linear.Example.AnnotatedArrow
   data `AnnArr : Set where
     `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
 
-  AnnArr : System
+  flags : PremisesFlags
+  flags = record noPremisesFlags { ✴? = true ; ·? = true }
+
+  AnnArr : System flags
   AnnArr = `AnnArr ▹ λ where
     (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
     (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
