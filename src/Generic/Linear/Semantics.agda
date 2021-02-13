@@ -104,6 +104,6 @@ module Generic.Linear.Semantics
       --                                          (*ₗ-*ᴹ _ _ (ρ .M))))
       --   }
 
-    body ρ t {QΔ′} th .app✴ r σ =
+    body ρ t th .app✴ r σ =
       let ρ′ = th^Env th^𝓥 ρ th in
       semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) t

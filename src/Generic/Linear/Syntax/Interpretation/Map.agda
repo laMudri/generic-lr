@@ -49,7 +49,7 @@ module Generic.Linear.Syntax.Interpretation.Map
       (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
       (∀ {P Q} → Q ⊴* apply P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
-    map-p `⊤ f r tt = tt
+    map-p `⊤ f r _ = _
     map-p `ℑ f r ℑ⟨ t ⟩ =
       ℑ⟨ (⊴*-trans r (⊴*-trans (hom-mono t) hom-0ₘ)) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
@@ -85,7 +85,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ : (ps : Premises fl) → (∀ {RΘ A} → ∀[ X RΘ A ⇒ Y RΘ A ]) →
              ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ PΓ `⊢ A ⟩ f t = f t
-    map-p′ `⊤ f tt = tt
+    map-p′ `⊤ f _ = _
     map-p′ `ℑ f ℑ⟨ sp ⟩ = ℑ⟨ sp ⟩
     map-p′ (ps `∧ qs) f (s , t) = map-p′ ps f s , map-p′ qs f t
     map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =

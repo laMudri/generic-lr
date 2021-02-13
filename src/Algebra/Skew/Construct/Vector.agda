@@ -7,7 +7,7 @@ module Algebra.Skew.Construct.Vector where
   open import Data.LTree.Vector
   -- open import Data.Nat as N using (ℕ)
   -- open import Data.Nat.Properties as NP
-  open import Data.Product
+  open import Data.Product hiding (_<*>_)
   open import Data.Product.Relation.Binary.Pointwise.NonDependent
   open import Data.Unit.Polymorphic
   open import Level using (Level; 0ℓ)

@@ -33,12 +33,18 @@ module Generic.Simple.Syntax (Ty : Set) where
 
   _++ᶜ_ : Ctx → Ctx → Ctx
   ctx Γ ++ᶜ ctx Δ = ctx (Γ ++ Δ)
+\end{code}
 
+%<*SimplePremises>
+\begin{code}
   data Premises : Set where
     ⟨_`⊢_⟩ : (Γ : Ctx) (A : Ty) → Premises
     `⊤ : Premises
     _`∧_ : (p q : Premises) → Premises
+\end{code}
+%</SimplePremises>
 
+\begin{code}
   record Rule : Set where
     constructor _=⇒_
     field
