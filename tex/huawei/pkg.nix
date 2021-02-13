@@ -6,7 +6,7 @@ let
                       biber;
   };
 in stdenv.mkDerivation {
-  name = "vest";
+  name = "huawei";
   src = ./.;
   buildInputs = [ tex-env ];
   buildPhase = ''
