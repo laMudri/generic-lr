@@ -97,7 +97,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
     open import Data.LTree
     open import Data.LTree.Vector as V hiding ([]; [_]; _++_)
-    open import Data.Product as ×
+    open import Data.Product as × hiding (_<*>_)
     open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×
     open import Function.Base using (_∘_)
     open import Relation.Unary

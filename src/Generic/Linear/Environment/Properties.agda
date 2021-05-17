@@ -1,13 +1,13 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (Level; 0ℓ)
 
 module Generic.Linear.Environment.Properties
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
 
   open import Data.LTree
@@ -19,13 +19,14 @@ module Generic.Linear.Environment.Properties
   open import Relation.Unary.Bunched.Checked
   open import Relation.Binary.PropositionalEquality
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann hiding ([_]ᶜ)
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Environment Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Environment Ty rawPoSemiring
   open _─Env
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
+  open import Generic.Linear.Thinning Ty rawPoSemiring
 
   private
     variable
@@ -41,23 +42,50 @@ module Generic.Linear.Environment.Properties
     ⊴*-trans (ren .sums)
              (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ (ρ .sums)) ⊴ᴹ-refl))
                        (unrowL₂ (*ᴹ-*ᴹ-→ _ (ρ .M) (ren .M))))
-  th^Env th^𝓥 {QΔ} ρ {RΘ} ren .lookup v =
-    th^𝓥 (ρ .lookup v) record { _─Env ren; sums = ⊴*-refl }
+  th^Env th^𝓥 {QΔ} ρ {RΘ} ren .lookup {P′ = P′} v =
+    th^𝓥 (ρ .lookup v) record
+      { _─Env ren
+      ; sums = unrowL₂
+        (⊴ᴹ-reflexive (≈ᴹ-sym (*ᴹ-assoc (row P′) (ρ .M) (ren .M))))
+      }
 
-  []ᵉ : ∀[ ℑᶜ ⇒ ([]ᶜ ─Env) 𝓥 ]
-  []ᵉ ℑ⟨ sp ⟩ .M = [─]
-  []ᵉ ℑ⟨ sp ⟩ .sums = sp
-  []ᵉ ℑ⟨ sp ⟩ .lookup (var (there () _) _)
+  module With-psh^𝓥 {ℓ} {𝓥 : Scoped ℓ} (psh^𝓥 : IsPresheaf 𝓥) where
 
-  ++ᵉ : ∀[ (PΓ ─Env) 𝓥 ✴ᶜ (QΔ ─Env) 𝓥 ⇒ ((PΓ ++ᶜ QΔ) ─Env) 𝓥 ]
-  ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M
-                             ─
-                           σ .M ]
-  ++ᵉ (ρ ✴⟨ sp ⟩ σ) .sums = ⊴*-trans sp (+*-mono (ρ .sums) (σ .sums))
-  ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (var (↙ i) q) = ρ .lookup (var i q)
-  ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (var (↘ i) q) = σ .lookup (var i q)
+    []ᵉ : ∀[ ℑᶜ ⇒ ([]ᶜ ─Env) 𝓥 ]
+    []ᵉ ℑ⟨ sp ⟩ .M = [─]
+    []ᵉ ℑ⟨ sp ⟩ .sums = sp
+    []ᵉ ℑ⟨ sp ⟩ .lookup (lvar (there () _) _ _)
 
-  [-]ᵉ : ∀[ r ·ᶜ 𝓥 A ⇒ ([ r · A ]ᶜ ─Env) 𝓥 ]
-  [-]ᵉ (⟨ sp ⟩· v) .M = row _
-  [-]ᵉ (⟨ sp ⟩· v) .sums = sp
-  [-]ᵉ (⟨ sp ⟩· v) .lookup (var _ refl) = v
+    ++ᵉ : ∀[ (PΓ ─Env) 𝓥 ✴ᶜ (QΔ ─Env) 𝓥 ⇒ ((PΓ ++ᶜ QΔ) ─Env) 𝓥 ]
+    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M
+                               ─
+                             σ .M ]
+    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .sums = ⊴*-trans sp (+*-mono (ρ .sums) (σ .sums))
+    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (lvar (↙ i) q b) =
+      let bl , br = un++₂ b in
+      psh^𝓥
+        (unrowL₂ (⊴ᴹ-trans
+          (+ᴹ-mono
+            ⊴ᴹ-refl
+            (⊴ᴹ-trans (*ᴹ-mono (rowL₂ br) ⊴ᴹ-refl) (0ᴹ-*ᴹ (σ .M))))
+          (mk λ i k → +.identity-← .proj₂ _)))
+        (ρ .lookup (lvar i q bl))
+    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (lvar (↘ i) q b) =
+      let bl , br = un++₂ b in
+      psh^𝓥
+        (unrowL₂ (⊴ᴹ-trans
+          (+ᴹ-mono
+            (⊴ᴹ-trans (*ᴹ-mono (rowL₂ bl) ⊴ᴹ-refl) (0ᴹ-*ᴹ (ρ .M)))
+            ⊴ᴹ-refl)
+          (mk λ i k → +.identity-→ .proj₁ _)))
+        (σ .lookup (lvar i q br))
+
+    [-]ᵉ : ∀[ r ·ᶜ 𝓥 A ⇒ ([ r · A ]ᶜ ─Env) 𝓥 ]
+    [-]ᵉ (⟨ sp ⟩· v) .M = row _
+    [-]ᵉ (⟨ sp ⟩· v) .sums = sp
+    [-]ᵉ (⟨_⟩·_ {z = P} sp v) .lookup (lvar here refl b) =
+      psh^𝓥
+        (unrowL₂ (⊴ᴹ-trans
+          (*ᴹ-mono (rowL₂ b) (⊴ᴹ-refl {x = row P}))
+          (mk λ _ _ → *.identity .proj₁ _)))
+        v

@@ -1,19 +1,19 @@
 {-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_)
 
 module Generic.Linear.Semantics
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann
              ; _≤_ to _⊴_
              ; refl to ⊴-refl; trans to ⊴-trans
              )
 
-  open import Algebra.Skew.Relation
+  open import Algebra.Po.Relation
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
@@ -22,17 +22,18 @@ module Generic.Linear.Semantics
   open import Relation.Unary
   open import Relation.Unary.Bunched
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
-  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
-  open import Generic.Linear.Environment Ty rawSkewSemiring hiding (var)
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Syntax.Interpretation.Map Ty poSemiring
+  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Environment Ty rawPoSemiring
+  open import Generic.Linear.Thinning Ty rawPoSemiring
   open _─Env
-  open import Generic.Linear.Thinning.Properties Ty skewSemiring
-  open import Generic.Linear.Environment.Properties Ty skewSemiring
+  open import Generic.Linear.Thinning.Properties Ty poSemiring
+  open import Generic.Linear.Environment.Properties Ty poSemiring
 
   private
     variable
@@ -58,6 +59,7 @@ module Generic.Linear.Semantics
 
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 QP v = th^𝓥 v (subuse-th QP)
+    open With-psh^𝓥 psh^𝓥
 
     _─Comp : Ctx → Scoped ℓ → Ctx → Set ℓ
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
@@ -67,11 +69,7 @@ module Generic.Linear.Semantics
            Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
     semantics ρ (`var v) =
-      var (psh^𝓥 (⊴*-trans (ρ .sums)
-                           (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis))
-                                                       ⊴ᴹ-refl))
-                                     (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
-                 (ρ .lookup (plain-var v)))
+      var (psh^𝓥 (ρ .sums) (ρ .lookup v))
     semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
       alg (map-s linMor {X = Scope (Tm d sz)} {Y = Kripke 𝓥 𝓒} d
                  (λ {RΘ} {A} {P′} {Q′} r →
@@ -79,30 +77,15 @@ module Generic.Linear.Semantics
                  {_} {P} {Q} (ρ .sums)
                  t)
       where
-      open SkewLeftSemimoduleMor
-      open ProsetMor
+      open PoLeftSemimoduleMor
 
-      linMor : LinMor skewSemiring _ _
-      linMor .prosetMor .apply P = unrow (row P *ᴹ ρ .M)
-      linMor .prosetMor .hom-mono PP = unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl)
-      linMor .hom-0ₘ = unrowL₂ (0ᴹ-*ᴹ (ρ .M))
-      linMor .hom-+ₘ P Q = unrowL₂ (+ᴹ-*ᴹ _ _ (ρ .M))
-      linMor .hom-*ₘ r P = unrowL₂ (*ₗ-*ᴹ _ _ (ρ .M))
-      -- linRel : LinRel skewSemiring _ _
-      -- linRel = record
-      --   { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
-      --   ; rel-0ₘ = λ (sp0 , is-rel) →
-      --     ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl)
-      --                                        (0ᴹ-*ᴹ (ρ .M))))
-      --   ; rel-+ₘ = λ (sp+ , is-rel) →
-      --     ⟨ ⊴*-refl , ⊴*-refl ⟩
-      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl)
-      --                                          (+ᴹ-*ᴹ _ _ (ρ .M))))
-      --   ; rel-*ₘ = λ (sp* , is-rel) →
-      --     ⊴*-refl ,
-      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp*) ⊴ᴹ-refl)
-      --                                          (*ₗ-*ᴹ _ _ (ρ .M))))
-      --   }
+      linMor : LinMor poSemiring _ _
+      linMor .hom P = unrow (row P *ᴹ ρ .M)
+      linMor .hom-cong PP = unrowL₂ (*ᴹ-cong (rowL₂ PP) ≈ᴹ-refl)
+      linMor .hom-mono PP = unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl)
+      linMor .hom-0ₘ = unrowL₂ (*ᴹ-annihilˡ (ρ .M))
+      linMor .hom-+ₘ P Q = unrowL₂ (*ᴹ-distribˡ _ _ (ρ .M))
+      linMor .hom-*ₘ P Q = unrowL₂ (*ₗ-assoc-*ᴹ _ _ (ρ .M))
 
     body ρ t th .app✴ r σ =
       let ρ′ = th^Env th^𝓥 ρ th in

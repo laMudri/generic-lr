@@ -4,14 +4,13 @@ open import Algebra.Po
 open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Binary using (Rel)
 
-module Generic.Linear.Thinning
+module Generic.Linear.Variable
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
   open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
   open import Relation.Binary.PropositionalEquality
-  open import Relation.Unary
 
   open import Data.LTree
   open import Data.LTree.Vector
@@ -19,18 +18,14 @@ module Generic.Linear.Thinning
 
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Variable Ty rawPoSemiring
-  open import Generic.Linear.Environment Ty rawPoSemiring
 
-  private
-    variable
-      ℓ : Level
+  record LVar (A : Ty) (PΓ : Ctx) : Set where
+    constructor lvar
 
-  Thinning : (PΓ QΔ : Ctx) → Set
-  Thinning PΓ QΔ = (PΓ ─Env) LVar QΔ
+    open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
 
-  □ : (Ctx → Set ℓ) → (Ctx → Set ℓ)
-  (□ T) PΓ = ∀[ Thinning PΓ ⇒ T ]
-
-  Thinnable : (Ctx → Set ℓ) → Set ℓ
-  Thinnable T = ∀[ T ⇒ □ T ]
+    field
+      idx : Ptr s
+      tyq : Γ idx ≡ A
+      basis : P ⊴* 1ᴹ idx
+  open LVar public
