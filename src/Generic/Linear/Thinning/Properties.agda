@@ -12,6 +12,7 @@ module Generic.Linear.Thinning.Properties
   open SkewSemiring skewSemiring
     renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
 
+  open import Algebra.Relational using (_◇_; _,_; middle; fst; snd)
   open import Data.Product
   open import Data.Sum
   open import Relation.Binary.PropositionalEquality
@@ -84,6 +85,8 @@ module Generic.Linear.Thinning.Properties
   tyq (lookup identity v) = tyq v
   basis (lookup identity v) = ⊴*-refl
 
+  1ᵗ = identity
+
   select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in IsPresheaf 𝓥 →
            Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
   M (select 𝓥-psh th ρ) = M th *ᴹ M ρ
@@ -98,6 +101,22 @@ module Generic.Linear.Thinning.Properties
                     (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
           (lookup ρ (plain-var (lookup th v)))
 
+  compose : ∀ {PΓ QΔ RΘ : Ctx} →
+    Thinning PΓ QΔ → Thinning QΔ RΘ → Thinning PΓ RΘ
+  compose th ph = select psh^LVar th ph
+
+  infixr 5 _>>ᵗ_
+  _>>ᵗ_ = compose
+
+  extract : ∀[ □ T ⇒ T ]
+  extract t = t identity
+
+  duplicate : ∀[ □ T ⇒ □ (□ T) ]
+  duplicate t ρ σ = t (compose ρ σ)
+
+  th^□ : Thinnable (□ T)
+  th^□ = duplicate
+
   instance
     re^LVar : RightExtend LVar
     re^LVar .embedVarʳ (var i q) = lvar (↙ i) q (⊴*-refl ++₂ ⊴*-refl)
@@ -110,11 +129,15 @@ module Generic.Linear.Thinning.Properties
   subuse-th QP .sums = ⊴*-trans QP (unrowL₂ (*ᴹ-1ᴹ (row _)))
   subuse-th QP .lookup v = record { Var v; basis = ⊴*-refl }
 
-  extract : ∀[ □ T ⇒ T ]
-  extract t = t identity
+  th⇒psh : (∀ {A} → Thinnable (𝓥 A)) → IsPresheaf 𝓥
+  th⇒psh th^𝓥 le v = th^𝓥 v (subuse-th le)
 
-  duplicate : ∀[ □ T ⇒ □ (□ T) ]
-  duplicate t ρ σ = t (select psh^LVar ρ σ)
-
-  th^□ : Thinnable (□ T)
-  th^□ = duplicate
+  nat^Th : ∀ {s P′ Γ t Q Δ} →
+    _⊴* P′ ◇ (λ P → Thinning (ctx {s} P Γ) (ctx {t} Q Δ)) →
+    (λ Q′ → Thinning (ctx P′ Γ) (ctx Q′ Δ)) ◇ Q ⊴*_
+  nat^Th {P′ = P′} (PP , th) .middle = unrow (row P′ *ᴹ th .M)
+  nat^Th (PP , th) .fst .M = th .M
+  nat^Th (PP , th) .fst .sums = ⊴*-refl
+  nat^Th (PP , th) .fst .lookup v = th .lookup v
+  nat^Th (PP , th) .snd =
+    ⊴*-trans (th .sums) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl))

@@ -18,6 +18,7 @@ module Generic.Linear.Semantics
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
   open import Data.Product
+  open import Data.Wrap
   open import Size
   open import Relation.Unary
   open import Relation.Unary.Bunched
@@ -29,6 +30,7 @@ module Generic.Linear.Semantics
   open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
   open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
   open import Generic.Linear.Environment Ty rawSkewSemiring hiding (var)
+  open import Generic.Linear.Extend Ty skewSemiring
   open import Generic.Linear.Thinning Ty rawSkewSemiring
   open _─Env
   open import Generic.Linear.Thinning.Properties Ty skewSemiring
@@ -39,15 +41,21 @@ module Generic.Linear.Semantics
       A : Ty
       ℓ v c : Level
       fl : PremisesFlags
+      𝓥 : Scoped v
+      𝓒 : Scoped c
+      RΘ : Ctx
 
   Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) (PΓ : Ctx) (A : Ty) →
            Ctx → Set (v ⊔ c)
-  Kripke 𝓥 𝓒 PΓ A = □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
+  Kripke = Wrap λ 𝓥 𝓒 PΓ A → □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
 
   mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
           (∀ {A} → ∀[ 𝓒 A ⇒ 𝓒′ A ]) →
           ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
-  mapK𝓒 f b th .app✴ sp ρ = f (b th .app✴ sp ρ)
+  mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
+
+  reify : {{LeftExtend 𝓥}} → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
+  reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
 
   record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
                    : Set (v ⊔ c) where
@@ -57,7 +65,7 @@ module Generic.Linear.Semantics
       alg : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) A ⇒ 𝓒 A ]
 
     psh^𝓥 : IsPresheaf 𝓥
-    psh^𝓥 QP v = th^𝓥 v (subuse-th QP)
+    psh^𝓥 = th⇒psh (λ {A} → th^𝓥 {A})
 
     _─Comp : Ctx → Scoped ℓ → Ctx → Set ℓ
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
@@ -104,6 +112,6 @@ module Generic.Linear.Semantics
       --                                          (*ₗ-*ᴹ _ _ (ρ .M))))
       --   }
 
-    body ρ t th .app✴ r σ =
+    body ρ t .get th .app✴ r σ =
       let ρ′ = th^Env th^𝓥 ρ th in
       semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) t
