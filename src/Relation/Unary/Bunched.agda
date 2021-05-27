@@ -25,7 +25,7 @@ module Relation.Unary.Bunched {a} {A : Set a} where
   module BunchedConjunction {ℓ} (_∼_+_ : A → A → A → Set ℓ) where
 
     infixr 8 _─✴_
-    infixr 9 _✴_
+    infixr 9 _✴_ _✴⟨_⟩_
 
     record _✴_ {t u} (T : A → Set t) (U : A → Set u) (x : A)
                : Set (a ⊔ ℓ ⊔ t ⊔ u) where
@@ -52,7 +52,7 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   module BunchedScaling {r ℓ} {R : Set r} (_∼_*ₗ_ : A → R → A → Set ℓ) where
 
-    infixr 10 _·_
+    infixr 10 _·_ ⟨_⟩·_
 
     record _·_ {t} (r : R) (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
       constructor ⟨_⟩·_
@@ -66,6 +66,8 @@ module Relation.Unary.Bunched {a} {A : Set a} where
   module BunchedDuplicable
     {ℓ} (_≤_ : A → A → Set ℓ) (0# : A) (_+_ : A → A → A)
     where
+
+    infixr 10 □⟨_,_,_⟩_
 
     record Dup {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
       constructor □⟨_,_,_⟩_

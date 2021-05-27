@@ -12,6 +12,8 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   open import Generic.Linear.Syntax.Core public
 
+  infix 5 _++ᶜ_
+
   record SizedCtx (s : LTree) : Set where
     constructor sctx
     field
