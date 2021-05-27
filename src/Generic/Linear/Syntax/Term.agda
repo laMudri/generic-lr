@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K #-}
+{-# OPTIONS --safe --sized-types --without-K --prop #-}
 
 open import Algebra.Skew
 open import Level renaming (zero to lzero; suc to lsuc)

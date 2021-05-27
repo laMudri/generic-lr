@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --postfix-projections #-}
+{-# OPTIONS --safe --without-K --prop --postfix-projections #-}
 
 open import Algebra.Skew
 open import Function.Base using (flip; _∘_)

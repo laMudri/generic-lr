@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
 
 open import Algebra.Skew
 open import Level using (Level; 0ℓ)

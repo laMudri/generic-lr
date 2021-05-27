@@ -1,29 +1,17 @@
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --without-K --prop #-}
 
 module Generic.Linear.Syntax.Core where
 
-  open import Data.Bool
+  open import Proposition
 
-  record PremisesFlags : Set where
+  record PremisesFlags : Set₁ where
     field
-      ⊤? ∧? ℑ? ✴? ·? □? : Bool
-
-    Has-⊤ Has-∧ Has-ℑ Has-✴ Has-· Has-□ : Set
-    Has-⊤ = T ⊤?
-    Has-∧ = T ∧?
-    Has-ℑ = T ℑ?
-    Has-✴ = T ✴?
-    Has-· = T ·?
-    Has-□ = T □?
+      Has-⊤ Has-∧ Has-ℑ Has-✴ Has-· Has-□ : Prop
 
   noPremisesFlags : PremisesFlags
   noPremisesFlags = record
-    { ⊤? = false ; ∧? = false ; ℑ? = false ; ✴? = false
-    ; ·? = false ; □? = false
-    }
+    { Has-⊤ = ⊥ᴾ; Has-∧ = ⊥ᴾ; Has-ℑ = ⊥ᴾ; Has-✴ = ⊥ᴾ; Has-· = ⊥ᴾ; Has-□ = ⊥ᴾ }
 
   allPremisesFlags : PremisesFlags
   allPremisesFlags = record
-    { ⊤? = true ; ∧? = true ; ℑ? = true ; ✴? = true
-    ; ·? = true ; □? = true
-    }
+    { Has-⊤ = ⊤ᴾ; Has-∧ = ⊤ᴾ; Has-ℑ = ⊤ᴾ; Has-✴ = ⊤ᴾ; Has-· = ⊤ᴾ; Has-□ = ⊤ᴾ }
