@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
 
 open import Algebra.Skew
 open import Level using (Level; 0ℓ; suc)
@@ -9,6 +9,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
   open import Data.Empty
   open import Data.List as L using (List; []; _∷_; [_])
   open import Data.Unit
+  open import Proposition
 
   Lone : ∀ {a} {A : Set a} → List A → Set
   Lone [] = ⊥
@@ -42,8 +43,6 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open _─Env public
     open import Generic.Linear.Extend Ty 0-skewSemiring public
     open import Generic.Linear.Semantics Ty 0-skewSemiring public
-    open import Generic.Linear.Semantics.Syntactic Ty 0-skewSemiring public
-      using (reify)
 
   module WithSkewSemiring (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
 
@@ -66,7 +65,6 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open _─Env
     open import Generic.Linear.Extend Ty skewSemiring
     open import Generic.Linear.Semantics Ty skewSemiring
-    open import Generic.Linear.Semantics.Syntactic Ty skewSemiring using (reify)
 
     private
       variable
@@ -97,7 +95,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
     open import Data.LTree
     open import Data.LTree.Vector as V hiding ([]; [_]; _++_)
-    open import Data.Product as ×
+    open import Data.Product as × hiding (_<*>_)
     open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×
     open import Function.Base using (_∘_)
     open import Relation.Unary
@@ -202,7 +200,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         elab-sem .var (U.lvar i q _) R =
           (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
         elab-sem .alg b R =
-          let foo = U.map-s′ (uSystem sys) (U.reify {𝓥 = U.LVar} {𝓒 = 𝓒}) b in
+          let foo = U.map-s′ (uSystem sys) U.reify b in
           (| `con (lemma sys foo) |)
 
         elab : ∀ {A s} {Γ : Vector Ty s} →
