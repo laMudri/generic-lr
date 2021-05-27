@@ -217,3 +217,18 @@ module Generic.Linear.Example.ZeroOneMany where
   rep u0 = (u0 , ⊴-refl , ⊴-refl , ⊴-refl) ∷ []
   rep u1 = []
   rep uω = (uω , ⊴-refl , ω⊴0 , ⊴-refl) ∷ []
+
+  ω*-del : ∀ x → uω * x ⊴ u0
+  ω*-del u0 = ⊴-refl
+  ω*-del u1 = ω⊴0
+  ω*-del uω = ω⊴0
+
+  ω*-dup : ∀ x → uω * x ⊴ uω * x + uω * x
+  ω*-dup u0 = ⊴-refl
+  ω*-dup u1 = ⊴-refl
+  ω*-dup uω = ⊴-refl
+
+  ω*-⊴ : ∀ x → uω * x ⊴ x
+  ω*-⊴ u0 = ⊴-refl
+  ω*-⊴ u1 = ω⊴1
+  ω*-⊴ uω = ⊴-refl
