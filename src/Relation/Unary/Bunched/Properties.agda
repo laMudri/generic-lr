@@ -5,35 +5,56 @@
 
 module Relation.Unary.Bunched.Properties where
 
+  open import Algebra.Skew using (Proset)
   open import Algebra.Relational
   open import Data.Product
   open import Level
-  open import Relation.Binary.PropositionalEquality
   open import Relation.Unary
   open import Relation.Unary.Bunched using
-    (module BunchedUnit; module BunchedConjunction; module BunchedScaling)
+    ( module BunchedOrder; module BunchedUnit
+    ; module BunchedConjunction; module BunchedScaling
+    )
+
+  module BunchedProset {c ℓ} (proset : Proset c ℓ) where
+
+    open Proset proset
+    open BunchedOrder _≤_
+
+    module _ {t} {T : Pred Carrier t} where
+
+      pure-◇ : ∀[ T ⇒ ◇ T ]
+      pure-◇ t = ◇⟨ refl ⟩ t
+
+      join-◇ : ∀[ ◇ (◇ T) ⇒ ◇ T ]
+      join-◇ (◇⟨ xy ⟩ (◇⟨ yz ⟩ t)) = ◇⟨ trans xy yz ⟩ t
+
+      alg-◇ : (psh^T : ∀ {x y} → x ≤ y → T y → T x) → ∀[ ◇ T ⇒ T ]
+      alg-◇ psh^T (◇⟨ xy ⟩ t) = psh^T xy t
 
   module BunchedCommutativeMonoid
-    {c ℓ} (skewCommutativeRelMonoid : SkewCommutativeRelMonoid c ℓ)
+    {c ℓ} (commutativeRelMonoid : CommutativeRelMonoid c ℓ)
     where
 
-    open SkewCommutativeRelMonoid skewCommutativeRelMonoid
+    open CommutativeRelMonoid commutativeRelMonoid
     open BunchedUnit _≤ε
     open BunchedConjunction _≤[_∙_]
+    open BunchedOrder _≤_
+
+    open BunchedProset proset public
 
     module _ {t} {T : Pred Carrier t} {v : Level} where
 
-      1-✴→ : ∀[ ℑ {v} ✴ T ⇒ T ]
-      1-✴→ (ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t) = subst T (identityˡ→ (sp0 , sp+)) t
+      1-✴→ : ∀[ ℑ {v} ✴ T ⇒ ◇ T ]
+      1-✴→ (ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t) = ◇⟨ identityˡ→ (sp0 , sp+) ⟩ t
 
-      1-✴← : ∀[ T ⇒ ℑ {v} ✴ T ]
-      1-✴← t = let sp0 , sp+ = identityˡ← refl in ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t
+      1-✴← : ∀[ ◇ T ⇒ ℑ {v} ✴ T ]
+      1-✴← (◇⟨ sub ⟩ t) = let sp0 , sp+ = identityˡ← sub in ℑ⟨ sp0 ⟩ ✴⟨ sp+ ⟩ t
 
-      ✴-1→ : ∀[ T ✴ ℑ {v} ⇒ T ]
-      ✴-1→ (t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩) = subst T (identityʳ→ (sp+ , sp0)) t
+      ✴-1→ : ∀[ T ✴ ℑ {v} ⇒ ◇ T ]
+      ✴-1→ (t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩) = ◇⟨ identityʳ→ (sp+ , sp0) ⟩ t
 
-      ✴-1← : ∀[ T ⇒ T ✴ ℑ {v} ]
-      ✴-1← t = let sp+ , sp0 = identityʳ← refl in t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩
+      ✴-1← : ∀[ ◇ T ⇒ T ✴ ℑ {v} ]
+      ✴-1← (◇⟨ sub ⟩ t) = let sp+ , sp0 = identityʳ← sub in t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩
 
     module _
       {t u v} {T : Pred Carrier t} {U : Pred Carrier u} {V : Pred Carrier v}
