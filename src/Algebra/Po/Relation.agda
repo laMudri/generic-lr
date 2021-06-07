@@ -9,9 +9,29 @@ module Algebra.Po.Relation where
   open import Relation.Binary using (REL; _⇒_)
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
-  module _ {c ℓ₁ ℓ₂ cm cn ℓm₁ ℓm₂ ℓn₁ ℓn₂} {R : PoSemiring c ℓ₁ ℓ₂}
-           (M : PoLeftSemimodule R cm ℓm₁ ℓm₂)
-           (N : PoLeftSemimodule R cn ℓn₁ ℓn₂)
+  module _
+    {c ℓ₁ ℓ₂ cm cn co ℓo₁ ℓo₂} {R : PoSemiring c ℓ₁ ℓ₂}
+    {M : Set cm} {N : Set cn} (O : PoLeftSemimodule R co ℓo₁ ℓo₂)
+    where
+
+    open PoSemiring R
+    private
+      module O = PoLeftSemimodule O
+
+    record Rel+Rel {r s} (R : REL M O.Carrierₘ r) (S : REL N O.Carrierₘ s)
+      (xy : M × N) (z : O.Carrierₘ) : Set (r ⊔ s ⊔ co ⊔ ℓo₁ ⊔ ℓo₂) where
+      constructor ⟨_,_⟩_
+      private
+        x = proj₁ xy; y = proj₂ xy
+      field
+        {x′ y′} : _
+        l-rel : R x x′
+        r-rel : S y y′
+        sp+ : z O.≤ₘ x′ O.+ₘ y′
+
+  module _
+    {c ℓ₁ ℓ₂ cm cn ℓm₁ ℓm₂ ℓn₁ ℓn₂} {R : PoSemiring c ℓ₁ ℓ₂}
+    (M : PoLeftSemimodule R cm ℓm₁ ℓm₂) (N : PoLeftSemimodule R cn ℓn₁ ℓn₂)
     where
 
     open PoSemiring R
@@ -42,17 +62,9 @@ module Algebra.Po.Relation where
         sp+ : x+y M.≤ₘ x M.+ₘ y
         is-rel : rel x+y z
 
-    record RelThen+ {r} (rel : REL M.Carrierₘ N.Carrierₘ r)
-      (xy : M.Carrierₘ × M.Carrierₘ) (z : N.Carrierₘ)
-      : Set (r ⊔ cn ⊔ ℓn₁ ⊔ ℓn₂) where
-      constructor ⟨_,_⟩_
-      private
-        x = proj₁ xy; y = proj₂ xy
-      field
-        {x′ y′} : _
-        l-rel : rel x x′
-        r-rel : rel y y′
-        sp+ : z N.≤ₘ x′ N.+ₘ y′
+    RelThen+ : ∀ {r} → REL M.Carrierₘ N.Carrierₘ r →
+      REL (M.Carrierₘ × M.Carrierₘ) N.Carrierₘ _
+    RelThen+ rel = Rel+Rel N rel rel
 
     record *ThenRel {r} (rel : REL M.Carrierₘ N.Carrierₘ r)
       (sx : Carrier × M.Carrierₘ) (z : N.Carrierₘ)

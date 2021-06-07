@@ -9,6 +9,7 @@ module Algebra.Po where
   import Algebra.Module.Definitions.Left as LeftDefs
   open import Algebra.Skew
   open import Data.Product
+  open import Function.Base using (flip)
   open import Level using (_⊔_; suc)
   open import Relation.Binary
   import Relation.Binary.Reasoning.Setoid as SetoidR
@@ -40,19 +41,36 @@ module Algebra.Po where
     field
       isPartialOrder : IsPartialOrder ≈ ≤
       isMonoid : IsMonoid ≈ ∙ ε
-      ∙-monoˡ : RightCongruent ≤ ∙
-      ∙-monoʳ : LeftCongruent ≤ ∙
+      ∙-mono : Congruent₂ ≤ ∙
 
-    open IsPartialOrder isPartialOrder public
-      renaming (refl to ≤-refl; reflexive to ≤-reflexive; trans to ≤-trans)
+    open IsPartialOrder isPartialOrder public renaming
+      ( refl to ≤-refl; reflexive to ≤-reflexive; trans to ≤-trans
+      ; antisym to ≤-antisym
+      )
     open IsMonoid isMonoid public
 
-    isSkewMonoid : IsSkewMonoid ≤ ε ∙
-    isSkewMonoid = record
+    ∙-monoˡ : RightCongruent ≤ ∙
+    ∙-monoˡ xx = ∙-mono xx ≤-refl
+    ∙-monoʳ : LeftCongruent ≤ ∙
+    ∙-monoʳ yy = ∙-mono ≤-refl yy
+
+    isProset : IsProset ≤
+    isProset = record { refl = ≤-refl ; trans = ≤-trans }
+
+    isSkewMonoidˡ : IsSkewMonoid ≤ ε ∙
+    isSkewMonoidˡ = record
       { identity = λ where
         .proj₁ x → ≤-reflexive (identity .proj₁ x)
         .proj₂ x → ≤-reflexive (sym (identity .proj₂ x))
       ; assoc = λ x y z → ≤-reflexive (assoc x y z)
+      }
+
+    isSkewMonoidʳ : IsSkewMonoid (flip ≤) ε ∙
+    isSkewMonoidʳ = record
+      { identity = λ where
+        .proj₁ x → ≤-reflexive (sym (identity .proj₁ x))
+        .proj₂ x → ≤-reflexive (identity .proj₂ x)
+      ; assoc = λ x y z → ≤-reflexive (sym (assoc x y z))
       }
 
   record IsPoCommutativeMonoid
@@ -61,7 +79,6 @@ module Algebra.Po where
     field
       isPoMonoid : IsPoMonoid ≈ ≤ ε ∙
       comm : Commutative ≈ ∙
-
     open IsPoMonoid isPoMonoid public
 
     isCommutativeMonoid : IsCommutativeMonoid ≈ ∙ ε
@@ -69,13 +86,8 @@ module Algebra.Po where
 
     isSkewCommutativeMonoid : IsSkewCommutativeMonoid ≤ ε ∙
     isSkewCommutativeMonoid = record
-      { isLeftSkewMonoid = isSkewMonoid
-      ; isRightSkewMonoid = record
-        { identity = λ where
-          .proj₁ x → ≤-reflexive (sym (identity .proj₁ x))
-          .proj₂ x → ≤-reflexive (identity .proj₂ x)
-        ; assoc = λ x y z → ≤-reflexive (sym (assoc x y z))
-        }
+      { isLeftSkewMonoid = isSkewMonoidˡ
+      ; isRightSkewMonoid = isSkewMonoidʳ
       ; comm = λ x y → ≤-reflexive (comm x y)
       }
 
@@ -86,10 +98,8 @@ module Algebra.Po where
     field
       isPartialOrder : IsPartialOrder ≈ ≤
       isSemiring : IsSemiring ≈ + * 0# 1#
-      +-monoˡ : RightCongruent ≤ +
-      +-monoʳ : LeftCongruent ≤ +
-      *-monoˡ : RightCongruent ≤ *
-      *-monoʳ : LeftCongruent ≤ *
+      +-mono : Congruent₂ ≤ +
+      *-mono : Congruent₂ ≤ *
 
     open IsPartialOrder isPartialOrder public renaming
       (refl to ≤-refl; reflexive to ≤-reflexive; trans to ≤-trans)
@@ -103,31 +113,32 @@ module Algebra.Po where
       { isPoMonoid = record
         { isPartialOrder = isPartialOrder
         ; isMonoid = +-isMonoid
-        ; ∙-monoˡ = +-monoˡ
-        ; ∙-monoʳ = +-monoʳ
+        ; ∙-mono = +-mono
         }
       ; comm = +-comm
       }
-    open IsPoCommutativeMonoid +-isPoCommutativeMonoid public using () renaming
+    open IsPoCommutativeMonoid +-isPoCommutativeMonoid public
+      using (isProset) renaming
       ( isPoMonoid to +-isPoMonoid
       ; isSkewCommutativeMonoid to +-isSkewCommutativeMonoid
+      ; ∙-monoˡ to +-monoˡ; ∙-monoʳ to +-monoʳ
       )
 
     *-isPoMonoid : IsPoMonoid ≈ ≤ 1# *
     *-isPoMonoid = record
       { isPartialOrder = isPartialOrder
       ; isMonoid = *-isMonoid
-      ; ∙-monoˡ = *-monoˡ
-      ; ∙-monoʳ = *-monoʳ
+      ; ∙-mono = *-mono
       }
     open IsPoMonoid *-isPoMonoid public using () renaming
-      ( isSkewMonoid to *-isSkewMonoid
+      ( isSkewMonoidˡ to *-isSkewMonoidˡ
+      ; ∙-monoˡ to *-monoˡ; ∙-monoʳ to *-monoʳ
       )
 
     isSkewSemiring : IsSkewSemiring ≤ 0# + 1# *
     isSkewSemiring = record
       { +-isSkewCommutativeMonoid = +-isSkewCommutativeMonoid
-      ; *-isSkewMonoid = *-isSkewMonoid
+      ; *-isSkewMonoid = *-isSkewMonoidˡ
       ; annihil = λ where
         .proj₁ x → ≤-reflexive (zero .proj₁ x)
         .proj₂ x → ≤-reflexive (sym (zero .proj₂ x))
@@ -158,22 +169,26 @@ module Algebra.Po where
     monoid : Monoid c ℓ₁
     monoid = record { isMonoid = isMonoid }
 
-    skewMonoid : SkewMonoid c ℓ₂
-    skewMonoid = record
+    skewMonoidˡ : SkewMonoid c ℓ₂
+    skewMonoidˡ = record
       { proset = record
         { Carrier = Carrier
         ; _≤_ = _≤_
         ; isProset = record { refl = ≤-refl ; trans = ≤-trans }
         }
       ; ε = ε
-      ; comp = record
-        { _∙_ = _∙_
-        ; mono = λ xx yy → ≤-trans (∙-monoˡ xx) (∙-monoʳ yy)
-        }
-      ; isSkewMonoid = isSkewMonoid
+      ; comp = record { _∙_ = _∙_; mono = ∙-mono }
+      ; isSkewMonoid = isSkewMonoidˡ
       }
-    open SkewMonoid skewMonoid public
-      using (proset; comp)
+    open SkewMonoid skewMonoidˡ public using (proset; comp)
+
+    skewMonoidʳ : SkewMonoid c ℓ₂
+    skewMonoidʳ = record
+      { proset = proset ᵒᵖ
+      ; ε = ε
+      ; comp = comp ᵒᵖ₂
+      ; isSkewMonoid = isSkewMonoidʳ
+      }
 
   record PoCommutativeMonoid c ℓ₁ ℓ₂ : Set (suc (c ⊔ ℓ₁ ⊔ ℓ₂)) where
     infix 4 _≈_ _≤_
@@ -190,7 +205,7 @@ module Algebra.Po where
     poMonoid : PoMonoid c ℓ₁ ℓ₂
     poMonoid = record { isPoMonoid = isPoMonoid }
     open PoMonoid poMonoid public
-      using (poset; monoid; skewMonoid; proset; comp)
+      using (poset; monoid; skewMonoidˡ; skewMonoidʳ; proset; comp)
 
     commutativeMonoid : CommutativeMonoid c ℓ₁
     commutativeMonoid = record { isCommutativeMonoid = isCommutativeMonoid }
@@ -226,25 +241,22 @@ module Algebra.Po where
       1# : Carrier
       _*_ : Op₂ Carrier
       isPoSemiring : IsPoSemiring _≈_ _≤_ 0# _+_ 1# _*_
-
     open IsPoSemiring isPoSemiring public
 
     +-poCommutativeMonoid : PoCommutativeMonoid c ℓ₁ ℓ₂
     +-poCommutativeMonoid = record
       { isPoCommutativeMonoid = +-isPoCommutativeMonoid }
     open PoCommutativeMonoid +-poCommutativeMonoid public
-      using (proset) renaming
-      ( poMonoid to +-poMonoid; skewMonoid to +-skewMonoid; comp to plus
-      ; inter to +-inter
+      using (poset; proset) renaming
+      ( poMonoid to +-poMonoid; skewMonoidˡ to +-skewMonoidˡ
+      ; skewMonoidʳ to +-skewMonoidʳ; comp to plus; inter to +-inter
       )
-    open MonoOp₂ plus public renaming (mono to +-mono)
 
     *-poMonoid : PoMonoid c ℓ₁ ℓ₂
     *-poMonoid = record { isPoMonoid = *-isPoMonoid }
     open PoMonoid *-poMonoid public using () renaming
-      ( skewMonoid to *-skewMonoid; comp to mult
+      ( skewMonoidˡ to *-skewMonoidˡ; skewMonoidʳ to *-skewMonoidʳ; comp to mult
       )
-    open MonoOp₂ mult public renaming (mono to *-mono)
 
     skewSemiring : SkewSemiring c ℓ₂
     skewSemiring = record
@@ -290,10 +302,12 @@ module Algebra.Po where
     record IsPoLeftSemimodule
       {cm ℓm₁ ℓm₂} {M : Set cm} (≈ : Rel M ℓm₁) (≤ : Rel M ℓm₂)
       (0ₘ : M) (+ₘ : Op₂ M) (*ₘ : Opₗ R.Carrier M)
-      : Set (cr ⊔ cm ⊔ ℓm₁ ⊔ ℓm₂) where
+      : Set (cr ⊔ ℓr₁ ⊔ ℓr₂ ⊔ cm ⊔ ℓm₁ ⊔ ℓm₂) where
       open LeftDefs R.Carrier ≈
       field
         +ₘ-isPoCommutativeMonoid : IsPoCommutativeMonoid ≈ ≤ 0ₘ +ₘ
+        *ₘ-cong : LeftDefs.Congruent R.Carrier ≈ R._≈_ *ₘ
+        *ₘ-mono : LeftDefs.Congruent R.Carrier ≤ R._≤_ *ₘ
         *ₘ-identity : LeftIdentity R.1# *ₘ
         *ₘ-assoc : Associative R._*_ *ₘ
         *ₘ-annihilˡ : LeftZero R.0# 0ₘ *ₘ
@@ -304,7 +318,22 @@ module Algebra.Po where
         ( identity to +ₘ-identity; identityʳ to +ₘ-identityʳ
         ; identityˡ to +ₘ-identityˡ; assoc to +ₘ-assoc; comm to +ₘ-comm
         ; ∙-cong to +ₘ-cong; ∙-monoˡ to +ₘ-monoˡ; ∙-monoʳ to +ₘ-monoʳ
+        ; ∙-mono to +ₘ-mono
+        ; ≤-refl to ≤ₘ-refl; ≤-trans to ≤ₘ-trans
+        ; ≤-antisym to ≤ₘ-antisym; ≤-reflexive to ≤ₘ-reflexive
+        ; refl to ≈ₘ-refl; trans to ≈ₘ-trans; sym to ≈ₘ-sym
+        ; reflexive to ≈ₘ-reflexive
+        ; isPreorder to ≤ₘ-isPreorder; isPartialOrder to ≤ₘ-isPartialOrder
+        ; isProset to ≤ₘ-isProset; isEquivalence to ≈ₘ-isEquivalence
+        ; isPoMonoid to +ₘ-isPoMonoid; isMonoid to +ₘ-isMonoid
+        ; isCommutativeMonoid to +ₘ-isCommutativeMonoid
+        ; isMagma to +ₘ-isMagma; isSemigroup to +ₘ-isSemigroup
         )
+
+      *ₘ-monoˡ : ∀ {r r′ u} → r R.≤ r′ → ≤ (*ₘ r u) (*ₘ r′ u)
+      *ₘ-monoˡ rr = *ₘ-mono rr ≤ₘ-refl
+      *ₘ-monoʳ : ∀ {r u u′} → ≤ u u′ → ≤ (*ₘ r u) (*ₘ r u′)
+      *ₘ-monoʳ uu = *ₘ-mono R.≤-refl uu
 
     record PoLeftSemimodule cm ℓm₁ ℓm₂
       : Set (cr ⊔ ℓr₁ ⊔ ℓr₂ ⊔ suc (cm ⊔ ℓm₁ ⊔ ℓm₂)) where

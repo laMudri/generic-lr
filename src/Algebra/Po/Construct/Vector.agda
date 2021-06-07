@@ -42,6 +42,8 @@ module Algebra.Po.Construct.Vector where
     ; _*ₘ_ = _*_
     ; isPoLeftSemimodule = record
       { +ₘ-isPoCommutativeMonoid = +-isPoCommutativeMonoid
+      ; *ₘ-cong = *-cong
+      ; *ₘ-mono = *-mono
       ; *ₘ-identity = *-identityˡ
       ; *ₘ-assoc = *-assoc
       ; *ₘ-annihilˡ = annihilˡ
@@ -84,11 +86,12 @@ module Algebra.Po.Construct.Vector where
               .proj₁ x .get i → +-identityˡ (x i)
               .proj₂ x .get i → +-identityʳ (x i)
             }
-          ; ∙-monoˡ = λ { xx .get i → +-monoˡ (xx .get i) }
-          ; ∙-monoʳ = λ { xx .get i → +-monoʳ (xx .get i) }
+          ; ∙-mono = λ { xx yy .get i → +-mono (xx .get i) (yy .get i) }
           }
         ; comm = λ { x y .get i → +-comm (x i) (y i) }
         }
+      ; *ₘ-cong = λ { rr vv .get i → *-cong rr (vv .get i) }
+      ; *ₘ-mono = λ { rr vv .get i → *-mono rr (vv .get i) }
       ; *ₘ-identity = λ { v .get i → *-identityˡ (v i) }
       ; *ₘ-assoc = λ { r s v .get i → *-assoc r s (v i) }
       ; *ₘ-annihilˡ = λ { v .get i → annihilˡ (v i) }
@@ -117,11 +120,11 @@ module Algebra.Po.Construct.Vector where
     -- TODO: this should be factored through the zero object
     0ᴹ : PoLeftSemimoduleMor f M N
     0ᴹ .hom u = N.0ₘ
-    0ᴹ .hom-cong uu = N.refl
-    0ᴹ .hom-mono uu = N.≤-refl
-    0ᴹ .hom-0ₘ = N.refl
-    0ᴹ .hom-+ₘ u v = N.sym (N.+ₘ-identityʳ N.0ₘ)
-    0ᴹ .hom-*ₘ r u = N.sym (N.*ₘ-annihilʳ _)
+    0ᴹ .hom-cong uu = N.≈ₘ-refl
+    0ᴹ .hom-mono uu = N.≤ₘ-refl
+    0ᴹ .hom-0ₘ = N.≈ₘ-refl
+    0ᴹ .hom-+ₘ u v = N.≈ₘ-sym (N.+ₘ-identityʳ N.0ₘ)
+    0ᴹ .hom-*ₘ r u = N.≈ₘ-sym (N.*ₘ-annihilʳ _)
 
   LinMap : ∀ {cr ℓr₁ ℓr₂ cs ℓs₁ ℓs₂}
            {R : PoSemiring cr ℓr₁ ℓr₂} {S : PoSemiring cs ℓs₁ ℓs₂}
@@ -182,8 +185,14 @@ module Algebra.Po.Construct.Vector where
     private
       module R = PoSemiring R
       module S = PoSemiring S
+      module f = PoSemiringMor f
       variable
         s s′ t t′ : LTree
+
+      open module Dummy {s} = PoLeftSemimodule (Vector-poLeftSemimodule S s)
+
+    [─] : LinMap f ε t
+    [─] = 0ᴹ
 
     [_─_] : LinMap f s t → LinMap f s′ t → LinMap f (s <+> s′) t
     [ M ─ N ] .hom u j = M .hom (u ∘ ↙) j S.+ N .hom (u ∘ ↘) j
@@ -202,6 +211,24 @@ module Algebra.Po.Construct.Vector where
     [ M ─ N ] .hom-*ₘ r u .get j = S.trans
       (S.+-cong (M .hom-*ₘ _ _ .get j) (N .hom-*ₘ _ _ .get j))
       (S.sym (S.distribʳ _ _ _))
+
+    [─_─] : Vector S.Carrier t → LinMap f [-] t
+    [─ v ─] .hom u = f.hom (u here) *ₘ v
+    [─ v ─] .hom-cong uu = *ₘ-cong (f.hom-cong (uu .get here)) ≈ₘ-refl
+    [─ v ─] .hom-mono uu = *ₘ-mono (f.hom-mono (uu .get here)) ≤ₘ-refl
+    [─ v ─] .hom-0ₘ = ≈ₘ-trans (*ₘ-cong f.hom-0# ≈ₘ-refl) (*ₘ-annihilˡ _)
+    [─ v ─] .hom-+ₘ x y =
+      ≈ₘ-trans (*ₘ-cong (f.hom-+ _ _) ≈ₘ-refl) (*ₘ-distribˡ _ _ _)
+    [─ v ─] .hom-*ₘ r u =
+      ≈ₘ-trans (*ₘ-cong (f.hom-* _ _) ≈ₘ-refl) (*ₘ-assoc _ _ _)
+
+    [│] : LinMap f s ε
+    [│] .hom u = []
+    [│] .hom-cong uu = []₂
+    [│] .hom-mono uu = []₂
+    [│] .hom-0ₘ = []₂
+    [│] .hom-+ₘ _ _ = []₂
+    [│] .hom-*ₘ _ _ = []₂
 
     [_│_] : LinMap f s t → LinMap f s t′ → LinMap f s (t <+> t′)
     [ M │ N ] .hom u = M .hom u ++ N .hom u
@@ -249,9 +276,9 @@ module Algebra.Po.Construct.Vector where
       ──-PoLeftSemimoduleMor .hom = id
       ──-PoLeftSemimoduleMor .hom-cong = id
       ──-PoLeftSemimoduleMor .hom-mono = id
-      ──-PoLeftSemimoduleMor .hom-0ₘ = refl
-      ──-PoLeftSemimoduleMor .hom-+ₘ _ _ = refl
-      ──-PoLeftSemimoduleMor .hom-*ₘ _ _ = refl
+      ──-PoLeftSemimoduleMor .hom-0ₘ = ≈ₘ-refl
+      ──-PoLeftSemimoduleMor .hom-+ₘ _ _ = ≈ₘ-refl
+      ──-PoLeftSemimoduleMor .hom-*ₘ _ _ = ≈ₘ-refl
 
   module _ {r rℓ₁ rℓ₂ s sℓ₁ sℓ₂ t tℓ₁ tℓ₂} {R : PoSemiring r rℓ₁ rℓ₂}
            {S : PoSemiring s sℓ₁ sℓ₂} {T : PoSemiring t tℓ₁ tℓ₂} where
@@ -261,8 +288,8 @@ module Algebra.Po.Construct.Vector where
     module _ where
       open PoSemiring T
 
-      >>-PoSemiringMor : PoSemiringMor R S → PoSemiringMor S T →
-                           PoSemiringMor R T
+      >>-PoSemiringMor :
+        PoSemiringMor R S → PoSemiringMor S T → PoSemiringMor R T
       >>-PoSemiringMor f g .hom = f .hom >> g .hom
       >>-PoSemiringMor f g .hom-cong = f .hom-cong >> g .hom-cong
       >>-PoSemiringMor f g .hom-mono = f .hom-mono >> g .hom-mono
@@ -289,8 +316,8 @@ module Algebra.Po.Construct.Vector where
       vv-PoLeftSemimoduleMor F G .hom-cong = F .hom-cong >> G .hom-cong
       vv-PoLeftSemimoduleMor F G .hom-mono = F .hom-mono >> G .hom-mono
       vv-PoLeftSemimoduleMor F G .hom-0ₘ =
-        trans (G .hom-cong (F .hom-0ₘ)) (G .hom-0ₘ)
+        ≈ₘ-trans (G .hom-cong (F .hom-0ₘ)) (G .hom-0ₘ)
       vv-PoLeftSemimoduleMor F G .hom-+ₘ _ _ =
-        trans (G .hom-cong (F .hom-+ₘ _ _)) (G .hom-+ₘ _ _)
+        ≈ₘ-trans (G .hom-cong (F .hom-+ₘ _ _)) (G .hom-+ₘ _ _)
       vv-PoLeftSemimoduleMor F G .hom-*ₘ _ _ =
-        trans (G .hom-cong (F .hom-*ₘ _ _)) (G .hom-*ₘ _ _)
+        ≈ₘ-trans (G .hom-cong (F .hom-*ₘ _ _)) (G .hom-*ₘ _ _)
