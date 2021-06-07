@@ -9,6 +9,8 @@ module Generic.Linear.Syntax.Interpretation.Map
 
   open import Algebra.Po.Relation
   open import Algebra.Po.Construct.Vector
+  open import Algebra.Relational
+  open import Algebra.Relational.Relation
   open import Data.Unit.Polymorphic
   open import Data.Product
   open import Data.LTree
@@ -30,49 +32,69 @@ module Generic.Linear.Syntax.Interpretation.Map
       x y : Level
       fl : PremisesFlags
 
-  LinRel : ∀ {c ℓ₁ ℓ₂} (R : PoSemiring c ℓ₁ ℓ₂) (s t : LTree) → Set _
-  LinRel R s t = PoLeftSemimoduleRel
-    (Vector-poLeftSemimodule R s) (Vector-poLeftSemimodule R t) 0ℓ
-
-  LinMor : ∀ {c ℓ₁ ℓ₂} (R : PoSemiring c ℓ₁ ℓ₂) (s t : LTree) → Set _
-  LinMor R s t = PoLeftSemimoduleMor id-PoSemiringMor
-    (Vector-poLeftSemimodule R s) (Vector-poLeftSemimodule R t)
-
-  module _ {s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
-           (F : LinMor poSemiring s t)
+  {-
+  module _ {ℓ s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
+           (F : LinRel s t ℓ)
            {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
     where
 
-    open PoLeftSemimoduleMor F
+    -- open RelLeftSemimoduleRel F
+
+    map-pᴿ : (ps : Premises fl) →
+      (∀ {RΘ A P Q} → F .rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
+    map-pᴿ ⟨ PΓ `⊢ A ⟩ f r t = {!!}
+    map-pᴿ `⊤ f r t = {!!}
+    map-pᴿ (ps `∧ qs) f r t = {!!}
+    map-pᴿ `ℑ f r t = {!!}
+    map-pᴿ (ps `✴ qs) f r t = {!!}
+    map-pᴿ (p `· ps) f r t = {!!}
+    map-pᴿ (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
+      let r′ , str′ = F .rel-comm-≤ₘ (str , r) in
+      □⟨ str′ , {!sp0!} , {!!} ⟩ map-pᴿ ps f r′ t
+
+    map-sᴿ : (s : System fl) →
+      (∀ {RΘ A P Q} → F .rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → F .rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
+    map-sᴿ s f r t = {!!}
+  -}
+
+  module _ {s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
+    (F : LinMor s t) {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+    where
+
+    -- open PoLeftSemimoduleMor F
 
     map-p : (ps : Premises fl) →
-      (∀ {RΘ A P Q} → Q ⊴* hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-      (∀ {P Q} → Q ⊴* hom P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {P Q} → Q ⊴* F .hom P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
     map-p `⊤ f r _ = _
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
     map-p `ℑ f r ℑ⟨ t ⟩ =
-      ℑ⟨ (⊴*-trans r (⊴*-trans (hom-mono t) (⊴*-reflexive hom-0ₘ))) ⟩
+      ℑ⟨ (⊴*-trans r (⊴*-trans (F .hom-mono t) (⊴*-reflexive (F .hom-0ₘ)))) ⟩
     map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (⊴*-reflexive (hom-+ₘ _ _)))
+      let sp′ = ⊴*-trans r
+           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-+ₘ _ _)))
       in map-p ps f ⊴*-refl s ✴⟨ sp′ ⟩ map-p qs f ⊴*-refl t
     map-p (p `· ps) f r (⟨ sp ⟩· t) =
-      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (⊴*-reflexive (hom-*ₘ _ _)))
+      let sp′ = ⊴*-trans r
+           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-*ₘ _ _)))
       in ⟨ sp′ ⟩· map-p ps f ⊴*-refl t
     map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ ⊴*-trans r (hom-mono str)
-       , ⊴*-trans (hom-mono sp0) (⊴*-reflexive hom-0ₘ)
-       , ⊴*-trans (hom-mono sp+) (⊴*-reflexive (hom-+ₘ _ _))
+      □⟨ ⊴*-trans r (F .hom-mono str)
+       , ⊴*-trans (F .hom-mono sp0) (⊴*-reflexive (F .hom-0ₘ))
+       , ⊴*-trans (F .hom-mono sp+) (⊴*-reflexive (F .hom-+ₘ _ _))
        ⟩ map-p ps f ⊴*-refl t
 
     map-r : (r : Rule fl) →
-      (∀ {RΘ A P Q} → Q ⊴* hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-      (∀ {A P Q} → Q ⊴* hom P → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
 
     map-s : (s : System fl) →
-       (∀ {RΘ A P Q} → Q ⊴* hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-       (∀ {A P Q} → Q ⊴* hom P → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
   module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where

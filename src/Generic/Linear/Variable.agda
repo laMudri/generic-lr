@@ -27,5 +27,5 @@ module Generic.Linear.Variable
     field
       idx : Ptr s
       tyq : Γ idx ≡ A
-      basis : P ⊴* 1ᴹ idx
+      basis : P ⊴* ⟨ idx ∣
   open LVar public
