@@ -95,8 +95,7 @@ module Data.LTree.Vector where
     []₂ .get (there () _)
 
     _++₂_ : {u : Vector A (s <+> t)} {v : Vector B (s <+> t)} →
-            Lift₂ R (u ∘ ↙) (v ∘ ↙) → Lift₂ R (u ∘ ↘) (v ∘ ↘) →
-            Lift₂ R u v
+      Lift₂ R (u ∘ ↙) (v ∘ ↙) → Lift₂ R (u ∘ ↘) (v ∘ ↘) → Lift₂ R u v
     (ru ++₂ rv) .get (↙ i) = ru .get i
     (ru ++₂ rv) .get (↘ i) = rv .get i
 
