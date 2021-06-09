@@ -2,7 +2,7 @@
 
 module Generic.Linear.Example.LR where
 
-  open import Algebra.Skew
+  open import Algebra.Po
   open import Data.Hand
   open import Data.LTree
   open import Data.LTree.Vector
@@ -43,9 +43,10 @@ module Generic.Linear.Example.LR where
 
     open import Generic.Linear.Syntax Ty Ann public
 
-    open import Generic.Linear.Syntax.Term Ty rawSkewSemiring public
-    open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring public
-    open import Generic.Linear.Thinning Ty rawSkewSemiring public
+    open import Generic.Linear.Syntax.Term Ty rawPoSemiring public
+    open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring public
+    open import Generic.Linear.Variable Ty rawPoSemiring public
+    open import Generic.Linear.Thinning Ty poSemiring public
 
     data `LR : Set where
       `0e : {{_ : Has-0}} (Z : Ty) → `LR
@@ -112,17 +113,18 @@ module Generic.Linear.Example.LR where
       `con (`!e _ _ T , refl , _✴⟨_⟩_ {y = P} {z = Q} e sp t)
 
     open import Generic.Linear.Example.UsageCheck Ty public
-    open WithSkewSemiring skewSemiring public
+    open WithPoSemiring poSemiring public
     open WithInverses flags record
       { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
       public
 
     module V where
 
-      open import Generic.Linear.Syntax.Term Ty U.0-rawSkewSemiring public
-      open import Generic.Linear.Syntax.Interpretation Ty U.0-rawSkewSemiring
+      open import Generic.Linear.Syntax.Term Ty U.0-rawPoSemiring public
+      open import Generic.Linear.Syntax.Interpretation Ty U.0-rawPoSemiring
         public
-      open import Generic.Linear.Thinning Ty U.0-rawSkewSemiring public
+      open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
+      open import Generic.Linear.Thinning Ty U.0-poSemiring public
 
     pattern uvar i = V.`var (V.lvar i refl _)
     pattern u⊸i t = V.`con (`⊸i _ _ , refl , t)

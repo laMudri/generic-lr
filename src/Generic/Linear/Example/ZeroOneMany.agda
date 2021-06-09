@@ -2,12 +2,14 @@
 
 module Generic.Linear.Example.ZeroOneMany where
 
+  open import Algebra.Po
   open import Algebra.Skew
   open import Data.List
   open import Data.Product
   open import Function.Base
   open import Level using (0ℓ)
-  open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
+  open import Relation.Binary.PropositionalEquality as ≡ using
+    (_≡_; refl; trans; sym; isEquivalence)
 
   infix 7 _*_
   infix 6 _+_
@@ -42,6 +44,12 @@ module Generic.Linear.Example.ZeroOneMany where
     ; _+_ = _+_
     ; 1# = u1
     ; _*_ = _*_
+    }
+
+  rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ
+  rawPoSemiring = record
+    { rawPoset = record { Carrier = u01ω ; _≈_ = _≡_ ; _≤_ = _⊴_ }
+    ; RawSkewSemiring rawSkewSemiring
     }
 
   ⊴-trans : ∀ {x y z} → x ⊴ y → y ⊴ z → x ⊴ z
@@ -156,6 +164,58 @@ module Generic.Linear.Example.ZeroOneMany where
   distribʳ uω u1 u1 = refl
   distribʳ uω u1 uω = refl
   distribʳ uω uω z = refl
+
+  antisym : ∀ {x y} → x ⊴ y → y ⊴ x → x ≡ y
+  antisym ⊴-refl yx = refl
+  antisym ω⊴0 ()
+  antisym ω⊴1 ()
+
+  poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ
+  poSemiring = record
+    { RawPoSemiring rawPoSemiring
+    ; isPoSemiring = record
+      { isPartialOrder = record
+        { isPreorder = record
+          { isEquivalence = isEquivalence
+          ; reflexive = ≡⇒⊴
+          ; trans = ⊴-trans
+          }
+        ; antisym = antisym
+        }
+      ; isSemiring = record
+        { isSemiringWithoutAnnihilatingZero = record
+          { +-isCommutativeMonoid = record
+            { isMonoid = record
+              { isSemigroup = record
+                { isMagma = record
+                  { isEquivalence = isEquivalence
+                  ; ∙-cong = ≡.cong₂ _
+                  }
+                ; assoc = +-assoc
+                }
+              ; identity = λ- refl , +-identityʳ
+              }
+            ; comm = +-comm
+            }
+          ; *-isMonoid = record
+            { isSemigroup = record
+              { isMagma = record
+                { isEquivalence = isEquivalence
+                ; ∙-cong = ≡.cong₂ _
+                }
+              ; assoc = *-assoc
+              }
+            ; identity = λ- refl , sym ∘ *-identityʳ
+            }
+          ; distrib = (λ x y z → sym (distribʳ x y z))
+                    , (λ x y z → distribˡ y z x)
+          }
+        ; zero = λ- refl , sym ∘ annihilʳ
+        }
+      ; +-mono = +-mono
+      ; *-mono = *-mono
+      }
+    }
 
   skewSemiring : SkewSemiring 0ℓ 0ℓ
   skewSemiring = record

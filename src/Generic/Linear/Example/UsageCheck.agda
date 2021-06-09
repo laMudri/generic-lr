@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (Level; 0ℓ; suc)
 open import Relation.Binary using (Rel)
 
@@ -21,50 +21,49 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
   module U where
 
-    0-skewSemiring : SkewSemiring 0ℓ 0ℓ
-    0-skewSemiring = record
-      { proset = record { Carrier = ⊤ ; _≤_ = λ _ _ → ⊤ } }
+    0-poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ
+    0-poSemiring = record { Carrier = ⊤; _≈_ = λ _ _ → ⊤; _≤_ = λ _ _ → ⊤ }
 
-    0-rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ
-    0-rawSkewSemiring = SkewSemiring.rawSkewSemiring 0-skewSemiring
+    0-rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ
+    0-rawPoSemiring = PoSemiring.rawPoSemiring 0-poSemiring
 
-    open import Generic.Linear.Operations 0-rawSkewSemiring public
-    open import Generic.Linear.Algebra 0-skewSemiring public
+    open import Generic.Linear.Operations 0-rawPoSemiring public
+    open import Generic.Linear.Algebra 0-poSemiring public
     open import Generic.Linear.Syntax Ty ⊤ public
-    open import Generic.Linear.Syntax.Interpretation Ty 0-rawSkewSemiring
+    open import Generic.Linear.Syntax.Interpretation Ty 0-rawPoSemiring
       public
-    open import Generic.Linear.Syntax.Interpretation.Map Ty 0-skewSemiring
+    open import Generic.Linear.Syntax.Interpretation.Map Ty 0-poSemiring
       public
-    open import Generic.Linear.Syntax.Term Ty 0-rawSkewSemiring public
-    open import Generic.Linear.Environment Ty 0-rawSkewSemiring public
-      renaming (var to ivar)
-    open import Generic.Linear.Thinning Ty 0-rawSkewSemiring public
-    open import Generic.Linear.Thinning.Properties Ty 0-skewSemiring public
-    open _─Env public
-    open import Generic.Linear.Extend Ty 0-skewSemiring public
-    open import Generic.Linear.Semantics Ty 0-skewSemiring public
+    open import Generic.Linear.Syntax.Term Ty 0-rawPoSemiring public
+    open import Generic.Linear.Variable Ty 0-rawPoSemiring public
+    open import Generic.Linear.Environment Ty 0-poSemiring public
+    open import Generic.Linear.Thinning Ty 0-poSemiring public
+    open import Generic.Linear.Thinning.Properties Ty 0-poSemiring public
+    open import Generic.Linear.Extend Ty 0-poSemiring public
+    open import Generic.Linear.Semantics Ty 0-poSemiring public
+    open import Generic.Linear.Semantics.Syntactic Ty 0-poSemiring public
 
-  module WithSkewSemiring (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
+  module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-    open SkewSemiring skewSemiring
+    open PoSemiring poSemiring
       renaming (Carrier to Ann
                ; _≤_ to _⊴_
                ; refl to ⊴-refl; trans to ⊴-trans
                )
 
-    open import Generic.Linear.Operations rawSkewSemiring
-    open import Generic.Linear.Algebra skewSemiring
+    open import Generic.Linear.Operations rawPoSemiring
+    open import Generic.Linear.Algebra poSemiring
     open import Generic.Linear.Syntax Ty Ann
-    open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-    open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
-    open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
-    open import Generic.Linear.Environment Ty rawSkewSemiring
-      renaming (var to ivar)
-    open import Generic.Linear.Thinning Ty rawSkewSemiring
-    open import Generic.Linear.Thinning.Properties Ty skewSemiring
+    open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+    open import Generic.Linear.Syntax.Interpretation.Map Ty poSemiring
+    open import Generic.Linear.Syntax.Term Ty rawPoSemiring
+    open import Generic.Linear.Variable Ty rawPoSemiring
+    open import Generic.Linear.Environment Ty poSemiring
+    open import Generic.Linear.Thinning Ty poSemiring
+    open import Generic.Linear.Thinning.Properties Ty poSemiring
     open _─Env
-    open import Generic.Linear.Extend Ty skewSemiring
-    open import Generic.Linear.Semantics Ty skewSemiring
+    open import Generic.Linear.Extend Ty poSemiring
+    open import Generic.Linear.Semantics Ty poSemiring
 
     private
       variable
@@ -129,7 +128,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       +*⁻¹ {s <+> t} R =
         (| (×.zip (×.zip V._++_ V._++_) _++₂_) (+*⁻¹ (R ∘ ↙)) (+*⁻¹ (R ∘ ↘)) |)
 
-      ⟨_∣⁻¹ : ∀ {s} (i : Ptr s) R → List (R ⊴* 1ᴹ i)
+      ⟨_∣⁻¹ : ∀ {s} (i : Ptr s) R → List (R ⊴* ⟨ i ∣)
       ⟨ here ∣⁻¹ R = (| [_]₂ (1#⁻¹ (R here)) |)
       ⟨ ↙ i ∣⁻¹ R = (| _++₂_ (⟨ i ∣⁻¹ (R ∘ ↙)) (0*⁻¹ (R ∘ ↘)) |)
       ⟨ ↘ i ∣⁻¹ R = (| _++₂_ (0*⁻¹ (R ∘ ↙)) (⟨ i ∣⁻¹ (R ∘ ↘)) |)
@@ -195,7 +194,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
         elab-sem : U.Semantics (uSystem sys) U.LVar 𝓒
         elab-sem .th^𝓥 (U.lvar i q _) th =
-          let v = th .U.lookup (U.ivar i q) in
+          let v = th .U.lookup (th .sums) (U.lvar i q _) in
           U.lvar (v .U.idx) (v .U.tyq) _
         elab-sem .var (U.lvar i q _) R =
           (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)

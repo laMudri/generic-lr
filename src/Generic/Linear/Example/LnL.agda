@@ -42,9 +42,9 @@ module Generic.Linear.Example.LnL where
 
   open import Generic.Linear.Syntax ΣTy Ann public
 
-  open import Generic.Linear.Syntax.Term ΣTy rawSkewSemiring public
-  open import Generic.Linear.Syntax.Interpretation ΣTy rawSkewSemiring public
-  open import Generic.Linear.Thinning ΣTy rawSkewSemiring public
+  open import Generic.Linear.Syntax.Term ΣTy rawPoSemiring public
+  open import Generic.Linear.Syntax.Interpretation ΣTy rawPoSemiring public
+  open import Generic.Linear.Thinning ΣTy poSemiring public
 
   data `LnL : Set where
     `Ii : `LnL
@@ -93,17 +93,18 @@ module Generic.Linear.Example.LnL where
   Term = Tm LnL ∞
 
   open import Generic.Linear.Example.UsageCheck ΣTy public
-  open WithSkewSemiring skewSemiring public
+  open WithPoSemiring poSemiring public
   open WithInverses flags record
     { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
     public
 
   module V where
 
-    open import Generic.Linear.Syntax.Term ΣTy U.0-rawSkewSemiring public
-    open import Generic.Linear.Syntax.Interpretation ΣTy U.0-rawSkewSemiring
+    open import Generic.Linear.Syntax.Term ΣTy U.0-rawPoSemiring public
+    open import Generic.Linear.Syntax.Interpretation ΣTy U.0-rawPoSemiring
       public
-    open import Generic.Linear.Thinning ΣTy U.0-rawSkewSemiring public
+    open import Generic.Linear.Variable ΣTy U.0-rawPoSemiring public
+    open import Generic.Linear.Thinning ΣTy U.0-poSemiring public
 
   pattern uvar i = V.`var (V.lvar i refl _)
   pattern uIi = V.`con (`Ii , refl , ℑ⟨ _ ⟩)
@@ -141,11 +142,11 @@ module Generic.Linear.Example.LnL where
   open import Algebra.Relational using (_◇_; _,_; middle; fst; snd)
   open import Data.LTree.Matrix
 
-  open import Generic.Linear.Algebra skewSemiring
-  open import Generic.Linear.Environment ΣTy rawSkewSemiring renaming
+  open import Generic.Linear.Algebra poSemiring
+  open import Generic.Linear.Environment ΣTy rawPoSemiring renaming
     (var to ivar)
-  open import Generic.Linear.Thinning.Properties ΣTy skewSemiring
-  open import Generic.Linear.Semantics ΣTy skewSemiring
+  open import Generic.Linear.Thinning.Properties ΣTy poSemiring
+  open import Generic.Linear.Semantics ΣTy poSemiring
 
   private
     variable

@@ -3,7 +3,7 @@
 module Generic.Linear.Example.Translation.LnL-LR where
 
   open import Algebra.Relational
-  open import Algebra.Skew
+  open import Algebra.Po
   open import Data.Hand
   open import Data.LTree
   open import Data.LTree.Vector hiding (++ˢ)
@@ -12,7 +12,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
   open import Data.Product
   open import Data.Sum
   open import Data.Unit
-  open import Data.Wrap
+  open import Data.Wrap renaming ([_] to mk)
   open import Function
   open import Function.Equality
   open import Function.Equivalence
@@ -25,21 +25,21 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   open import Generic.Linear.Example.LLFlags
   open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
 
   open import Generic.Linear.Example.LR
   module LR where
     open WithLLFlags (record noLLFlags
       { Has-I = ⊤ᴾ; Has-⊗ = ⊤ᴾ; Has-⊸ = ⊤ᴾ; Has-! = ⊤ᴾ })
-      public hiding (var)
-    open import Generic.Linear.Environment Ty rawSkewSemiring public
-    open import Generic.Linear.Environment.Properties Ty skewSemiring public
-    open import Generic.Linear.Thinning.Properties Ty skewSemiring public
-    open import Generic.Linear.Thinning.Monoidal Ty skewSemiring public
-    open import Generic.Linear.Extend Ty skewSemiring public
-    open import Generic.Linear.Semantics Ty skewSemiring public
-    open import Generic.Linear.Semantics.Syntactic Ty skewSemiring public
+      public
+    open import Generic.Linear.Environment Ty poSemiring public
+    open import Generic.Linear.Environment.Properties Ty poSemiring public
+    open import Generic.Linear.Thinning.Properties Ty poSemiring public
+    open import Generic.Linear.Thinning.Monoidal Ty poSemiring public
+    open import Generic.Linear.Extend Ty poSemiring public
+    open import Generic.Linear.Semantics Ty poSemiring public
+    open import Generic.Linear.Semantics.Syntactic Ty poSemiring public
   open LR using
     ( `LR; LR; ι; tI; _t⊗_; _t⊸_; t!
     ; `Ii; `Ie; `⊗i; `⊗e; `⊸i; `⊸e; `!i; `!e
@@ -47,13 +47,14 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   module LnL where
     open import Generic.Linear.Example.LnL public
-    open import Generic.Linear.Environment ΣTy rawSkewSemiring public
-    open import Generic.Linear.Environment.Properties ΣTy skewSemiring public
-    open import Generic.Linear.Thinning.Properties ΣTy skewSemiring public
-    open import Generic.Linear.Thinning.Monoidal ΣTy skewSemiring public
-    open import Generic.Linear.Extend ΣTy skewSemiring public
-    open import Generic.Linear.Semantics ΣTy skewSemiring public
-    open import Generic.Linear.Semantics.Syntactic ΣTy skewSemiring public
+    open import Generic.Linear.Variable ΣTy rawPoSemiring public
+    open import Generic.Linear.Environment ΣTy poSemiring public
+    open import Generic.Linear.Environment.Properties ΣTy poSemiring public
+    open import Generic.Linear.Thinning.Properties ΣTy poSemiring public
+    open import Generic.Linear.Thinning.Monoidal ΣTy poSemiring public
+    open import Generic.Linear.Extend ΣTy poSemiring public
+    open import Generic.Linear.Semantics ΣTy poSemiring public
+    open import Generic.Linear.Semantics.Syntactic ΣTy poSemiring public
   open LnL using
     ( `LnL; LnL; lin; int; ι; tI; _t⊗_; _t⊸_; tF; t1; _t×_; _t→_; tG
     ; `Ii; `Ie; `⊗i; `⊗e; `⊸i; `⊸e; `Fi; `Fe
@@ -101,28 +102,24 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   module _ where
     open LnL._─Env
-    open LnL.Var
     open LnL.LVar
 
     o-distrib-[]ᶜ : LnL.Thinning (LR.[]ᶜ ᵒCtx) LnL.[]ᶜ
     o-distrib-[]ᶜ .M = 1ᴹ
+    o-distrib-[]ᶜ .asLinRel = idAsLinRel
     o-distrib-[]ᶜ .sums = []₂
-    o-distrib-[]ᶜ .lookup (LnL.var (there () i) q)
+    o-distrib-[]ᶜ .lookup _ (LnL.lvar (there () i) q b)
 
     o-distrib-++ᶜ : ∀ {PΓ QΔ} →
       LnL.Thinning ((PΓ LR.++ᶜ QΔ) ᵒCtx) (PΓ ᵒCtx LnL.++ᶜ QΔ ᵒCtx)
     o-distrib-++ᶜ .M = 1ᴹ
-    o-distrib-++ᶜ {LR.ctx P Γ} {LR.ctx Q Δ} .sums =
-      ⊴*-trans (+*-identity↘ _)
-        (+*-mono (unrowL₂ (*ᴹ-1ᴹ (row P))) (unrowL₂ (*ᴹ-0ᴹ (row Q))))
-      ++₂
-      ⊴*-trans (+*-identity↙ _)
-        (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row P))) (unrowL₂ (*ᴹ-1ᴹ (row Q))))
-    o-distrib-++ᶜ .lookup v .idx = v .idx
-    o-distrib-++ᶜ .lookup v .tyq with v .idx | v .tyq
+    o-distrib-++ᶜ .asLinRel = idAsLinRel
+    o-distrib-++ᶜ .sums = ⊴*-refl ++₂ ⊴*-refl
+    o-distrib-++ᶜ .lookup _ v .idx = v .idx
+    o-distrib-++ᶜ .lookup _ v .tyq with v .idx | v .tyq
     ... | ↙ i | q = q
     ... | ↘ i | q = q
-    o-distrib-++ᶜ .lookup v .basis = ⊴*-refl
+    o-distrib-++ᶜ .lookup le v .basis = ⊴*-trans le (v .basis)
 
     o𝓒 : LR.Scoped 0ℓ
     o𝓒 A PΓ = LnL.Term (_ , A ᵒTy) (PΓ ᵒCtx)
@@ -172,9 +169,9 @@ module Generic.Linear.Example.Translation.LnL-LR where
       where
       th : ∀ {s R Γ} → LnL.Thinning (LnL.ctx {s} R Γ) (LnL.ctx (uω *ₗ R) Γ)
       th .M = 1ᴹ
-      th {R = R} .sums =
-        ⊴*-trans (mk λ i → ω*-⊴ (R i)) (unrowL₂ (*ᴹ-1ᴹ (row R)))
-      th .lookup v = record { LnL.Var v; basis = ⊴*-refl }
+      th .asLinRel = idAsLinRel
+      th {R = R} .sums .get i = ω*-⊴ (R i)
+      th .lookup le (LnL.lvar i q b) = LnL.lvar i q (⊴*-trans le b)
     oSem .alg (`!e A Z , refl , s ✴⟨ sp+ ⟩ t) =
       let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
       LnL.`con (`Fe _ _ , refl ,
@@ -184,39 +181,46 @@ module Generic.Linear.Example.Translation.LnL-LR where
       where
       σ : ∀ {A} →
         LnL.Substitution LnL (LnL.[ uω · _ , A ]ᶜ) (LnL.[ uω · _ , tG A ]ᶜ)
-      σ .M _ _ = uω
-      σ .sums .get i = ⊴-refl
-      σ .lookup (LnL.var here refl) =
-        LnL.`con (`Ge _ , refl , □⟨ ⊴*-refl , [ ω⊴0 ]₂ , ⊴*-refl ⟩
-          LnL.`var (LnL.lvar (↙ here) refl ([ ω⊴1 ]₂ ++₂ []₂)))
+      σ .M = [─ [ uω ] ─]
+      σ .asLinRel = [─ [ uω ] ─]AsLinRel
+      σ .sums = ⊴*-refl
+      σ .lookup {_} {P′} {Q′} le (LnL.lvar here refl b) =
+        LnL.`con (`Ge _ , refl , □⟨ ⊴*-refl , [ Q′⊴0 ]₂ , [ Q′⊴+ ]₂ ⟩
+          LnL.`var (LnL.lvar (↙ here) refl ([ Q′⊴1 ]₂ ++₂ []₂)))
+        where
+        Q′⊴ω : Q′ here ⊴ uω
+        Q′⊴ω = ⊴-trans (le .get here) (*-mono (b .get here) ⊴-refl)
+
+        Q′⊴0 : Q′ here ⊴ u0
+        Q′⊴0 = ⊴-trans Q′⊴ω ω⊴0
+        Q′⊴+ : Q′ here ⊴ Q′ here + Q′ here
+        Q′⊴+ with _ ← Q′ here | ⊴-refl ← Q′⊴ω = ⊴-refl
+        Q′⊴1 : Q′ here ⊴ u1
+        Q′⊴1 = ⊴-trans Q′⊴ω ω⊴1
 
   _ᵒTm : ∀ {A Γ} → LR.Term A Γ → LnL.Term (_ , A ᵒTy) (Γ ᵒCtx)
   _ᵒTm = LR.Semantics.semantics oSem LR.identity
 
   module _ where
     open LR._─Env
-    open LR.Var
     open LR.LVar
 
     *-distrib-[]ᶜ : LR.Thinning (LnL.[]ᶜ *Ctx) LR.[]ᶜ
     *-distrib-[]ᶜ .M = 1ᴹ
+    *-distrib-[]ᶜ .asLinRel = idAsLinRel
     *-distrib-[]ᶜ .sums = []₂
-    *-distrib-[]ᶜ .lookup (LR.var (there () i) q)
+    *-distrib-[]ᶜ .lookup _ (LR.lvar (there () i) q b)
 
     *-distrib-++ᶜ : ∀ {PΓ QΔ} →
       LR.Thinning ((PΓ LnL.++ᶜ QΔ) *Ctx) (PΓ *Ctx LR.++ᶜ QΔ *Ctx)
     *-distrib-++ᶜ .M = 1ᴹ
-    *-distrib-++ᶜ {LnL.ctx P Γ} {LnL.ctx Q Δ} .sums =
-      ⊴*-trans (+*-identity↘ _)
-        (+*-mono (unrowL₂ (*ᴹ-1ᴹ (row P))) (unrowL₂ (*ᴹ-0ᴹ (row Q))))
-      ++₂
-      ⊴*-trans (+*-identity↙ _)
-        (+*-mono (unrowL₂ (*ᴹ-0ᴹ (row P))) (unrowL₂ (*ᴹ-1ᴹ (row Q))))
-    *-distrib-++ᶜ .lookup v .idx = v .idx
-    *-distrib-++ᶜ .lookup v .tyq with v .idx | v .tyq
+    *-distrib-++ᶜ .asLinRel = idAsLinRel
+    *-distrib-++ᶜ .sums = ⊴*-refl ++₂ ⊴*-refl
+    *-distrib-++ᶜ .lookup _ v .idx = v .idx
+    *-distrib-++ᶜ .lookup _ v .tyq with v .idx | v .tyq
     ... | ↙ i | q = q
     ... | ↘ i | q = q
-    *-distrib-++ᶜ .lookup v .basis = ⊴*-refl
+    *-distrib-++ᶜ .lookup le v .basis = ⊴*-trans le (v .basis)
 
   module _ where
     open LnL.Semantics
