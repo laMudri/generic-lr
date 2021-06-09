@@ -1,14 +1,16 @@
 {-# OPTIONS --safe --without-K --prop #-}
 
-open import Algebra.Skew
-open import Level renaming (zero to lzero; suc to lsuc)
+open import Algebra.Po
+open import Level using (Level; 0ℓ)
 
 module Generic.Linear.Syntax.Interpretation.Map
-  (Ty : Set) (skewSemiring : SkewSemiring lzero lzero)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open import Algebra.Skew.Relation
-  open import Algebra.Skew.Construct.Vector hiding (pure; _<*>_)
+  open import Algebra.Po.Relation
+  open import Algebra.Po.Construct.Vector
+  open import Algebra.Relational
+  open import Algebra.Relational.Relation
   open import Data.Unit.Polymorphic
   open import Data.Product
   open import Data.LTree
@@ -18,67 +20,82 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Relation.Unary
   open import Relation.Unary.Bunched
 
-  open SkewSemiring skewSemiring renaming (Carrier to Ann)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
 
   private
     variable
       x y : Level
       fl : PremisesFlags
 
-  LinRel : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
-  LinRel R s t = SkewLeftSemimoduleRel
-    (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t) 0ℓ
-
-  LinMor : ∀ {c ℓ} (R : SkewSemiring c ℓ) (s t : LTree) → Set _
-  LinMor R s t = SkewLeftSemimoduleMor id-SkewSemiringMor
-    (Vector-skewLeftSemimodule R s) (Vector-skewLeftSemimodule R t)
-
-  module _ {s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
-           (F : LinMor skewSemiring s t)
+  {-
+  module _ {ℓ s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
+           (F : LinRel s t ℓ)
            {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
     where
 
-    open SkewLeftSemimoduleMor F
+    -- open RelLeftSemimoduleRel F
+
+    map-pᴿ : (ps : Premises fl) →
+      (∀ {RΘ A P Q} → F .rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
+    map-pᴿ ⟨ PΓ `⊢ A ⟩ f r t = {!!}
+    map-pᴿ `⊤ f r t = {!!}
+    map-pᴿ (ps `∧ qs) f r t = {!!}
+    map-pᴿ `ℑ f r t = {!!}
+    map-pᴿ (ps `✴ qs) f r t = {!!}
+    map-pᴿ (p `· ps) f r t = {!!}
+    map-pᴿ (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
+      let r′ , str′ = F .rel-comm-≤ₘ (str , r) in
+      □⟨ str′ , {!sp0!} , {!!} ⟩ map-pᴿ ps f r′ t
+
+    map-sᴿ : (s : System fl) →
+      (∀ {RΘ A P Q} → F .rel P Q → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → F .rel P Q → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
+    map-sᴿ s f r t = {!!}
+  -}
+
+  module _ {s t} {Γ : Vector Ty s} {Δ : Vector Ty t}
+    (F : LinMor s t) {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+    where
+
+    -- open PoLeftSemimoduleMor F
 
     map-p : (ps : Premises fl) →
-      (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-      (∀ {P Q} → Q ⊴* apply P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {P Q} → Q ⊴* F .hom P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
     map-p `⊤ f r _ = _
-    map-p `ℑ f r ℑ⟨ t ⟩ =
-      ℑ⟨ (⊴*-trans r (⊴*-trans (hom-mono t) hom-0ₘ)) ⟩
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
+    map-p `ℑ f r ℑ⟨ t ⟩ =
+      ℑ⟨ (⊴*-trans r (⊴*-trans (F .hom-mono t) (⊴*-reflexive (F .hom-0ₘ)))) ⟩
     map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (hom-+ₘ _ _)) in
-      map-p ps f ⊴*-refl s ✴⟨ sp′ ⟩ map-p qs f ⊴*-refl t
-    map-p (ρ `· ps) f r (⟨ sp ⟩· t) =
-      let sp′ = ⊴*-trans r (⊴*-trans (hom-mono sp) (hom-*ₘ _ _)) in
-      ⟨ sp′ ⟩· map-p ps f ⊴*-refl t
+      let sp′ = ⊴*-trans r
+           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-+ₘ _ _)))
+      in map-p ps f ⊴*-refl s ✴⟨ sp′ ⟩ map-p qs f ⊴*-refl t
+    map-p (p `· ps) f r (⟨ sp ⟩· t) =
+      let sp′ = ⊴*-trans r
+           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-*ₘ _ _)))
+      in ⟨ sp′ ⟩· map-p ps f ⊴*-refl t
     map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ ⊴*-trans r (hom-mono str)
-       , ⊴*-trans (hom-mono sp0) hom-0ₘ
-       , ⊴*-trans (hom-mono sp+) (hom-+ₘ _ _)
+      □⟨ ⊴*-trans r (F .hom-mono str)
+       , ⊴*-trans (F .hom-mono sp0) (⊴*-reflexive (F .hom-0ₘ))
+       , ⊴*-trans (F .hom-mono sp+) (⊴*-reflexive (F .hom-+ₘ _ _))
        ⟩ map-p ps f ⊴*-refl t
 
     map-r : (r : Rule fl) →
-      (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-      (∀ {A P Q} → Q ⊴* apply P → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ r ⟧r X A (ctx P Γ) → ⟦ r ⟧r Y A (ctx Q Δ))
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
 
     map-s : (s : System fl) →
-       (∀ {RΘ A P Q} → Q ⊴* apply P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
-       (∀ {A P Q} → Q ⊴* apply P → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
+      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ A (ctx P Γ) → Y RΘ A (ctx Q Δ)) →
+      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ s ⟧s X A (ctx P Γ) → ⟦ s ⟧s Y A (ctx Q Δ))
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
-
-  -- map-s′ : ∀ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} (s : System fl) →
-  --   (∀ {RΘ A u Γ P Q} → Q ⊴* P → X RΘ A (ctx P Γ) → Y RΘ A (ctx {u} Q Γ)) →
-  --   (∀ {A} → ∀[ ⟦ s ⟧s X A ⇒ ⟦ s ⟧s Y A ])
-  -- map-s′ s f t = map-s ──-SkewLeftSemimoduleMor s f ⊴*-refl t
 
   module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
 

@@ -2,31 +2,33 @@
 
 -- The monoidal structure of the category of thinnings
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (Level; 0ℓ)
 
 module Generic.Linear.Thinning.Monoidal
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Matrix
+  open import Data.Product
+  open import Data.Unit
   open import Relation.Unary.Bunched
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Environment Ty rawSkewSemiring
-  open import Generic.Linear.Environment.Properties Ty skewSemiring
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
-  open import Generic.Linear.Thinning.Properties Ty skewSemiring
-  open import Generic.Linear.Extend Ty skewSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Environment Ty poSemiring
+  open import Generic.Linear.Environment.Properties Ty poSemiring
+  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Thinning.Properties Ty poSemiring
+  open import Generic.Linear.Extend Ty poSemiring
 
-  open _─Env
+  open With-psh^𝓥 {𝓥 = LVar} psh^LVar
 
   []ᵗ : Thinning []ᶜ []ᶜ
   []ᵗ = identity
@@ -43,5 +45,6 @@ module Generic.Linear.Thinning.Monoidal
 
   ++-[]ᵗ← : ∀ {PΓ} → Thinning PΓ (PΓ ++ᶜ []ᶜ)
   ++-[]ᵗ← .M = [ 1ᴹ │ [│] ]
-  ++-[]ᵗ← .sums = unrowL₂ (*ᴹ-1ᴹ _) ++₂ []₂
-  ++-[]ᵗ← .lookup (var i q) = lvar (↙ i) q (⊴*-refl ++₂ []₂)
+  ++-[]ᵗ← .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
+  ++-[]ᵗ← .sums = ⊴*-refl , _
+  ++-[]ᵗ← .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++₂ []₂)

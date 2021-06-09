@@ -1,15 +1,15 @@
 \begin{code}
 {-# OPTIONS --safe --without-K --prop #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_)
 open import Relation.Binary using (Rel)
 
 module Generic.Linear.Syntax.Interpretation
-  (Ty : Set) (rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open RawSkewSemiring rawSkewSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
   open import Algebra using (Op₂; Opₗ)
   open import Data.Product as ×
@@ -21,7 +21,7 @@ module Generic.Linear.Syntax.Interpretation
   open import Data.LTree
   open import Data.LTree.Vector
 
-  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Syntax Ty Ann
 
   open import Relation.Unary.Bunched.Checked

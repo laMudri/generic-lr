@@ -1,26 +1,25 @@
 {-# OPTIONS --safe --without-K --prop #-}
 
-open import Algebra.Skew
-open import Level renaming (zero to lzero; suc to lsuc)
+open import Algebra.Po
+open import Level
 open import Relation.Binary using (Rel)
 
 module Generic.Linear.Environment
-  (Ty : Set) (rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open RawSkewSemiring rawSkewSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
-
-  open import Relation.Binary.PropositionalEquality
+  open PoSemiring poSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Matrix
 
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Operations rawSkewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
 
   open import Data.Product
-  open import Function.Base using (_∘_)
+  open import Function using (_∘_; _⇔_; Equivalence)
 
   private
     variable
@@ -35,13 +34,30 @@ module Generic.Linear.Environment
     ∀ {s} {Γ : Vector Ty s} {P Q} {A} →
     Q ⊴* P → 𝓒 A (ctx P Γ) → 𝓒 A (ctx Q Γ)
 
-  record Var {s} (A : Ty) (Γ : Vector Ty s) : Set where
-    constructor var
-    field
-      idx : Ptr s
-      tyq : Γ idx ≡ A
-  open Var public
+  -- Working with relations is nicer than working with functions, but to
+  -- implement `map` for `□, we need the relation to be backed by a function.
 
+  record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
+    constructor pack
+
+    open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
+    open Ctx QΔ renaming (s to t; Γ to Δ; R to Q)
+
+    field
+      M : LinMor s t
+      asLinRel : AsLinRel M 0ℓ
+    private
+      Mᴿ = asLinRel .linRel
+    field
+      sums : Mᴿ .rel P Q
+      lookup : ∀ {A P′ Q′} → Mᴿ .rel P′ Q′ → LVar A (ctx P′ Γ) → 𝓥 A (ctx Q′ Δ)
+
+    sums-⊴* : Q ⊴* M .hom P
+    sums-⊴* = asLinRel .equiv .f sums
+      where open Equivalence
+  open _─Env public
+
+  {- TODO: resurrect as an easy way to produce envs.
   record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set ℓ where
     constructor pack
 
@@ -49,12 +65,9 @@ module Generic.Linear.Environment
     open Ctx QΔ renaming (s to t; Γ to Δ; R to Q)
 
     field
-      M : Matrix Ann s t
-      sums : Q ⊴* unrow (mult 0# _+_ _*_ (row P) M)
-      lookup : ∀ {A} (v : Var A Γ) → 𝓥 A (record QΔ { R = M (Var.idx v) })
-  open _─Env  -- TODO: better names so this can be public
-
-  leftᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ ↙) → Var A Γ
-  leftᵛ (var i q) = var (↙ i) q
-  rightᵛ : ∀ {s t A} {Γ : Vector Ty (s <+> t)} → Var A (Γ ∘ ↘) → Var A Γ
-  rightᵛ (var i q) = var (↘ i) q
+      M : LinMor s t
+      sums : Q ⊴* M .hom P
+      lookup : ∀ {A P′ Q′} → Q′ ⊴* M .hom P′ →
+        LVar A (ctx P′ Γ) → 𝓥 A (ctx Q′ Δ)
+  open _─Env public
+  -}

@@ -13,6 +13,13 @@ module Relation.Unary.Bunched {a} {A : Set a} where
     _⇒ᵏ_ : ∀ {t u} (T : A → Set t) (U : A → Set u) → A → Set (a ⊔ ℓ ⊔ t ⊔ u)
     (T ⇒ᵏ U) x = ∀ {y} → y ≤ x → T y → U y
 
+    record ◇ {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
+      constructor ◇⟨_⟩_
+      field
+        {y} : A
+        sub : x ≤ y
+        T-prf : T y
+
   module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
 
     record ℑ {v} (x : A) : Set (ℓ ⊔ v) where

@@ -1,33 +1,33 @@
 {-# OPTIONS --safe --without-K --prop --postfix-projections #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Function.Base using (flip; _∘_)
 open import Level using (Level; 0ℓ)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
 module Generic.Linear.Thinning.Properties
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
 
-  open import Algebra.Relational using (_◇_; _,_; middle; fst; snd)
+  open import Algebra.Relational
   open import Data.Product
   open import Data.Sum
-  open import Relation.Binary.PropositionalEquality
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
   open import Relation.Unary
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Matrix
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Environment Ty rawSkewSemiring
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
-  open import Generic.Linear.Extend Ty skewSemiring
+  open import Generic.Linear.Environment Ty poSemiring
+  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  -- open import Generic.Linear.Extend Ty poSemiring
 
   open _─Env
 
@@ -49,15 +49,9 @@ module Generic.Linear.Thinning.Properties
 
   -- Possible lemma: if we have `Thinning PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
   th^LVar : Thinnable (LVar A)
-  th^LVar v th = record
-    { LVar (th .lookup (plain-var v))
-    ; basis = ⊴*-trans
-      (th .sums) (⊴*-trans
-      (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis)) ⊴ᴹ-refl)) (⊴*-trans
-      (getrowL₂ (1ᴹ-*ᴹ (th .M)) (v .idx))
-      (th .lookup (plain-var v) .basis)))
-    }
+  th^LVar v th = th .lookup (th .sums) v
 
+  {-
   -- The rows of a thinning's matrix are a selection of standard basis vectors
   -- (i.e, rows from the identity matrix).
   -- Which rows, exactly, is defined by the action of the thinning (lookup).
@@ -77,33 +71,26 @@ module Generic.Linear.Thinning.Properties
       {rightᶜ (ctx→sctx PΓ)}
       record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
+  -}
 
   identity : Thinning PΓ PΓ
-  M identity = 1ᴹ
-  sums (identity {PΓ}) .get j = *ᴹ-1ᴹ (row (Ctx.R PΓ)) .get here j
-  idx (lookup identity v) = idx v
-  tyq (lookup identity v) = tyq v
-  basis (lookup identity v) = ⊴*-refl
+  identity .M = idLinMor
+  identity .asLinRel = idAsLinRel
+  identity .sums = ⊴*-refl
+  identity .lookup le v = record { LVar v; basis = ⊴*-trans le (v .basis) }
 
   1ᵗ = identity
 
-  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in IsPresheaf 𝓥 →
-           Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
-  M (select 𝓥-psh th ρ) = M th *ᴹ M ρ
-  sums (select {PΓ = PΓ} {QΔ} 𝓥-psh th ρ) =
-    ⊴*-trans (sums ρ)
-             (unrow-cong₂ (⊴ᴹ-trans (*ᴹ-mono (row-cong₂ (sums th)) ⊴ᴹ-refl)
-                                    (*ᴹ-*ᴹ-→ (row (Ctx.R PΓ)) (M th) (M ρ))))
-  lookup (select 𝓥-psh th ρ) v =
-    𝓥-psh (⊴*-trans (unrow-cong₂ (*ᴹ-mono
-                                    (row-cong₂ (thinning-sub-1ᴹ th v))
-                                    ⊴ᴹ-refl))
-                    (mk λ j → 1ᴹ-*ᴹ (M ρ) .get (th .lookup v .idx) j))
-          (lookup ρ (plain-var (lookup th v)))
+  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in
+    Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
+  select th ρ .M = th .M >>LinMor ρ .M
+  select th ρ .asLinRel = th .asLinRel >>AsLinRel ρ .asLinRel
+  select th ρ .sums = th .sums , ρ .sums
+  select th ρ .lookup (th-r , ρ-r) v = ρ .lookup ρ-r (th .lookup th-r v)
 
   compose : ∀ {PΓ QΔ RΘ : Ctx} →
     Thinning PΓ QΔ → Thinning QΔ RΘ → Thinning PΓ RΘ
-  compose th ph = select psh^LVar th ph
+  compose th ph = select th ph
 
   infixr 5 _>>ᵗ_
   _>>ᵗ_ = compose
@@ -117,21 +104,16 @@ module Generic.Linear.Thinning.Properties
   th^□ : Thinnable (□ T)
   th^□ = duplicate
 
-  instance
-    re^LVar : RightExtend LVar
-    re^LVar .embedVarʳ (var i q) = lvar (↙ i) q (⊴*-refl ++₂ ⊴*-refl)
-
-    le^LVar : LeftExtend LVar
-    le^LVar .embedVarˡ (var i q) = lvar (↘ i) q (⊴*-refl ++₂ ⊴*-refl)
-
   subuse-th : ∀ {Γ} → Q ⊴* P → Thinning (ctx P Γ) (ctx Q Γ)
-  subuse-th QP .M = 1ᴹ
-  subuse-th QP .sums = ⊴*-trans QP (unrowL₂ (*ᴹ-1ᴹ (row _)))
-  subuse-th QP .lookup v = record { Var v; basis = ⊴*-refl }
+  subuse-th QP .M = idLinMor
+  subuse-th QP .asLinRel = idAsLinRel
+  subuse-th QP .sums = QP
+  subuse-th QP .lookup QP′ v = psh^LVar QP′ v
 
   th⇒psh : (∀ {A} → Thinnable (𝓥 A)) → IsPresheaf 𝓥
   th⇒psh th^𝓥 le v = th^𝓥 v (subuse-th le)
 
+  {-
   nat^Th : ∀ {s P′ Γ t Q Δ} →
     _⊴* P′ ◇ (λ P → Thinning (ctx {s} P Γ) (ctx {t} Q Δ)) →
     (λ Q′ → Thinning (ctx P′ Γ) (ctx Q′ Δ)) ◇ Q ⊴*_
@@ -141,3 +123,4 @@ module Generic.Linear.Thinning.Properties
   nat^Th (PP , th) .fst .lookup v = th .lookup v
   nat^Th (PP , th) .snd =
     ⊴*-trans (th .sums) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl))
+  -}

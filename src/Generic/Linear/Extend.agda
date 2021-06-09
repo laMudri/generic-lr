@@ -1,13 +1,13 @@
 {-# OPTIONS --safe --without-K --prop --postfix-projections #-}
 
-open import Algebra.Skew
-open import Level using (0ℓ)
+open import Algebra.Po
+open import Level
 
 module Generic.Linear.Extend
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ) {ℓ}
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann
              ; _≤_ to _⊴_
              ; refl to ⊴-refl; trans to ⊴-trans
@@ -15,37 +15,34 @@ module Generic.Linear.Extend
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Matrix
+  open import Data.Product
+  open import Relation.Unary
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Environment Ty rawSkewSemiring
-    renaming (var to ivar)
-  open _─Env
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Environment Ty poSemiring
 
-  -- Classes for extensions by 0-use contexts
-
-  record LeftExtend (𝓥 : Scoped ℓ) : Set ℓ where
-    constructor mk
-    field
-      embedVarˡ : ∀ {s u Γ Θ A} (v : Var A Θ) →
-                 𝓥 A (ctx {s} 0* Γ ++ᶜ ctx {u} (1ᴹ (v .idx)) Θ)
+  record FromLVar {ℓ} (𝓥 : Scoped ℓ) : Set (suc 0ℓ ⊔ ℓ) where
+    field fromLVar : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]
 
     extendˡ : ∀ {RΘ s Γ} → (RΘ ─Env) 𝓥 (ctx {s} 0* Γ ++ᶜ RΘ)
     extendˡ .M = [ 0ᴹ │ 1ᴹ ]
-    extendˡ {ctx R Θ} .sums = unrowL₂ (*ᴹ-0ᴹ (row R)) ++₂ unrowL₂ (*ᴹ-1ᴹ _)
-    extendˡ .lookup = embedVarˡ
-  open LeftExtend {{...}} public
-
-  record RightExtend (𝓥 : Scoped ℓ) : Set ℓ where
-    constructor mk
-    field
-      embedVarʳ : ∀ {s u Γ Θ A} (v : Var A Θ) →
-                 𝓥 A (ctx {u} (1ᴹ (v .idx)) Θ ++ᶜ ctx {s} 0* Γ)
+    extendˡ .asLinRel = [ 0AsLinRel │ idAsLinRel ]AsLinRel
+    extendˡ .sums = ⊴*-refl , ⊴*-refl
+    extendˡ .lookup (sp0 , le) (lvar i q b) =
+      fromLVar (lvar (↘ i) q (sp0 ++₂ ⊴*-trans le b))
 
     extendʳ : ∀ {RΘ s Γ} → (RΘ ─Env) 𝓥 (RΘ ++ᶜ ctx {s} 0* Γ)
     extendʳ .M = [ 1ᴹ │ 0ᴹ ]
-    extendʳ {ctx R Θ} .sums = unrowL₂ (*ᴹ-1ᴹ _) ++₂ unrowL₂ (*ᴹ-0ᴹ (row R))
-    extendʳ .lookup = embedVarʳ
-  open RightExtend {{...}} public
+    extendʳ .asLinRel = [ idAsLinRel │ 0AsLinRel ]AsLinRel
+    extendʳ .sums = ⊴*-refl , ⊴*-refl
+    extendʳ .lookup (le , sp0) (lvar i q b) =
+      fromLVar (lvar (↙ i) q (⊴*-trans le b ++₂ sp0))
+
+  open FromLVar {{...}} public
+
+  instance
+    flv^LVar : FromLVar LVar
+    flv^LVar .fromLVar v = v

@@ -1,40 +1,40 @@
 {-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
 
-open import Algebra.Skew
-open import Level using (Level; 0ℓ; _⊔_)
+open import Algebra.Po
+open import Level using (Level; 0ℓ; _⊔_; suc)
 
 module Generic.Linear.Semantics
-  (Ty : Set) (skewSemiring : SkewSemiring 0ℓ 0ℓ)
+  (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann
              ; _≤_ to _⊴_
              ; refl to ⊴-refl; trans to ⊴-trans
              )
 
-  open import Algebra.Skew.Relation
+  open import Algebra.Po.Relation
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.LTree.Matrix
   open import Data.Product
   open import Data.Wrap
+  open import Function using (Equivalence)
   open import Size
   open import Relation.Unary
   open import Relation.Unary.Bunched
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Ty skewSemiring
-  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
-  open import Generic.Linear.Environment Ty rawSkewSemiring hiding (var)
-  open import Generic.Linear.Extend Ty skewSemiring
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
-  open _─Env
-  open import Generic.Linear.Thinning.Properties Ty skewSemiring
-  open import Generic.Linear.Environment.Properties Ty skewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Syntax.Interpretation.Map Ty poSemiring
+  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Environment Ty poSemiring
+  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Thinning.Properties Ty poSemiring
+  open import Generic.Linear.Environment.Properties Ty poSemiring
 
   private
     variable
@@ -46,7 +46,7 @@ module Generic.Linear.Semantics
       RΘ : Ctx
 
   Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) (PΓ : Ctx) (A : Ty) →
-           Ctx → Set (v ⊔ c)
+           Ctx → Set _
   Kripke = Wrap λ 𝓥 𝓒 PΓ A → □ ((PΓ ─Env) 𝓥 ─✴ᶜ 𝓒 A)
 
   mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
@@ -54,11 +54,8 @@ module Generic.Linear.Semantics
           ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
   mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
 
-  reify : {{LeftExtend 𝓥}} → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
-  reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
-
   record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
-                   : Set (v ⊔ c) where
+                   : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
       th^𝓥 : Thinnable (𝓥 A)
       var : ∀[ 𝓥 A ⇒ 𝓒 A ]
@@ -66,6 +63,7 @@ module Generic.Linear.Semantics
 
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = th⇒psh (λ {A} → th^𝓥 {A})
+    open With-psh^𝓥 psh^𝓥
 
     _─Comp : Ctx → Scoped ℓ → Ctx → Set ℓ
     (PΓ ─Comp) 𝓒 QΔ = ∀ {sz A} → Tm d sz A PΓ → 𝓒 A QΔ
@@ -74,43 +72,12 @@ module Generic.Linear.Semantics
     body : ∀ {PΓ QΔ sz} → (PΓ ─Env) 𝓥 QΔ → ∀ {RΘ A} →
            Scope (Tm d sz) RΘ A PΓ → Kripke 𝓥 𝓒 RΘ A QΔ
 
-    semantics ρ (`var v) =
-      var (psh^𝓥 (⊴*-trans (ρ .sums)
-                           (⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ (v .basis))
-                                                       ⊴ᴹ-refl))
-                                     (getrowL₂ (1ᴹ-*ᴹ (ρ .M)) (v .idx))))
-                 (ρ .lookup (plain-var v)))
-    semantics {ctx P Γ} {ctx Q Δ} ρ (`con {sz = sz} t) =
-      alg (map-s linMor {X = Scope (Tm d sz)} {Y = Kripke 𝓥 𝓒} d
-                 (λ {RΘ} {A} {P′} {Q′} r →
-                   body {ctx P′ Γ} {ctx Q′ Δ} {sz} (pack (ρ .M) r (ρ .lookup)))
-                 {_} {P} {Q} (ρ .sums)
-                 t)
-      where
-      open SkewLeftSemimoduleMor
-      open ProsetMor
-
-      linMor : LinMor skewSemiring _ _
-      linMor .prosetMor .apply P = unrow (row P *ᴹ ρ .M)
-      linMor .prosetMor .hom-mono PP = unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl)
-      linMor .hom-0ₘ = unrowL₂ (0ᴹ-*ᴹ (ρ .M))
-      linMor .hom-+ₘ P Q = unrowL₂ (+ᴹ-*ᴹ _ _ (ρ .M))
-      linMor .hom-*ₘ r P = unrowL₂ (*ₗ-*ᴹ _ _ (ρ .M))
-      -- linRel : LinRel skewSemiring _ _
-      -- linRel = record
-      --   { rel = λ P Q → Q ⊴* unrow (row P *ᴹ ρ .M)
-      --   ; rel-0ₘ = λ (sp0 , is-rel) →
-      --     ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl)
-      --                                        (0ᴹ-*ᴹ (ρ .M))))
-      --   ; rel-+ₘ = λ (sp+ , is-rel) →
-      --     ⟨ ⊴*-refl , ⊴*-refl ⟩
-      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl)
-      --                                          (+ᴹ-*ᴹ _ _ (ρ .M))))
-      --   ; rel-*ₘ = λ (sp* , is-rel) →
-      --     ⊴*-refl ,
-      --       ⊴*-trans is-rel (unrowL₂ (⊴ᴹ-trans (*ᴹ-mono (rowL₂ sp*) ⊴ᴹ-refl)
-      --                                          (*ₗ-*ᴹ _ _ (ρ .M))))
-      --   }
+    semantics ρ (`var v) = var (ρ .lookup (ρ .sums) v)
+    semantics ρ (`con {sz = sz} t) =
+      alg (map-s (ρ .M) d
+        (λ r → body (record { _─Env ρ; sums = ρ .asLinRel .equiv .g r }))
+        (sums-⊴* ρ) t)
+      where open Equivalence
 
     body ρ t .get th .app✴ r σ =
       let ρ′ = th^Env th^𝓥 ρ th in
