@@ -22,15 +22,17 @@ module Generic.Linear.Thinning
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
 
+  infix 4 _⇒ʳ_
+
   private
     variable
       ℓ : Level
 
-  Thinning : (PΓ QΔ : Ctx) → Set₁
-  Thinning PΓ QΔ = (PΓ ─Env) LVar QΔ
+  _⇒ʳ_ : (PΓ QΔ : Ctx) → Set₁
+  _⇒ʳ_ = [ LVar ]_⇒ᵉ_
 
-  □ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
-  (□ T) PΓ = ∀[ Thinning PΓ ⇒ T ]
+  □ʳ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
+  (□ʳ T) PΓ = ∀[ (_⇒ʳ PΓ) ⇒ T ]
 
-  Thinnable : (Ctx → Set ℓ) → Set (suc 0ℓ ⊔ ℓ)
-  Thinnable T = ∀[ T ⇒ □ T ]
+  Renameable : (Ctx → Set ℓ) → Set (suc 0ℓ ⊔ ℓ)
+  Renameable T = ∀[ T ⇒ □ʳ T ]

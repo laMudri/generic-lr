@@ -21,6 +21,8 @@ module Generic.Linear.Environment
   open import Data.Product
   open import Function using (_∘_; _⇔_; Equivalence)
 
+  infix 4 [_]_⇒ᵉ_
+
   private
     variable
       PΓ QΔ RΘ : Ctx
@@ -37,25 +39,25 @@ module Generic.Linear.Environment
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
 
-  record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
+  record [_]_⇒ᵉ_ (𝓥 : Scoped ℓ) (PΓ QΔ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
     constructor pack
 
     open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
     open Ctx QΔ renaming (s to t; Γ to Δ; R to Q)
 
     field
-      M : LinMor s t
+      M : LinMor t s
       asLinRel : AsLinRel M 0ℓ
     private
       Mᴿ = asLinRel .linRel
     field
-      sums : Mᴿ .rel P Q
-      lookup : ∀ {A P′ Q′} → Mᴿ .rel P′ Q′ → LVar A (ctx P′ Γ) → 𝓥 A (ctx Q′ Δ)
+      sums : Mᴿ .rel Q P
+      lookup : ∀ {A P′ Q′} → Mᴿ .rel Q′ P′ → LVar A (ctx Q′ Δ) → 𝓥 A (ctx P′ Γ)
 
-    sums-⊴* : Q ⊴* M .hom P
+    sums-⊴* : P ⊴* M .hom Q
     sums-⊴* = asLinRel .equiv .f sums
       where open Equivalence
-  open _─Env public
+  open [_]_⇒ᵉ_ public
 
   {- TODO: resurrect as an easy way to produce envs.
   record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set ℓ where

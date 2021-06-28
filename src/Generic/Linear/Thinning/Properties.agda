@@ -29,8 +29,6 @@ module Generic.Linear.Thinning.Properties
   open import Generic.Linear.Variable Ty rawPoSemiring
   -- open import Generic.Linear.Extend Ty poSemiring
 
-  open _─Env
-
   private
     variable
       PΓ QΔ RΘ : Ctx
@@ -41,15 +39,15 @@ module Generic.Linear.Thinning.Properties
       P P′ Q Q′ R : Vector Ann s
       A : Ty
 
-  -- Also, Thinnable ⇒ IsPresheaf via subuse-th
+  -- Also, Renameable ⇒ IsPresheaf via subuse-th
   psh^LVar : IsPresheaf LVar
   idx (psh^LVar QP lv) = idx lv
   tyq (psh^LVar QP lv) = tyq lv
   basis (psh^LVar QP lv) = ⊴*-trans QP (basis lv)
 
   -- Possible lemma: if we have `Thinning PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
-  th^LVar : Thinnable (LVar A)
-  th^LVar v th = th .lookup (th .sums) v
+  ren^LVar : Renameable (LVar A)
+  ren^LVar v th = th .lookup (th .sums) v
 
   {-
   -- The rows of a thinning's matrix are a selection of standard basis vectors
@@ -73,45 +71,44 @@ module Generic.Linear.Thinning.Properties
       (var i q)
   -}
 
-  identity : Thinning PΓ PΓ
+  identity : PΓ ⇒ʳ PΓ
   identity .M = idLinMor
   identity .asLinRel = idAsLinRel
   identity .sums = ⊴*-refl
   identity .lookup le v = record { LVar v; basis = ⊴*-trans le (v .basis) }
 
-  1ᵗ = identity
+  1ʳ = identity
 
-  select : ∀ {PΓ QΔ RΘ : Ctx} → let ctx R Θ = RΘ in
-    Thinning PΓ QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
+  select : ∀ {PΓ QΔ RΘ : Ctx} → PΓ ⇒ʳ QΔ → [ 𝓥 ] RΘ ⇒ᵉ PΓ → [ 𝓥 ] RΘ ⇒ᵉ QΔ
   select th ρ .M = th .M >>LinMor ρ .M
   select th ρ .asLinRel = th .asLinRel >>AsLinRel ρ .asLinRel
   select th ρ .sums = th .sums , ρ .sums
   select th ρ .lookup (th-r , ρ-r) v = ρ .lookup ρ-r (th .lookup th-r v)
 
-  compose : ∀ {PΓ QΔ RΘ : Ctx} →
-    Thinning PΓ QΔ → Thinning QΔ RΘ → Thinning PΓ RΘ
+  compose : ∀ {PΓ QΔ RΘ : Ctx} → QΔ ⇒ʳ RΘ → PΓ ⇒ʳ QΔ → PΓ ⇒ʳ RΘ
   compose th ph = select th ph
 
-  infixr 5 _>>ᵗ_
-  _>>ᵗ_ = compose
+  -- TODO: this is now the wrong way round.
+  infixr 5 _>>ʳ_
+  _>>ʳ_ = compose
 
-  extract : ∀[ □ T ⇒ T ]
+  extract : ∀[ □ʳ T ⇒ T ]
   extract t = t identity
 
-  duplicate : ∀[ □ T ⇒ □ (□ T) ]
+  duplicate : ∀[ □ʳ T ⇒ □ʳ (□ʳ T) ]
   duplicate t ρ σ = t (compose ρ σ)
 
-  th^□ : Thinnable (□ T)
-  th^□ = duplicate
+  ren^□ : Renameable (□ʳ T)
+  ren^□ = duplicate
 
-  subuse-th : ∀ {Γ} → Q ⊴* P → Thinning (ctx P Γ) (ctx Q Γ)
-  subuse-th QP .M = idLinMor
-  subuse-th QP .asLinRel = idAsLinRel
-  subuse-th QP .sums = QP
-  subuse-th QP .lookup QP′ v = psh^LVar QP′ v
+  subuse-th : ∀ {Γ} → P ⊴* Q → ctx P Γ ⇒ʳ ctx Q Γ
+  subuse-th PQ .M = idLinMor
+  subuse-th PQ .asLinRel = idAsLinRel
+  subuse-th PQ .sums = PQ
+  subuse-th PQ .lookup PQ′ v = psh^LVar PQ′ v
 
-  th⇒psh : (∀ {A} → Thinnable (𝓥 A)) → IsPresheaf 𝓥
-  th⇒psh th^𝓥 le v = th^𝓥 v (subuse-th le)
+  ren⇒psh : (∀ {A} → Renameable (𝓥 A)) → IsPresheaf 𝓥
+  ren⇒psh ren^𝓥 le v = ren^𝓥 v (subuse-th le)
 
   {-
   nat^Th : ∀ {s P′ Γ t Q Δ} →

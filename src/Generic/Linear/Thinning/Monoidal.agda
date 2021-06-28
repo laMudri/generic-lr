@@ -30,21 +30,21 @@ module Generic.Linear.Thinning.Monoidal
 
   open With-psh^𝓥 {𝓥 = LVar} psh^LVar
 
-  []ᵗ : Thinning []ᶜ []ᶜ
-  []ᵗ = identity
+  []ʳ : []ᶜ ⇒ʳ []ᶜ
+  []ʳ = identity
 
-  _++ᵗ_ : ∀ {PΓl PΓr QΔl QΔr} →
-    Thinning PΓl QΔl → Thinning PΓr QΔr → Thinning (PΓl ++ᶜ PΓr) (QΔl ++ᶜ QΔr)
-  th ++ᵗ ph = ++ᵉ
+  _++ʳ_ : ∀ {PΓl PΓr QΔl QΔr} →
+    PΓl ⇒ʳ QΔl → PΓr ⇒ʳ QΔr → PΓl ++ᶜ PΓr ⇒ʳ QΔl ++ᶜ QΔr
+  th ++ʳ ph = ++ᵉ
     (compose th extendʳ
       ✴⟨ +*-identity↘ _ ++₂ +*-identity↙ _ ⟩
      compose ph extendˡ)
 
-  ++-[]ᵗ→ : ∀ {PΓ} → Thinning (PΓ ++ᶜ []ᶜ) PΓ
-  ++-[]ᵗ→ = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
+  ++-[]ʳ← : ∀ {PΓ} → PΓ ⇒ʳ PΓ ++ᶜ []ᶜ
+  ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
 
-  ++-[]ᵗ← : ∀ {PΓ} → Thinning PΓ (PΓ ++ᶜ []ᶜ)
-  ++-[]ᵗ← .M = [ 1ᴹ │ [│] ]
-  ++-[]ᵗ← .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
-  ++-[]ᵗ← .sums = ⊴*-refl , _
-  ++-[]ᵗ← .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++₂ []₂)
+  ++-[]ʳ→ : ∀ {PΓ} → PΓ ++ᶜ []ᶜ ⇒ʳ PΓ
+  ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
+  ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
+  ++-[]ʳ→ .sums = ⊴*-refl , _
+  ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++₂ []₂)

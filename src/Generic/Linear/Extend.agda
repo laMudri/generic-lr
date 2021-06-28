@@ -27,14 +27,14 @@ module Generic.Linear.Extend
   record FromLVar {ℓ} (𝓥 : Scoped ℓ) : Set (suc 0ℓ ⊔ ℓ) where
     field fromLVar : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]
 
-    extendˡ : ∀ {RΘ s Γ} → (RΘ ─Env) 𝓥 (ctx {s} 0* Γ ++ᶜ RΘ)
+    extendˡ : ∀ {RΘ s Γ} → [ 𝓥 ] ctx {s} 0* Γ ++ᶜ RΘ ⇒ᵉ RΘ
     extendˡ .M = [ 0ᴹ │ 1ᴹ ]
     extendˡ .asLinRel = [ 0AsLinRel │ idAsLinRel ]AsLinRel
     extendˡ .sums = ⊴*-refl , ⊴*-refl
     extendˡ .lookup (sp0 , le) (lvar i q b) =
       fromLVar (lvar (↘ i) q (sp0 ++₂ ⊴*-trans le b))
 
-    extendʳ : ∀ {RΘ s Γ} → (RΘ ─Env) 𝓥 (RΘ ++ᶜ ctx {s} 0* Γ)
+    extendʳ : ∀ {RΘ s Γ} → [ 𝓥 ] RΘ ++ᶜ ctx {s} 0* Γ ⇒ᵉ RΘ
     extendʳ .M = [ 1ᴹ │ 0ᴹ ]
     extendʳ .asLinRel = [ idAsLinRel │ 0AsLinRel ]AsLinRel
     extendʳ .sums = ⊴*-refl , ⊴*-refl

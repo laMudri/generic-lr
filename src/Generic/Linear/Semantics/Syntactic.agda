@@ -39,6 +39,8 @@ module Generic.Linear.Semantics.Syntactic
   open import Generic.Linear.Environment.Properties Ty poSemiring
   open import Generic.Linear.Semantics Ty poSemiring
 
+  infix 4 [_]_⇒ˢ_
+
   private
     variable
       fl : PremisesFlags
@@ -51,12 +53,12 @@ module Generic.Linear.Semantics.Syntactic
 
   record Kit (d : System fl) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
     field
-      th^𝓥 : ∀ {A} → Thinnable (𝓥 A)
+      ren^𝓥 : ∀ {A} → Renameable (𝓥 A)
       var : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]
       trm : ∀ {A} → ∀[ 𝓥 A ⇒ Tm d ∞ A ]
 
     psh^𝓥 : IsPresheaf 𝓥
-    psh^𝓥 = th⇒psh (λ {A} → th^𝓥 {A})
+    psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
 
     instance
       flv : FromLVar 𝓥
@@ -71,39 +73,39 @@ module Generic.Linear.Semantics.Syntactic
     open Kit
 
     kit→sem : Kit d 𝓥 → Semantics d 𝓥 (Tm d ∞)
-    kit→sem K .th^𝓥 = K .th^𝓥
+    kit→sem K .ren^𝓥 = K .ren^𝓥
     kit→sem K .var = K .trm
     kit→sem {d = d} K .alg = `con ∘ map-s′ d (reify {{flv K}})
 
   Ren-Kit : Kit d LVar
-  Ren-Kit = record { th^𝓥 = th^LVar ; var = id ; trm = `var }
+  Ren-Kit = record { ren^𝓥 = ren^LVar ; var = id ; trm = `var }
 
   Ren : Semantics d LVar (Tm d ∞)
   Ren = kit→sem Ren-Kit
 
-  ren : Thinning PΓ QΔ → Tm d ∞ A PΓ → Tm d ∞ A QΔ
-  ren th t = semantics Ren th t
+  ren : PΓ ⇒ʳ QΔ → Tm d ∞ A QΔ → Tm d ∞ A PΓ
+  ren ρ t = semantics Ren ρ t
 
-  th^Tm : Thinnable (Tm d ∞ A)
-  th^Tm t th = ren th t
+  ren^Tm : Renameable (Tm d ∞ A)
+  ren^Tm t ρ = ren ρ t
 
   psh^Tm : IsPresheaf (Tm d ∞)
-  psh^Tm = th⇒psh (λ {A} → th^Tm {A = A})
+  psh^Tm = ren⇒psh (λ {A} → ren^Tm {A = A})
 
   instance
     flv^Tm : FromLVar (Tm d ∞)
     flv^Tm .fromLVar = `var
 
   Sub-Kit : Kit d (Tm d ∞)
-  Sub-Kit = record { th^𝓥 = th^Tm ; var = `var ; trm = id }
+  Sub-Kit = record { ren^𝓥 = ren^Tm ; var = `var ; trm = id }
 
   Sub : Semantics d (Tm d ∞) (Tm d ∞)
   Sub = kit→sem Sub-Kit
 
-  Substitution : (d : System fl) (PΓ QΔ : Ctx) → Set₁
-  Substitution d PΓ QΔ = (PΓ ─Env) (Tm d ∞) QΔ
+  [_]_⇒ˢ_ : (d : System fl) (PΓ QΔ : Ctx) → Set₁
+  [ d ] PΓ ⇒ˢ QΔ = [ Tm d ∞ ] PΓ ⇒ᵉ QΔ
 
-  sub : Substitution d PΓ QΔ → Tm d ∞ A PΓ → Tm d ∞ A QΔ
+  sub : [ d ] PΓ ⇒ˢ QΔ → Tm d ∞ A QΔ → Tm d ∞ A PΓ
   sub σ t = semantics Sub σ t
 
   -- _>>ˢ_ : Substitution d PΓ QΔ → Substitution d QΔ RΘ → Substitution d PΓ RΘ
@@ -117,7 +119,7 @@ module Generic.Linear.Semantics.Syntactic
 
     infix 5 _++ᵏ_
 
-    1ᵏ : (PΓ ─Env) 𝓥 PΓ
+    1ᵏ : [ 𝓥 ] PΓ ⇒ᵉ PΓ
     1ᵏ .M = 1ᴹ
     1ᵏ .asLinRel = idAsLinRel
     1ᵏ .sums = ⊴*-refl
@@ -129,11 +131,11 @@ module Generic.Linear.Semantics.Syntactic
     --   ⊴*-trans {!((*ᴹ-mono ⊴ᴹ-refl (rowL₂ (ρ .sums))))!} (unrowL₂ (*ᴹ-*ᴹ-→ (row _) (ρ .M) (σ .M)))
     -- (ρ >>ᵏ σ) .lookup v = {!semantics (kit→sem K)!}
 
-    []ᵏ : ([]ᶜ ─Env) 𝓥 []ᶜ
+    []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
     []ᵏ = 1ᵏ
 
     _++ᵏ_ : ∀ {PΓl QΔl PΓr QΔr} →
-      (PΓl ─Env) 𝓥 QΔl → (PΓr ─Env) 𝓥 QΔr → ((PΓl ++ᶜ PΓr) ─Env) 𝓥 (QΔl ++ᶜ QΔr)
+      [ 𝓥 ] PΓl ⇒ᵉ QΔl → [ 𝓥 ] PΓr ⇒ᵉ QΔr → [ 𝓥 ] PΓl ++ᶜ PΓr ⇒ᵉ QΔl ++ᶜ QΔr
     (ρ ++ᵏ σ) .M =
       [ [ ρ .M │  0ᴹ  ]
                ─
@@ -153,7 +155,7 @@ module Generic.Linear.Semantics.Syntactic
       let leρ = +ₘ-identityʳ→ (sp+ρ , 0ρ) in
       let leσ = +ₘ-identity²→
            (0σ ↘, sp+σ ,↙ σ .asLinRel .linRel .rel-0ₘ (bσ , sσ)) in
-      K.th^𝓥 (ρ .lookup sρ (lvar i q bρ)) (extendʳ >>ᵗ subuse-th (leρ ++₂ leσ))
+      K.ren^𝓥 (ρ .lookup sρ (lvar i q bρ)) (extendʳ >>ʳ subuse-th (leρ ++₂ leσ))
       where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
     (ρ ++ᵏ σ) .lookup ((sρ , 0σ) ↘, sp+ ,↙ (0ρ , sσ)) (lvar (↘ i) q b) =
       let bρ , bσ = un++₂ b in
@@ -161,16 +163,16 @@ module Generic.Linear.Semantics.Syntactic
       let leρ = +ₘ-identity²→
            (ρ .asLinRel .linRel .rel-0ₘ (bρ , sρ) ↘, sp+ρ ,↙ 0ρ) in
       let leσ = +ₘ-identityˡ→ (0σ , sp+σ) in
-      K.th^𝓥 (σ .lookup sσ (lvar i q bσ)) (extendˡ >>ᵗ subuse-th (leρ ++₂ leσ))
+      K.ren^𝓥 (σ .lookup sσ (lvar i q bσ)) (extendˡ >>ʳ subuse-th (leρ ++₂ leσ))
       where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
 
     [_·_]ᵏ : ∀ {r s A B} →
-      s ⊴ r → 𝓥 A [ 1# · B ]ᶜ → ([ r · A ]ᶜ ─Env) 𝓥 [ s · B ]ᶜ
+      r ⊴ s → 𝓥 B [ 1# · A ]ᶜ → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
     [ le · t ]ᵏ .M = [─ [ 1# ] ─]
     [ le · t ]ᵏ .asLinRel = [─ [ 1# ] ─]AsLinRel
     [ le · t ]ᵏ .sums = [ ⊴-trans le (*.identity .proj₂ _) ]₂
     [ le · t ]ᵏ .lookup r (lvar here refl b) =
-      K.th^𝓥 t
+      K.ren^𝓥 t
         (subuse-th [
           ⊴-trans (r .get here)
             (⊴-trans (*-monoˡ (b .get here)) (*.identity .proj₁ _))
@@ -181,17 +183,16 @@ module Generic.Linear.Semantics.Syntactic
 
     infix 5 _++ˢ_
 
-    1ˢ : Substitution d PΓ PΓ
+    1ˢ : [ d ] PΓ ⇒ˢ PΓ
     1ˢ = 1ᵏ
 
-    []ˢ : Substitution d []ᶜ []ᶜ
+    []ˢ : [ d ] []ᶜ ⇒ˢ []ᶜ
     []ˢ = []ᵏ
 
     _++ˢ_ : ∀ {PΓl QΔl PΓr QΔr} →
-      Substitution d PΓl QΔl → Substitution d PΓr QΔr →
-      Substitution d (PΓl ++ᶜ PΓr) (QΔl ++ᶜ QΔr)
+      [ d ] PΓl ⇒ˢ QΔl → [ d ] PΓr ⇒ˢ QΔr → [ d ] PΓl ++ᶜ PΓr ⇒ˢ QΔl ++ᶜ QΔr
     _++ˢ_ = _++ᵏ_
 
     [_·_]ˢ : ∀ {r s A B} →
-      s ⊴ r → Tm d ∞ A [ 1# · B ]ᶜ → Substitution d [ r · A ]ᶜ [ s · B ]ᶜ
+      r ⊴ s → Tm d ∞ B [ 1# · A ]ᶜ → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
     [_·_]ˢ = [_·_]ᵏ
