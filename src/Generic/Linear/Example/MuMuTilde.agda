@@ -54,10 +54,10 @@ module Generic.Linear.Example.MuMuTilde
   open import Generic.Linear.Syntax.Term Conc rawPoSemiring
   open import Generic.Linear.Variable Conc rawPoSemiring
   open import Generic.Linear.Environment Conc poSemiring
-  open import Generic.Linear.Thinning Conc poSemiring
+  open import Generic.Linear.Renaming Conc poSemiring
   open [_]_⇒ᵉ_
   open import Generic.Linear.Extend Conc poSemiring
-  open import Generic.Linear.Thinning.Properties Conc poSemiring
+  open import Generic.Linear.Renaming.Properties Conc poSemiring
   open import Generic.Linear.Environment.Properties Conc poSemiring
   open import Generic.Linear.Semantics Conc poSemiring
 

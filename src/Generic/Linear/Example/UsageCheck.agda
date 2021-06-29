@@ -37,8 +37,8 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Syntax.Term Ty 0-rawPoSemiring public
     open import Generic.Linear.Variable Ty 0-rawPoSemiring public
     open import Generic.Linear.Environment Ty 0-poSemiring public
-    open import Generic.Linear.Thinning Ty 0-poSemiring public
-    open import Generic.Linear.Thinning.Properties Ty 0-poSemiring public
+    open import Generic.Linear.Renaming Ty 0-poSemiring public
+    open import Generic.Linear.Renaming.Properties Ty 0-poSemiring public
     open import Generic.Linear.Extend Ty 0-poSemiring public
     open import Generic.Linear.Semantics Ty 0-poSemiring public
     open import Generic.Linear.Semantics.Syntactic Ty 0-poSemiring public
@@ -59,8 +59,8 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Syntax.Term Ty rawPoSemiring
     open import Generic.Linear.Variable Ty rawPoSemiring
     open import Generic.Linear.Environment Ty poSemiring
-    open import Generic.Linear.Thinning Ty poSemiring
-    open import Generic.Linear.Thinning.Properties Ty poSemiring
+    open import Generic.Linear.Renaming Ty poSemiring
+    open import Generic.Linear.Renaming.Properties Ty poSemiring
     open import Generic.Linear.Extend Ty poSemiring
     open import Generic.Linear.Semantics Ty poSemiring
 

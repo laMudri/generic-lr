@@ -5,7 +5,7 @@ open import Function.Base using (flip; _∘_)
 open import Level using (Level; 0ℓ)
 open import Relation.Binary using (Rel; IsPreorder; Reflexive; Transitive)
 
-module Generic.Linear.Thinning.Properties
+module Generic.Linear.Renaming.Properties
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
@@ -25,7 +25,7 @@ module Generic.Linear.Thinning.Properties
   open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Environment Ty poSemiring
-  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Renaming Ty poSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
   -- open import Generic.Linear.Extend Ty poSemiring
 
@@ -45,7 +45,7 @@ module Generic.Linear.Thinning.Properties
   tyq (psh^LVar QP lv) = tyq lv
   basis (psh^LVar QP lv) = ⊴*-trans QP (basis lv)
 
-  -- Possible lemma: if we have `Thinning PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
+  -- Possible lemma: if we have `Renaming PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
   ren^LVar : Renameable (LVar A)
   ren^LVar v th = th .lookup (th .sums) v
 
@@ -55,7 +55,7 @@ module Generic.Linear.Thinning.Properties
   -- Which rows, exactly, is defined by the action of the thinning (lookup).
   thinning-sub-1ᴹ :
     ∀ {PΓ QΔ A}
-    (th : Thinning PΓ QΔ) (v : Var A (Ctx.Γ PΓ)) →
+    (th : Renaming PΓ QΔ) (v : Var A (Ctx.Γ PΓ)) →
     M th (v .idx) ⊴* 1ᴹ (th .lookup v .idx)
   thinning-sub-1ᴹ {ctx {[-]} P Γ} {ctx {t} Q Δ} th v@(var here q) =
     th .lookup v .basis
@@ -112,8 +112,8 @@ module Generic.Linear.Thinning.Properties
 
   {-
   nat^Th : ∀ {s P′ Γ t Q Δ} →
-    _⊴* P′ ◇ (λ P → Thinning (ctx {s} P Γ) (ctx {t} Q Δ)) →
-    (λ Q′ → Thinning (ctx P′ Γ) (ctx Q′ Δ)) ◇ Q ⊴*_
+    _⊴* P′ ◇ (λ P → Renaming (ctx {s} P Γ) (ctx {t} Q Δ)) →
+    (λ Q′ → Renaming (ctx P′ Γ) (ctx Q′ Δ)) ◇ Q ⊴*_
   nat^Th {P′ = P′} (PP , th) .middle = unrow (row P′ *ᴹ th .M)
   nat^Th (PP , th) .fst .M = th .M
   nat^Th (PP , th) .fst .sums = ⊴*-refl

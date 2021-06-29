@@ -44,7 +44,7 @@ module Generic.Linear.Example.LnL where
 
   open import Generic.Linear.Syntax.Term ΣTy rawPoSemiring public
   open import Generic.Linear.Syntax.Interpretation ΣTy rawPoSemiring public
-  open import Generic.Linear.Thinning ΣTy poSemiring public
+  open import Generic.Linear.Renaming ΣTy poSemiring public
 
   data `LnL : Set where
     `Ii : `LnL
@@ -104,7 +104,7 @@ module Generic.Linear.Example.LnL where
     open import Generic.Linear.Syntax.Interpretation ΣTy U.0-rawPoSemiring
       public
     open import Generic.Linear.Variable ΣTy U.0-rawPoSemiring public
-    open import Generic.Linear.Thinning ΣTy U.0-poSemiring public
+    open import Generic.Linear.Renaming ΣTy U.0-poSemiring public
 
   pattern uvar i = V.`var (V.lvar i refl _)
   pattern uIi = V.`con (`Ii , refl , ℑ⟨ _ ⟩)
@@ -145,7 +145,7 @@ module Generic.Linear.Example.LnL where
   open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Environment ΣTy rawPoSemiring renaming
     (var to ivar)
-  open import Generic.Linear.Thinning.Properties ΣTy poSemiring
+  open import Generic.Linear.Renaming.Properties ΣTy poSemiring
   open import Generic.Linear.Semantics ΣTy poSemiring
 
   private

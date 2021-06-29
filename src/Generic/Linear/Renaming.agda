@@ -4,7 +4,7 @@ open import Algebra.Po
 open import Level
 open import Relation.Binary using (Rel)
 
-module Generic.Linear.Thinning
+module Generic.Linear.Renaming
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 

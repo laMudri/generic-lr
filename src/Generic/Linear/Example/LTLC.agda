@@ -31,7 +31,7 @@ module Generic.Linear.Example.LTLC where
   open import Generic.Linear.Syntax.Term Ty rawPoSemiring
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
-  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Renaming Ty poSemiring
 
   data `LTLC : Set where
     `lam `app : (A B : Ty) → `LTLC
@@ -64,7 +64,7 @@ module Generic.Linear.Example.LTLC where
     open import Generic.Linear.Syntax.Interpretation Ty U.0-rawPoSemiring
       public
     open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
-    open import Generic.Linear.Thinning Ty U.0-poSemiring public
+    open import Generic.Linear.Renaming Ty U.0-poSemiring public
 
   pattern uvar i = V.`var (V.lvar i refl _)
   pattern ulam t = V.`con (`lam _ _ , refl , t)

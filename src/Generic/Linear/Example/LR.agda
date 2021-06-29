@@ -46,7 +46,7 @@ module Generic.Linear.Example.LR where
     open import Generic.Linear.Syntax.Term Ty rawPoSemiring public
     open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring public
     open import Generic.Linear.Variable Ty rawPoSemiring public
-    open import Generic.Linear.Thinning Ty poSemiring public
+    open import Generic.Linear.Renaming Ty poSemiring public
 
     data `LR : Set where
       `0e : {{_ : Has-0}} (Z : Ty) → `LR
@@ -124,7 +124,7 @@ module Generic.Linear.Example.LR where
       open import Generic.Linear.Syntax.Interpretation Ty U.0-rawPoSemiring
         public
       open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
-      open import Generic.Linear.Thinning Ty U.0-poSemiring public
+      open import Generic.Linear.Renaming Ty U.0-poSemiring public
 
     pattern uvar i = V.`var (V.lvar i refl _)
     pattern u⊸i t = V.`con (`⊸i _ _ , refl , t)

@@ -35,8 +35,8 @@ module Generic.Linear.Example.Translation.LnL-LR where
       public
     open import Generic.Linear.Environment Ty poSemiring public
     open import Generic.Linear.Environment.Properties Ty poSemiring public
-    open import Generic.Linear.Thinning.Properties Ty poSemiring public
-    open import Generic.Linear.Thinning.Monoidal Ty poSemiring public
+    open import Generic.Linear.Renaming.Properties Ty poSemiring public
+    open import Generic.Linear.Renaming.Monoidal Ty poSemiring public
     open import Generic.Linear.Extend Ty poSemiring public
     open import Generic.Linear.Semantics Ty poSemiring public
     open import Generic.Linear.Semantics.Syntactic Ty poSemiring public
@@ -50,8 +50,8 @@ module Generic.Linear.Example.Translation.LnL-LR where
     open import Generic.Linear.Variable ΣTy rawPoSemiring public
     open import Generic.Linear.Environment ΣTy poSemiring public
     open import Generic.Linear.Environment.Properties ΣTy poSemiring public
-    open import Generic.Linear.Thinning.Properties ΣTy poSemiring public
-    open import Generic.Linear.Thinning.Monoidal ΣTy poSemiring public
+    open import Generic.Linear.Renaming.Properties ΣTy poSemiring public
+    open import Generic.Linear.Renaming.Monoidal ΣTy poSemiring public
     open import Generic.Linear.Extend ΣTy poSemiring public
     open import Generic.Linear.Semantics ΣTy poSemiring public
     open import Generic.Linear.Semantics.Syntactic ΣTy poSemiring public

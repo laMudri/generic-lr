@@ -78,10 +78,10 @@ module Generic.Linear.Example.BidiMuMuTilde where
         open import Generic.Linear.Syntax.Term Conc rawPoSemiring public
         open import Generic.Linear.Variable Conc rawPoSemiring public
         open import Generic.Linear.Environment Conc poSemiring public
-        open import Generic.Linear.Thinning Conc poSemiring public
+        open import Generic.Linear.Renaming Conc poSemiring public
         open [_]_⇒ᵉ_
         open import Generic.Linear.Extend Conc poSemiring public
-        open import Generic.Linear.Thinning.Properties Conc poSemiring public
+        open import Generic.Linear.Renaming.Properties Conc poSemiring public
         open import Generic.Linear.Environment.Properties Conc poSemiring
           public
         open import Generic.Linear.Semantics Conc poSemiring public
@@ -136,10 +136,10 @@ module Generic.Linear.Example.BidiMuMuTilde where
         open import Generic.Linear.Syntax.Term Conc rawPoSemiring public
         open import Generic.Linear.Variable Conc rawPoSemiring public
         open import Generic.Linear.Environment Conc poSemiring public
-        open import Generic.Linear.Thinning Conc poSemiring public
+        open import Generic.Linear.Renaming Conc poSemiring public
         open [_]_⇒ᵉ_
         open import Generic.Linear.Extend Conc poSemiring public
-        open import Generic.Linear.Thinning.Properties Conc poSemiring public
+        open import Generic.Linear.Renaming.Properties Conc poSemiring public
         open import Generic.Linear.Environment.Properties Conc poSemiring
           public
         open import Generic.Linear.Semantics Conc poSemiring public

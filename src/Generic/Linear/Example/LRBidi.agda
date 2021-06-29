@@ -40,7 +40,7 @@ module Generic.Linear.Example.LRBidi where
     open import Generic.Linear.Syntax.Term Conc rawPoSemiring
     open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
     open import Generic.Linear.Variable Conc rawPoSemiring
-    open import Generic.Linear.Thinning Conc poSemiring
+    open import Generic.Linear.Renaming Conc poSemiring
 
     data `LR : Set where
       `emb `ann : (A : Ty) → `LR
@@ -94,7 +94,7 @@ module Generic.Linear.Example.LRBidi where
       open import Generic.Linear.Syntax.Interpretation Conc U.0-rawPoSemiring
         public
       open import Generic.Linear.Variable Conc U.0-rawPoSemiring public
-      open import Generic.Linear.Thinning Conc U.0-poSemiring public
+      open import Generic.Linear.Renaming Conc U.0-poSemiring public
 
     pattern uvar i = V.`var (V.lvar i refl _)
     pattern uemb e = V.`con (`emb _ , refl , e)

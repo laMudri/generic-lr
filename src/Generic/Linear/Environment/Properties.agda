@@ -25,7 +25,7 @@ module Generic.Linear.Environment.Properties
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
-  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Renaming Ty poSemiring
 
   private
     variable

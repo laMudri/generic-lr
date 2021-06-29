@@ -5,7 +5,7 @@
 open import Algebra.Po
 open import Level using (Level; 0ℓ)
 
-module Generic.Linear.Thinning.Monoidal
+module Generic.Linear.Renaming.Monoidal
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
@@ -24,8 +24,8 @@ module Generic.Linear.Thinning.Monoidal
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
   open import Generic.Linear.Environment.Properties Ty poSemiring
-  open import Generic.Linear.Thinning Ty poSemiring
-  open import Generic.Linear.Thinning.Properties Ty poSemiring
+  open import Generic.Linear.Renaming Ty poSemiring
+  open import Generic.Linear.Renaming.Properties Ty poSemiring
   open import Generic.Linear.Extend Ty poSemiring
 
   open With-psh^𝓥 {𝓥 = LVar} psh^LVar

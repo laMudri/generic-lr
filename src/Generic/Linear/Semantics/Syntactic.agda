@@ -33,9 +33,9 @@ module Generic.Linear.Semantics.Syntactic
   open import Generic.Linear.Syntax.Term Ty rawPoSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
-  open import Generic.Linear.Thinning Ty poSemiring
+  open import Generic.Linear.Renaming Ty poSemiring
   open import Generic.Linear.Extend Ty poSemiring
-  open import Generic.Linear.Thinning.Properties Ty poSemiring
+  open import Generic.Linear.Renaming.Properties Ty poSemiring
   open import Generic.Linear.Environment.Properties Ty poSemiring
   open import Generic.Linear.Semantics Ty poSemiring
 
