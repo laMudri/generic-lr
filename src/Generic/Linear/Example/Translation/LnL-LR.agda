@@ -262,7 +262,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       LR.`con (`⊸e _ _ , refl ,
         LR.ren ths (*reify s) ✴⟨ sp+ ⟩ LR.ren tht (*reify t))
     *Sem .alg (`Fi X , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ in
+      let th = LR.subuse-ren str LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`!i _ , refl ,
         ⟨ (mk λ i → lemma (⊴-trans (str .get i) (sp0 .get i))) ⟩·
           LR.ren th (*reify t))
@@ -332,8 +332,8 @@ module Generic.Linear.Example.Translation.LnL-LR where
       lemma ⊴-refl = ⊴-refl
       lemma ω⊴0 = ⊴-refl
     *Sem .alg (`Gi A , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = (LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
+      let th = (LR.subuse-ren str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
       LR.ren th (*reify t)
     *Sem .alg (`Ge A , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = (LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
+      let th = (LR.subuse-ren str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
       LR.ren th (*reify t)

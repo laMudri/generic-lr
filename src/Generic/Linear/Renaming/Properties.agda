@@ -39,7 +39,7 @@ module Generic.Linear.Renaming.Properties
       P P′ Q Q′ R : Vector Ann s
       A : Ty
 
-  -- Also, Renameable ⇒ IsPresheaf via subuse-th
+  -- Also, Renameable ⇒ IsPresheaf via subuse-ren
   psh^LVar : IsPresheaf LVar
   idx (psh^LVar QP lv) = idx lv
   tyq (psh^LVar QP lv) = tyq lv
@@ -100,14 +100,14 @@ module Generic.Linear.Renaming.Properties
   ren^□ : Renameable (□ʳ T)
   ren^□ = duplicate
 
-  subuse-th : ∀ {Γ} → P ⊴* Q → ctx P Γ ⇒ʳ ctx Q Γ
-  subuse-th PQ .M = idLinMor
-  subuse-th PQ .asLinRel = idAsLinRel
-  subuse-th PQ .sums = PQ
-  subuse-th PQ .lookup PQ′ v = psh^LVar PQ′ v
+  subuse-ren : ∀ {Γ} → P ⊴* Q → ctx P Γ ⇒ʳ ctx Q Γ
+  subuse-ren PQ .M = idLinMor
+  subuse-ren PQ .asLinRel = idAsLinRel
+  subuse-ren PQ .sums = PQ
+  subuse-ren PQ .lookup PQ′ v = psh^LVar PQ′ v
 
   ren⇒psh : (∀ {A} → Renameable (𝓥 A)) → IsPresheaf 𝓥
-  ren⇒psh ren^𝓥 le v = ren^𝓥 v (subuse-th le)
+  ren⇒psh ren^𝓥 le v = ren^𝓥 v (subuse-ren le)
 
   {-
   nat^Th : ∀ {s P′ Γ t Q Δ} →

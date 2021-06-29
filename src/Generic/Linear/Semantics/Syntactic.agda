@@ -155,7 +155,7 @@ module Generic.Linear.Semantics.Syntactic
       let leρ = +ₘ-identityʳ→ (sp+ρ , 0ρ) in
       let leσ = +ₘ-identity²→
            (0σ ↘, sp+σ ,↙ σ .asLinRel .linRel .rel-0ₘ (bσ , sσ)) in
-      K.ren^𝓥 (ρ .lookup sρ (lvar i q bρ)) (extendʳ >>ʳ subuse-th (leρ ++₂ leσ))
+      K.ren^𝓥 (ρ .lookup sρ (lvar i q bρ)) (extendʳ >>ʳ subuse-ren (leρ ++₂ leσ))
       where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
     (ρ ++ᵏ σ) .lookup ((sρ , 0σ) ↘, sp+ ,↙ (0ρ , sσ)) (lvar (↘ i) q b) =
       let bρ , bσ = un++₂ b in
@@ -163,7 +163,7 @@ module Generic.Linear.Semantics.Syntactic
       let leρ = +ₘ-identity²→
            (ρ .asLinRel .linRel .rel-0ₘ (bρ , sρ) ↘, sp+ρ ,↙ 0ρ) in
       let leσ = +ₘ-identityˡ→ (0σ , sp+σ) in
-      K.ren^𝓥 (σ .lookup sσ (lvar i q bσ)) (extendˡ >>ʳ subuse-th (leρ ++₂ leσ))
+      K.ren^𝓥 (σ .lookup sσ (lvar i q bσ)) (extendˡ >>ʳ subuse-ren (leρ ++₂ leσ))
       where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
 
     [_·_]ᵏ : ∀ {r s A B} →
@@ -173,7 +173,7 @@ module Generic.Linear.Semantics.Syntactic
     [ le · t ]ᵏ .sums = [ ⊴-trans le (*.identity .proj₂ _) ]₂
     [ le · t ]ᵏ .lookup r (lvar here refl b) =
       K.ren^𝓥 t
-        (subuse-th [
+        (subuse-ren [
           ⊴-trans (r .get here)
             (⊴-trans (*-monoˡ (b .get here)) (*.identity .proj₁ _))
         ]₂)
