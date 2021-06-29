@@ -45,7 +45,6 @@ module Generic.Linear.Renaming.Properties
   tyq (psh^LVar QP lv) = tyq lv
   basis (psh^LVar QP lv) = ⊴*-trans QP (basis lv)
 
-  -- Possible lemma: if we have `Renaming PΓ QΔ` and `P ≤ R`, then `Q ≤ MR`.
   ren^LVar : Renameable (LVar A)
   ren^LVar v th = th .lookup (th .sums) v
 
