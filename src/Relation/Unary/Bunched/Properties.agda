@@ -56,6 +56,16 @@ module Relation.Unary.Bunched.Properties where
       ✴-1← : ∀[ ◇ T ⇒ T ✴ ℑ {v} ]
       ✴-1← (◇⟨ sub ⟩ t) = let sp+ , sp0 = identityʳ← sub in t ✴⟨ sp+ ⟩ ℑ⟨ sp0 ⟩
 
+    module _ {t u v : Level} where
+
+      1✴1→ : ∀[ ℑ {t} ✴ ℑ {u} ⇒ ℑ {v} ]
+      1✴1→ (ℑ⟨ spl ⟩ ✴⟨ sp+ ⟩ ℑ⟨ spr ⟩) = ℑ⟨ identity²→ (spl ↘, sp+ ,↙ spr) ⟩
+
+      1✴1← : ∀[ ℑ {v} ⇒ ℑ {t} ✴ ℑ {u} ]
+      1✴1← ℑ⟨ sp0 ⟩ =
+        let spl ↘, sp+ ,↙ spr = identity²← sp0 in
+        ℑ⟨ spl ⟩ ✴⟨ sp+ ⟩ ℑ⟨ spr ⟩
+
     module _
       {t u v} {T : Pred Carrier t} {U : Pred Carrier u} {V : Pred Carrier v}
       where

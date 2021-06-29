@@ -20,6 +20,8 @@ module Relation.Unary.Bunched {a} {A : Set a} where
         sub : x ≤ y
         T-prf : T y
 
+  open BunchedOrder public using (◇⟨_⟩_)
+
   module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
 
     record ℑ {v} (x : A) : Set (ℓ ⊔ v) where
