@@ -1,8 +1,8 @@
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections --prop #-}
 
 module Generic.Linear.Example.LTLC where
 
-  open import Algebra.Skew
+  open import Algebra.Po
   open import Data.Bool
   open import Data.Empty
   open import Data.List as L using (List; _∷_) renaming ([] to []L)
@@ -13,6 +13,7 @@ module Generic.Linear.Example.LTLC where
   open import Data.Unit
   open import Function.Base
   open import Level
+  open import Proposition
   open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
   open import Relation.Unary.Bunched
   open import Size
@@ -27,15 +28,16 @@ module Generic.Linear.Example.LTLC where
 
   open import Generic.Linear.Syntax Ty Ann
 
-  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Thinning Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+  open import Generic.Linear.Thinning Ty poSemiring
 
   data `LTLC : Set where
     `lam `app : (A B : Ty) → `LTLC
 
   flags : PremisesFlags
-  flags = record noPremisesFlags { ✴? = true }
+  flags = record noPremisesFlags { Has-✴ = ⊤ᴾ }
 
   LTLC : System flags
   LTLC = `LTLC ▹ λ where
@@ -52,16 +54,17 @@ module Generic.Linear.Example.LTLC where
     `con (`app A _ , refl , _✴⟨_⟩_ {y = P} {z = Q} s sp t)
 
   open import Generic.Linear.Example.UsageCheck Ty
-  open WithSkewSemiring skewSemiring
+  open WithPoSemiring poSemiring
   open WithInverses flags record
     { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = λ { {{()}} } }
 
   module V where
 
-    open import Generic.Linear.Syntax.Term Ty U.0-rawSkewSemiring public
-    open import Generic.Linear.Syntax.Interpretation Ty U.0-rawSkewSemiring
+    open import Generic.Linear.Syntax.Term Ty U.0-rawPoSemiring public
+    open import Generic.Linear.Syntax.Interpretation Ty U.0-rawPoSemiring
       public
-    open import Generic.Linear.Thinning Ty U.0-rawSkewSemiring public
+    open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
+    open import Generic.Linear.Thinning Ty U.0-poSemiring public
 
   pattern uvar i = V.`var (V.lvar i refl _)
   pattern ulam t = V.`con (`lam _ _ , refl , t)

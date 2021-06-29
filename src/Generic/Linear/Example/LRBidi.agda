@@ -1,7 +1,8 @@
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections --prop #-}
 
-module Generic.Linear.Example.LR where
+module Generic.Linear.Example.LRBidi where
 
-  open import Algebra.Skew
+  open import Algebra.Po
   open import Data.Bool
   open import Data.LTree
   open import Data.LTree.Vector
@@ -9,6 +10,7 @@ module Generic.Linear.Example.LR where
   open import Data.Product
   open import Data.Unit
   open import Level
+  open import Proposition
   open import Relation.Binary.PropositionalEquality using (_≡_; refl)
   open import Relation.Unary.Bunched
   open import Size
@@ -35,9 +37,10 @@ module Generic.Linear.Example.LR where
 
     open import Generic.Linear.Syntax Conc Ann public
 
-    open import Generic.Linear.Syntax.Term Conc rawSkewSemiring
-    open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
-    open import Generic.Linear.Thinning Conc rawSkewSemiring
+    open import Generic.Linear.Syntax.Term Conc rawPoSemiring
+    open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
+    open import Generic.Linear.Variable Conc rawPoSemiring
+    open import Generic.Linear.Thinning Conc poSemiring
 
     data `LR : Set where
       `emb `ann : (A : Ty) → `LR
@@ -49,7 +52,7 @@ module Generic.Linear.Example.LR where
 
     flags : PremisesFlags
     flags = record noPremisesFlags
-      { ∧? = true ; ℑ? = true ; ✴? = true ; ·? = true ; □? = true }
+      { Has-∧ = ⊤ᴾ; Has-ℑ = ⊤ᴾ; Has-✴ = ⊤ᴾ; Has-· = ⊤ᴾ; Has-□ = ⊤ᴾ }
 
     LR : System flags
     LR = `LR ▹ λ where
@@ -80,17 +83,18 @@ module Generic.Linear.Example.LR where
       `con (`bm _ _ T , refl , _✴⟨_⟩_ {y = P} {z = Q} e sp t)
 
     open import Generic.Linear.Example.UsageCheck Conc public
-    open WithSkewSemiring skewSemiring public
+    open WithPoSemiring poSemiring public
     open WithInverses flags record
       { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
       public
 
     module V where
 
-      open import Generic.Linear.Syntax.Term Conc U.0-rawSkewSemiring public
-      open import Generic.Linear.Syntax.Interpretation Conc U.0-rawSkewSemiring
+      open import Generic.Linear.Syntax.Term Conc U.0-rawPoSemiring public
+      open import Generic.Linear.Syntax.Interpretation Conc U.0-rawPoSemiring
         public
-      open import Generic.Linear.Thinning Conc U.0-rawSkewSemiring public
+      open import Generic.Linear.Variable Conc U.0-rawPoSemiring public
+      open import Generic.Linear.Thinning Conc U.0-poSemiring public
 
     pattern uvar i = V.`var (V.lvar i refl _)
     pattern uemb e = V.`con (`emb _ , refl , e)

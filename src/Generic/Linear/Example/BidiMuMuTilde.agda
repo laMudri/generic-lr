@@ -1,6 +1,6 @@
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections --prop #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (0ℓ)
 open import Relation.Binary using (Rel)
 
@@ -19,6 +19,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
   open import Data.Unit using (⊤; tt)
   open import Function.Base using (id; _∘_; _∘′_; _$_; λ-; _$-; case_of_)
   open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
+  open import Proposition
   open import Size
   open import Relation.Unary
   open import Relation.Unary.Bunched
@@ -38,17 +39,17 @@ module Generic.Linear.Example.BidiMuMuTilde where
   neg cot = trm
 
   flags : PremisesFlags
-  flags = record noPremisesFlags { ✴? = true }
+  flags = record noPremisesFlags { Has-✴ = ⊤ᴾ }
 
-  module WithSkewSemiring (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
+  module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-    open SkewSemiring skewSemiring
+    open PoSemiring poSemiring
       renaming (Carrier to Ann
                ; _≤_ to _⊴_
                ; refl to ⊴-refl; trans to ⊴-trans
                )
-    open import Generic.Linear.Operations rawSkewSemiring
-    open import Generic.Linear.Algebra skewSemiring
+    open import Generic.Linear.Operations rawPoSemiring
+    open import Generic.Linear.Algebra poSemiring
 
     module WithBaseTypes (Base : Pol → Set) where
 
@@ -70,20 +71,20 @@ module Generic.Linear.Example.BidiMuMuTilde where
         Conc = Maybe (Dir × Pol)
 
         open import Generic.Linear.Syntax Conc Ann public
-        open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
+        open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
           public
-        open import Generic.Linear.Syntax.Interpretation.Map Conc skewSemiring
+        open import Generic.Linear.Syntax.Interpretation.Map Conc poSemiring
           public
-        open import Generic.Linear.Syntax.Term Conc rawSkewSemiring public
-        open import Generic.Linear.Environment Conc rawSkewSemiring public
-          renaming (var to ivar)
-        open import Generic.Linear.Thinning Conc rawSkewSemiring public
-        open _─Env
-        open import Generic.Linear.Extend Conc skewSemiring public
-        open import Generic.Linear.Thinning.Properties Conc skewSemiring public
-        open import Generic.Linear.Environment.Properties Conc skewSemiring
+        open import Generic.Linear.Syntax.Term Conc rawPoSemiring public
+        open import Generic.Linear.Variable Conc rawPoSemiring public
+        open import Generic.Linear.Environment Conc poSemiring public
+        open import Generic.Linear.Thinning Conc poSemiring public
+        open [_]_⇒ᵉ_
+        open import Generic.Linear.Extend Conc poSemiring public
+        open import Generic.Linear.Thinning.Properties Conc poSemiring public
+        open import Generic.Linear.Environment.Properties Conc poSemiring
           public
-        open import Generic.Linear.Semantics Conc skewSemiring public
+        open import Generic.Linear.Semantics Conc poSemiring public
 
         data `Untyped : Set where
           `cut : (p : Pol) → `Untyped
@@ -128,20 +129,20 @@ module Generic.Linear.Example.BidiMuMuTilde where
           chk : ∀ {p} (A : Ty p) (q : Pol) → Conc
 
         open import Generic.Linear.Syntax Conc Ann public
-        open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
+        open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
           public
-        open import Generic.Linear.Syntax.Interpretation.Map Conc skewSemiring
+        open import Generic.Linear.Syntax.Interpretation.Map Conc poSemiring
           public
-        open import Generic.Linear.Syntax.Term Conc rawSkewSemiring public
-        open import Generic.Linear.Environment Conc rawSkewSemiring public
-          renaming (var to ivar)
-        open import Generic.Linear.Thinning Conc rawSkewSemiring public
-        open _─Env
-        open import Generic.Linear.Extend Conc skewSemiring public
-        open import Generic.Linear.Thinning.Properties Conc skewSemiring public
-        open import Generic.Linear.Environment.Properties Conc skewSemiring
+        open import Generic.Linear.Syntax.Term Conc rawPoSemiring public
+        open import Generic.Linear.Variable Conc rawPoSemiring public
+        open import Generic.Linear.Environment Conc poSemiring public
+        open import Generic.Linear.Thinning Conc poSemiring public
+        open [_]_⇒ᵉ_
+        open import Generic.Linear.Extend Conc poSemiring public
+        open import Generic.Linear.Thinning.Properties Conc poSemiring public
+        open import Generic.Linear.Environment.Properties Conc poSemiring
           public
-        open import Generic.Linear.Semantics Conc skewSemiring public
+        open import Generic.Linear.Semantics Conc poSemiring public
 
         data `Typed : Set where
           `cut : ∀ {p} (A : Ty p) → `Typed
@@ -177,9 +178,9 @@ module Generic.Linear.Example.BidiMuMuTilde where
 
         TypedTm = Tm Typed ∞
 
-      module Syntax {Conc : Set} {rawSkewSemiring : RawSkewSemiring 0ℓ 0ℓ}
+      module Syntax {Conc : Set} {rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ}
         where
-        open import Generic.Linear.Syntax.Term Conc rawSkewSemiring public
+        open import Generic.Linear.Syntax.Term Conc rawPoSemiring public
           using (`var; `con)
       open Syntax
 
@@ -222,7 +223,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
       open Untyped.Semantics
 
       tyelab : Untyped.Semantics Untyped 𝓥 𝓒
-      tyelab .th^𝓥 = {!!}
+      tyelab .ren^𝓥 = {!!}
       tyelab .var (vr {A = A} {RΓ′} (Typed.lvar i q b)) =
         just λ Γ Γq → A , `var (Typed.lvar i (≡.trans {!Γq i!} q) b)
         -- go {nothing} (Untyped.lvar i eq b) = {!!}

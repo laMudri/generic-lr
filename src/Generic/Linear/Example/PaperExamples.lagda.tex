@@ -1,15 +1,16 @@
 \begin{code}
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections --prop #-}
 module Generic.Linear.Example.PaperExamples where
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Data.Product
 open import Data.Unit
 open import Level
+open import Proposition
 
-module Example1 (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
+module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann
              ; _≤_ to _⊴_
              ; refl to ⊴-refl; trans to ⊴-trans
@@ -30,8 +31,8 @@ module Example1 (skewSemiring : SkewSemiring 0ℓ 0ℓ) where
 
 \begin{code}
   open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty rawSkewSemiring
-  open import Generic.Linear.Syntax.Term Ty rawSkewSemiring
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
 \end{code}
 
 %<*exIlabels>

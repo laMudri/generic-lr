@@ -1,17 +1,17 @@
-{-# OPTIONS --safe --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --safe --sized-types --without-K --postfix-projections --prop #-}
 
-open import Algebra.Skew
+open import Algebra.Po
 open import Level using (0ℓ)
 open import Relation.Binary using (Rel)
 
 module Generic.Linear.Example.MuMuTilde
-  (skewSemiring : SkewSemiring 0ℓ 0ℓ) (Base : Set)
+  (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (Base : Set)
   where
 
-  open SkewSemiring skewSemiring
+  open PoSemiring poSemiring
     renaming (Carrier to Ann
              ; _≤_ to _⊴_
-             ; refl to ⊴-refl; trans to ⊴-trans
+             ; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans
              )
 
   open import Algebra.Relational
@@ -24,6 +24,7 @@ module Generic.Linear.Example.MuMuTilde
   open import Data.Unit using (⊤; tt)
   open import Function.Base using (id; _∘_; _∘′_; _$_; λ-; _$-)
   open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
+  open import Proposition
   open import Size
   open import Relation.Unary
   open import Relation.Unary.Bunched
@@ -45,20 +46,20 @@ module Generic.Linear.Example.MuMuTilde
     com : Conc
     trm cot : (A : Ty) → Conc
 
-  open import Generic.Linear.Operations rawSkewSemiring
-  open import Generic.Linear.Algebra skewSemiring
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Conc Ann
-  open import Generic.Linear.Syntax.Interpretation Conc rawSkewSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Conc skewSemiring
-  open import Generic.Linear.Syntax.Term Conc rawSkewSemiring
-  open import Generic.Linear.Environment Conc rawSkewSemiring
-    renaming (var to ivar)
-  open import Generic.Linear.Thinning Conc rawSkewSemiring
-  open _─Env
-  open import Generic.Linear.Extend Conc skewSemiring
-  open import Generic.Linear.Thinning.Properties Conc skewSemiring
-  open import Generic.Linear.Environment.Properties Conc skewSemiring
-  open import Generic.Linear.Semantics Conc skewSemiring
+  open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
+  open import Generic.Linear.Syntax.Interpretation.Map Conc poSemiring
+  open import Generic.Linear.Syntax.Term Conc rawPoSemiring
+  open import Generic.Linear.Variable Conc rawPoSemiring
+  open import Generic.Linear.Environment Conc poSemiring
+  open import Generic.Linear.Thinning Conc poSemiring
+  open [_]_⇒ᵉ_
+  open import Generic.Linear.Extend Conc poSemiring
+  open import Generic.Linear.Thinning.Properties Conc poSemiring
+  open import Generic.Linear.Environment.Properties Conc poSemiring
+  open import Generic.Linear.Semantics Conc poSemiring
 
   data `MMT : Set where
     `cut `μ `μ∼ : (A : Ty) → `MMT
@@ -110,13 +111,13 @@ module Generic.Linear.Example.MuMuTilde
                 {z = (((([] ++ ([ 0# ] ++ [ 0# ])) ++ []) ++ ([ s ] ++ [ 0# ])) ++ []) ++ []}
                 (⟨_⟩·_
                   {z = (((([] ++ ([ 0# ] ++ [ 0# ])) ++ []) ++ ([ 0# ] ++ [ 1# ])) ++ []) ++ []}
-                  ((((([]₂ ++₂ ([ annihil .proj₂ _ ]₂ ++₂ [ annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ ([ annihil .proj₂ _ ]₂ ++₂ [ *.identity .proj₂ _ ]₂)) ++₂ []₂) ++₂ []₂)
+                  ((((([]₂ ++₂ ([ ≤-annihil .proj₂ _ ]₂ ++₂ [ ≤-annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ ([ ≤-annihil .proj₂ _ ]₂ ++₂ [ *.identity .proj₂ _ ]₂)) ++₂ []₂) ++₂ []₂)
                   (`var (lvar (↙ (↙ (↙ (↘ (↘ here))))) ≡.refl
                               (((((([]₂ ++₂ ([ ⊴-refl ]₂ ++₂ [ ⊴-refl ]₂)) ++₂ []₂) ++₂ ([ ⊴-refl ]₂ ++₂ [ ⊴-refl ]₂)) ++₂ []₂) ++₂ []₂) ++₂ []₂))))
                 ((((([]₂ ++₂ ([ +.identity-→ .proj₂ _ ]₂ ++₂ [ +.identity-→ .proj₂ _ ]₂)) ++₂ []₂) ++₂ ([ +.identity-← .proj₁ _ ]₂ ++₂ [ +.identity-→ .proj₂ _ ]₂)) ++₂ []₂) ++₂ []₂)
                 (⟨_⟩·_
                   {z = (((([] ++ ([ 0# ] ++ [ 0# ])) ++ []) ++ ([ 1# ] ++ [ 0# ])) ++ []) ++ []}
-                  ((((([]₂ ++₂ ([ annihil .proj₂ _ ]₂ ++₂ [ annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ ([ *.identity .proj₂ _ ]₂ ++₂ [ annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ []₂)
+                  ((((([]₂ ++₂ ([ ≤-annihil .proj₂ _ ]₂ ++₂ [ ≤-annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ ([ *.identity .proj₂ _ ]₂ ++₂ [ ≤-annihil .proj₂ _ ]₂)) ++₂ []₂) ++₂ []₂)
                   (`var (lvar (↙ (↙ (↙ (↘ (↙ here))))) ≡.refl
                               (((((([]₂ ++₂ ([ ⊴-refl ]₂ ++₂ [ ⊴-refl ]₂)) ++₂ []₂) ++₂ ([ ⊴-refl ]₂ ++₂ [ ⊴-refl ]₂)) ++₂ []₂) ++₂ []₂) ++₂ []₂)))))))
             ((([]₂ ++₂ ([ +.identity-← .proj₁ _ ]₂ ++₂ [ +.identity-← .proj₁ _ ]₂)) ++₂ []₂) ++₂ ([ +.identity-→ .proj₂ _ ]₂ ++₂ [ +.identity-→ .proj₂ _ ]₂))
