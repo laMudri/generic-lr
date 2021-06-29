@@ -165,8 +165,6 @@ module Generic.Linear.Example.LnL where
   map-IntDup f (lin s) = lin (f s)
   map-IntDup f (int s) = int (map-□ (λ {PΓ} → f {PΓ}) s)
 
-  open _─Env
-
   th^IntDup : Thinnable T → ∀ {A} → Thinnable (IntDup T A)
   th^IntDup th^T (lin t) th = lin (th^T t th)
   th^IntDup th^T (int (□⟨ str , sp0 , sp+ ⟩ t)) th =

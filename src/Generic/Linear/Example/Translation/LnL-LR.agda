@@ -101,17 +101,17 @@ module Generic.Linear.Example.Translation.LnL-LR where
     (RΓ *Ctx) .Γ i = RΓ .Γ i *ΣTy
 
   module _ where
-    open LnL._─Env
+    open LnL.[_]_⇒ᵉ_
     open LnL.LVar
 
-    o-distrib-[]ᶜ : LnL.Thinning (LR.[]ᶜ ᵒCtx) LnL.[]ᶜ
+    o-distrib-[]ᶜ : LnL.[]ᶜ LnL.⇒ʳ (LR.[]ᶜ ᵒCtx)
     o-distrib-[]ᶜ .M = 1ᴹ
     o-distrib-[]ᶜ .asLinRel = idAsLinRel
     o-distrib-[]ᶜ .sums = []₂
     o-distrib-[]ᶜ .lookup _ (LnL.lvar (there () i) q b)
 
     o-distrib-++ᶜ : ∀ {PΓ QΔ} →
-      LnL.Thinning ((PΓ LR.++ᶜ QΔ) ᵒCtx) (PΓ ᵒCtx LnL.++ᶜ QΔ ᵒCtx)
+      PΓ ᵒCtx LnL.++ᶜ QΔ ᵒCtx LnL.⇒ʳ (PΓ LR.++ᶜ QΔ) ᵒCtx
     o-distrib-++ᶜ .M = 1ᴹ
     o-distrib-++ᶜ .asLinRel = idAsLinRel
     o-distrib-++ᶜ .sums = ⊴*-refl ++₂ ⊴*-refl
@@ -131,35 +131,35 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   module _ where
     open LR.Semantics
-    open LnL._─Env
+    open LnL.[_]_⇒ᵉ_
 
     oSem : LR.Semantics LR LR.LVar o𝓒
-    oSem .th^𝓥 = LR.th^LVar
+    oSem .ren^𝓥 = LR.ren^LVar
     oSem .var (LR.lvar i refl b) = LnL.`var (LnL.lvar i refl b)
     oSem .alg (`Ii , refl , ℑ⟨ sp0 ⟩) = LnL.`con (`Ii , refl , ℑ⟨ sp0 ⟩)
     oSem .alg (`Ie Z , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
-      let tht = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
+      let ths = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
+      let tht = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
       LnL.`con (`Ie _ , refl ,
         LnL.ren ths (oreify s) ✴⟨ sp+ ⟩ LnL.ren tht (oreify t))
     oSem .alg (`⊗i A B , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
-      let tht = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
+      let ths = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
+      let tht = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
       LnL.`con (`⊗i _ _ , refl ,
         LnL.ren ths (oreify s) ✴⟨ sp+ ⟩ LnL.ren tht (oreify t))
     oSem .alg (`⊗e A B Z , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
-      let tht = LnL.1ᵗ LnL.++ᵗ o-distrib-++ᶜ in
+      let ths = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
+      let tht = LnL.1ʳ LnL.++ʳ o-distrib-++ᶜ in
       LnL.`con (`⊗e _ _ _ , refl ,
         LnL.ren ths (oreify s) ✴⟨ sp+ ⟩ LnL.ren tht (oreify t))
     oSem .alg (`⊸i A B , refl , t) = LnL.`con (`⊸i _ _ , refl , oreify t)
     oSem .alg (`⊸e A B , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
-      let tht = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
+      let ths = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
+      let tht = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
       LnL.`con (`⊸e _ _ , refl ,
         LnL.ren ths (oreify s) ✴⟨ sp+ ⟩ LnL.ren tht (oreify t))
     oSem .alg (`!i A , refl , ⟨_⟩·_ {R} sp* t) =
-      let tht = (th LnL.++ᵗ o-distrib-[]ᶜ) LnL.>>ᵗ LnL.++-[]ᵗ← in
+      let tht = (th LnL.++ʳ o-distrib-[]ᶜ) LnL.>>ʳ LnL.++-[]ʳ→ in
       LnL.`con (`Fi _ , refl ,
         □⟨ sp* , (mk λ i → ω*-del (R i)) , (mk λ i → ω*-dup (R i)) ⟩
           LnL.`con (`Gi _ , refl ,
@@ -167,52 +167,52 @@ module Generic.Linear.Example.Translation.LnL-LR where
                        , (mk λ i → ω*-dup (R i)) ++₂ []₂ ⟩
               LnL.ren tht (oreify t)))
       where
-      th : ∀ {s R Γ} → LnL.Thinning (LnL.ctx {s} R Γ) (LnL.ctx (uω *ₗ R) Γ)
+      th : ∀ {s R Γ} → LnL.ctx (uω *ₗ R) Γ LnL.⇒ʳ LnL.ctx {s} R Γ
       th .M = 1ᴹ
       th .asLinRel = idAsLinRel
       th {R = R} .sums .get i = ω*-⊴ (R i)
       th .lookup le (LnL.lvar i q b) = LnL.lvar i q (⊴*-trans le b)
     oSem .alg (`!e A Z , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LnL.1ᵗ LnL.++ᵗ o-distrib-[]ᶜ in
+      let ths = LnL.1ʳ LnL.++ʳ o-distrib-[]ᶜ in
       LnL.`con (`Fe _ _ , refl ,
         LnL.ren ths (oreify s)
           ✴⟨ sp+ ⟩
         LnL.sub (LnL.1ˢ LnL.++ˢ σ) (oreify t))
       where
       σ : ∀ {A} →
-        LnL.Substitution LnL (LnL.[ uω · _ , A ]ᶜ) (LnL.[ uω · _ , tG A ]ᶜ)
+        LnL.[ LnL ] LnL.[ uω · _ , tG A ]ᶜ ⇒ˢ LnL.[ uω · _ , A ]ᶜ
       σ .M = [─ [ uω ] ─]
       σ .asLinRel = [─ [ uω ] ─]AsLinRel
       σ .sums = ⊴*-refl
       σ .lookup {_} {P′} {Q′} le (LnL.lvar here refl b) =
-        LnL.`con (`Ge _ , refl , □⟨ ⊴*-refl , [ Q′⊴0 ]₂ , [ Q′⊴+ ]₂ ⟩
-          LnL.`var (LnL.lvar (↙ here) refl ([ Q′⊴1 ]₂ ++₂ []₂)))
+        LnL.`con (`Ge _ , refl , □⟨ ⊴*-refl , [ P′⊴0 ]₂ , [ P′⊴+ ]₂ ⟩
+          LnL.`var (LnL.lvar (↙ here) refl ([ P′⊴1 ]₂ ++₂ []₂)))
         where
-        Q′⊴ω : Q′ here ⊴ uω
-        Q′⊴ω = ⊴-trans (le .get here) (*-mono (b .get here) ⊴-refl)
+        P′⊴ω : P′ here ⊴ uω
+        P′⊴ω = ⊴-trans (le .get here) (*-mono (b .get here) ⊴-refl)
 
-        Q′⊴0 : Q′ here ⊴ u0
-        Q′⊴0 = ⊴-trans Q′⊴ω ω⊴0
-        Q′⊴+ : Q′ here ⊴ Q′ here + Q′ here
-        Q′⊴+ with _ ← Q′ here | ⊴-refl ← Q′⊴ω = ⊴-refl
-        Q′⊴1 : Q′ here ⊴ u1
-        Q′⊴1 = ⊴-trans Q′⊴ω ω⊴1
+        P′⊴0 : P′ here ⊴ u0
+        P′⊴0 = ⊴-trans P′⊴ω ω⊴0
+        P′⊴+ : P′ here ⊴ P′ here + P′ here
+        P′⊴+ with _ ← P′ here | ⊴-refl ← P′⊴ω = ⊴-refl
+        P′⊴1 : P′ here ⊴ u1
+        P′⊴1 = ⊴-trans P′⊴ω ω⊴1
 
   _ᵒTm : ∀ {A Γ} → LR.Term A Γ → LnL.Term (_ , A ᵒTy) (Γ ᵒCtx)
   _ᵒTm = LR.Semantics.semantics oSem LR.identity
 
   module _ where
-    open LR._─Env
+    open LR.[_]_⇒ᵉ_
     open LR.LVar
 
-    *-distrib-[]ᶜ : LR.Thinning (LnL.[]ᶜ *Ctx) LR.[]ᶜ
+    *-distrib-[]ᶜ : LR.[]ᶜ LR.⇒ʳ LnL.[]ᶜ *Ctx
     *-distrib-[]ᶜ .M = 1ᴹ
     *-distrib-[]ᶜ .asLinRel = idAsLinRel
     *-distrib-[]ᶜ .sums = []₂
     *-distrib-[]ᶜ .lookup _ (LR.lvar (there () i) q b)
 
     *-distrib-++ᶜ : ∀ {PΓ QΔ} →
-      LR.Thinning ((PΓ LnL.++ᶜ QΔ) *Ctx) (PΓ *Ctx LR.++ᶜ QΔ *Ctx)
+      PΓ *Ctx LR.++ᶜ QΔ *Ctx LR.⇒ʳ (PΓ LnL.++ᶜ QΔ) *Ctx
     *-distrib-++ᶜ .M = 1ᴹ
     *-distrib-++ᶜ .asLinRel = idAsLinRel
     *-distrib-++ᶜ .sums = ⊴*-refl ++₂ ⊴*-refl
@@ -224,8 +224,8 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   module _ where
     open LnL.Semantics
-    open LnL._─Env
-    open LR._─Env
+    open LnL.[_]_⇒ᵉ_
+    open LR.[_]_⇒ᵉ_
 
     *𝓒 : LnL.Scoped 0ℓ
     *𝓒 A PΓ = LR.Term (A *ΣTy) (PΓ *Ctx)
@@ -236,33 +236,33 @@ module Generic.Linear.Example.Translation.LnL-LR where
     *reify t = LR.ren *-distrib-++ᶜ (LnL.reify t)
 
     *Sem : LnL.Semantics LnL LnL.LVar *𝓒
-    *Sem .th^𝓥 = LnL.th^LVar
+    *Sem .ren^𝓥 = LnL.ren^LVar
     *Sem .var (LnL.lvar i q b) = LR.`var (LR.lvar i (≡.cong _*ΣTy q) b)
     *Sem .alg (`Ii , refl , ℑ⟨ sp0 ⟩) = LR.`con (`Ii , refl , ℑ⟨ sp0 ⟩)
     *Sem .alg (`Ie C , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`Ie _ , refl ,
         LR.ren ths (*reify s) ✴⟨ sp+ ⟩ LR.ren tht (*reify t))
     *Sem .alg (`⊗i A B , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗i _ _ , refl ,
         LR.ren ths (*reify s) ✴⟨ sp+ ⟩ LR.ren tht (*reify t))
     *Sem .alg (`⊗e A B C , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.1ᵗ LR.++ᵗ *-distrib-++ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.1ʳ LR.++ʳ *-distrib-++ᶜ in
       LR.`con (`⊗e _ _ _ , refl ,
         LR.ren ths (*reify s) ✴⟨ sp+ ⟩ LR.ren tht (*reify t))
     *Sem .alg (`⊸i A B , refl , t) =
       LR.`con (`⊸i _ _ , refl , *reify t)
     *Sem .alg (`⊸e A B , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊸e _ _ , refl ,
         LR.ren ths (*reify s) ✴⟨ sp+ ⟩ LR.ren tht (*reify t))
     *Sem .alg (`Fi X , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = LR.subuse-th str LR.++ᵗ *-distrib-[]ᶜ in
+      let th = LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`!i _ , refl ,
         ⟨ (mk λ i → lemma (⊴-trans (str .get i) (sp0 .get i))) ⟩·
           LR.ren th (*reify t))
@@ -271,13 +271,13 @@ module Generic.Linear.Example.Translation.LnL-LR where
       lemma ⊴-refl = ⊴-refl
       lemma ω⊴0 = ⊴-refl
     *Sem .alg (`Fe X C , refl , s ✴⟨ sp+ ⟩ t) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`!e _ _ , refl , LR.ren ths (*reify s) ✴⟨ sp+ ⟩ *reify t)
     *Sem .alg (`1i , refl , □⟨ str , sp0 , sp+ ⟩ _) =
       LR.`con (`Ii , refl , ℑ⟨ ⊴*-trans str sp0 ⟩)
     *Sem .alg (`×i X Y , refl , □⟨ str , sp0 , sp+ ⟩ (s , t)) =
-      let ths = LR.++-[]ᵗ← LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.++-[]ᵗ← LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.++-[]ʳ→ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.++-[]ʳ→ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗i _ _ , refl ,
         LR.`con (`!i _ , refl ,
           ⟨ (mk λ i → lemma (sp0 .get i)) ++₂ []₂ ⟩· LR.ren ths (*reify s))
@@ -289,7 +289,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       lemma ⊴-refl = ⊴-refl
       lemma ω⊴0 = ⊴-refl
     *Sem .alg (`×e ll X Y , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let th = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗e _ _ _ , refl ,
         LR.ren th (*reify t)
           ✴⟨ ⊴*-trans str (+*-identity↘ _) ⟩
@@ -301,7 +301,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
               ✴⟨ ⊴*-refl ++₂ [ ω⊴1 ]₂ ⟩
             LR.`var (LR.lvar (↙ (↘ here)) refl (⊴*-refl ++₂ [ ω⊴0 ]₂)))))
     *Sem .alg (`×e rr X Y , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
+      let th = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗e _ _ _ , refl ,
         LR.ren th (*reify t)
           ✴⟨ ⊴*-trans str (+*-identity↘ _) ⟩
@@ -313,15 +313,15 @@ module Generic.Linear.Example.Translation.LnL-LR where
               ✴⟨ ⊴*-refl ++₂ [ ω⊴0 ]₂ ⟩
             LR.`var (LR.lvar (↘ here) refl (⊴*-refl ++₂ [ ω⊴1 ]₂)))))
     *Sem .alg (`→i X Y , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = LR.extendʳ LR.++ᵗ LR.1ᵗ in
+      let th = LR.extendʳ LR.++ʳ LR.1ʳ in
       LR.`con (`⊸i _ _ , refl ,
         LR.`con (`!e _ _ , refl ,
           LR.`var (LR.lvar (↙ (↘ here)) refl (⊴*-refl ++₂ []₂))
             ✴⟨ str ++₂ [ ⊴-refl ]₂ ⟩
           LR.ren th (*reify t)))
     *Sem .alg (`→e X Y , refl , □⟨ str , sp0 , sp+ ⟩ (s , t)) =
-      let ths = LR.1ᵗ LR.++ᵗ *-distrib-[]ᶜ in
-      let tht = LR.++-[]ᵗ← LR.++ᵗ *-distrib-[]ᶜ in
+      let ths = LR.1ʳ LR.++ʳ *-distrib-[]ᶜ in
+      let tht = LR.++-[]ʳ→ LR.++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊸e _ _ , refl ,
         LR.ren ths (*reify s)
           ✴⟨ ⊴*-trans str sp+ ⟩
@@ -332,8 +332,8 @@ module Generic.Linear.Example.Translation.LnL-LR where
       lemma ⊴-refl = ⊴-refl
       lemma ω⊴0 = ⊴-refl
     *Sem .alg (`Gi A , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = (LR.subuse-th str LR.++ᵗ *-distrib-[]ᶜ) LR.>>ᵗ LR.++-[]ᵗ→ in
+      let th = (LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
       LR.ren th (*reify t)
     *Sem .alg (`Ge A , refl , □⟨ str , sp0 , sp+ ⟩ t) =
-      let th = (LR.subuse-th str LR.++ᵗ *-distrib-[]ᶜ) LR.>>ᵗ LR.++-[]ᵗ→ in
+      let th = (LR.subuse-th str LR.++ʳ *-distrib-[]ᶜ) LR.>>ʳ LR.++-[]ʳ← in
       LR.ren th (*reify t)

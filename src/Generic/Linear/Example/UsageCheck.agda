@@ -61,7 +61,6 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Environment Ty poSemiring
     open import Generic.Linear.Thinning Ty poSemiring
     open import Generic.Linear.Thinning.Properties Ty poSemiring
-    open _─Env
     open import Generic.Linear.Extend Ty poSemiring
     open import Generic.Linear.Semantics Ty poSemiring
 
@@ -190,12 +189,13 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         𝓒 : U.Scoped _
         𝓒 A (U.ctx _ Γ) = ∀ R → List (Tm sys ∞ A (ctx R Γ))
 
-        open Semantics using (th^𝓥; var; alg)
+        open Semantics using (ren^𝓥; var; alg)
 
         elab-sem : U.Semantics (uSystem sys) U.LVar 𝓒
-        elab-sem .th^𝓥 (U.lvar i q _) th =
-          let v = th .U.lookup (th .sums) (U.lvar i q _) in
+        elab-sem .ren^𝓥 (U.lvar i q _) ρ =
+          let v = ρ .U.lookup (ρ .sums) (U.lvar i q _) in
           U.lvar (v .U.idx) (v .U.tyq) _
+          where open [_]_⇒ᵉ_
         elab-sem .var (U.lvar i q _) R =
           (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
         elab-sem .alg b R =
