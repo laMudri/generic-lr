@@ -19,7 +19,9 @@ module Generic.Linear.Variable
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Syntax Ty Ann
 
-  record LVar (A : Ty) (PΓ : Ctx) : Set where
+  infix 20 _∋_
+
+  record _∋_ (PΓ : Ctx) (A : Ty) : Set where
     constructor lvar
 
     open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
@@ -28,4 +30,4 @@ module Generic.Linear.Variable
       idx : Ptr s
       tyq : Γ idx ≡ A
       basis : P ⊴* ⟨ idx ∣
-  open LVar public
+  open _∋_ public

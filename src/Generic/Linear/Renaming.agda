@@ -22,14 +22,14 @@ module Generic.Linear.Renaming
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
 
-  infix 4 _⇒ʳ_
+  infix 20 _⇒ʳ_
 
   private
     variable
       ℓ : Level
 
   _⇒ʳ_ : (PΓ QΔ : Ctx) → Set₁
-  _⇒ʳ_ = [ LVar ]_⇒ᵉ_
+  _⇒ʳ_ = [ _∋_ ]_⇒ᵉ_
 
   □ʳ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
   (□ʳ T) PΓ = ∀[ (_⇒ʳ PΓ) ⇒ T ]

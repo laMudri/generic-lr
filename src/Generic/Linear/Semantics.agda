@@ -20,8 +20,10 @@ module Generic.Linear.Semantics
   open import Data.Product
   open import Data.Wrap
   open import Function using (Equivalence)
+  open import Function.Extra
   open import Size
-  open import Relation.Unary
+  open import Relation.Nary
+  -- open import Relation.Unary hiding (_⊢_)
   open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawPoSemiring
@@ -45,32 +47,30 @@ module Generic.Linear.Semantics
       𝓒 : Scoped c
       RΘ : Ctx
 
-  Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) (PΓ : Ctx) (A : Ty) →
-           Ctx → Set _
-  Kripke = Wrap λ 𝓥 𝓒 PΓ A → □ʳ (([ 𝓥 ]_⇒ᵉ PΓ) ─✴ᶜ 𝓒 A)
+  Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) → Ctx → Scoped _
+  Kripke = Wrap λ 𝓥 𝓒 PΓ QΔ A → □ʳ (([ 𝓥 ]_⇒ᵉ PΓ) ─✴ᶜ _⟨ 𝓒 ⟩⊢ A) QΔ
 
   mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
-          (∀ {A} → ∀[ 𝓒 A ⇒ 𝓒′ A ]) →
-          ∀ {PΓ A} → ∀[ Kripke 𝓥 𝓒 PΓ A ⇒ Kripke 𝓥 𝓒′ PΓ A ]
+          ∀[ 𝓒 ⇒ 𝓒′ ] → ∀[ Kripke 𝓥 𝓒 ⇒ Kripke 𝓥 𝓒′ ]
   mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
 
   record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
                    : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
-      ren^𝓥 : Renameable (𝓥 A)
-      var : ∀[ 𝓥 A ⇒ 𝓒 A ]
-      alg : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) A ⇒ 𝓒 A ]
+      ren^𝓥 : Renameable (_⟨ 𝓥 ⟩⊢ A)
+      var : ∀[                   𝓥 ⇒ 𝓒 ]
+      alg : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) ⇒ 𝓒 ]
 
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
     open With-psh^𝓥 psh^𝓥
 
-    [_]_⇒ᶜ_ : (𝓒 : Scoped ℓ) (PΓ QΔ : Ctx) → Set ℓ
-    [ 𝓒 ] PΓ ⇒ᶜ QΔ = ∀ {sz A} → Tm d sz A QΔ → 𝓒 A PΓ
+    [_]_⇒ᶜ_ : (𝓒′ : Scoped ℓ) (PΓ QΔ : Ctx) → Set ℓ
+    [ 𝓒′ ] PΓ ⇒ᶜ QΔ = ∀ {sz} → ∀[ [ d , sz ] QΔ ⊢_ ⇒ 𝓒′ PΓ ]
 
     semantics : ∀ {PΓ QΔ} → [ 𝓥 ] PΓ ⇒ᵉ QΔ → [ 𝓒 ] PΓ ⇒ᶜ QΔ
-    body : ∀ {PΓ QΔ sz} → [ 𝓥 ] PΓ ⇒ᵉ QΔ → ∀ {RΘ A} →
-      Scope (Tm d sz) RΘ A QΔ → Kripke 𝓥 𝓒 RΘ A PΓ
+    body : ∀ {PΓ QΔ sz} → [ 𝓥 ] PΓ ⇒ᵉ QΔ → ∀ {RΘ} →
+      ∀[ Scope [ d , sz ]_⊢_ RΘ QΔ ⇒ Kripke 𝓥 𝓒 RΘ PΓ ]
 
     semantics ρ (`var v) = var (ρ .lookup (ρ .sums) v)
     semantics ρ (`con {sz = sz} t) =

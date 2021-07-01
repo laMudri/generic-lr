@@ -2,7 +2,6 @@
 
 open import Algebra.Po
 open import Level renaming (zero to lzero; suc to lsuc)
-open import Relation.Binary using (Rel)
 
 module Generic.Linear.Syntax.Term
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
@@ -10,8 +9,9 @@ module Generic.Linear.Syntax.Term
 
   open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
 
+  open import Function.Extra
   open import Size
-  open import Relation.Unary
+  open import Relation.Nary
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
@@ -23,6 +23,8 @@ module Generic.Linear.Syntax.Term
      sz : Size
      fl : PremisesFlags
 
-  data Tm (d : System fl) : Size → Scoped 0ℓ where
-    `var : ∀[ LVar                     A ⇒ Tm d (↑ sz) A ]
-    `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]
+  infix 20 [_,_]_⊢_
+
+  data [_,_]_⊢_ (d : System fl) : Size → Scoped 0ℓ where
+    `var : ∀[                          _∋_ ⇒ [ d , ↑ sz ]_⊢_ ]
+    `con : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_) ⇒ [ d , ↑ sz ]_⊢_ ]

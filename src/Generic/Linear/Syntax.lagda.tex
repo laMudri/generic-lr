@@ -7,12 +7,12 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Data.LTree.Vector
   open import Data.Product using (_×_; _,_)
   open import Level
-  open import Function.Base using (_∘_)
+  open import Function.Base using (_∘_; _⟨_⟩_)
   open import Relation.Unary
 
   open import Generic.Linear.Syntax.Core public
 
-  infix 5 _++ᶜ_
+  infix 25 _++ᶜ_
 
   record SizedCtx (s : LTree) : Set where
     constructor sctx
@@ -110,8 +110,8 @@ connectives:
 
 \begin{code}
   Scoped : ∀ ℓ → Set (suc ℓ)
-  Scoped ℓ = Ty → Ctx → Set ℓ
+  Scoped ℓ = Ctx → Ty → Set ℓ
 
   Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
-  Scope T QΔ A = (_++ᶜ QΔ) ⊢ T A
+  Scope T QΔ PΓ A = T (PΓ ++ᶜ QΔ) A
 \end{code}

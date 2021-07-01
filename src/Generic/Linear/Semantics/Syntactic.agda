@@ -20,8 +20,9 @@ module Generic.Linear.Semantics.Syntactic
   open import Data.Product
   open import Data.Wrap renaming ([_] to mk)
   open import Function.Base using (id; _∘_)
+  open import Function.Extra
   open import Size
-  open import Relation.Unary
+  open import Relation.Nary
   open import Relation.Unary.Bunched
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; refl)
 
@@ -39,7 +40,7 @@ module Generic.Linear.Semantics.Syntactic
   open import Generic.Linear.Environment.Properties Ty poSemiring
   open import Generic.Linear.Semantics Ty poSemiring
 
-  infix 4 [_]_⇒ˢ_
+  infix 20 [_]_⇒ˢ_
 
   private
     variable
@@ -53,9 +54,9 @@ module Generic.Linear.Semantics.Syntactic
 
   record Kit (d : System fl) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
     field
-      ren^𝓥 : ∀ {A} → Renameable (𝓥 A)
-      var : ∀ {A} → ∀[ LVar A ⇒ 𝓥 A ]
-      trm : ∀ {A} → ∀[ 𝓥 A ⇒ Tm d ∞ A ]
+      ren^𝓥 : ∀ {A} → Renameable (_⟨ 𝓥 ⟩⊢ A)
+      var : ∀[ _∋_ ⇒ 𝓥 ]
+      trm : ∀[ 𝓥 ⇒ [ d , ∞ ]_⊢_ ]
 
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
@@ -66,46 +67,46 @@ module Generic.Linear.Semantics.Syntactic
 
   open Semantics
 
-  reify : {{FromLVar 𝓥}} → ∀[ Kripke 𝓥 𝓒 RΘ A ⇒ Scope 𝓒 RΘ A ]
+  reify : {{FromLVar 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
   reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
 
   module _ where
     open Kit
 
-    kit→sem : Kit d 𝓥 → Semantics d 𝓥 (Tm d ∞)
+    kit→sem : Kit d 𝓥 → Semantics d 𝓥 [ d , ∞ ]_⊢_
     kit→sem K .ren^𝓥 = K .ren^𝓥
     kit→sem K .var = K .trm
     kit→sem {d = d} K .alg = `con ∘ map-s′ d (reify {{flv K}})
 
-  Ren-Kit : Kit d LVar
-  Ren-Kit = record { ren^𝓥 = ren^LVar ; var = id ; trm = `var }
+  Ren-Kit : Kit d _∋_
+  Ren-Kit = record { ren^𝓥 = ren^∋ ; var = id ; trm = `var }
 
-  Ren : Semantics d LVar (Tm d ∞)
+  Ren : Semantics d _∋_ [ d , ∞ ]_⊢_
   Ren = kit→sem Ren-Kit
 
-  ren : PΓ ⇒ʳ QΔ → Tm d ∞ A QΔ → Tm d ∞ A PΓ
+  ren : PΓ ⇒ʳ QΔ → [ d , ∞ ] QΔ ⊢ A → [ d , ∞ ] PΓ ⊢ A
   ren ρ t = semantics Ren ρ t
 
-  ren^Tm : Renameable (Tm d ∞ A)
-  ren^Tm t ρ = ren ρ t
+  ren^⊢ : Renameable ([ d , ∞ ]_⊢ A)
+  ren^⊢ t ρ = ren ρ t
 
-  psh^Tm : IsPresheaf (Tm d ∞)
-  psh^Tm = ren⇒psh (λ {A} → ren^Tm {A = A})
+  psh^⊢ : IsPresheaf [ d , ∞ ]_⊢_
+  psh^⊢ = ren⇒psh (λ {A} → ren^⊢ {A = A})
 
   instance
-    flv^Tm : FromLVar (Tm d ∞)
-    flv^Tm .fromLVar = `var
+    flv^⊢ : FromLVar [ d , ∞ ]_⊢_
+    flv^⊢ .fromLVar = `var
 
-  Sub-Kit : Kit d (Tm d ∞)
-  Sub-Kit = record { ren^𝓥 = ren^Tm ; var = `var ; trm = id }
+  Sub-Kit : Kit d [ d , ∞ ]_⊢_
+  Sub-Kit = record { ren^𝓥 = ren^⊢ ; var = `var ; trm = id }
 
-  Sub : Semantics d (Tm d ∞) (Tm d ∞)
+  Sub : Semantics d [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
   Sub = kit→sem Sub-Kit
 
   [_]_⇒ˢ_ : (d : System fl) (PΓ QΔ : Ctx) → Set₁
-  [ d ] PΓ ⇒ˢ QΔ = [ Tm d ∞ ] PΓ ⇒ᵉ QΔ
+  [ d ] PΓ ⇒ˢ QΔ = [ [ d , ∞ ]_⊢_ ] PΓ ⇒ᵉ QΔ
 
-  sub : [ d ] PΓ ⇒ˢ QΔ → Tm d ∞ A QΔ → Tm d ∞ A PΓ
+  sub : [ d ] PΓ ⇒ˢ QΔ → [ d , ∞ ] QΔ ⊢ A → [ d , ∞ ] PΓ ⊢ A
   sub σ t = semantics Sub σ t
 
   -- _>>ˢ_ : Substitution d PΓ QΔ → Substitution d QΔ RΘ → Substitution d PΓ RΘ
@@ -167,7 +168,7 @@ module Generic.Linear.Semantics.Syntactic
       where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
 
     [_·_]ᵏ : ∀ {r s A B} →
-      r ⊴ s → 𝓥 B [ 1# · A ]ᶜ → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
+      r ⊴ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
     [ le · t ]ᵏ .M = [─ [ 1# ] ─]
     [ le · t ]ᵏ .asLinRel = [─ [ 1# ] ─]AsLinRel
     [ le · t ]ᵏ .sums = [ ⊴-trans le (*.identity .proj₂ _) ]₂
@@ -194,5 +195,5 @@ module Generic.Linear.Semantics.Syntactic
     _++ˢ_ = _++ᵏ_
 
     [_·_]ˢ : ∀ {r s A B} →
-      r ⊴ s → Tm d ∞ B [ 1# · A ]ᶜ → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
+      r ⊴ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
     [_·_]ˢ = [_·_]ᵏ

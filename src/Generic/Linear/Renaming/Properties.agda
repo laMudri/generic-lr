@@ -15,6 +15,7 @@ module Generic.Linear.Renaming.Properties
   open import Algebra.Relational
   open import Data.Product
   open import Data.Sum
+  open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
   open import Relation.Unary
 
@@ -40,13 +41,13 @@ module Generic.Linear.Renaming.Properties
       A : Ty
 
   -- Also, Renameable ⇒ IsPresheaf via subuse-ren
-  psh^LVar : IsPresheaf LVar
-  idx (psh^LVar QP lv) = idx lv
-  tyq (psh^LVar QP lv) = tyq lv
-  basis (psh^LVar QP lv) = ⊴*-trans QP (basis lv)
+  psh^∋ : IsPresheaf _∋_
+  idx (psh^∋ QP lv) = idx lv
+  tyq (psh^∋ QP lv) = tyq lv
+  basis (psh^∋ QP lv) = ⊴*-trans QP (basis lv)
 
-  ren^LVar : Renameable (LVar A)
-  ren^LVar v th = th .lookup (th .sums) v
+  ren^∋ : Renameable (_∋ A)
+  ren^∋ v th = th .lookup (th .sums) v
 
   {-
   -- The rows of a thinning's matrix are a selection of standard basis vectors
@@ -74,7 +75,7 @@ module Generic.Linear.Renaming.Properties
   identity .M = idLinMor
   identity .asLinRel = idAsLinRel
   identity .sums = ⊴*-refl
-  identity .lookup le v = record { LVar v; basis = ⊴*-trans le (v .basis) }
+  identity .lookup le v = record { _∋_ v; basis = ⊴*-trans le (v .basis) }
 
   1ʳ = identity
 
@@ -104,9 +105,9 @@ module Generic.Linear.Renaming.Properties
   subuse-ren PQ .M = idLinMor
   subuse-ren PQ .asLinRel = idAsLinRel
   subuse-ren PQ .sums = PQ
-  subuse-ren PQ .lookup PQ′ v = psh^LVar PQ′ v
+  subuse-ren PQ .lookup PQ′ v = psh^∋ PQ′ v
 
-  ren⇒psh : (∀ {A} → Renameable (𝓥 A)) → IsPresheaf 𝓥
+  ren⇒psh : (∀ {A} → Renameable (_⟨ 𝓥 ⟩⊢ A)) → IsPresheaf 𝓥
   ren⇒psh ren^𝓥 le v = ren^𝓥 v (subuse-ren le)
 
   {-

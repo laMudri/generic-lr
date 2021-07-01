@@ -20,8 +20,9 @@ module Generic.Linear.Environment
 
   open import Data.Product
   open import Function using (_∘_; _⇔_; Equivalence)
+  open import Relation.Unary
 
-  infix 4 [_]_⇒ᵉ_
+  infix 20 [_]_⇒ᵉ_
 
   private
     variable
@@ -32,9 +33,9 @@ module Generic.Linear.Environment
 
   -- TODO: this probably should be somewhere else.
   IsPresheaf : Scoped ℓ → Set ℓ
-  IsPresheaf 𝓒 =
-    ∀ {s} {Γ : Vector Ty s} {P Q} {A} →
-    Q ⊴* P → 𝓒 A (ctx P Γ) → 𝓒 A (ctx Q Γ)
+  IsPresheaf 𝓥 =
+    ∀ {s} {Γ : Vector Ty s} {P Q} →
+    Q ⊴* P → ∀[ 𝓥 (ctx P Γ) ⇒ 𝓥 (ctx Q Γ) ]
 
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
@@ -52,7 +53,7 @@ module Generic.Linear.Environment
       Mᴿ = asLinRel .linRel
     field
       sums : Mᴿ .rel Q P
-      lookup : ∀ {A P′ Q′} → Mᴿ .rel Q′ P′ → LVar A (ctx Q′ Δ) → 𝓥 A (ctx P′ Γ)
+      lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ Δ ∋_ ⇒ 𝓥 (ctx P′ Γ) ]
 
     sums-⊴* : P ⊴* M .hom Q
     sums-⊴* = asLinRel .equiv .f sums
