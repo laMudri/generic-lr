@@ -15,6 +15,7 @@ module Generic.Linear.Example.LTLC where
   open import Level
   open import Proposition
   open import Relation.Binary.PropositionalEquality using (_≡_; refl; sym)
+  open import Relation.Nullary.Decidable.Core  -- TODO: remove
   open import Relation.Unary.Bunched
   open import Size
 
@@ -44,9 +45,8 @@ module Generic.Linear.Example.LTLC where
     (`lam A B) → ⟨ [(u1 , A)]ᶜ `⊢ B ⟩ =⇒ A ⊸ B
     (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
-  open WithScope (Scope (Tm LTLC ∞))
-
-  Term = Tm LTLC ∞
+  Term = [ LTLC , ∞ ]_⊢_
+  open WithScope (Scope Term)
 
   pattern var i les = `var (lvar i refl les)
   pattern lam t = `con (`lam _ _ , refl , t)
@@ -71,14 +71,15 @@ module Generic.Linear.Example.LTLC where
   pattern uapp s t =
     V.`con (`app _ _ , refl , s ✴⟨ _ ⟩ t)
 
-  myC : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
+  myC : (A B C : Ty) → Term []ᶜ ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C))
   myC A B C = elab-unique LTLC
     (ulam (ulam (ulam (uapp (uapp (uvar (# 0)) (uvar (# 2))) (uvar (# 1))))))
     []
 
-  myB : (A B C : Ty) → Term ((B ⊸ C) ⊸ (A ⊸ B) ⊸ (A ⊸ C)) []ᶜ
-  myB A B C = elab-unique LTLC
-    (ulam (ulam (ulam (uapp (uvar (# 0)) (uapp (uvar (# 1)) (uvar (# 2)))))))
+  -- I have no idea why `# 1` isn't working in place of `#1`.
+  myB : (A B C : Ty) → Term []ᶜ ((B ⊸ C) ⊸ (A ⊸ B) ⊸ (A ⊸ C))
+  myB A B C = let #1 = ↙ (↙ (↙ (↘ here))) in elab-unique LTLC
+    (ulam (ulam (ulam (uapp (uvar (# 0)) (uapp (uvar #1) (uvar (# 2)))))))
     []
 
   {- Commenting out old stuff because it takes forever to check.
@@ -140,7 +141,7 @@ module Generic.Linear.Example.LTLC where
             (↘ (there () _))
           )))))))
 
-  myC′ : (A B C : Ty) → Term ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C)) []ᶜ
+  myC′ : (A B C : Ty) → Term []ᶜ ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C))
   myC′ A B C = lam (lam (lam
     (app B ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u1 ])
            ((([] ++ [ u0 ]) ++ [ u1 ]) ++ [ u0 ])

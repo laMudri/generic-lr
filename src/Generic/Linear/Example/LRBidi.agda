@@ -70,7 +70,7 @@ module Generic.Linear.Example.LRBidi where
                   `□ (⟨ []ᶜ `⊢ (chk , Z) ⟩ `∧ ⟨ [ u1 , syn , Z ]ᶜ `⊢ (chk , Z) ⟩)
                   =⇒ (syn , Z)
 
-    Term = Tm LR ∞
+    Term = [ LR , ∞ ]_⊢_
 
     pattern var i les = `var (lvar i refl les)
     pattern emb e = `con (`emb _ , refl , e)
@@ -110,14 +110,14 @@ module Generic.Linear.Example.LRBidi where
 
   open WithLLFlags allLLFlags
 
-  myK : ∀ A B → Term _ []ᶜ
+  myK : ∀ A B → Term []ᶜ _
   myK A B = elab-unique LR
     (uann (! uω (A ⊸ B) ⊸ ! uω A ⊸ ! uω B)
           (ulam (ulam (uemb (ubm _ (uvar (# 0)) (uemb (ubm _ (uvar (# 1))
             (ubang (uemb (uapp (uvar (# 2)) (uemb (uvar (# 3)))))))))))))
     []
 
-  deepid : Term _ []ᶜ
+  deepid : Term []ᶜ _
   deepid = elab-unique LR
     (uann (nat ⊸ nat)
           (ulam (uemb (uiter _ (uvar (# 0))
@@ -131,7 +131,7 @@ module Generic.Linear.Example.LRBidi where
   --   suc _ | ih ↦ let bang m = ih return ! uω nat in
   --                bang (suc m)
 
-  dupNat : Term (syn , nat ⊸ ! uω nat) []ᶜ
+  dupNat : Term []ᶜ (syn , nat ⊸ ! uω nat)
   dupNat = elab-unique LR
     (uann (nat ⊸ ! uω nat)
           (ulam (uemb
@@ -142,7 +142,7 @@ module Generic.Linear.Example.LRBidi where
     []
 
   {-
-  myK : ∀ A B → Term _ []ᶜ
+  myK : ∀ A B → Term []ᶜ _
   myK A B =
     ann (! uω (A ⊸ B) ⊸ ! uω A ⊸ ! uω B)
         (lam (lam (emb (bm _

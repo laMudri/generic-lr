@@ -88,9 +88,8 @@ module Generic.Linear.Example.LnL where
     (`Gi A) → `□ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ int , tG A
     (`Ge A) → `□ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
 
-  open WithScope (Scope (Tm LnL ∞))
-
-  Term = Tm LnL ∞
+  Term = [ LnL , ∞ ]_⊢_
+  open WithScope (Scope Term)
 
   open import Generic.Linear.Example.UsageCheck ΣTy public
   open WithPoSemiring poSemiring public
@@ -125,14 +124,14 @@ module Generic.Linear.Example.LnL where
   pattern uGe s = V.`con (`Ge _ , refl , □⟨ _ , _ , _ ⟩ s)
 
   private
-    myCojoin : (A : Ty lin) → Term (lin , t! A t⊸ t! (t! A)) []ᶜ
-    myCojoin A = elab-unique LnL
-      (u⊸i (uFe _ (uvar (# 0)) (uFi (uGi (uFi (uvar (# 1)))))))
+    myCojoin : (A : Ty lin) → Term []ᶜ (lin , t! A t⊸ t! (t! A))
+    myCojoin A = let #0 = ↙ (↘ here) in elab-unique LnL
+      (u⊸i (uFe _ (uvar #0) (uFi (uGi (uFi (uvar (# 1)))))))
       []
 
-    myCopure : (A : Ty lin) → Term (lin , t! A t⊸ A) []ᶜ
-    myCopure A = elab-unique LnL
-      (u⊸i (uFe _ (uvar (# 0)) (uGe (uvar (# 1)))))
+    myCopure : (A : Ty lin) → Term []ᶜ (lin , t! A t⊸ A)
+    myCopure A = let #0 = ↙ (↘ here) in elab-unique LnL
+      (u⊸i (uFe _ (uvar #0) (uGe (uvar (# 1)))))
       []
 
   {-

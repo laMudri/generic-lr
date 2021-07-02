@@ -96,7 +96,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Data.Product as × hiding (_<*>_)
     open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×
     open import Function.Base using (_∘_)
-    open import Relation.Unary
+    open import Relation.Nary
     open import Relation.Unary.Bunched
     open import Size
 
@@ -150,9 +150,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-p :
         ∀ (sys : System fl) (ps : Premises fl) {PΓ} →
         U.⟦ uPremises ps ⟧p
-          (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
+          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
           (uCtx PΓ) →
-        List (⟦ ps ⟧p (Scope (Tm sys ∞)) PΓ)
+        List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) PΓ)
       lemma-p sys ⟨ ctx Q Δ `⊢ A ⟩ {ctx P Γ} t = t (P V.++ Q)
       lemma-p sys `⊤ t = (| t |)
       lemma-p sys `ℑ t = (| ℑ⟨_⟩ (0*⁻¹ _) |)
@@ -171,27 +171,27 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-r :
         ∀ (sys : System fl) (r : Rule fl) {A PΓ} →
         U.⟦ uRule r ⟧r
-          (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
-          A (uCtx PΓ) →
-        List (⟦ r ⟧r (Scope (Tm sys ∞)) A PΓ)
+          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
+          (uCtx PΓ) A →
+        List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) PΓ A)
       lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
 
       lemma :
         ∀ (sys : System fl) {A PΓ} →
         U.⟦ uSystem sys ⟧s
-          (U.Scope λ B (U.ctx _ Δ) → ∀ Q → List (Tm sys ∞ B (ctx Q Δ)))
-          A (uCtx PΓ) →
-        List (⟦ sys ⟧s (Scope (Tm sys ∞)) A PΓ)
+          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
+          (uCtx PΓ) A →
+        List (⟦ sys ⟧s (Scope [ sys , ∞ ]_⊢_) PΓ A)
       lemma sys@(L ▹ rs) (l , t) = (| (l ,_) (lemma-r sys (rs l) t) |)
 
       module _ (sys : System fl) where
 
         𝓒 : U.Scoped _
-        𝓒 A (U.ctx _ Γ) = ∀ R → List (Tm sys ∞ A (ctx R Γ))
+        𝓒 (U.ctx _ Γ) A = ∀ R → List ([ sys , ∞ ] ctx R Γ ⊢ A)
 
         open Semantics using (ren^𝓥; var; alg)
 
-        elab-sem : U.Semantics (uSystem sys) U.LVar 𝓒
+        elab-sem : U.Semantics (uSystem sys) U._∋_ 𝓒
         elab-sem .ren^𝓥 (U.lvar i q _) ρ =
           let v = ρ .U.lookup (ρ .sums) (U.lvar i q _) in
           U.lvar (v .U.idx) (v .U.tyq) _
@@ -203,13 +203,13 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
           (| `con (lemma sys foo) |)
 
         elab : ∀ {A s} {Γ : Vector Ty s} →
-               U.Tm (uSystem sys) ∞ A (U.ctx _ Γ) →
-               ∀ R → List (Tm sys ∞ A (ctx R Γ))
+               U.[ uSystem sys , ∞ ] U.ctx _ Γ ⊢ A →
+               ∀ R → List ([ sys , ∞ ] ctx R Γ ⊢ A)
         elab = semantics U.identity
           where open U.Semantics elab-sem
 
         elab-unique :
           ∀ {A s} {Γ : Vector Ty s} →
-          (M : U.Tm (uSystem sys) ∞ A (U.ctx _ Γ)) →
-          ∀ R → {_ : Lone (elab M R)} → Tm sys ∞ A (ctx R Γ)
+          (M : U.[ uSystem sys , ∞ ] U.ctx _ Γ ⊢ A) →
+          ∀ R → {_ : Lone (elab M R)} → [ sys , ∞ ] ctx R Γ ⊢ A
         elab-unique M R {l} with uM ∷ [] ← elab M R = uM

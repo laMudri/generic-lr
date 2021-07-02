@@ -102,7 +102,7 @@ module Generic.Linear.Example.LR where
       (`iter Z) →
         ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) =⇒ Z
 
-    Term = Tm LR ∞
+    Term = [ LR , ∞ ]_⊢_
 
     pattern var i les = `var (lvar i refl les)
     pattern ⊸i t = `con (`⊸i _ _ , refl , t)
@@ -139,13 +139,13 @@ module Generic.Linear.Example.LR where
   private
     open WithLLFlags allLLFlags
 
-    myK : ∀ A B → Term (t! (A t⊸ B) t⊸ t! A t⊸ t! B) []ᶜ
+    myK : ∀ A B → Term []ᶜ (t! (A t⊸ B) t⊸ t! A t⊸ t! B)
     myK A B = elab-unique LR
       (u⊸i (u⊸i (u!e _ (uvar (# 0)) (u!e _ (uvar (# 1))
         (u!i (u⊸e (uvar (# 2)) (uvar (# 3))))))))
       []
 
-    deepid : Term (nat t⊸ nat) []ᶜ
+    deepid : Term []ᶜ (nat t⊸ nat)
     deepid = elab-unique LR
       (u⊸i (uiter _ (uvar (# 0)) uze (usu (uvar (# 1)))))
       []
@@ -156,7 +156,7 @@ module Generic.Linear.Example.LR where
     --   suc _ | ih ↦ let !i m = ih return t! uω nat in
     --                !i (suc m)
 
-    dupNat : Term (nat t⊸ t! nat) []ᶜ
+    dupNat : Term []ᶜ (nat t⊸ t! nat)
     dupNat = elab-unique LR
       (u⊸i (uiter (t! nat) (uvar (# 0))
         (u!i uze)

@@ -69,7 +69,7 @@ module Generic.Linear.Example.AnnotatedArrow
     (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
     (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
-  Term = Tm AnnArr ∞
+  Term = [ AnnArr , ∞ ]_⊢_
   open WithScope (Scope Term)
 
   -- pattern var i les = `var (lvar i refl les)
@@ -83,15 +83,15 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦ ctx _ Γ ⟧ᶜ = Lift₁ ⟦_⟧ Γ
 
   ⟦Tm⟧ : Scoped 0ℓ
-  ⟦Tm⟧ A PΓ = ⟦ PΓ ⟧ᶜ → ⟦ A ⟧
+  ⟦Tm⟧ PΓ A = ⟦ PΓ ⟧ᶜ → ⟦ A ⟧
 
   open Semantics
-  open With-psh^𝓥 (λ {s} {Γ} {P} {Q} {A} → psh^LVar {s} {Γ} {P} {Q} {A})
+  open With-psh^𝓥 (λ {s} {Γ} {P} {Q} → psh^∋ {s} {Γ} {P} {Q})
 
-  set : Semantics AnnArr LVar ⟦Tm⟧
-  set .ren^𝓥 = ren^LVar
+  set : Semantics AnnArr _∋_ ⟦Tm⟧
+  set .ren^𝓥 = ren^∋
   set .var (lvar i ≡.refl _) γ = γ .get i
-  set .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) γ x =
+  set .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) γ x =
     m .get {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
       .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
       (γ ++₁ [ x ]₁)
@@ -99,7 +99,7 @@ module Generic.Linear.Example.AnnotatedArrow
     (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
     (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
 
-  myConst : (A B : Ty) → Term ((1# , A) ⊸ (0# , B) ⊸ A) []ᶜ
+  myConst : (A B : Ty) → Term []ᶜ ((1# , A) ⊸ (0# , B) ⊸ A)
   myConst A B =
     `con (`lam _ _ , ≡.refl , `con (`lam _ _ , ≡.refl ,
       `var (lvar (↙ (↘ here)) ≡.refl (([]₂ ++₂ [ ⊴-refl ]₂) ++₂ ⊴*-refl))))
@@ -120,22 +120,22 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦ ctx _ Γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ Γ
 
   ⟦Tm⟧ˢ : Scoped 0ℓ
-  ⟦Tm⟧ˢ A PΓ = ⟦ PΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
+  ⟦Tm⟧ˢ PΓ A = ⟦ PΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
 
   module _ where
 
     open Setoid
 
-    setoid : Semantics AnnArr LVar ⟦Tm⟧ˢ
-    setoid .ren^𝓥 = ren^LVar
+    setoid : Semantics AnnArr _∋_ ⟦Tm⟧ˢ
+    setoid .ren^𝓥 = ren^∋
     setoid .var (lvar i ≡.refl _) ⟨$⟩ γ = γ .get i
     setoid .var (lvar i ≡.refl _) .cong γγ = γγ .get i
     -- TODO: lam case could be made better by Setoid currying.
-    setoid .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ ⟨$⟩ x =
+    setoid .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ ⟨$⟩ x =
       m .get {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
         .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
         ⟨$⟩ (γ ++₁ [ x ]₁)
-    setoid .alg {_} {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ .cong xx =
+    setoid .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ .cong xx =
       m .get _ .app✴ _ _ .cong (setoidL₁ ⟦_⟧ˢ _ .refl ++₁∼ [ xx ]₁∼)
     setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
       m .get _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
@@ -333,27 +333,25 @@ module Generic.Linear.Example.AnnotatedArrow
     ◇-alg R (◇⟨ sub ⟩ xy) = R .subres sub xy
 
     ⟦Tm⟧ᴿ : Scoped 0ℓ
-    ⟦Tm⟧ᴿ A RΓ = WRelMor ⟦ RΓ ⟧ᴿᶜ ⟦ A ⟧ᴿ
+    ⟦Tm⟧ᴿ RΓ A = WRelMor ⟦ RΓ ⟧ᴿᶜ ⟦ A ⟧ᴿ
 
-    wrel : Semantics AnnArr LVar ⟦Tm⟧ᴿ
-    wrel .ren^𝓥 = ren^LVar
+    wrel : Semantics AnnArr _∋_ ⟦Tm⟧ᴿ
+    wrel .ren^𝓥 = ren^∋
     wrel .var v .sem0 = setoid .var v
     wrel .var v .sem1 = setoid .var v
     wrel .var v .semsem = go v
       where
       -- η-expand RΓ to satisfy termination checker (s gets smaller).
-      go : ∀ {A s R Γ} (let RΓ = ctx {s} R Γ) (v : LVar A RΓ) →
+      go : ∀ {A s R Γ} (let RΓ = ctx {s} R Γ) (v : RΓ ∋ A) →
            ∀[ ⟦Tm⟧-rel A RΓ (setoid .var v) (setoid .var v) ]
       go (lvar here ≡.refl (mk le)) = !ᴿ-1 (le here)
       go {Γ = Γ} (lvar (↙ i) ≡.refl (mk le)) = ◇-alg ⟦ Γ (↙ i) ⟧ᴿ ∘′ ✴-1→ ∘′
         map-✴ (go (lvar i ≡.refl (mk (le ∘ ↙))) , lemma-ℑ (mk (le ∘ ↘)))
       go {Γ = Γ} (lvar (↘ i) ≡.refl (mk le)) = ◇-alg ⟦ Γ (↘ i) ⟧ᴿ ∘′ 1-✴→ ∘′
         map-✴ (lemma-ℑ (mk (le ∘ ↙)) , go (lvar i ≡.refl (mk (le ∘ ↘))))
-    wrel .alg mm .sem0 =
-      setoid .alg (map-s′ AnnArr (λ {RΓ} {A} → mapK𝓒 sem0 {RΓ} {A}) mm)
-    wrel .alg mm .sem1 =
-      setoid .alg (map-s′ AnnArr (λ {RΓ} {A} → mapK𝓒 sem1 {RΓ} {A}) mm)
-    wrel .alg {_} {ctx R Γ} (`lam (r , A) B , ≡.refl , mm)
+    wrel .alg mm .sem0 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem0) mm)
+    wrel .alg mm .sem1 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem1) mm)
+    wrel .alg {ctx R Γ} (`lam (r , A) B , ≡.refl , mm)
       .semsem γγ .app✴ sp xx =
       mm .get _ .app✴ _ _ .semsem
         (⟦⊴⟧ᴿᶜ {P = R} (mk (λ i → ⊴-trans (+.identity-→ .proj₂ _)

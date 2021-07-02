@@ -18,7 +18,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Function.Base
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡
-  open import Relation.Unary
+  open import Relation.Nary
   open import Relation.Unary.Bunched
 
   open PoSemiring poSemiring renaming (Carrier to Ann)
@@ -67,7 +67,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     -- open PoLeftSemimoduleMor F
 
     map-p : (ps : Premises fl) →
-      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ (ctx P Γ) A → Y RΘ (ctx Q Δ) A) →
+      (∀ {RΘ P Q} → Q ⊴* F .hom P → ∀[ X RΘ (ctx P Γ) ⇒ Y RΘ (ctx Q Δ) ]) →
       (∀ {P Q} → Q ⊴* F .hom P → ⟦ ps ⟧p X (ctx P Γ) → ⟦ ps ⟧p Y (ctx Q Δ))
     map-p (⟨ PΓ `⊢ A ⟩) f r t = f r t
     map-p `⊤ f r _ = _
@@ -89,19 +89,18 @@ module Generic.Linear.Syntax.Interpretation.Map
        ⟩ map-p ps f ⊴*-refl t
 
     map-r : (r : Rule fl) →
-      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ (ctx P Γ) A → Y RΘ (ctx Q Δ) A) →
-      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ r ⟧r X (ctx P Γ) A → ⟦ r ⟧r Y (ctx Q Δ) A)
+      (∀ {RΘ P Q} → Q ⊴* F .hom P → ∀[ X RΘ (ctx P Γ) ⇒ Y RΘ (ctx Q Δ) ]) →
+      (∀ {P Q} → Q ⊴* F .hom P → ∀[ ⟦ r ⟧r X (ctx P Γ) ⇒ ⟦ r ⟧r Y (ctx Q Δ) ])
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
 
     map-s : (s : System fl) →
-      (∀ {RΘ A P Q} → Q ⊴* F .hom P → X RΘ (ctx P Γ) A → Y RΘ (ctx Q Δ) A) →
-      (∀ {A P Q} → Q ⊴* F .hom P → ⟦ s ⟧s X (ctx P Γ) A → ⟦ s ⟧s Y (ctx Q Δ) A)
+      (∀ {RΘ P Q} → Q ⊴* F .hom P → ∀[ X RΘ (ctx P Γ) ⇒ Y RΘ (ctx Q Δ) ]) →
+      (∀ {P Q} → Q ⊴* F .hom P → ∀[ ⟦ s ⟧s X (ctx P Γ) ⇒ ⟦ s ⟧s Y (ctx Q Δ) ])
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
   module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
 
-    map-p′ : (ps : Premises fl) →
-      (∀ {RΘ A} → ∀[ _⟨ X RΘ ⟩⊢ A ⇒ _⟨ Y RΘ ⟩⊢ A ]) → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
+    map-p′ : (ps : Premises fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ PΓ `⊢ A ⟩ f t = f t
     map-p′ `⊤ f _ = _
     map-p′ `ℑ f ℑ⟨ sp ⟩ = ℑ⟨ sp ⟩
@@ -112,14 +111,10 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (`□ ps) f (□⟨ str , sp0 , sp+ ⟩ t) =
       □⟨ str , sp0 , sp+ ⟩ map-p′ ps f t
 
-    map-r′ : (r : Rule fl) →
-      (∀ {RΘ A} → ∀[ _⟨ X RΘ ⟩⊢ A ⇒ _⟨ Y RΘ ⟩⊢ A ]) →
-      (∀ {A} → ∀[ _⟨ ⟦ r ⟧r X ⟩⊢ A ⇒ _⟨ ⟦ r ⟧r Y ⟩⊢ A ])
+    map-r′ : (r : Rule fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
 
-    map-s′ : (s : System fl) →
-      (∀ {RΘ A} → ∀[ _⟨ X RΘ ⟩⊢ A ⇒ _⟨ Y RΘ ⟩⊢ A ]) →
-      (∀ {A} → ∀[ _⟨ ⟦ s ⟧s X ⟩⊢ A ⇒ _⟨ ⟦ s ⟧s Y ⟩⊢ A ])
+    map-s′ : (s : System fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ s ⟧s X ⇒ ⟦ s ⟧s Y ]
     map-s′ (L ▹ rs) f (l , t) = l , map-r′ (rs l) f t
 
   open import Category.Applicative

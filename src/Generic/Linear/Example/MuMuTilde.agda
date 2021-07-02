@@ -88,11 +88,11 @@ module Generic.Linear.Example.MuMuTilde
       ⟨ [ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ `⊢ com ⟩
       =⇒ trm (rA ⅋ sB)
 
-  Drv = Tm MMT ∞
+  Drv = [ MMT , ∞ ]_⊢_
   open WithScope (Scope Drv)
 
   myComm : (rA sB : Ann × Ty) →
-           Drv (trm ((1# , (rA ⅋ sB) ^⊥) ⅋ (1# , sB ⅋ rA))) []ᶜ
+           Drv []ᶜ (trm ((1# , (rA ⅋ sB) ^⊥) ⅋ (1# , sB ⅋ rA)))
   myComm rA@(r , A) sB@(s , B) =
     `con (`μ⟨-,-⟩ _ _ , ≡.refl ,
       `con (`cut (sB ⅋ rA) , ≡.refl ,

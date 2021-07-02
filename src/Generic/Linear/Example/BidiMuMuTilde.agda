@@ -119,7 +119,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
             ⟨ []ᶜ `⊢ just (syn , p) ⟩
             =⇒ just (chk , p)
 
-        UntypedTm = Tm Untyped ∞
+        UntypedTm = [ Untyped , ∞ ]_⊢_
 
       module Typed where
 
@@ -176,7 +176,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
             ⟨ []ᶜ `⊢ syn A ⟩
             =⇒ chk A p
 
-        TypedTm = Tm Typed ∞
+        TypedTm = [ Typed , ∞ ]_⊢_
 
       module Syntax {Conc : Set} {rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ}
         where
@@ -197,7 +197,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
 
       Elab : ∀ {ℓ} → Typed.Scoped ℓ → ∀ {s uΓ} →
              Typed.Conc → Vector Ann s → Typing {s} uΓ → Set ℓ
-      Elab T 𝓙 R Γ = T 𝓙 (Typed.ctx R ⌞ Γ ⌟)
+      Elab T 𝓙 R Γ = T (Typed.ctx R ⌞ Γ ⌟) 𝓙
 
       untyConc : Typed.Conc → Untyped.Conc
       untyConc Typed.com = nothing
@@ -208,17 +208,17 @@ module Generic.Linear.Example.BidiMuMuTilde where
       untyCtx (Typed.ctx R Γ) = Untyped.ctx R (untyConc ∘ Γ)
 
       data 𝓥 : Untyped.Scoped 0ℓ where
-        vr : ∀ {p A RΓ} → Typed.LVar (Typed.syn {p} A) RΓ →
-             𝓥 (just (syn , p)) (untyCtx RΓ)
+        vr : ∀ {p A RΓ} → RΓ Typed.∋ Typed.syn {p} A →
+             𝓥 (untyCtx RΓ) (just (syn , p))
 
-      𝓒′ : Untyped.Conc → Typed.Ctx → Set
-      𝓒′ nothing RΓ = TypedTm Typed.com RΓ
-      𝓒′ (just (syn , p)) RΓ = ∃ \ A → TypedTm (Typed.syn {p} A) RΓ
-      𝓒′ (just (chk , q)) RΓ = ∀ {p} A → TypedTm (Typed.chk {p} A q) RΓ
+      𝓒′ : Typed.Ctx → Untyped.Conc → Set
+      𝓒′ RΓ nothing = TypedTm RΓ Typed.com
+      𝓒′ RΓ (just (syn , p)) = ∃ \ A → TypedTm RΓ (Typed.syn {p} A)
+      𝓒′ RΓ (just (chk , q)) = ∀ {p} A → TypedTm RΓ (Typed.chk {p} A q)
 
       𝓒 : Untyped.Scoped _
-      𝓒 𝓙 (Untyped.ctx R uΓ) =
-        Maybe $ ∀ Γ → untyConc ∘ Γ ≗ uΓ → 𝓒′ 𝓙 (Typed.ctx R Γ)
+      𝓒 (Untyped.ctx R uΓ) 𝓙 =
+        Maybe $ ∀ Γ → untyConc ∘ Γ ≗ uΓ → 𝓒′ (Typed.ctx R Γ) 𝓙
 
       open Untyped.Semantics
 

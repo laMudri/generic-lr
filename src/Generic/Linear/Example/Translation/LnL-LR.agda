@@ -19,7 +19,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
   open import Level
   open import Proposition
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; refl)
-  open import Relation.Unary
+  open import Relation.Nary
   open import Relation.Unary.Bunched
   open import Size
 
@@ -61,7 +61,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
     ; `1i; `×i; `×e; `→i; `→e; `Gi; `Ge
     )
 
-  infixl 8 _ᵒTy _*Ty
+  infixl 28 _ᵒTy _*Ty _*ΣTy
 
   _ᵒTy : LR.Ty → LnL.Ty lin
   ι ᵒTy = ι
@@ -88,7 +88,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
     open LnL.Ctx
     open LR.Ctx
 
-    infixl 8 _ᵒCtx _*Ctx
+    infixl 28 _ᵒCtx _*Ctx
 
     _ᵒCtx : LR.Ctx → LnL.Ctx
     (RΓ ᵒCtx) .s = RΓ .s
@@ -102,7 +102,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
   module _ where
     open LnL.[_]_⇒ᵉ_
-    open LnL.LVar
+    open LnL._∋_
 
     o-distrib-[]ᶜ : LnL.[]ᶜ LnL.⇒ʳ (LR.[]ᶜ ᵒCtx)
     o-distrib-[]ᶜ .M = 1ᴹ
@@ -122,19 +122,19 @@ module Generic.Linear.Example.Translation.LnL-LR where
     o-distrib-++ᶜ .lookup le v .basis = ⊴*-trans le (v .basis)
 
     o𝓒 : LR.Scoped 0ℓ
-    o𝓒 A PΓ = LnL.Term (_ , A ᵒTy) (PΓ ᵒCtx)
+    o𝓒 PΓ A = LnL.Term (PΓ ᵒCtx) (_ , A ᵒTy)
 
-    oreify : ∀ {RΘ A} →
-      ∀[ LR.Kripke LR.LVar o𝓒 RΘ A ⇒
-         (λ PΓ → LnL.Term (_ , A ᵒTy) (PΓ ᵒCtx LnL.++ᶜ RΘ ᵒCtx)) ]
+    oreify : ∀ {RΘ} →
+      ∀[ LR.Kripke LR._∋_ o𝓒 RΘ ⇒
+         (λ PΓ A → LnL.Term (PΓ ᵒCtx LnL.++ᶜ RΘ ᵒCtx) (_ , A ᵒTy)) ]
     oreify t = LnL.ren o-distrib-++ᶜ (LR.reify t)
 
   module _ where
     open LR.Semantics
     open LnL.[_]_⇒ᵉ_
 
-    oSem : LR.Semantics LR LR.LVar o𝓒
-    oSem .ren^𝓥 = LR.ren^LVar
+    oSem : LR.Semantics LR LR._∋_ o𝓒
+    oSem .ren^𝓥 = LR.ren^∋
     oSem .var (LR.lvar i refl b) = LnL.`var (LnL.lvar i refl b)
     oSem .alg (`Ii , refl , ℑ⟨ sp0 ⟩) = LnL.`con (`Ii , refl , ℑ⟨ sp0 ⟩)
     oSem .alg (`Ie Z , refl , s ✴⟨ sp+ ⟩ t) =
@@ -184,7 +184,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       σ .M = [─ [ uω ] ─]
       σ .asLinRel = [─ [ uω ] ─]AsLinRel
       σ .sums = ⊴*-refl
-      σ .lookup {_} {P′} {Q′} le (LnL.lvar here refl b) =
+      σ .lookup {P′} {Q′} le (LnL.lvar here refl b) =
         LnL.`con (`Ge _ , refl , □⟨ ⊴*-refl , [ P′⊴0 ]₂ , [ P′⊴+ ]₂ ⟩
           LnL.`var (LnL.lvar (↙ here) refl ([ P′⊴1 ]₂ ++₂ []₂)))
         where
@@ -198,12 +198,12 @@ module Generic.Linear.Example.Translation.LnL-LR where
         P′⊴1 : P′ here ⊴ u1
         P′⊴1 = ⊴-trans P′⊴ω ω⊴1
 
-  _ᵒTm : ∀ {A Γ} → LR.Term A Γ → LnL.Term (_ , A ᵒTy) (Γ ᵒCtx)
+  _ᵒTm : ∀ {A Γ} → LR.Term Γ A → LnL.Term (Γ ᵒCtx) (_ , A ᵒTy)
   _ᵒTm = LR.Semantics.semantics oSem LR.identity
 
   module _ where
     open LR.[_]_⇒ᵉ_
-    open LR.LVar
+    open LR._∋_
 
     *-distrib-[]ᶜ : LR.[]ᶜ LR.⇒ʳ LnL.[]ᶜ *Ctx
     *-distrib-[]ᶜ .M = 1ᴹ
@@ -228,15 +228,15 @@ module Generic.Linear.Example.Translation.LnL-LR where
     open LR.[_]_⇒ᵉ_
 
     *𝓒 : LnL.Scoped 0ℓ
-    *𝓒 A PΓ = LR.Term (A *ΣTy) (PΓ *Ctx)
+    *𝓒 PΓ A = LR.Term (PΓ *Ctx) (A *ΣTy)
 
-    *reify : ∀ {RΘ A} →
-      ∀[ LnL.Kripke LnL.LVar *𝓒 RΘ A ⇒
-         (λ PΓ → LR.Term (A *ΣTy) (PΓ *Ctx LR.++ᶜ RΘ *Ctx)) ]
+    *reify : ∀ {RΘ} →
+      ∀[ LnL.Kripke LnL._∋_ *𝓒 RΘ ⇒
+         (λ PΓ A → LR.Term (PΓ *Ctx LR.++ᶜ RΘ *Ctx) (A *ΣTy)) ]
     *reify t = LR.ren *-distrib-++ᶜ (LnL.reify t)
 
-    *Sem : LnL.Semantics LnL LnL.LVar *𝓒
-    *Sem .ren^𝓥 = LnL.ren^LVar
+    *Sem : LnL.Semantics LnL LnL._∋_ *𝓒
+    *Sem .ren^𝓥 = LnL.ren^∋
     *Sem .var (LnL.lvar i q b) = LR.`var (LR.lvar i (≡.cong _*ΣTy q) b)
     *Sem .alg (`Ii , refl , ℑ⟨ sp0 ⟩) = LR.`con (`Ii , refl , ℑ⟨ sp0 ⟩)
     *Sem .alg (`Ie C , refl , s ✴⟨ sp+ ⟩ t) =
