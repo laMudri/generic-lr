@@ -32,7 +32,7 @@ module Generic.Linear.Renaming.Properties
 
   private
     variable
-      PΓ QΔ RΘ : Ctx
+      Γ Δ Θ : Ctx
       ℓ : Level
       T : Ctx → Set ℓ
       𝓥 : Scoped ℓ
@@ -54,24 +54,24 @@ module Generic.Linear.Renaming.Properties
   -- (i.e, rows from the identity matrix).
   -- Which rows, exactly, is defined by the action of the thinning (lookup).
   thinning-sub-1ᴹ :
-    ∀ {PΓ QΔ A}
-    (th : Renaming PΓ QΔ) (v : Var A (Ctx.Γ PΓ)) →
+    ∀ {Γ Δ A}
+    (th : Renaming Γ Δ) (v : Var A (Ctx.γ Γ)) →
     M th (v .idx) ⊴* 1ᴹ (th .lookup v .idx)
-  thinning-sub-1ᴹ {ctx {[-]} P Γ} {ctx {t} Q Δ} th v@(var here q) =
+  thinning-sub-1ᴹ {ctx {[-]} P γ} {ctx {t} Q δ} th v@(var here q) =
     th .lookup v .basis
-  thinning-sub-1ᴹ {PΓ} th (var (↙ i) q) =
+  thinning-sub-1ᴹ {Γ} th (var (↙ i) q) =
     thinning-sub-1ᴹ
-      {leftᶜ (ctx→sctx PΓ)}
+      {leftᶜ (ctx→sctx Γ)}
       record { M = topᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ leftᵛ }
       (var i q)
-  thinning-sub-1ᴹ {PΓ} th (var (↘ i) q) =
+  thinning-sub-1ᴹ {Γ} th (var (↘ i) q) =
     thinning-sub-1ᴹ
-      {rightᶜ (ctx→sctx PΓ)}
+      {rightᶜ (ctx→sctx Γ)}
       record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
   -}
 
-  identity : PΓ ⇒ʳ PΓ
+  identity : Γ ⇒ʳ Γ
   identity .M = idLinMor
   identity .asLinRel = idAsLinRel
   identity .sums = ⊴*-refl
@@ -79,13 +79,13 @@ module Generic.Linear.Renaming.Properties
 
   1ʳ = identity
 
-  select : ∀ {PΓ QΔ RΘ : Ctx} → PΓ ⇒ʳ QΔ → [ 𝓥 ] RΘ ⇒ᵉ PΓ → [ 𝓥 ] RΘ ⇒ᵉ QΔ
+  select : ∀ {Γ Δ Θ : Ctx} → Γ ⇒ʳ Δ → [ 𝓥 ] Θ ⇒ᵉ Γ → [ 𝓥 ] Θ ⇒ᵉ Δ
   select th ρ .M = th .M >>LinMor ρ .M
   select th ρ .asLinRel = th .asLinRel >>AsLinRel ρ .asLinRel
   select th ρ .sums = th .sums , ρ .sums
   select th ρ .lookup (th-r , ρ-r) v = ρ .lookup ρ-r (th .lookup th-r v)
 
-  compose : ∀ {PΓ QΔ RΘ : Ctx} → QΔ ⇒ʳ RΘ → PΓ ⇒ʳ QΔ → PΓ ⇒ʳ RΘ
+  compose : ∀ {Γ Δ Θ : Ctx} → Δ ⇒ʳ Θ → Γ ⇒ʳ Δ → Γ ⇒ʳ Θ
   compose th ph = select th ph
 
   -- TODO: this is now the wrong way round.
@@ -101,7 +101,7 @@ module Generic.Linear.Renaming.Properties
   ren^□ : Renameable (□ʳ T)
   ren^□ = duplicate
 
-  subuse-ren : ∀ {Γ} → P ⊴* Q → ctx P Γ ⇒ʳ ctx Q Γ
+  subuse-ren : ∀ {γ} → P ⊴* Q → ctx P γ ⇒ʳ ctx Q γ
   subuse-ren PQ .M = idLinMor
   subuse-ren PQ .asLinRel = idAsLinRel
   subuse-ren PQ .sums = PQ
@@ -111,9 +111,9 @@ module Generic.Linear.Renaming.Properties
   ren⇒psh ren^𝓥 le v = ren^𝓥 v (subuse-ren le)
 
   {-
-  nat^Th : ∀ {s P′ Γ t Q Δ} →
-    _⊴* P′ ◇ (λ P → Renaming (ctx {s} P Γ) (ctx {t} Q Δ)) →
-    (λ Q′ → Renaming (ctx P′ Γ) (ctx Q′ Δ)) ◇ Q ⊴*_
+  nat^Th : ∀ {s P′ γ t Q δ} →
+    _⊴* P′ ◇ (λ P → Renaming (ctx {s} P γ) (ctx {t} Q δ)) →
+    (λ Q′ → Renaming (ctx P′ γ) (ctx Q′ δ)) ◇ Q ⊴*_
   nat^Th {P′ = P′} (PP , th) .middle = unrow (row P′ *ᴹ th .M)
   nat^Th (PP , th) .fst .M = th .M
   nat^Th (PP , th) .fst .sums = ⊴*-refl

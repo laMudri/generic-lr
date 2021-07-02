@@ -29,13 +29,13 @@ module Generic.Linear.Environment.Properties
 
   private
     variable
-      PΓ QΔ RΘ : Ctx
+      Γ Δ : Ctx
       ℓ : Level
       _𝓥_ : Scoped ℓ
       A : Ty
       r : Ann
 
-  ren^Env : (∀ {A} → Renameable (_𝓥 A)) → Renameable ([ _𝓥_ ]_⇒ᵉ PΓ)
+  ren^Env : (∀ {A} → Renameable (_𝓥 A)) → Renameable ([ _𝓥_ ]_⇒ᵉ Γ)
   ren^Env ren^𝓥 ρ ren .M = ρ .M >>LinMor ren .M
   ren^Env ren^𝓥 ρ ren .asLinRel = ρ .asLinRel >>AsLinRel ren .asLinRel
   ren^Env ren^𝓥 ρ ren .sums = ρ .sums , ren .sums
@@ -52,7 +52,7 @@ module Generic.Linear.Environment.Properties
     []ᵉ ℑ⟨ sp ⟩ .sums = sp
     []ᵉ ℑ⟨ sp ⟩ .lookup _ (lvar (there () _) _ _)
 
-    ++ᵉ : ∀[ [ _𝓥_ ]_⇒ᵉ PΓ ✴ᶜ [ _𝓥_ ]_⇒ᵉ QΔ ⇒ [ _𝓥_ ]_⇒ᵉ PΓ ++ᶜ QΔ ]
+    ++ᵉ : ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ Γ ++ᶜ Δ ]
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M ─ σ .M ]
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .asLinRel = [ ρ .asLinRel ─ σ .asLinRel ]AsLinRel
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums

@@ -69,10 +69,10 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         fl : PremisesFlags
 
     uCtx : Ctx → U.Ctx
-    uCtx (ctx P Γ) = U.ctx _ Γ
+    uCtx (ctx P γ) = U.ctx _ γ
 
     uPremises : Premises fl → U.Premises fl
-    uPremises ⟨ PΓ `⊢ A ⟩ = U.⟨ uCtx PΓ `⊢ A ⟩
+    uPremises ⟨ Γ `⊢ A ⟩ = U.⟨ uCtx Γ `⊢ A ⟩
     uPremises `⊤ = U.`⊤
     uPremises `ℑ = U.`ℑ
     uPremises (ps `∧ qs) = uPremises ps U.`∧ uPremises qs
@@ -148,46 +148,46 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
              (rep* (R ∘ ↙)) (rep* (R ∘ ↘)) |)
 
       lemma-p :
-        ∀ (sys : System fl) (ps : Premises fl) {PΓ} →
+        ∀ (sys : System fl) (ps : Premises fl) {Γ} →
         U.⟦ uPremises ps ⟧p
-          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
-          (uCtx PΓ) →
-        List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) PΓ)
-      lemma-p sys ⟨ ctx Q Δ `⊢ A ⟩ {ctx P Γ} t = t (P V.++ Q)
+          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
+          (uCtx Γ) →
+        List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) Γ)
+      lemma-p sys ⟨ ctx Q δ `⊢ A ⟩ {ctx P γ} t = t (P V.++ Q)
       lemma-p sys `⊤ t = (| t |)
       lemma-p sys `ℑ t = (| ℑ⟨_⟩ (0*⁻¹ _) |)
       lemma-p sys (ps `∧ qs) (s , t) =
         (| _,_ (lemma-p sys ps s) (lemma-p sys qs t) |)
-      lemma-p sys (ps `✴ qs) {ctx P Γ} (s ✴⟨ _ ⟩ t) = do
+      lemma-p sys (ps `✴ qs) {ctx P γ} (s ✴⟨ _ ⟩ t) = do
         ((Pl , Pr) , sp) ← +*⁻¹ P
         (| _✴⟨ sp ⟩_ (lemma-p sys ps s) (lemma-p sys qs t) |)
-      lemma-p sys (r `· ps) {ctx P Γ} (⟨ _ ⟩· t) = do
+      lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩· t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
         (| ⟨ sp ⟩·_ (lemma-p sys ps t) |)
-      lemma-p sys (`□ ps) {ctx P Γ} (□⟨ _ , _ , _ ⟩ t) = do
+      lemma-p sys (`□ ps) {ctx P γ} (□⟨ _ , _ , _ ⟩ t) = do
         (P′ , str , sp0 , sp+) ← rep* P
         (| □⟨ str , sp0 , sp+ ⟩_ (lemma-p sys ps t) |)
 
       lemma-r :
-        ∀ (sys : System fl) (r : Rule fl) {A PΓ} →
+        ∀ (sys : System fl) (r : Rule fl) {A Γ} →
         U.⟦ uRule r ⟧r
-          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
-          (uCtx PΓ) A →
-        List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) PΓ A)
+          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
+          (uCtx Γ) A →
+        List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) Γ A)
       lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
 
       lemma :
-        ∀ (sys : System fl) {A PΓ} →
+        ∀ (sys : System fl) {A Γ} →
         U.⟦ uSystem sys ⟧s
-          (U.Scope λ (U.ctx _ Δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q Δ ⊢ B))
-          (uCtx PΓ) A →
-        List (⟦ sys ⟧s (Scope [ sys , ∞ ]_⊢_) PΓ A)
+          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
+          (uCtx Γ) A →
+        List (⟦ sys ⟧s (Scope [ sys , ∞ ]_⊢_) Γ A)
       lemma sys@(L ▹ rs) (l , t) = (| (l ,_) (lemma-r sys (rs l) t) |)
 
       module _ (sys : System fl) where
 
         𝓒 : U.Scoped _
-        𝓒 (U.ctx _ Γ) A = ∀ R → List ([ sys , ∞ ] ctx R Γ ⊢ A)
+        𝓒 (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
 
         open Semantics using (ren^𝓥; var; alg)
 
@@ -202,14 +202,14 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
           let foo = U.map-s′ (uSystem sys) U.reify b in
           (| `con (lemma sys foo) |)
 
-        elab : ∀ {A s} {Γ : Vector Ty s} →
-               U.[ uSystem sys , ∞ ] U.ctx _ Γ ⊢ A →
-               ∀ R → List ([ sys , ∞ ] ctx R Γ ⊢ A)
+        elab : ∀ {A s} {γ : Vector Ty s} →
+               U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A →
+               ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
         elab = semantics U.identity
           where open U.Semantics elab-sem
 
         elab-unique :
-          ∀ {A s} {Γ : Vector Ty s} →
-          (M : U.[ uSystem sys , ∞ ] U.ctx _ Γ ⊢ A) →
-          ∀ R → {_ : Lone (elab M R)} → [ sys , ∞ ] ctx R Γ ⊢ A
+          ∀ {A s} {γ : Vector Ty s} →
+          (M : U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A) →
+          ∀ R → {_ : Lone (elab M R)} → [ sys , ∞ ] ctx R γ ⊢ A
         elab-unique M R {l} with uM ∷ [] ← elab M R = uM

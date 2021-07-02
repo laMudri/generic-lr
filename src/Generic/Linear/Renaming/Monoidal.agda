@@ -33,17 +33,17 @@ module Generic.Linear.Renaming.Monoidal
   []ʳ : []ᶜ ⇒ʳ []ᶜ
   []ʳ = identity
 
-  _++ʳ_ : ∀ {PΓl PΓr QΔl QΔr} →
-    PΓl ⇒ʳ QΔl → PΓr ⇒ʳ QΔr → PΓl ++ᶜ PΓr ⇒ʳ QΔl ++ᶜ QΔr
+  _++ʳ_ : ∀ {Γl Γr Δl Δr} →
+    Γl ⇒ʳ Δl → Γr ⇒ʳ Δr → Γl ++ᶜ Γr ⇒ʳ Δl ++ᶜ Δr
   th ++ʳ ph = ++ᵉ
     (compose th extendʳ
       ✴⟨ +*-identity↘ _ ++₂ +*-identity↙ _ ⟩
      compose ph extendˡ)
 
-  ++-[]ʳ← : ∀ {PΓ} → PΓ ⇒ʳ PΓ ++ᶜ []ᶜ
+  ++-[]ʳ← : ∀ {Γ} → Γ ⇒ʳ Γ ++ᶜ []ᶜ
   ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
 
-  ++-[]ʳ→ : ∀ {PΓ} → PΓ ++ᶜ []ᶜ ⇒ʳ PΓ
+  ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
   ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
   ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
   ++-[]ʳ→ .sums = ⊴*-refl , _

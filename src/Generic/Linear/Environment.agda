@@ -26,7 +26,7 @@ module Generic.Linear.Environment
 
   private
     variable
-      PΓ QΔ RΘ : Ctx
+      Γ Δ : Ctx
       T : Ctx → Set
       ℓ : Level
       𝓥 : Scoped ℓ
@@ -34,17 +34,17 @@ module Generic.Linear.Environment
   -- TODO: this probably should be somewhere else.
   IsPresheaf : Scoped ℓ → Set ℓ
   IsPresheaf 𝓥 =
-    ∀ {s} {Γ : Vector Ty s} {P Q} →
-    Q ⊴* P → ∀[ 𝓥 (ctx P Γ) ⇒ 𝓥 (ctx Q Γ) ]
+    ∀ {s} {γ : Vector Ty s} {P Q} →
+    Q ⊴* P → ∀[ 𝓥 (ctx P γ) ⇒ 𝓥 (ctx Q γ) ]
 
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
 
-  record [_]_⇒ᵉ_ (𝓥 : Scoped ℓ) (PΓ QΔ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
+  record [_]_⇒ᵉ_ (𝓥 : Scoped ℓ) (Γ Δ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
     constructor pack
 
-    open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
-    open Ctx QΔ renaming (s to t; Γ to Δ; R to Q)
+    open Ctx Γ renaming (shape to s; ty-ctx to γ; use-ctx to P)
+    open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
       M : LinMor t s
@@ -53,7 +53,7 @@ module Generic.Linear.Environment
       Mᴿ = asLinRel .linRel
     field
       sums : Mᴿ .rel Q P
-      lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ Δ ∋_ ⇒ 𝓥 (ctx P′ Γ) ]
+      lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
 
     sums-⊴* : P ⊴* M .hom Q
     sums-⊴* = asLinRel .equiv .f sums
@@ -61,16 +61,16 @@ module Generic.Linear.Environment
   open [_]_⇒ᵉ_ public
 
   {- TODO: resurrect as an easy way to produce envs.
-  record _─Env (PΓ : Ctx) (𝓥 : Scoped ℓ) (QΔ : Ctx) : Set ℓ where
+  record _─Env (Γ : Ctx) (𝓥 : Scoped ℓ) (Δ : Ctx) : Set ℓ where
     constructor pack
 
-    open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
-    open Ctx QΔ renaming (s to t; Γ to Δ; R to Q)
+    open Ctx Γ renaming (shape to s; ty-ctx to γ; use-ctx to P)
+    open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
       M : LinMor s t
       sums : Q ⊴* M .hom P
       lookup : ∀ {A P′ Q′} → Q′ ⊴* M .hom P′ →
-        LVar A (ctx P′ Γ) → 𝓥 A (ctx Q′ Δ)
+        LVar A (ctx P′ γ) → 𝓥 A (ctx Q′ δ)
   open _─Env public
   -}

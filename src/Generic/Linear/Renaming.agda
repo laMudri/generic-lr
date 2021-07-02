@@ -28,11 +28,11 @@ module Generic.Linear.Renaming
     variable
       ℓ : Level
 
-  _⇒ʳ_ : (PΓ QΔ : Ctx) → Set₁
+  _⇒ʳ_ : (Γ Δ : Ctx) → Set₁
   _⇒ʳ_ = [ _∋_ ]_⇒ᵉ_
 
   □ʳ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
-  (□ʳ T) PΓ = ∀[ (_⇒ʳ PΓ) ⇒ T ]
+  (□ʳ T) Γ = ∀[ (_⇒ʳ Γ) ⇒ T ]
 
   Renameable : (Ctx → Set ℓ) → Set (suc 0ℓ ⊔ ℓ)
   Renameable T = ∀[ T ⇒ □ʳ T ]

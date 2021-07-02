@@ -17,19 +17,19 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   record SizedCtx (s : LTree) : Set where
     constructor sctx
     field
-      R : Vector Ann s
-      Γ : Vector Ty s
+      use-ctx : Vector Ann s
+      ty-ctx : Vector Ty s
 
   record Ctx : Set where
     constructor ctx
     field
-      {s} : LTree
-      R : Vector Ann s
-      Γ : Vector Ty s
+      {shape} : LTree
+      use-ctx : Vector Ann shape
+      ty-ctx : Vector Ty shape
 
-    ctx→sctx : SizedCtx s
-    ctx→sctx = sctx R Γ
-  open Ctx public using (ctx→sctx)
+    ctx→sctx : SizedCtx shape
+    ctx→sctx = sctx use-ctx ty-ctx
+  open Ctx public
 
   sctx→ctx : ∀ {s} → SizedCtx s → Ctx
   sctx→ctx (sctx P Γ) = ctx P Γ

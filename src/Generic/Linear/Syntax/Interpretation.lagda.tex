@@ -52,29 +52,29 @@ module Generic.Linear.Syntax.Interpretation
   infixr 9 _✴ᶜ_
   infixr 10 _·ᶜ_
 
-  _⊴ᶜ_ : (PΓ QΔ : Ctx) → Set
-  ctx {s} P Γ ⊴ᶜ ctx {t} Q Δ = Σ (s ≡ t) λ where
-    refl → P ⊴* Q × Γ ≡ Δ
+  _⊴ᶜ_ : (Γ Δ : Ctx) → Set
+  ctx {s} P γ ⊴ᶜ ctx {t} Q δ = Σ (s ≡ t) λ where
+    refl → P ⊴* Q × γ ≡ δ
 
   pattern !!_ PQ = refl , PQ , refl
 
-  _⇒ᵏᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (RΓ : Ctx) → Set (t ⊔ u)
-  (T ⇒ᵏᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ⇒ᵏ (λ Q → U (ctx Q Γ))) R
+  _⇒ᵏᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (Γ : Ctx) → Set (t ⊔ u)
+  (T ⇒ᵏᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ⇒ᵏ (λ Q → U (ctx Q γ))) R
 
   ℑᶜ : Ctx → Set ℓ
-  ℑᶜ (ctx R Γ) = ℑ R
+  ℑᶜ (ctx R γ) = ℑ R
 
-  _✴ᶜ_ : (T U : Ctx → Set ℓ) (RΓ : Ctx) → Set ℓ
-  (T ✴ᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ✴ (λ Q → U (ctx Q Γ))) R
+  _✴ᶜ_ : (T U : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  (T ✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ✴ (λ Q → U (ctx Q γ))) R
 
-  _─✴ᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (RΓ : Ctx) → Set (t ⊔ u)
-  (T ─✴ᶜ U) (ctx R Γ) = ((λ P → T (ctx P Γ)) ─✴ (λ Q → U (ctx Q Γ))) R
+  _─✴ᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (Γ : Ctx) → Set (t ⊔ u)
+  (T ─✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ─✴ (λ Q → U (ctx Q γ))) R
 
-  _·ᶜ_ : (r : Ann) (T : Ctx → Set ℓ) (RΓ : Ctx) → Set ℓ
-  (r ·ᶜ T) (ctx R Γ) = (r · (λ P → T (ctx P Γ))) R
+  _·ᶜ_ : (r : Ann) (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  (r ·ᶜ T) (ctx R γ) = (r · (λ P → T (ctx P γ))) R
 
-  Dupᶜ : (T : Ctx → Set ℓ) (RΓ : Ctx) → Set ℓ
-  Dupᶜ T (ctx R Γ) = Dup (λ P → T (ctx P Γ)) R
+  Dupᶜ : (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
 
   module WithScope (⟦_,_⊢_⟧ : Ctx → Scoped ℓ) where
 \end{code}
@@ -98,14 +98,14 @@ module Generic.Linear.Syntax.Interpretation
 %<*semr>
 \begin{code}
     ⟦_⟧r : Rule fl → Scoped ℓ
-    ⟦ ps =⇒ A′ ⟧r PΓ A = A′ ≡ A × ⟦ ps ⟧p PΓ
+    ⟦ ps =⇒ A′ ⟧r Γ A = A′ ≡ A × ⟦ ps ⟧p Γ
 \end{code}
 %</semr>
 
 %<*sems>
 \begin{code}
     ⟦_⟧s : System fl → Scoped ℓ
-    ⟦ L ▹ rs ⟧s PΓ A = Σ[ l ∈ L ] ⟦ rs l ⟧r PΓ A
+    ⟦ L ▹ rs ⟧s Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r Γ A
 \end{code}
 %</sems>
 

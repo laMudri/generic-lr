@@ -50,7 +50,7 @@ module Generic.Linear.Semantics.Syntactic
       v c : Level
       𝓥 : Scoped v
       𝓒 : Scoped c
-      PΓ QΔ RΘ : Ctx
+      Γ Δ Θ : Ctx
 
   record Kit (d : System fl) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
     field
@@ -84,7 +84,7 @@ module Generic.Linear.Semantics.Syntactic
   Ren : Semantics d _∋_ [ d , ∞ ]_⊢_
   Ren = kit→sem Ren-Kit
 
-  ren : PΓ ⇒ʳ QΔ → [ d , ∞ ] QΔ ⊢ A → [ d , ∞ ] PΓ ⊢ A
+  ren : Γ ⇒ʳ Δ → [ d , ∞ ] Δ ⊢ A → [ d , ∞ ] Γ ⊢ A
   ren ρ t = semantics Ren ρ t
 
   ren^⊢ : Renameable ([ d , ∞ ]_⊢ A)
@@ -103,13 +103,13 @@ module Generic.Linear.Semantics.Syntactic
   Sub : Semantics d [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
   Sub = kit→sem Sub-Kit
 
-  [_]_⇒ˢ_ : (d : System fl) (PΓ QΔ : Ctx) → Set₁
-  [ d ] PΓ ⇒ˢ QΔ = [ [ d , ∞ ]_⊢_ ] PΓ ⇒ᵉ QΔ
+  [_]_⇒ˢ_ : (d : System fl) (Γ Δ : Ctx) → Set₁
+  [ d ] Γ ⇒ˢ Δ = [ [ d , ∞ ]_⊢_ ] Γ ⇒ᵉ Δ
 
-  sub : [ d ] PΓ ⇒ˢ QΔ → [ d , ∞ ] QΔ ⊢ A → [ d , ∞ ] PΓ ⊢ A
+  sub : [ d ] Γ ⇒ˢ Δ → [ d , ∞ ] Δ ⊢ A → [ d , ∞ ] Γ ⊢ A
   sub σ t = semantics Sub σ t
 
-  -- _>>ˢ_ : Substitution d PΓ QΔ → Substitution d QΔ RΘ → Substitution d PΓ RΘ
+  -- _>>ˢ_ : Substitution d Γ Δ → Substitution d Δ Θ → Substitution d Γ Θ
   -- (ρ >>ˢ σ) .M = ρ .M *ᴹ σ .M
   -- (ρ >>ˢ σ) .sums = {!!}
   -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (⊴*-trans (ρ .sums) {!!}) (ρ .lookup v)))
@@ -120,13 +120,13 @@ module Generic.Linear.Semantics.Syntactic
 
     infix 5 _++ᵏ_
 
-    1ᵏ : [ 𝓥 ] PΓ ⇒ᵉ PΓ
+    1ᵏ : [ 𝓥 ] Γ ⇒ᵉ Γ
     1ᵏ .M = 1ᴹ
     1ᵏ .asLinRel = idAsLinRel
     1ᵏ .sums = ⊴*-refl
     1ᵏ .lookup le (lvar i q b) = K.var (lvar i q (⊴*-trans le b))
 
-    -- _>>ᵏ_ : (PΓ ─Env) 𝓥 QΔ → (QΔ ─Env) 𝓥 RΘ → (PΓ ─Env) 𝓥 RΘ
+    -- _>>ᵏ_ : (Γ ─Env) 𝓥 Δ → (Δ ─Env) 𝓥 Θ → (Γ ─Env) 𝓥 Θ
     -- (ρ >>ᵏ σ) .M = ρ .M *ᴹ σ .M
     -- (ρ >>ᵏ σ) .sums =
     --   ⊴*-trans {!((*ᴹ-mono ⊴ᴹ-refl (rowL₂ (ρ .sums))))!} (unrowL₂ (*ᴹ-*ᴹ-→ (row _) (ρ .M) (σ .M)))
@@ -135,8 +135,8 @@ module Generic.Linear.Semantics.Syntactic
     []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
     []ᵏ = 1ᵏ
 
-    _++ᵏ_ : ∀ {PΓl QΔl PΓr QΔr} →
-      [ 𝓥 ] PΓl ⇒ᵉ QΔl → [ 𝓥 ] PΓr ⇒ᵉ QΔr → [ 𝓥 ] PΓl ++ᶜ PΓr ⇒ᵉ QΔl ++ᶜ QΔr
+    _++ᵏ_ : ∀ {Γl Δl Γr Δr} →
+      [ 𝓥 ] Γl ⇒ᵉ Δl → [ 𝓥 ] Γr ⇒ᵉ Δr → [ 𝓥 ] Γl ++ᶜ Γr ⇒ᵉ Δl ++ᶜ Δr
     (ρ ++ᵏ σ) .M =
       [ [ ρ .M │  0ᴹ  ]
                ─
@@ -145,7 +145,7 @@ module Generic.Linear.Semantics.Syntactic
       [ [ ρ .asLinRel │  0AsLinRel  ]AsLinRel
                       ─
         [  0AsLinRel  │ σ .asLinRel ]AsLinRel ]AsLinRel
-    _++ᵏ_ {PΓl = ctx Pl Γl} {PΓr = ctx Pr Γr} ρ σ .sums =
+    _++ᵏ_ {Γl = ctx Pl γl} {Γr = ctx Pr γr} ρ σ .sums =
       _↘,_,↙_ {left = _ ++ _} {_ ++ _}
         (ρ .sums , ⊴*-refl)
         (+*-identity↘ _ ++₂ +*-identity↙ _)
@@ -184,14 +184,14 @@ module Generic.Linear.Semantics.Syntactic
 
     infix 5 _++ˢ_
 
-    1ˢ : [ d ] PΓ ⇒ˢ PΓ
+    1ˢ : [ d ] Γ ⇒ˢ Γ
     1ˢ = 1ᵏ
 
     []ˢ : [ d ] []ᶜ ⇒ˢ []ᶜ
     []ˢ = []ᵏ
 
-    _++ˢ_ : ∀ {PΓl QΔl PΓr QΔr} →
-      [ d ] PΓl ⇒ˢ QΔl → [ d ] PΓr ⇒ˢ QΔr → [ d ] PΓl ++ᶜ PΓr ⇒ˢ QΔl ++ᶜ QΔr
+    _++ˢ_ : ∀ {Γl Δl Γr Δr} →
+      [ d ] Γl ⇒ˢ Δl → [ d ] Γr ⇒ˢ Δr → [ d ] Γl ++ᶜ Γr ⇒ˢ Δl ++ᶜ Δr
     _++ˢ_ = _++ᵏ_
 
     [_·_]ˢ : ∀ {r s A B} →

@@ -28,8 +28,8 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
   open import Proposition
   open import Size
-  open import Relation.Unary using (IUniversal)
-  open import Relation.Unary.Checked
+  open import Relation.Nary
+  open import Relation.Unary.Checked as Chk using (Pred)
   open import Relation.Unary.Bunched.Checked
   open import Relation.Unary.Bunched.Properties
   open import Relation.Binary using (Setoid)
@@ -80,24 +80,24 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦ (_ , A) ⊸ B ⟧ = ⟦ A ⟧ → ⟦ B ⟧
 
   ⟦_⟧ᶜ : Ctx → Set
-  ⟦ ctx _ Γ ⟧ᶜ = Lift₁ ⟦_⟧ Γ
+  ⟦ ctx _ γ ⟧ᶜ = Lift₁ ⟦_⟧ γ
 
   ⟦Tm⟧ : Scoped 0ℓ
-  ⟦Tm⟧ PΓ A = ⟦ PΓ ⟧ᶜ → ⟦ A ⟧
+  ⟦Tm⟧ Γ A = ⟦ Γ ⟧ᶜ → ⟦ A ⟧
 
   open Semantics
-  open With-psh^𝓥 (λ {s} {Γ} {P} {Q} → psh^∋ {s} {Γ} {P} {Q})
+  open With-psh^𝓥 (λ {s} {γ} {P} {Q} → psh^∋ {s} {γ} {P} {Q})
 
   set : Semantics AnnArr _∋_ ⟦Tm⟧
   set .ren^𝓥 = ren^∋
-  set .var (lvar i ≡.refl _) γ = γ .get i
-  set .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) γ x =
-    m .get {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
+  set .var (lvar i ≡.refl _) γ0 = γ0 .get i
+  set .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) γ0 x =
+    m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
       .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
-      (γ ++₁ [ x ]₁)
-  set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ =
-    (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
-    (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ)
+      (γ0 ++₁ [ x ]₁)
+  set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ0 =
+    (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ0)
+    (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ0)
 
   myConst : (A B : Ty) → Term []ᶜ ((1# , A) ⊸ (0# , B) ⊸ A)
   myConst A B =
@@ -117,10 +117,10 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦ (_ , A) ⊸ B ⟧ˢ = ⟦ A ⟧ˢ ⇨ ⟦ B ⟧ˢ
 
   ⟦_⟧ˢᶜ : Ctx → Setoid 0ℓ 0ℓ
-  ⟦ ctx _ Γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ Γ
+  ⟦ ctx _ γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ γ
 
   ⟦Tm⟧ˢ : Scoped 0ℓ
-  ⟦Tm⟧ˢ PΓ A = ⟦ PΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
+  ⟦Tm⟧ˢ Γ A = ⟦ Γ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
 
   module _ where
 
@@ -128,20 +128,20 @@ module Generic.Linear.Example.AnnotatedArrow
 
     setoid : Semantics AnnArr _∋_ ⟦Tm⟧ˢ
     setoid .ren^𝓥 = ren^∋
-    setoid .var (lvar i ≡.refl _) ⟨$⟩ γ = γ .get i
+    setoid .var (lvar i ≡.refl _) ⟨$⟩ γ0 = γ0 .get i
     setoid .var (lvar i ≡.refl _) .cong γγ = γγ .get i
     -- TODO: lam case could be made better by Setoid currying.
-    setoid .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ ⟨$⟩ x =
-      m .get {ctx P Γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
+    setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ0 ⟨$⟩ x =
+      m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
         .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
-        ⟨$⟩ (γ ++₁ [ x ]₁)
-    setoid .alg {ctx P Γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ .cong xx =
+        ⟨$⟩ (γ0 ++₁ [ x ]₁)
+    setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ0 .cong xx =
       m .get _ .app✴ _ _ .cong (setoidL₁ ⟦_⟧ˢ _ .refl ++₁∼ [ xx ]₁∼)
     setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
       m .get _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
-    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ =
-      (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ) ⟨$⟩
-      (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ)
+    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ0 =
+      (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ0) ⟨$⟩
+      (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ0)
     setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
       m .get _ .app✴ _ _ .cong γγ (n .get _ .app✴ _ _ .cong γγ)
 
@@ -206,7 +206,7 @@ module Generic.Linear.Example.AnnotatedArrow
          !ᴿ r {B} S .rel (f .sem0 ⟨$⟩ x) (f .sem1 ⟨$⟩ y) ])
     (!ᴿ-⊴ : ∀ {r s A R x y} → r ⊴ s →
       ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ s R .rel x y ])
-    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R .rel x y ⇒ ℑ ])
+    (!ᴿ-0 : ∀ {r A R x y} → r ⊴ 0# → ∀[ !ᴿ r {A} R .rel x y Chk.⇒ ℑ ])
     (!ᴿ-+ : ∀ {r p q A R x y} → r ⊴ p + q →
       ∀[ !ᴿ r {A} R .rel x y ⇒ !ᴿ p R .rel x y ✴ !ᴿ q R .rel x y ])
     (!ᴿ-1 : ∀ {r A R x y} → r ⊴ 1# → ∀[ !ᴿ r {A} R .rel x y ⇒ R .rel x y ])
@@ -232,91 +232,91 @@ module Generic.Linear.Example.AnnotatedArrow
       rf .app✴ (∙-mono ≤-refl sub ≤-refl sp) aa
 
     module ⟦_⟧ᴿᶜ where
-      go : ∀ {s} R Γ → WRel _≤_ ⟦ ctx {s} R Γ ⟧ˢᶜ
+      go : ∀ {s} R γ → WRel _≤_ ⟦ ctx {s} R γ ⟧ˢᶜ
 
-      go {[-]} R Γ .rel (mk γ0) (mk γ1) =
-        !ᴿ (R here) ⟦ Γ here ⟧ᴿ .rel (γ0 here) (γ1 here)
-      go {[-]} R Γ .resp-≈ (mk p0) (mk p1) =
-        !ᴿ (R here) ⟦ Γ here ⟧ᴿ .resp-≈ (p0 here) (p1 here)
-      go {[-]} R Γ .subres sub r = !ᴿ-≤ sub r
+      go {[-]} R γ .rel (mk γ0) (mk γ1) =
+        !ᴿ (R here) ⟦ γ here ⟧ᴿ .rel (γ0 here) (γ1 here)
+      go {[-]} R γ .resp-≈ (mk p0) (mk p1) =
+        !ᴿ (R here) ⟦ γ here ⟧ᴿ .resp-≈ (p0 here) (p1 here)
+      go {[-]} R γ .subres sub r = !ᴿ-≤ sub r
 
-      go {ε} R Γ .rel γ0 γ1 = ℑ
-      go {ε} R Γ .resp-≈ p0 p1 = id
-      go {ε} R Γ .subres sub ℑ⟨ sp ⟩ = ℑ⟨ ε-mono sub sp ⟩
+      go {ε} R γ .rel γ0 γ1 = ℑ
+      go {ε} R γ .resp-≈ p0 p1 = id
+      go {ε} R γ .subres sub ℑ⟨ sp ⟩ = ℑ⟨ ε-mono sub sp ⟩
 
-      go {s <+> t} R Γ .rel (mk γ0) (mk γ1) =
-        go (R ∘ ↙) (Γ ∘ ↙) .rel (mk (γ0 ∘ ↙)) (mk (γ1 ∘ ↙)) ✴
-        go (R ∘ ↘) (Γ ∘ ↘) .rel (mk (γ0 ∘ ↘)) (mk (γ1 ∘ ↘))
-      go {s <+> t} R Γ .resp-≈ (mk p0) (mk p1) = map-✴
-        ( go (R ∘ ↙) (Γ ∘ ↙) .resp-≈ (mk (p0 ∘ ↙)) (mk (p1 ∘ ↙))
-        , go (R ∘ ↘) (Γ ∘ ↘) .resp-≈ (mk (p0 ∘ ↘)) (mk (p1 ∘ ↘))
+      go {s <+> t} R γ .rel (mk γ0) (mk γ1) =
+        go (R ∘ ↙) (γ ∘ ↙) .rel (mk (γ0 ∘ ↙)) (mk (γ1 ∘ ↙)) ✴
+        go (R ∘ ↘) (γ ∘ ↘) .rel (mk (γ0 ∘ ↘)) (mk (γ1 ∘ ↘))
+      go {s <+> t} R γ .resp-≈ (mk p0) (mk p1) = map-✴
+        ( go (R ∘ ↙) (γ ∘ ↙) .resp-≈ (mk (p0 ∘ ↙)) (mk (p1 ∘ ↙))
+        , go (R ∘ ↘) (γ ∘ ↘) .resp-≈ (mk (p0 ∘ ↘)) (mk (p1 ∘ ↘))
         )
-      go {s <+> t} R Γ .subres sub (rl ✴⟨ sp ⟩ rr) =
+      go {s <+> t} R γ .subres sub (rl ✴⟨ sp ⟩ rr) =
         rl ✴⟨ ∙-mono sub ≤-refl ≤-refl sp ⟩ rr
 
-    ⟦_⟧ᴿᶜ : ∀ RΓ → WRel _≤_ ⟦ RΓ ⟧ˢᶜ
-    ⟦ ctx R Γ ⟧ᴿᶜ = ⟦_⟧ᴿᶜ.go R Γ
+    ⟦_⟧ᴿᶜ : ∀ Rγ → WRel _≤_ ⟦ Rγ ⟧ˢᶜ
+    ⟦ ctx R γ ⟧ᴿᶜ = ⟦_⟧ᴿᶜ.go R γ
 
-    ⟦⊴⟧ᴿᶜ : ∀ {s P Q Γ} → P ⊴* Q →
-            ∀ {γ0 γ1} →
-            ∀[ ⟦ ctx {s} P Γ ⟧ᴿᶜ .rel γ0 γ1 ⇒ ⟦ ctx Q Γ ⟧ᴿᶜ .rel γ0 γ1 ]
+    ⟦⊴⟧ᴿᶜ : ∀ {s P Q γ} → P ⊴* Q →
+      ∀[ ⟦ ctx {s} P γ ⟧ᴿᶜ .rel ⇒ ⟦ ctx Q γ ⟧ᴿᶜ .rel ]
     ⟦⊴⟧ᴿᶜ {[-]} (mk le) = !ᴿ-⊴ (le here)
     ⟦⊴⟧ᴿᶜ {ε} le = id
     ⟦⊴⟧ᴿᶜ {s <+> t} (mk le) =
       map-✴ (⟦⊴⟧ᴿᶜ (mk (le ∘ ↙)) , ⟦⊴⟧ᴿᶜ (mk (le ∘ ↘)))
 
     {- Interesting, but unnecessary
-    ⟦Tm⟧ᴿ : (A : Ty) (RΓ : Ctx) → WRel _≤_ (⟦ RΓ ⟧ˢᶜ ⇨ ⟦ A ⟧ˢ)
-    ⟦Tm⟧ᴿ A RΓ .rel m0 m1 = I⋂ (_ × _) \ (γ0 , γ1) →
-      ⟦ RΓ ⟧ᴿᶜ .rel γ0 γ1 ⇒ᵏ ⟦ A ⟧ᴿ .rel (m0 ⟨$⟩ γ0) (m1 ⟨$⟩ γ1)
-    ⟦Tm⟧ᴿ A RΓ .resp-≈ p0 p1 mm le γγ =
-      ⟦ A ⟧ᴿ .resp-≈ (p0 RΓ.refl) (p1 RΓ.refl) (mm le γγ)
-      where module RΓ = Setoid ⟦ RΓ ⟧ˢᶜ
-    ⟦Tm⟧ᴿ A RΓ .subres sub mm le γγ = mm (≤-trans le sub) γγ
+    ⟦Tm⟧ᴿ : (A : Ty) (Rγ : Ctx) → WRel _≤_ (⟦ Rγ ⟧ˢᶜ ⇨ ⟦ A ⟧ˢ)
+    ⟦Tm⟧ᴿ A Rγ .rel m0 m1 = I⋂ (_ × _) \ (γ0 , γ1) →
+      ⟦ Rγ ⟧ᴿᶜ .rel γ0 γ1 ⇒ᵏ ⟦ A ⟧ᴿ .rel (m0 ⟨$⟩ γ0) (m1 ⟨$⟩ γ1)
+    ⟦Tm⟧ᴿ A Rγ .resp-≈ p0 p1 mm le γγ =
+      ⟦ A ⟧ᴿ .resp-≈ (p0 Rγ.refl) (p1 Rγ.refl) (mm le γγ)
+      where module Rγ = Setoid ⟦ Rγ ⟧ˢᶜ
+    ⟦Tm⟧ᴿ A Rγ .subres sub mm le γγ = mm (≤-trans le sub) γγ
     -}
 
-    ⟦Tm⟧-rel : (A : Ty) (RΓ : Ctx) (m0 m1 : ⟦ RΓ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ) → W → Set
-    ⟦Tm⟧-rel A RΓ m0 m1 = I⋂ (_ × _) \ (γ0 , γ1) →
-      ⟦ RΓ ⟧ᴿᶜ .rel γ0 γ1 ⇒ ⟦ A ⟧ᴿ .rel (m0 ⟨$⟩ γ0) (m1 ⟨$⟩ γ1)
+    ⟦Tm⟧-rel : (A : Ty) (Rγ : Ctx) (m0 m1 : ⟦ Rγ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ) → W → Set
+    ⟦Tm⟧-rel A Rγ m0 m1 = I⋂ (_ × _) \ (γ0 , γ1) →
+      ⟦ Rγ ⟧ᴿᶜ .rel γ0 γ1 ⇒ ⟦ A ⟧ᴿ .rel (m0 ⟨$⟩ γ0) (m1 ⟨$⟩ γ1)
 
-    lemma-ℑ : ∀ {s R Γ γ δ} → R ⊴* 0* → ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ δ ⇒ ℑ ]
+    lemma-ℑ : ∀ {s R γ γ0 γ1} → R ⊴* 0* →
+      ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 Chk.⇒ ℑ ]
     lemma-ℑ {[-]} (mk sp) = !ᴿ-0 (sp here)
     lemma-ℑ {ε} sp = id
     lemma-ℑ {s <+> t} (mk sp) =
       1✴1→ ∘ map-✴ (lemma-ℑ (mk (sp ∘ ↙)) , lemma-ℑ (mk (sp ∘ ↘)))
 
-    lemma-✴ : ∀ {s R P Q Γ γ δ} → R ⊴* P +* Q →
-              ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ δ ⇒
-                 ⟦ ctx P Γ ⟧ᴿᶜ .rel γ δ ✴ ⟦ ctx Q Γ ⟧ᴿᶜ .rel γ δ ]
+    lemma-✴ : ∀ {s R P Q γ γ0 γ1} → R ⊴* P +* Q →
+      ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 ⇒
+         ⟦ ctx P γ ⟧ᴿᶜ .rel γ0 γ1 ✴ ⟦ ctx Q γ ⟧ᴿᶜ .rel γ0 γ1 ]
     lemma-✴ {[-]} (mk sp) = !ᴿ-+ (sp here)
     lemma-✴ {ε} sp = 1✴1←
     lemma-✴ {s <+> t} (mk sp) =
       inter-✴ ∘ map-✴ (lemma-✴ (mk (sp ∘ ↙)) , lemma-✴ (mk (sp ∘ ↘)))
 
-    lemma-!ᴿ : ∀ {s R r Q Γ γ0 γ1} → R ⊴* r *ₗ Q →
-               ∀[ ⟦ ctx {s} R Γ ⟧ᴿᶜ .rel γ0 γ1 ⇒ !ᴿ r ⟦ ctx Q Γ ⟧ᴿᶜ .rel γ0 γ1 ]
-    lemma-!ᴿ {[-]} {Q = Q} {Γ} (mk sp) =
-      !ᴿ _ ⟦ ctx Q Γ ⟧ᴿᶜ .resp-≈ ([-]₁η (λ {A} → ⟦_⟧ˢ.refl A))
+    lemma-!ᴿ : ∀ {s R r Q γ γ0 γ1} → R ⊴* r *ₗ Q →
+      ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 ⇒ !ᴿ r ⟦ ctx Q γ ⟧ᴿᶜ .rel γ0 γ1 ]
+    lemma-!ᴿ {[-]} {Q = Q} {γ} (mk sp) =
+      !ᴿ _ ⟦ ctx Q γ ⟧ᴿᶜ .resp-≈ ([-]₁η (λ {A} → ⟦_⟧ˢ.refl A))
                                  ([-]₁η (λ {A} → ⟦_⟧ˢ.refl A))
       ∘′ !ᴿ-map f
       ∘′ !ᴿ-* (sp here)
       where
       module ⟦_⟧ˢ A = Setoid ⟦ A ⟧ˢ
 
-      f : WRelMor (!ᴿ (Q here) ⟦ Γ here ⟧ᴿ) ⟦ ctx Q Γ ⟧ᴿᶜ
+      f : WRelMor (!ᴿ (Q here) ⟦ γ here ⟧ᴿ) ⟦ ctx Q γ ⟧ᴿᶜ
       f .sem0 = [-]₁ˢ {S = ⟦_⟧ˢ}
       f .sem1 = [-]₁ˢ {S = ⟦_⟧ˢ}
       f .semsem = id
-    lemma-!ᴿ {ε} {Q = Q} {Γ} sp = !ᴿ-map f ∘ !ᴿ-ℑ
+    lemma-!ᴿ {ε} {Q = Q} {γ} sp = !ᴿ-map f ∘ !ᴿ-ℑ
       where
-      module QΓ = Setoid ⟦ ctx Q Γ ⟧ˢᶜ
+      module Qγ = Setoid ⟦ ctx Q γ ⟧ˢᶜ
 
-      f : WRelMor Iᴿ ⟦ ctx Q Γ ⟧ᴿᶜ
-      f .sem0 = record { cong = λ _ → QΓ.refl }
-      f .sem1 = record { cong = λ _ → QΓ.refl }
+      f : WRelMor Iᴿ ⟦ ctx Q γ ⟧ᴿᶜ
+      f .sem0 = record { cong = λ _ → Qγ.refl }
+      f .sem1 = record { cong = λ _ → Qγ.refl }
       f .semsem = id
-    lemma-!ᴿ {s <+> t} {Q = Q} {Γ} (mk sp) =
-      !ᴿ _ ⟦ ctx Q Γ ⟧ᴿᶜ .resp-≈ (++₁η (λ {A} → ⟦_⟧ˢ.refl A))
+    lemma-!ᴿ {s <+> t} {Q = Q} {γ} (mk sp) =
+      !ᴿ _ ⟦ ctx Q γ ⟧ᴿᶜ .resp-≈ (++₁η (λ {A} → ⟦_⟧ˢ.refl A))
                                  (++₁η (λ {A} → ⟦_⟧ˢ.refl A))
       ∘′ !ᴿ-map f
       ∘′ !ᴿ-✴
@@ -324,7 +324,7 @@ module Generic.Linear.Example.AnnotatedArrow
       where
       open module ⟦_⟧ˢ A = Setoid ⟦ A ⟧ˢ
 
-      f : WRelMor (⟦ _ ⟧ᴿᶜ ⊗ᴿ ⟦ _ ⟧ᴿᶜ) ⟦ ctx Q Γ ⟧ᴿᶜ
+      f : WRelMor (⟦ _ ⟧ᴿᶜ ⊗ᴿ ⟦ _ ⟧ᴿᶜ) ⟦ ctx Q γ ⟧ᴿᶜ
       f .sem0 = ++₁ˢ {S = ⟦_⟧ˢ}
       f .sem1 = ++₁ˢ {S = ⟦_⟧ˢ}
       f .semsem = id
@@ -333,7 +333,7 @@ module Generic.Linear.Example.AnnotatedArrow
     ◇-alg R (◇⟨ sub ⟩ xy) = R .subres sub xy
 
     ⟦Tm⟧ᴿ : Scoped 0ℓ
-    ⟦Tm⟧ᴿ RΓ A = WRelMor ⟦ RΓ ⟧ᴿᶜ ⟦ A ⟧ᴿ
+    ⟦Tm⟧ᴿ Rγ A = WRelMor ⟦ Rγ ⟧ᴿᶜ ⟦ A ⟧ᴿ
 
     wrel : Semantics AnnArr _∋_ ⟦Tm⟧ᴿ
     wrel .ren^𝓥 = ren^∋
@@ -341,17 +341,17 @@ module Generic.Linear.Example.AnnotatedArrow
     wrel .var v .sem1 = setoid .var v
     wrel .var v .semsem = go v
       where
-      -- η-expand RΓ to satisfy termination checker (s gets smaller).
-      go : ∀ {A s R Γ} (let RΓ = ctx {s} R Γ) (v : RΓ ∋ A) →
-           ∀[ ⟦Tm⟧-rel A RΓ (setoid .var v) (setoid .var v) ]
+      -- η-expand Rγ to satisfy termination checker (s gets smaller).
+      go : ∀ {A s R γ} (let Rγ = ctx {s} R γ) (v : Rγ ∋ A) →
+           ∀[ ⟦Tm⟧-rel A Rγ (setoid .var v) (setoid .var v) ]
       go (lvar here ≡.refl (mk le)) = !ᴿ-1 (le here)
-      go {Γ = Γ} (lvar (↙ i) ≡.refl (mk le)) = ◇-alg ⟦ Γ (↙ i) ⟧ᴿ ∘′ ✴-1→ ∘′
+      go {γ = γ} (lvar (↙ i) ≡.refl (mk le)) = ◇-alg ⟦ γ (↙ i) ⟧ᴿ ∘′ ✴-1→ ∘′
         map-✴ (go (lvar i ≡.refl (mk (le ∘ ↙))) , lemma-ℑ (mk (le ∘ ↘)))
-      go {Γ = Γ} (lvar (↘ i) ≡.refl (mk le)) = ◇-alg ⟦ Γ (↘ i) ⟧ᴿ ∘′ 1-✴→ ∘′
+      go {γ = γ} (lvar (↘ i) ≡.refl (mk le)) = ◇-alg ⟦ γ (↘ i) ⟧ᴿ ∘′ 1-✴→ ∘′
         map-✴ (lemma-ℑ (mk (le ∘ ↙)) , go (lvar i ≡.refl (mk (le ∘ ↘))))
     wrel .alg mm .sem0 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem0) mm)
     wrel .alg mm .sem1 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem1) mm)
-    wrel .alg {ctx R Γ} (`lam (r , A) B , ≡.refl , mm)
+    wrel .alg {ctx R γ} (`lam (r , A) B , ≡.refl , mm)
       .semsem γγ .app✴ sp xx =
       mm .get _ .app✴ _ _ .semsem
         (⟦⊴⟧ᴿᶜ {P = R} (mk (λ i → ⊴-trans (+.identity-→ .proj₂ _)
@@ -360,8 +360,8 @@ module Generic.Linear.Example.AnnotatedArrow
          ✴⟨ sp ⟩
          !ᴿ-⊴ (⊴-trans (*.identity .proj₂ _) (+.identity-← .proj₁ _)) xx)
     wrel .alg (`app rA B , ≡.refl , mm ✴⟨ sp+ ⟩ (⟨ sp* ⟩· nn)) .semsem γγ =
-      let Pγγ ✴⟨ ⟦sp+⟧ ⟩ rQγγ = lemma-✴ sp+ γγ in
-      mm .get _ .app✴ _ _ .semsem Pγγ .app✴ ⟦sp+⟧
+      let γγ ✴⟨ ⟦sp+⟧ ⟩ rQγγ = lemma-✴ sp+ γγ in
+      mm .get _ .app✴ _ _ .semsem γγ .app✴ ⟦sp+⟧
         (!ᴿ-map
           (nn .get _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
           (lemma-!ᴿ sp* rQγγ))

@@ -45,10 +45,10 @@ module Generic.Linear.Semantics
       fl : PremisesFlags
       𝓥 : Scoped v
       𝓒 : Scoped c
-      RΘ : Ctx
+      Θ : Ctx
 
   Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) → Ctx → Scoped _
-  Kripke = Wrap λ 𝓥 𝓒 PΓ QΔ A → □ʳ (([ 𝓥 ]_⇒ᵉ PΓ) ─✴ᶜ _⟨ 𝓒 ⟩⊢ A) QΔ
+  Kripke = Wrap λ 𝓥 𝓒 Γ Δ A → □ʳ (([ 𝓥 ]_⇒ᵉ Γ) ─✴ᶜ _⟨ 𝓒 ⟩⊢ A) Δ
 
   mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
           ∀[ 𝓒 ⇒ 𝓒′ ] → ∀[ Kripke 𝓥 𝓒 ⇒ Kripke 𝓥 𝓒′ ]
@@ -65,12 +65,12 @@ module Generic.Linear.Semantics
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
     open With-psh^𝓥 psh^𝓥
 
-    [_]_⇒ᶜ_ : (𝓒′ : Scoped ℓ) (PΓ QΔ : Ctx) → Set ℓ
-    [ 𝓒′ ] PΓ ⇒ᶜ QΔ = ∀ {sz} → ∀[ [ d , sz ] QΔ ⊢_ ⇒ 𝓒′ PΓ ]
+    [_]_⇒ᶜ_ : (𝓒′ : Scoped ℓ) (Γ Δ : Ctx) → Set ℓ
+    [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → ∀[ [ d , sz ] Δ ⊢_ ⇒ 𝓒′ Γ ]
 
-    semantics : ∀ {PΓ QΔ} → [ 𝓥 ] PΓ ⇒ᵉ QΔ → [ 𝓒 ] PΓ ⇒ᶜ QΔ
-    body : ∀ {PΓ QΔ sz} → [ 𝓥 ] PΓ ⇒ᵉ QΔ → ∀ {RΘ} →
-      ∀[ Scope [ d , sz ]_⊢_ RΘ QΔ ⇒ Kripke 𝓥 𝓒 RΘ PΓ ]
+    semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → [ 𝓒 ] Γ ⇒ᶜ Δ
+    body : ∀ {Γ Δ sz} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {Θ} →
+      ∀[ Scope [ d , sz ]_⊢_ Θ Δ ⇒ Kripke 𝓥 𝓒 Θ Γ ]
 
     semantics ρ (`var v) = var (ρ .lookup (ρ .sums) v)
     semantics ρ (`con {sz = sz} t) =

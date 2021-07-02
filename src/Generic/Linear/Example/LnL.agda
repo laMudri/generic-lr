@@ -162,7 +162,7 @@ module Generic.Linear.Example.LnL where
 
   map-IntDup : ∀[ S ⇒ T ] → ∀ {A} → ∀[ IntDup S A ⇒ IntDup T A ]
   map-IntDup f (lin s) = lin (f s)
-  map-IntDup f (int s) = int (map-□ (λ {PΓ} → f {PΓ}) s)
+  map-IntDup f (int s) = int (map-□ (λ {Γ} → f {Γ}) s)
 
   th^IntDup : Thinnable T → ∀ {A} → Thinnable (IntDup T A)
   th^IntDup th^T (lin t) th = lin (th^T t th)
@@ -189,7 +189,7 @@ module Generic.Linear.Example.LnL where
   IntDupSem .alg (`⊸e A B , refl , t) = lin tt
   IntDupSem .alg (`Fi X , refl , t) = lin tt
   IntDupSem .alg (`Fe X C , refl , t) = lin tt
-  IntDupSem .alg {x = PΓ} (`1i , refl , t) = int (map-□ (λ _ → tt) {PΓ} t)
+  IntDupSem .alg {x = Γ} (`1i , refl , t) = int (map-□ (λ _ → tt) {Γ} t)
   IntDupSem .alg (`×i X Y , refl , t) =
     int (map-□ {S = Kripke _ _ _ _ ∩ Kripke _ _ _ _} (λ _ → tt) t)
   IntDupSem .alg (`×e i X Y , refl , t) =

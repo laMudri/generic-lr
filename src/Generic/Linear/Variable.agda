@@ -21,13 +21,13 @@ module Generic.Linear.Variable
 
   infix 20 _∋_
 
-  record _∋_ (PΓ : Ctx) (A : Ty) : Set where
+  record _∋_ (Γ : Ctx) (A : Ty) : Set where
     constructor lvar
 
-    open Ctx PΓ renaming (s to s; Γ to Γ; R to P)
+    open Ctx Γ renaming (shape to s; ty-ctx to γ; use-ctx to P)
 
     field
       idx : Ptr s
-      tyq : Γ idx ≡ A
+      tyq : γ idx ≡ A
       basis : P ⊴* ⟨ idx ∣
   open _∋_ public

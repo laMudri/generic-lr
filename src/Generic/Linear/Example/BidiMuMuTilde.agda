@@ -190,14 +190,14 @@ module Generic.Linear.Example.BidiMuMuTilde where
       Typing : ∀ {s} → Vector Untyped.Conc s → Set
       Typing = Lift₁ (maybe (uncurry λ _ p → Ty p) ⊥)
 
-      ⌞_⌟ : ∀ {s uΓ} → Typing {s} uΓ → Vector Typed.Conc s
-      ⌞_⌟ {s} {uΓ} Γ i with uΓ i | Γ .get i
+      ⌞_⌟ : ∀ {s uγ} → Typing {s} uγ → Vector Typed.Conc s
+      ⌞_⌟ {s} {uγ} γ i with uγ i | γ .get i
       ... | just (syn , p) | A = Typed.syn A
       ... | just (chk , q) | A = Typed.chk A q
 
-      Elab : ∀ {ℓ} → Typed.Scoped ℓ → ∀ {s uΓ} →
-             Typed.Conc → Vector Ann s → Typing {s} uΓ → Set ℓ
-      Elab T 𝓙 R Γ = T (Typed.ctx R ⌞ Γ ⌟) 𝓙
+      Elab : ∀ {ℓ} → Typed.Scoped ℓ → ∀ {s uγ} →
+             Typed.Conc → Vector Ann s → Typing {s} uγ → Set ℓ
+      Elab T 𝓙 R γ = T (Typed.ctx R ⌞ γ ⌟) 𝓙
 
       untyConc : Typed.Conc → Untyped.Conc
       untyConc Typed.com = nothing
@@ -205,27 +205,27 @@ module Generic.Linear.Example.BidiMuMuTilde where
       untyConc (Typed.chk A q) = just (chk , q)
 
       untyCtx : Typed.Ctx → Untyped.Ctx
-      untyCtx (Typed.ctx R Γ) = Untyped.ctx R (untyConc ∘ Γ)
+      untyCtx (Typed.ctx R γ) = Untyped.ctx R (untyConc ∘ γ)
 
       data 𝓥 : Untyped.Scoped 0ℓ where
-        vr : ∀ {p A RΓ} → RΓ Typed.∋ Typed.syn {p} A →
-             𝓥 (untyCtx RΓ) (just (syn , p))
+        vr : ∀ {p A Γ} → Γ Typed.∋ Typed.syn {p} A →
+             𝓥 (untyCtx Γ) (just (syn , p))
 
       𝓒′ : Typed.Ctx → Untyped.Conc → Set
-      𝓒′ RΓ nothing = TypedTm RΓ Typed.com
-      𝓒′ RΓ (just (syn , p)) = ∃ \ A → TypedTm RΓ (Typed.syn {p} A)
-      𝓒′ RΓ (just (chk , q)) = ∀ {p} A → TypedTm RΓ (Typed.chk {p} A q)
+      𝓒′ Γ nothing = TypedTm Γ Typed.com
+      𝓒′ Γ (just (syn , p)) = ∃ \ A → TypedTm Γ (Typed.syn {p} A)
+      𝓒′ Γ (just (chk , q)) = ∀ {p} A → TypedTm Γ (Typed.chk {p} A q)
 
       𝓒 : Untyped.Scoped _
-      𝓒 (Untyped.ctx R uΓ) 𝓙 =
-        Maybe $ ∀ Γ → untyConc ∘ Γ ≗ uΓ → 𝓒′ (Typed.ctx R Γ) 𝓙
+      𝓒 (Untyped.ctx R uγ) 𝓙 =
+        Maybe $ ∀ γ → untyConc ∘ γ ≗ uγ → 𝓒′ (Typed.ctx R γ) 𝓙
 
       open Untyped.Semantics
 
       tyelab : Untyped.Semantics Untyped 𝓥 𝓒
       tyelab .ren^𝓥 = {!!}
-      tyelab .var (vr {A = A} {RΓ′} (Typed.lvar i q b)) =
-        just λ Γ Γq → A , `var (Typed.lvar i (≡.trans {!Γq i!} q) b)
+      tyelab .var (vr {A = A} {Γ′} (Typed.lvar i q b)) =
+        just λ γ γq → A , `var (Typed.lvar i (≡.trans {!γq i!} q) b)
         -- go {nothing} (Untyped.lvar i eq b) = {!!}
         -- go {just (syn , p)} (Untyped.lvar i eq b) =
         --   _ , `var (Typed.lvar i (lemma eq .proj₂) b)
@@ -237,22 +237,22 @@ module Generic.Linear.Example.BidiMuMuTilde where
       tyelab .alg = {!!}
 
       {-
-      synth : ∀ {p s R} Γ → let RΓ = Typed.ctx {s} R Γ in
-              Untyped.UntypedTm (just (syn , p)) (untyCtx RΓ) →
-              Maybe (∃ \ A → Typed.TypedTm (Typed.syn {p} A) RΓ)
-      check : ∀ {p q s R} Γ A → let RΓ = Typed.ctx {s} R Γ in
-              Untyped.UntypedTm (just (chk , q)) (untyCtx RΓ) →
-              Maybe (Typed.TypedTm (Typed.chk {p} A q) RΓ)
+      synth : ∀ {p s R} γ → let Γ = Typed.ctx {s} R γ in
+              Untyped.UntypedTm (just (syn , p)) (untyCtx Γ) →
+              Maybe (∃ \ A → Typed.TypedTm (Typed.syn {p} A) Γ)
+      check : ∀ {p q s R} γ A → let Γ = Typed.ctx {s} R γ in
+              Untyped.UntypedTm (just (chk , q)) (untyCtx Γ) →
+              Maybe (Typed.TypedTm (Typed.chk {p} A q) Γ)
 
-      synth Γ (`var (Untyped.lvar i q b)) =
+      synth γ (`var (Untyped.lvar i q b)) =
         just (_ , `var (Typed.lvar i (lemma q .proj₂) b))
         where
         lemma : ∀ {𝓙 p} →
                 untyConc 𝓙 ≡ just (syn , p) → ∃ \ A → 𝓙 ≡ Typed.syn {p} A
         lemma {Typed.syn A} ≡.refl = _ , ≡.refl
-      synth Γ (`con (Untyped.ann A , q , M)) = M.map {!A ,_!} (check Γ A {!M!})
+      synth γ (`con (Untyped.ann A , q , M)) = M.map {!A ,_!} (check γ A {!M!})
 
-      check Γ A M = {!!}
+      check γ A M = {!!}
       -}
 
       -- check : ∃₂ Untyped.UntypedTm →
