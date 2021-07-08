@@ -2,7 +2,6 @@
 
 open import Algebra.Po
 open import Level
-open import Relation.Binary using (Rel)
 
 module Generic.Linear.Environment
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
@@ -49,8 +48,7 @@ module Generic.Linear.Environment
     field
       M : LinMor t s
       asLinRel : AsLinRel M 0ℓ
-    private
-      Mᴿ = asLinRel .linRel
+    Mᴿ = asLinRel .linRel
     field
       sums : Mᴿ .rel Q P
       lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
