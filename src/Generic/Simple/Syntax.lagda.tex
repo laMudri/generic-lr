@@ -21,8 +21,8 @@ module Generic.Simple.Syntax (Ty : Set) where
   record Ctx : Set where
     constructor ctx
     field
-      {size} : LTree
-      tys : Vector Ty size
+      {shape} : LTree
+      ty-ctx : Vector Ty shape
   open Ctx public
 
   []ᶜ : Ctx
@@ -97,7 +97,7 @@ module Generic.Simple.Syntax (Ty : Set) where
             (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →
             (⟦ ps ⟧p X Γ → ⟦ ps ⟧p Y Δ)
     map-p ⟨ Γ `⊢ A ⟩ f t = f t
-    map-p `⊤ f tt = tt
+    map-p `⊤ f _ = _
     map-p (ps `∧ qs) f (s , t) = map-p ps f s , map-p qs f t
 
     map-r : (r : Rule) →
