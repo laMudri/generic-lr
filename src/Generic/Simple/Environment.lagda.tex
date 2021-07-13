@@ -22,8 +22,8 @@ module Generic.Simple.Environment (Ty : Set) where
   record Var (A : Ty) (Γ : Ctx) : Set where
     constructor var
     field
-      idx : Ptr (Γ .size)
-      tyq : Γ .tys idx ≡ A
+      idx : Ptr (Γ .shape)
+      tyq : Γ .ty-ctx idx ≡ A
   open Var public
 
   record _─Env (Γ : Ctx) (𝓥 : Scoped ℓ) (Δ : Ctx) : Set ℓ where
