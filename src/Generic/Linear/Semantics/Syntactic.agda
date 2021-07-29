@@ -7,11 +7,7 @@ module Generic.Linear.Semantics.Syntactic
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann
-             ; _≤_ to _⊴_
-             ; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans
-             )
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Po.Relation
   open import Algebra.Relational
@@ -112,7 +108,7 @@ module Generic.Linear.Semantics.Syntactic
   -- _>>ˢ_ : Substitution d Γ Δ → Substitution d Δ Θ → Substitution d Γ Θ
   -- (ρ >>ˢ σ) .M = ρ .M *ᴹ σ .M
   -- (ρ >>ˢ σ) .sums = {!!}
-  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (⊴*-trans (ρ .sums) {!!}) (ρ .lookup v)))
+  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (≤*-trans (ρ .sums) {!!}) (ρ .lookup v)))
 
   module WithKit (K : Kit d 𝓥) where
     private
@@ -124,8 +120,8 @@ module Generic.Linear.Semantics.Syntactic
     1ᵏ : [ 𝓥 ] Γ ⇒ᵉ Γ
     1ᵏ .M = 1ᴹ
     1ᵏ .asLinRel = idAsLinRel
-    1ᵏ .sums = ⊴*-refl
-    1ᵏ .lookup le (lvar i q b) = K.var (lvar i q (⊴*-trans le b))
+    1ᵏ .sums = ≤*-refl
+    1ᵏ .lookup le (lvar i q b) = K.var (lvar i q (≤*-trans le b))
 
     []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
     []ᵏ = []ᵉ ℑ⟨ []ₙ ⟩
@@ -138,8 +134,8 @@ module Generic.Linear.Semantics.Syntactic
       ren^Env K.ren^𝓥 σ extendˡ
 
     [_·_]ᵏ : ∀ {r s A B} →
-      r ⊴ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
-    [ le · t ]ᵏ = [-]ᵉ (⟨ [ ⊴-trans le (*.identity .proj₂ _) ]ₙ ⟩· t)
+      r ≤ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
+    [ le · t ]ᵏ = [-]ᵉ (⟨ [ ≤-trans le (*.identity .proj₂ _) ]ₙ ⟩· t)
 
   module _ {fl d} where
     open WithKit (Sub-Kit {fl} {d})
@@ -157,5 +153,5 @@ module Generic.Linear.Semantics.Syntactic
     _++ˢ_ = _++ᵏ_
 
     [_·_]ˢ : ∀ {r s A B} →
-      r ⊴ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
+      r ≤ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
     [_·_]ˢ = [_·_]ᵏ

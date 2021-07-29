@@ -5,11 +5,7 @@ open import Level using (0ℓ; suc; _⊔_)
 
 module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann
-             ; _≤_ to _⊴_
-             ; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans; ≤-reflexive to ⊴-reflexive
-             )
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Po.Construct.Vector as APCV
     using (Vector-poLeftSemimodule; id-PoSemiringMor)
@@ -37,10 +33,10 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
       s t : LTree
       P Q R : Vector Ann s
 
-  ⊴*-refl : P ⊴* P
-  ⊴*-refl .get i = ⊴-refl
-  ⊴*-trans : P ⊴* Q → Q ⊴* R → P ⊴* R
-  ⊴*-trans PQ QR .get i = ⊴-trans (PQ .get i) (QR .get i)
+  ≤*-refl : P ≤* P
+  ≤*-refl .get i = ≤-refl
+  ≤*-trans : P ≤* Q → Q ≤* R → P ≤* R
+  ≤*-trans PQ QR .get i = ≤-trans (PQ .get i) (QR .get i)
 
   ≈*-refl : P ≈* P
   ≈*-refl .get i = refl
@@ -48,34 +44,34 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   ≈*-trans PQ QR .get i = trans (PQ .get i) (QR .get i)
   ≈*-sym : P ≈* Q → Q ≈* P
   ≈*-sym PQ .get i = sym (PQ .get i)
-  ⊴*-reflexive : P ≈* Q → P ⊴* Q
-  ⊴*-reflexive PQ .get i = ⊴-reflexive (PQ .get i)
+  ≤*-reflexive : P ≈* Q → P ≤* Q
+  ≤*-reflexive PQ .get i = ≤-reflexive (PQ .get i)
 
-  0*-triv : ∀ {s} → 0* {s} ⊴0*
-  0*-triv .get i = ⊴-refl
-  +*-triv : P +* Q ⊴[ P +* Q ]
-  +*-triv .get i = ⊴-refl
-  *ₗ-triv : ∀ {r} → r *ₗ P ⊴[ r *ₗ P ]
-  *ₗ-triv .get i = ⊴-refl
+  0*-triv : ∀ {s} → 0* {s} ≤0*
+  0*-triv .get i = ≤-refl
+  +*-triv : P +* Q ≤[ P +* Q ]
+  +*-triv .get i = ≤-refl
+  *ₗ-triv : ∀ {r} → r *ₗ P ≤[ r *ₗ P ]
+  *ₗ-triv .get i = ≤-refl
 
   -- Conversion between n-ary relations and _≈*_
 
-  ≈*→0* : ∀ {s} {R : Vector _ s} → R ≈* 0* → R ⊴0*
-  ≈*→0* = ⊴*→0* ∘ ⊴*-reflexive
-  ≈*→+* : ∀ {s} {P Q R : Vector _ s} → R ≈* P +* Q → R ⊴[ P +* Q ]
-  ≈*→+* = ⊴*→+* ∘ ⊴*-reflexive
-  ≈*→*ₗ : ∀ {s r} {P R : Vector _ s} → R ≈* r *ₗ P → R ⊴[ r *ₗ P ]
-  ≈*→*ₗ = ⊴*→*ₗ ∘ ⊴*-reflexive
+  ≈*→0* : ∀ {s} {R : Vector _ s} → R ≈* 0* → R ≤0*
+  ≈*→0* = ≤*→0* ∘ ≤*-reflexive
+  ≈*→+* : ∀ {s} {P Q R : Vector _ s} → R ≈* P +* Q → R ≤[ P +* Q ]
+  ≈*→+* = ≤*→+* ∘ ≤*-reflexive
+  ≈*→*ₗ : ∀ {s r} {P R : Vector _ s} → R ≈* r *ₗ P → R ≤[ r *ₗ P ]
+  ≈*→*ₗ = ≤*→*ₗ ∘ ≤*-reflexive
 
   -- Addition properties
 
-  -- +*-identity↖ : (P : Vector Ann s) → 0* +* P ⊴* P
+  -- +*-identity↖ : (P : Vector Ann s) → 0* +* P ≤* P
   -- +*-identity↖ P .get _ = +.identity-→ .proj₁ _
-  -- +*-identity↗ : (P : Vector Ann s) → P +* 0* ⊴* P
+  -- +*-identity↗ : (P : Vector Ann s) → P +* 0* ≤* P
   -- +*-identity↗ P .get _ = +.identity-← .proj₂ _
-  +*-identity↙ : (P : Vector Ann s) → P ⊴[ 0* +* P ]
+  +*-identity↙ : (P : Vector Ann s) → P ≤[ 0* +* P ]
   +*-identity↙ P .get _ = +.identity-← .proj₁ _
-  +*-identity↘ : (P : Vector Ann s) → P ⊴[ P +* 0* ]
+  +*-identity↘ : (P : Vector Ann s) → P ≤[ P +* 0* ]
   +*-identity↘ P .get _ = +.identity-→ .proj₂ _
 
   +*-comm : (P Q : Vector Ann s) → P +* Q ≈* Q +* P
@@ -129,17 +125,17 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   record AsLinRel (M : LinMor s t) ℓ : Set (suc ℓ) where
     field
       linRel : LinRel s t ℓ
-      equiv : ∀ {P Q} → linRel .rel P Q ⇔ Q ⊴* M .hom P
+      equiv : ∀ {P Q} → linRel .rel P Q ⇔ Q ≤* M .hom P
   open AsLinRel public
   open Equivalence public using () renaming (f to to; g to from)
 
   idLinRel : ∀ {s} → LinRel s s 0ℓ
-  idLinRel .rel x x′ = x′ ⊴* x
-  idLinRel .rel-≤ₘ xx yy le = ⊴*-trans yy (⊴*-trans le xx)
+  idLinRel .rel x x′ = x′ ≤* x
+  idLinRel .rel-≤ₘ xx yy le = ≤*-trans yy (≤*-trans le xx)
   idLinRel .rel-0ₘ (sp0 , le) = 0ₘ-mono le sp0
   idLinRel .rel-+ₘ (sp+ , le) =
-    ⊴*-refl ↘, +ₘ-mono le ⊴*-refl ⊴*-refl sp+ ,↙ ⊴*-refl
-  idLinRel .rel-*ₘ (sp* , le) = *ₘ-mono le ⊴-refl ⊴*-refl sp* , ⊴*-refl
+    ≤*-refl ↘, +ₘ-mono le ≤*-refl ≤*-refl sp+ ,↙ ≤*-refl
+  idLinRel .rel-*ₘ (sp* , le) = *ₘ-mono le ≤-refl ≤*-refl sp* , ≤*-refl
 
   id⇔ : ∀ {a} {A : Set a} → A ⇔ A
   id⇔ = mk⇔ id id
@@ -155,7 +151,7 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   _>>LinRel_ : ∀ {a b s t u} → LinRel s t a → LinRel t u b → LinRel s u (a ⊔ b)
   (R >>LinRel S) .rel = R .rel >>ᴿ S .rel
   (R >>LinRel S) .rel-≤ₘ xx yy (r , s) =
-    R .rel-≤ₘ xx ⊴*-refl r , S .rel-≤ₘ ⊴*-refl yy s
+    R .rel-≤ₘ xx ≤*-refl r , S .rel-≤ₘ ≤*-refl yy s
   (R >>LinRel S) .rel-0ₘ (sp0 , (r , s)) =
     S .rel-0ₘ (R .rel-0ₘ (sp0 , r) , s)
   (R >>LinRel S) .rel-+ₘ (sp+ , (r , s)) =
@@ -172,8 +168,8 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     _>>AsLinRel_ : AsLinRel M a → AsLinRel N b → AsLinRel (M >>LinMor N) (a ⊔ b)
     (R >>AsLinRel S) .linRel = R .linRel >>LinRel S .linRel
     (R >>AsLinRel S) .equiv = mk⇔
-      (λ { (r , s) → ⊴*-trans (S .equiv .to s) (N .hom-mono (R .equiv .to r)) })
-      (λ le → R .equiv .from ⊴*-refl , S .equiv .from le)
+      (λ { (r , s) → ≤*-trans (S .equiv .to s) (N .hom-mono (R .equiv .to r)) })
+      (λ le → R .equiv .from ≤*-refl , S .equiv .from le)
 
   0LinRel : ∀ {s t} → LinRel s t 0ℓ
   0LinRel .rel P Q = Q ≤0ₘ
@@ -184,15 +180,15 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   0AsLinRel : ∀ {s t} → AsLinRel {s} {t} 0ᴹ 0ℓ
   0AsLinRel .linRel = 0LinRel
-  0AsLinRel .equiv = mk⇔ 0*→⊴* ⊴*→0*
+  0AsLinRel .equiv = mk⇔ 0*→≤* ≤*→0*
 
   {-
   subLinRel : ∀ {s} → LinRel s s 0ℓ
-  subLinRel .rel x x′ = x′ ⊴* x
+  subLinRel .rel x x′ = x′ ≤* x
   subLinRel .rel-0ₘ (sp0 , sub) = 0ₘ-mono sub sp0
   subLinRel .rel-+ₘ (sp+ , sub) =
-    ⊴*-refl ↘, +ₘ-mono sub ⊴*-refl ⊴*-refl sp+ ,↙ ⊴*-refl
-  subLinRel .rel-*ₘ (sp* , sub) = *ₘ-mono sub ⊴-refl ⊴*-refl sp* , ⊴*-refl
+    ≤*-refl ↘, +ₘ-mono sub ≤*-refl ≤*-refl sp+ ,↙ ≤*-refl
+  subLinRel .rel-*ₘ (sp* , sub) = *ₘ-mono sub ≤-refl ≤*-refl sp* , ≤*-refl
   -}
 
   [─]ᴿ : ∀ {u} → LinRel ε u 0ℓ
@@ -204,15 +200,15 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   [─]AsLinRel : ∀ {u} → AsLinRel {ε} {u} ([─]) _
   [─]AsLinRel .linRel = [─]ᴿ
-  [─]AsLinRel .equiv = mk⇔ 0*→⊴* ⊴*→0*
+  [─]AsLinRel .equiv = mk⇔ 0*→≤* ≤*→0*
 
   [_─_]ᴿ : ∀ {a b s t u} →
     LinRel s u a → LinRel t u b → LinRel (s <+> t) u (a ⊔ b)
   [ R ─ S ]ᴿ .rel P Q = R .rel (P ∘ ↙) ↘- Q ≤[_+ₘ_] -↙ S .rel (P ∘ ↘)
   [ R ─ S ]ᴿ .rel-≤ₘ (mk xx) yy (r ↘, r+s ,↙ s) =
-    R .rel-≤ₘ (mk (xx ∘ ↙)) ⊴*-refl r
-    ↘, +ₘ-mono yy ⊴*-refl ⊴*-refl r+s ,↙
-    S .rel-≤ₘ (mk (xx ∘ ↘)) ⊴*-refl s
+    R .rel-≤ₘ (mk (xx ∘ ↙)) ≤*-refl r
+    ↘, +ₘ-mono yy ≤*-refl ≤*-refl r+s ,↙
+    S .rel-≤ₘ (mk (xx ∘ ↘)) ≤*-refl s
   [ R ─ S ]ᴿ .rel-0ₘ (sp0 , (r ↘, r+s ,↙ s)) =
     let sp0r , sp0s = un++ₙ sp0 in
     +ₘ-identity²→ (R .rel-0ₘ (sp0r , r) ↘, r+s ,↙ S .rel-0ₘ (sp0s , s))
@@ -234,8 +230,8 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   [ R ─ S ]AsLinRel .linRel = [ R .linRel ─ S .linRel ]ᴿ
   [ R ─ S ]AsLinRel .equiv = mk⇔
     (λ { (ll ↘, sp+ ,↙ rr) →
-      ⊴*-trans (+*→⊴* sp+) (+*-mono (R .equiv .f ll) (S .equiv .f rr)) })
-    (λ le → R .equiv .g ⊴*-refl ↘, ⊴*→+* le ,↙ S .equiv .g ⊴*-refl)
+      ≤*-trans (+*→≤* sp+) (+*-mono (R .equiv .f ll) (S .equiv .f rr)) })
+    (λ le → R .equiv .g ≤*-refl ↘, ≤*→+* le ,↙ S .equiv .g ≤*-refl)
     where
     open PoLeftSemimodule (Vᴾ _) renaming (+ₘ-mono to +*-mono)
     open Equivalence
@@ -244,14 +240,14 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   -- a concrete vector.
   [─_─]ᴿ : ∀ {u} → Vector Ann u → LinRel [-] u 0ℓ
   [─ Q′ ─]ᴿ .rel P Q = Q ≤[ P here *ₘ Q′ ]
-  [─ Q′ ─]ᴿ .rel-≤ₘ (mk xx) yy sp = *ₘ-mono yy (xx here) ⊴*-refl sp
+  [─ Q′ ─]ᴿ .rel-≤ₘ (mk xx) yy sp = *ₘ-mono yy (xx here) ≤*-refl sp
   [─ Q′ ─]ᴿ .rel-0ₘ (sp0 , sp) = *ₘ-annihilˡ→ (sp0 .get here , sp)
   [─ Q′ ─]ᴿ .rel-+ₘ (sp+ , sp) = *ₘ-distribˡ→ (sp+ .get here , sp)
   [─ Q′ ─]ᴿ .rel-*ₘ (sp* , sp) = *ₘ-assoc→ (sp* .get here , sp)
 
   [─_─]AsLinRel : ∀ {u} (Q′ : Vector Ann u) → AsLinRel [─ Q′ ─] 0ℓ
   [─ Q′ ─]AsLinRel .linRel = [─ Q′ ─]ᴿ
-  [─ Q′ ─]AsLinRel .equiv = mk⇔ *ₗ→⊴* ⊴*→*ₗ
+  [─ Q′ ─]AsLinRel .equiv = mk⇔ *ₗ→≤* ≤*→*ₗ
 
   [│]ᴿ : ∀ {s} → LinRel s ε 0ℓ
   [│]ᴿ .rel _ _ = ⊤
@@ -294,13 +290,13 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   [│_│]ᴿ {sl <+> sr} P′ .rel P Q =
     [│ P′ ∘ ↙ │]ᴿ .rel (P ∘ ↙) ↘- Q ≤[_+ₘ_] -↙ [│ P′ ∘ ↘ │]ᴿ .rel (P ∘ ↘)
   [│_│]ᴿ {[-]} P′ .rel-≤ₘ (mk xx) (mk yy) r =
-    *-mono↔ (yy here) (xx here) ⊴-refl r
+    *-mono↔ (yy here) (xx here) ≤-refl r
   [│_│]ᴿ {ε} P′ .rel-≤ₘ xx yy sp = 0ₘ-mono yy sp
   [│_│]ᴿ {sl <+> sr} P′ .rel-≤ₘ xx yy (l ↘, sp ,↙ r) =
     let xx↙ , xx↘ = un++ₙ xx in
-    [│ P′ ∘ ↙ │]ᴿ .rel-≤ₘ xx↙ ⊴*-refl l
-    ↘, +ₘ-mono yy ⊴*-refl ⊴*-refl sp ,↙
-    [│ P′ ∘ ↘ │]ᴿ .rel-≤ₘ xx↘ ⊴*-refl r
+    [│ P′ ∘ ↙ │]ᴿ .rel-≤ₘ xx↙ ≤*-refl l
+    ↘, +ₘ-mono yy ≤*-refl ≤*-refl sp ,↙
+    [│ P′ ∘ ↘ │]ᴿ .rel-≤ₘ xx↘ ≤*-refl r
   [│_│]ᴿ {[-]} P′ .rel-0ₘ (mk sp0 , r) = [ annihilˡ→ (sp0 here , r) ]ₙ
   [│_│]ᴿ {ε} P′ .rel-0ₘ (mk sp0 , sp) = sp
   [│_│]ᴿ {sl <+> sr} P′ .rel-0ₘ (mk sp0 , (l ↘, mk sp ,↙ r)) =
@@ -337,13 +333,13 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     where
     open Sum 0# _+_
 
-    f : ∀ {s P Q P′} → [│ P′ │]ᴿ .rel P Q → Q ⊴* [ (∑ {s} λ i → P i * P′ i) ]
+    f : ∀ {s P Q P′} → [│ P′ │]ᴿ .rel P Q → Q ≤* [ (∑ {s} λ i → P i * P′ i) ]
     f {[-]} r = [ r ]ₙ
-    f {ε} r = 0*→⊴* r
+    f {ε} r = 0*→≤* r
     f {sl <+> sr} (ll ↘, sp+ ,↙ rr) =
-      +*→⊴* (+ₘ-mono ⊴*-refl (f {sl} ll) (f {sr} rr) sp+)
+      +*→≤* (+ₘ-mono ≤*-refl (f {sl} ll) (f {sr} rr) sp+)
 
-    g : ∀ {s P Q P′} → Q ⊴* [ (∑ {s} λ i → P i * P′ i) ] → [│ P′ │]ᴿ .rel P Q
+    g : ∀ {s P Q P′} → Q ≤* [ (∑ {s} λ i → P i * P′ i) ] → [│ P′ │]ᴿ .rel P Q
     g {[-]} le = un[-]ₙ le
-    g {ε} le = ⊴*→0* le
-    g {sl <+> sr} le = g {sl} ⊴*-refl ↘, ⊴*→+* le ,↙ g {sr} ⊴*-refl
+    g {ε} le = ≤*→0* le
+    g {sl <+> sr} le = g {sl} ≤*-refl ↘, ≤*→+* le ,↙ g {sr} ≤*-refl

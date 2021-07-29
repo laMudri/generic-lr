@@ -170,9 +170,9 @@ module Generic.Linear.Example.LnL where
     let th′ , str′ = nat^Th (str , th) in
     int
     (□⟨ str′
-      , ⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp0) ⊴ᴹ-refl))
+      , ≤*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp0) ≤ᴹ-refl))
           (unrowL₂ (0ᴹ-*ᴹ (th .M)))
-      , ⊴*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp+) ⊴ᴹ-refl))
+      , ≤*-trans (unrowL₂ (*ᴹ-mono (rowL₂ sp+) ≤ᴹ-refl))
         (unrowL₂ (+ᴹ-*ᴹ _ _ (th .M)))
       ⟩ th^T t th′)
 

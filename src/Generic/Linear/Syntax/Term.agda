@@ -7,7 +7,7 @@ module Generic.Linear.Syntax.Term
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann)
 
   open import Function.Extra
   open import Size

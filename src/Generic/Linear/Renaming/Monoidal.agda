@@ -9,8 +9,7 @@ module Generic.Linear.Renaming.Monoidal
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Data.LTree
   open import Data.LTree.Vector
@@ -46,5 +45,5 @@ module Generic.Linear.Renaming.Monoidal
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
   ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
   ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
-  ++-[]ʳ→ .sums = ⊴*-refl , _
-  ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++ₙ []ₙ)
+  ++-[]ʳ→ .sums = ≤*-refl , _
+  ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (≤*-trans le b ++ₙ []ₙ)

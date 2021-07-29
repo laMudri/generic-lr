@@ -9,8 +9,7 @@ module Generic.Linear.Renaming.Properties
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Relational
   open import Data.Product
@@ -45,7 +44,7 @@ module Generic.Linear.Renaming.Properties
   psh^∋ : IsPresheaf _∋_
   idx (psh^∋ QP lv) = idx lv
   tyq (psh^∋ QP lv) = tyq lv
-  basis (psh^∋ QP lv) = ⊴*-trans QP (basis lv)
+  basis (psh^∋ QP lv) = ≤*-trans QP (basis lv)
 
   ren^∋ : Renameable (_∋ A)
   ren^∋ v th = th .lookup (th .sums) v
@@ -57,18 +56,18 @@ module Generic.Linear.Renaming.Properties
   thinning-sub-1ᴹ :
     ∀ {Γ Δ A}
     (th : Renaming Γ Δ) (v : Var A (Ctx.γ Γ)) →
-    M th (v .idx) ⊴* 1ᴹ (th .lookup v .idx)
+    M th (v .idx) ≤* 1ᴹ (th .lookup v .idx)
   thinning-sub-1ᴹ {ctx {[-]} P γ} {ctx {t} Q δ} th v@(var here q) =
     th .lookup v .basis
   thinning-sub-1ᴹ {Γ} th (var (↙ i) q) =
     thinning-sub-1ᴹ
       {leftᶜ (ctx→sctx Γ)}
-      record { M = topᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ leftᵛ }
+      record { M = topᴹ (th .M); sums = ≤*-refl; lookup = th .lookup ∘ leftᵛ }
       (var i q)
   thinning-sub-1ᴹ {Γ} th (var (↘ i) q) =
     thinning-sub-1ᴹ
       {rightᶜ (ctx→sctx Γ)}
-      record { M = botᴹ (th .M); sums = ⊴*-refl; lookup = th .lookup ∘ rightᵛ }
+      record { M = botᴹ (th .M); sums = ≤*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
   -}
 
@@ -97,7 +96,7 @@ module Generic.Linear.Renaming.Properties
   ren^□ : Renameable (□ʳ T)
   ren^□ = duplicate
 
-  subuse-ren : ∀ {γ} → P ⊴* Q → ctx P γ ⇒ʳ ctx Q γ
+  subuse-ren : ∀ {γ} → P ≤* Q → ctx P γ ⇒ʳ ctx Q γ
   subuse-ren PQ .M = idLinMor
   subuse-ren PQ .asLinRel = idAsLinRel
   subuse-ren PQ .sums = PQ
@@ -108,12 +107,12 @@ module Generic.Linear.Renaming.Properties
 
   {-
   nat^Th : ∀ {s P′ γ t Q δ} →
-    _⊴* P′ ◇ (λ P → Renaming (ctx {s} P γ) (ctx {t} Q δ)) →
-    (λ Q′ → Renaming (ctx P′ γ) (ctx Q′ δ)) ◇ Q ⊴*_
+    _≤* P′ ◇ (λ P → Renaming (ctx {s} P γ) (ctx {t} Q δ)) →
+    (λ Q′ → Renaming (ctx P′ γ) (ctx Q′ δ)) ◇ Q ≤*_
   nat^Th {P′ = P′} (PP , th) .middle = unrow (row P′ *ᴹ th .M)
   nat^Th (PP , th) .fst .M = th .M
-  nat^Th (PP , th) .fst .sums = ⊴*-refl
+  nat^Th (PP , th) .fst .sums = ≤*-refl
   nat^Th (PP , th) .fst .lookup v = th .lookup v
   nat^Th (PP , th) .snd =
-    ⊴*-trans (th .sums) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ⊴ᴹ-refl))
+    ≤*-trans (th .sums) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ≤ᴹ-refl))
   -}

@@ -43,11 +43,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
 
   module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-    open PoSemiring poSemiring
-      renaming (Carrier to Ann
-               ; _≤_ to _⊴_
-               ; refl to ⊴-refl; trans to ⊴-trans
-               )
+    open PoSemiring poSemiring renaming (Carrier to Ann)
     open import Generic.Linear.Operations rawPoSemiring
     open import Generic.Linear.Algebra poSemiring
 

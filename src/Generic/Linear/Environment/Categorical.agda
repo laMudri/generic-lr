@@ -7,8 +7,7 @@ module Generic.Linear.Environment.Categorical
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann; _≤_ to _⊴_; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Relational
   open import Relation.Nary
@@ -28,8 +27,8 @@ module Generic.Linear.Environment.Categorical
     id^Env : ∀ {Γ} → [ 𝓥 ] Γ ⇒ᵉ Γ
     id^Env .M = 1ᴹ
     id^Env .asLinRel = idAsLinRel
-    id^Env .sums = ⊴*-refl
-    id^Env .lookup r (lvar i q b) = pure (lvar i q (⊴*-trans r b))
+    id^Env .sums = ≤*-refl
+    id^Env .lookup r (lvar i q b) = pure (lvar i q (≤*-trans r b))
 
   record ComposeEnv {u v w} (𝓤 : Scoped u) (𝓥 : Scoped v) (𝓦 : Scoped w)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where

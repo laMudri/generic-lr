@@ -9,7 +9,7 @@ module Generic.Linear.Syntax.Interpretation
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann)
 
   open import Algebra using (Op₂; Opₗ)
   open import Data.Product as ×
@@ -26,16 +26,16 @@ module Generic.Linear.Syntax.Interpretation
 
   open import Relation.Unary.Bunched.Checked
   private
-    open module Chk0 {s} = BunchedUnit (_⊴0* {s})
-    open module Chk+ {s} = BunchedConjunction (_⊴[_+*_] {s})
+    open module Chk0 {s} = BunchedUnit (_≤0* {s})
+    open module Chk+ {s} = BunchedConjunction (_≤[_+*_] {s})
       hiding (_─✴_)
-    open module Chk* {s} = BunchedScaling (_⊴[_*ₗ_] {s})
+    open module Chk* {s} = BunchedScaling (_≤[_*ₗ_] {s})
     open module ChkD {s} =
-      BunchedDuplicable (_⊴*_ {s}) 0* _+*_
+      BunchedDuplicable (_≤*_ {s}) 0* _+*_
   import Relation.Unary.Bunched as Syn
   private
-    open module Syn⊴ {s} = Syn.BunchedOrder (_⊴*_ {s})
-    open module Syn+ {s} = Syn.BunchedConjunction (_⊴[_+*_] {s})
+    open module Syn≤ {s} = Syn.BunchedOrder (_≤*_ {s})
+    open module Syn+ {s} = Syn.BunchedConjunction (_≤[_+*_] {s})
       using (_─✴_)
 
   private
@@ -43,15 +43,15 @@ module Generic.Linear.Syntax.Interpretation
       ℓ t u : Level
       fl : PremisesFlags
 
-  infix 4 _⊴ᶜ_
+  infix 4 _≤ᶜ_
   infixr 5 !!_
   infixr 8 _⇒ᵏᶜ_ _─✴ᶜ_
   infixr 9 _✴ᶜ_
   infixr 10 _·ᶜ_
 
-  _⊴ᶜ_ : (Γ Δ : Ctx) → Set
-  ctx {s} P γ ⊴ᶜ ctx {t} Q δ = Σ (s ≡ t) λ where
-    refl → P ⊴* Q × γ ≡ δ
+  _≤ᶜ_ : (Γ Δ : Ctx) → Set
+  ctx {s} P γ ≤ᶜ ctx {t} Q δ = Σ (s ≡ t) λ where
+    refl → P ≤* Q × γ ≡ δ
 
   pattern !!_ PQ = refl , PQ , refl
 

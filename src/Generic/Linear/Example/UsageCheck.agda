@@ -8,7 +8,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
   open import Data.Empty
   open import Data.List as L using (List; []; _∷_; [_])
-  open import Data.Unit
+  open import Data.Unit hiding (_≤_)
   open import Proposition
 
   Lone : ∀ {a} {A : Set a} → List A → Set
@@ -45,11 +45,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
   module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-    open PoSemiring poSemiring
-      renaming (Carrier to Ann
-               ; _≤_ to _⊴_
-               ; refl to ⊴-refl; trans to ⊴-trans
-               )
+    open PoSemiring poSemiring renaming (Carrier to Ann)
 
     open import Generic.Linear.Operations rawPoSemiring
     open import Generic.Linear.Algebra poSemiring
@@ -103,43 +99,43 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     record NonDetInverses (fl : PremisesFlags) : Set where
       open PremisesFlags fl
       field
-        0#⁻¹ : (r : Ann) → List (r ⊴ 0#)
-        +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ⊴ p + q)
-        1#⁻¹ : (r : Ann) → List (r ⊴ 1#)
-        *⁻¹ : (r q : Ann) → List (∃ \ p → q ⊴ r * p)
+        0#⁻¹ : (r : Ann) → List (r ≤ 0#)
+        +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ≤ p + q)
+        1#⁻¹ : (r : Ann) → List (r ≤ 1#)
+        *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
         rep : {{_ : Has-□}} (r : Ann) →
-              List (∃ \ p → r ⊴ p × p ⊴ 0# × p ⊴ p + p)
+              List (∃ \ p → r ≤ p × p ≤ 0# × p ≤ p + p)
 
     module WithInverses (fl : PremisesFlags) (invs : NonDetInverses fl) where
 
       open PremisesFlags fl
       open NonDetInverses invs
 
-      0*⁻¹ : ∀ {s} (R : Vector Ann s) → List (R ⊴0*)
+      0*⁻¹ : ∀ {s} (R : Vector Ann s) → List (R ≤0*)
       0*⁻¹ {[-]} R = (| [_]ₙ (0#⁻¹ (R here)) |)
       0*⁻¹ {ε} R = (| []ₙ |)
       0*⁻¹ {s <+> t} R = (| _++ₙ_ (0*⁻¹ (R ∘ ↙)) (0*⁻¹ (R ∘ ↘)) |)
 
       +*⁻¹ : ∀ {s} (R : Vector Ann s) →
-             List (∃ \ ((P , Q) : _ × _) → R ⊴[ P +* Q ])
+             List (∃ \ ((P , Q) : _ × _) → R ≤[ P +* Q ])
       +*⁻¹ {[-]} R = (| (×.map (×.map V.[_] V.[_]) [_]ₙ) (+⁻¹ (R here)) |)
       +*⁻¹ {ε} R = (| ((V.[] , V.[]) , []ₙ) |)
       +*⁻¹ {s <+> t} R =
         (| (×.zip (×.zip V._++_ V._++_) _++ₙ_) (+*⁻¹ (R ∘ ↙)) (+*⁻¹ (R ∘ ↘)) |)
 
-      ⟨_∣⁻¹ : ∀ {s} (i : Ptr s) R → List (R ⊴* ⟨ i ∣)
+      ⟨_∣⁻¹ : ∀ {s} (i : Ptr s) R → List (R ≤* ⟨ i ∣)
       ⟨ here ∣⁻¹ R = (| [_]ₙ (1#⁻¹ (R here)) |)
-      ⟨ ↙ i ∣⁻¹ R = (| _++ₙ_ (⟨ i ∣⁻¹ (R ∘ ↙)) (L.map 0*→⊴* (0*⁻¹ (R ∘ ↘))) |)
-      ⟨ ↘ i ∣⁻¹ R = (| _++ₙ_ (L.map 0*→⊴* (0*⁻¹ (R ∘ ↙))) (⟨ i ∣⁻¹ (R ∘ ↘)) |)
+      ⟨ ↙ i ∣⁻¹ R = (| _++ₙ_ (⟨ i ∣⁻¹ (R ∘ ↙)) (L.map 0*→≤* (0*⁻¹ (R ∘ ↘))) |)
+      ⟨ ↘ i ∣⁻¹ R = (| _++ₙ_ (L.map 0*→≤* (0*⁻¹ (R ∘ ↙))) (⟨ i ∣⁻¹ (R ∘ ↘)) |)
 
-      *ₗ⁻¹ : ∀ {s} r (Q : Vector Ann s) → List (∃ \ P → Q ⊴[ r *ₗ P ])
+      *ₗ⁻¹ : ∀ {s} r (Q : Vector Ann s) → List (∃ \ P → Q ≤[ r *ₗ P ])
       *ₗ⁻¹ {[-]} r Q = (| (×.map V.[_] [_]ₙ) (*⁻¹ r (Q here)) |)
       *ₗ⁻¹ {ε} r Q = (| (V.[] , []ₙ) |)
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++ₙ_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
 
       rep* : ∀ {{_ : Has-□}} {s} (R : Vector Ann s) →
-             List (∃ \ P → R ⊴* P × P ⊴* 0* × P ⊴* P +* P)
+             List (∃ \ P → R ≤* P × P ≤* 0* × P ≤* P +* P)
       rep* {[-]} R =
         (| (×.map V.[_] (×.map [_]ₙ (×.map [_]ₙ [_]ₙ))) (rep (R here)) |)
       rep* {ε} R = (| (V.[] , []ₙ , []ₙ , []ₙ) |)

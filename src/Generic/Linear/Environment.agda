@@ -7,7 +7,7 @@ module Generic.Linear.Environment
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Data.LTree
   open import Data.LTree.Vector
@@ -34,7 +34,7 @@ module Generic.Linear.Environment
   IsPresheaf : Scoped ℓ → Set ℓ
   IsPresheaf 𝓥 =
     ∀ {s} {γ : Vector Ty s} {P Q} →
-    Q ⊴* P → ∀[ 𝓥 (ctx P γ) ⇒ 𝓥 (ctx Q γ) ]
+    Q ≤* P → ∀[ 𝓥 (ctx P γ) ⇒ 𝓥 (ctx Q γ) ]
 
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
@@ -53,8 +53,8 @@ module Generic.Linear.Environment
       sums : Mᴿ .rel Q P
       lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
 
-    sums-⊴* : P ⊴* M .hom Q
-    sums-⊴* = asLinRel .equiv .f sums
+    sums-≤* : P ≤* M .hom Q
+    sums-≤* = asLinRel .equiv .f sums
       where open Equivalence
   open [_]_⇒ᵉ_ public
 
@@ -67,8 +67,8 @@ module Generic.Linear.Environment
 
     field
       M : LinMor s t
-      sums : Q ⊴* M .hom P
-      lookup : ∀ {A P′ Q′} → Q′ ⊴* M .hom P′ →
+      sums : Q ≤* M .hom P
+      lookup : ∀ {A P′ Q′} → Q′ ≤* M .hom P′ →
         LVar A (ctx P′ γ) → 𝓥 A (ctx Q′ δ)
   open _─Env public
   -}

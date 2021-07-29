@@ -8,7 +8,7 @@ module Generic.Linear.Renaming
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary

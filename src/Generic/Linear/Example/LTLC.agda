@@ -100,17 +100,17 @@ module Generic.Linear.Example.LTLC where
             refl
             (mk λ where
               (↙ (↙ (↙ (↙ (↙ (there () _))))))
-              (↙ (↙ (↙ (↙ (↘ here))))) → ⊴-refl
-              (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-              (↙ (↙ (↘ _))) → ⊴-refl
+              (↙ (↙ (↙ (↙ (↘ here))))) → ≤-refl
+              (↙ (↙ (↙ (↘ _)))) → ≤-refl
+              (↙ (↙ (↘ _))) → ≤-refl
               (↙ (↘ (there () _)))
               (↘ (there () _))
             )))
           (mk λ where
             (↙ (↙ (↙ (↙ (there () _)))))
-            (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-            (↙ (↙ (↘ _))) → ⊴-refl
-            (↙ (↘ _)) → ⊴-refl
+            (↙ (↙ (↙ (↘ _)))) → ≤-refl
+            (↙ (↙ (↘ _))) → ≤-refl
+            (↙ (↘ _)) → ≤-refl
             (↘ (there () _))
           )
           (`var (lvar
@@ -118,26 +118,26 @@ module Generic.Linear.Example.LTLC where
             refl
             (mk λ where
               (↙ (↙ (↙ (↙ (↙ (there () _))))))
-              (↙ (↙ (↙ (↙ (↘ _))))) → ⊴-refl
-              (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-              (↙ (↙ (↘ here))) → ⊴-refl
+              (↙ (↙ (↙ (↙ (↘ _))))) → ≤-refl
+              (↙ (↙ (↙ (↘ _)))) → ≤-refl
+              (↙ (↙ (↘ here))) → ≤-refl
               (↙ (↘ (there () _)))
               (↘ (there () _))
             )))))
         (mk λ where
           (↙ (↙ (↙ (there () _))))
-          (↙ (↙ (↘ _))) → ⊴-refl
-          (↙ (↘ _)) → ⊴-refl
-          (↘ _) → ⊴-refl
+          (↙ (↙ (↘ _))) → ≤-refl
+          (↙ (↘ _)) → ≤-refl
+          (↘ _) → ≤-refl
         )
         (`var (lvar
           (↙ (↙ (↘ here)))
           refl
           (mk λ where
             (↙ (↙ (↙ (↙ (there () _)))))
-            (↙ (↙ (↙ (↘ _)))) → ⊴-refl
-            (↙ (↙ (↘ here))) → ⊴-refl
-            (↙ (↘ _)) → ⊴-refl
+            (↙ (↙ (↙ (↘ _)))) → ≤-refl
+            (↙ (↙ (↘ here))) → ≤-refl
+            (↙ (↘ _)) → ≤-refl
             (↘ (there () _))
           )))))))
 
@@ -145,18 +145,18 @@ module Generic.Linear.Example.LTLC where
   myC′ A B C = lam (lam (lam
     (app B ((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u1 ])
            ((([] ++ [ u0 ]) ++ [ u1 ]) ++ [ u0 ])
-           ((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+           ((([]₂ ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂)
       (app A (((([] ++ [ u1 ]) ++ [ u0 ]) ++ [ u0 ]) ++ [])
              (((([] ++ [ u0 ]) ++ [ u0 ]) ++ [ u1 ]) ++ [])
-             (((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+             (((([]₂ ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂)
                ++₂ []₂)
         (var (↙ (↙ (↙ (↙ (↘ here)))))
-             ((((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+             ((((([]₂ ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂)
                ++₂ []₂) ++₂ []₂))
         (var (↙ (↙ (↘ here)))
-             ((((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+             ((((([]₂ ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂)
                ++₂ []₂) ++₂ []₂)))
       (var (↙ (↙ (↘ here)))
-           (((([]₂ ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂) ++₂ [ ⊴-refl ]₂)
+           (((([]₂ ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂) ++₂ [ ≤-refl ]₂)
              ++₂ []₂)))))
   -}

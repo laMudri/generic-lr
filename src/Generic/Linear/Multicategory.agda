@@ -48,8 +48,8 @@ module Generic.Linear.Multicategory (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) whe
     -- TODO: move out into Extend, maybe.
     -- It duplicates Generic.Linear.Semantics.Syntactic.WithKit.1ᵏ
     idˢ : ∀ {Γ} → Γ ⇒ˢ Γ
-    idˢ = pack 1ᴹ idAsLinRel ⊴*-refl
-      λ le (lvar i q b) → id (lvar i q (⊴*-trans le b))
+    idˢ = pack 1ᴹ idAsLinRel ≤*-refl
+      λ le (lvar i q b) → id (lvar i q (≤*-trans le b))
 
     _∘ˢ_ : ∀ {Γ Δ Θ} → Δ ⇒ˢ Θ → Γ ⇒ˢ Δ → Γ ⇒ˢ Θ
     σ ∘ˢ τ = pack (σ .M >>LinMor τ .M) (σ .asLinRel >>AsLinRel τ .asLinRel)

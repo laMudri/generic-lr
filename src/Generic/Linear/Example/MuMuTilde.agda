@@ -8,11 +8,7 @@ module Generic.Linear.Example.MuMuTilde
   (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (Base : Set)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann
-             ; _≤_ to _⊴_
-             ; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans
-             )
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Relational
   open import Data.LTree
@@ -113,20 +109,20 @@ module Generic.Linear.Example.MuMuTilde
                   {z = (((([] ++ ([ 0# ] ++ [ 0# ])) ++ []) ++ ([ 0# ] ++ [ 1# ])) ++ []) ++ []}
                   ((((([]ₙ ++ₙ ([ ≤-annihil .proj₂ _ ]ₙ ++ₙ [ ≤-annihil .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ≤-annihil .proj₂ _ ]ₙ ++ₙ [ *.identity .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ)
                   (`var (lvar (↙ (↙ (↙ (↘ (↘ here))))) ≡.refl
-                              (((((([]ₙ ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ) ++ₙ []ₙ))))
+                              (((((([]ₙ ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ) ++ₙ []ₙ))))
                 ((((([]ₙ ++ₙ ([ +.identity-→ .proj₂ _ ]ₙ ++ₙ [ +.identity-→ .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ ([ +.identity-← .proj₁ _ ]ₙ ++ₙ [ +.identity-→ .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ)
                 (⟨_⟩·_
                   {z = (((([] ++ ([ 0# ] ++ [ 0# ])) ++ []) ++ ([ 1# ] ++ [ 0# ])) ++ []) ++ []}
                   ((((([]ₙ ++ₙ ([ ≤-annihil .proj₂ _ ]ₙ ++ₙ [ ≤-annihil .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ ([ *.identity .proj₂ _ ]ₙ ++ₙ [ ≤-annihil .proj₂ _ ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ)
                   (`var (lvar (↙ (↙ (↙ (↘ (↙ here))))) ≡.refl
-                              (((((([]ₙ ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ) ++ₙ []ₙ)))))))
+                              (((((([]ₙ ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ) ++ₙ []ₙ) ++ₙ []ₙ)))))))
             ((([]ₙ ++ₙ ([ +.identity-← .proj₁ _ ]ₙ ++ₙ [ +.identity-← .proj₁ _ ]ₙ)) ++ₙ []ₙ) ++ₙ ([ +.identity-→ .proj₂ _ ]ₙ ++ₙ [ +.identity-→ .proj₂ _ ]ₙ))
             (`var (lvar (↙ (↙ (↙ (↘ (↙ here))))) ≡.refl
-                        (((([]ₙ ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ)))
+                        (((([]ₙ ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ) ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ)))
           )
         ))
         ([]ₙ ++ₙ ([ +.identity-→ .proj₂ _ ]ₙ ++ₙ [ +.identity-← .proj₁ _ ]ₙ))
         (`var (lvar (↙ (↘ (↘ here))) ≡.refl
-                    (([]ₙ ++ₙ ([ ⊴-refl ]ₙ ++ₙ [ ⊴-refl ]ₙ)) ++ₙ []ₙ)))
+                    (([]ₙ ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ)))
       )
     )

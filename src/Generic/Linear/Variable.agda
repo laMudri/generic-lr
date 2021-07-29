@@ -8,7 +8,7 @@ module Generic.Linear.Variable
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open RawPoSemiring rawPoSemiring renaming (Carrier to Ann)
 
   open import Relation.Binary.PropositionalEquality
 
@@ -29,5 +29,5 @@ module Generic.Linear.Variable
     field
       idx : Ptr s
       tyq : γ idx ≡ A
-      basis : P ⊴* ⟨ idx ∣
+      basis : P ≤* ⟨ idx ∣
   open _∋_ public

@@ -7,7 +7,7 @@ module Generic.Linear.Extend
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Data.LTree
   open import Data.LTree.Vector
@@ -26,16 +26,16 @@ module Generic.Linear.Extend
     extendˡ : ∀ {RΘ s Γ} → [ _𝓥_ ] ctx {s} 0* Γ ++ᶜ RΘ ⇒ᵉ RΘ
     extendˡ .M = [ 0ᴹ │ 1ᴹ ]
     extendˡ .asLinRel = [ 0AsLinRel │ idAsLinRel ]AsLinRel
-    extendˡ .sums = 0*-triv , ⊴*-refl
+    extendˡ .sums = 0*-triv , ≤*-refl
     extendˡ .lookup (sp0 , le) (lvar i q b) =
-      fromLVar (lvar (↘ i) q (0*→⊴* sp0 ++ₙ ⊴*-trans le b))
+      fromLVar (lvar (↘ i) q (0*→≤* sp0 ++ₙ ≤*-trans le b))
 
     extendʳ : ∀ {RΘ s Γ} → [ _𝓥_ ] RΘ ++ᶜ ctx {s} 0* Γ ⇒ᵉ RΘ
     extendʳ .M = [ 1ᴹ │ 0ᴹ ]
     extendʳ .asLinRel = [ idAsLinRel │ 0AsLinRel ]AsLinRel
-    extendʳ .sums = ⊴*-refl , 0*-triv
+    extendʳ .sums = ≤*-refl , 0*-triv
     extendʳ .lookup (le , sp0) (lvar i q b) =
-      fromLVar (lvar (↙ i) q (⊴*-trans le b ++ₙ 0*→⊴* sp0))
+      fromLVar (lvar (↙ i) q (≤*-trans le b ++ₙ 0*→≤* sp0))
 
   open FromLVar {{...}} public
 

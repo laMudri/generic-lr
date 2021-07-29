@@ -7,11 +7,7 @@ module Generic.Linear.Semantics
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring
-    renaming (Carrier to Ann
-             ; _≤_ to _⊴_
-             ; refl to ⊴-refl; trans to ⊴-trans
-             )
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Po.Relation
   open import Data.LTree
@@ -76,7 +72,7 @@ module Generic.Linear.Semantics
     semantics ρ (`con {sz = sz} t) =
       alg (map-s (ρ .M) d
         (λ r → body (record { [_]_⇒ᵉ_ ρ; sums = ρ .asLinRel .equiv .g r }))
-        (sums-⊴* ρ) t)
+        (sums-≤* ρ) t)
       where open Equivalence
 
     body ρ t .get th .app✴ r σ =

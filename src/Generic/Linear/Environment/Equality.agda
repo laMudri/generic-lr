@@ -7,7 +7,7 @@ module Generic.Linear.Environment.Equality
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann; _≤_ to _⊴_)
+  open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Data.LTree
   open import Data.LTree.Vector
