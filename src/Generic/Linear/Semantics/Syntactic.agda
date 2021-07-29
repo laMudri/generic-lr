@@ -19,7 +19,7 @@ module Generic.Linear.Semantics.Syntactic
   open import Data.LTree.Vector hiding ([]ˢ)
   open import Data.Product
   open import Data.Wrap renaming ([_] to mk)
-  open import Function.Base using (id; _∘_)
+  open import Function.Base using (id; _∘_; _$_)
   open import Function.Extra
   open import Size
   open import Relation.Nary
@@ -68,7 +68,7 @@ module Generic.Linear.Semantics.Syntactic
   open Semantics
 
   reify : {{FromLVar 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
-  reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++₂ +*-identity↙ _) extendˡ
+  reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++ₙ +*-identity↙ _) extendˡ
 
   module _ where
     open Kit
@@ -117,6 +117,7 @@ module Generic.Linear.Semantics.Syntactic
   module WithKit (K : Kit d 𝓥) where
     private
       module K = Kit K
+    open With-psh^𝓥 (λ {_} {γ} → K.psh^𝓥 {γ = γ})
 
     infix 5 _++ᵏ_
 
@@ -126,58 +127,19 @@ module Generic.Linear.Semantics.Syntactic
     1ᵏ .sums = ⊴*-refl
     1ᵏ .lookup le (lvar i q b) = K.var (lvar i q (⊴*-trans le b))
 
-    -- _>>ᵏ_ : (Γ ─Env) 𝓥 Δ → (Δ ─Env) 𝓥 Θ → (Γ ─Env) 𝓥 Θ
-    -- (ρ >>ᵏ σ) .M = ρ .M *ᴹ σ .M
-    -- (ρ >>ᵏ σ) .sums =
-    --   ⊴*-trans {!((*ᴹ-mono ⊴ᴹ-refl (rowL₂ (ρ .sums))))!} (unrowL₂ (*ᴹ-*ᴹ-→ (row _) (ρ .M) (σ .M)))
-    -- (ρ >>ᵏ σ) .lookup v = {!semantics (kit→sem K)!}
-
     []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
-    []ᵏ = 1ᵏ
+    []ᵏ = []ᵉ ℑ⟨ []ₙ ⟩
 
     _++ᵏ_ : ∀ {Γl Δl Γr Δr} →
       [ 𝓥 ] Γl ⇒ᵉ Δl → [ 𝓥 ] Γr ⇒ᵉ Δr → [ 𝓥 ] Γl ++ᶜ Γr ⇒ᵉ Δl ++ᶜ Δr
-    (ρ ++ᵏ σ) .M =
-      [ [ ρ .M │  0ᴹ  ]
-               ─
-        [  0ᴹ  │ σ .M ] ]
-    (ρ ++ᵏ σ) .asLinRel =
-      [ [ ρ .asLinRel │  0AsLinRel  ]AsLinRel
-                      ─
-        [  0AsLinRel  │ σ .asLinRel ]AsLinRel ]AsLinRel
-    _++ᵏ_ {Γl = ctx Pl γl} {Γr = ctx Pr γr} ρ σ .sums =
-      _↘,_,↙_ {left = _ ++ _} {_ ++ _}
-        (ρ .sums , ⊴*-refl)
-        (+*-identity↘ _ ++₂ +*-identity↙ _)
-        (⊴*-refl , σ .sums)
-    (ρ ++ᵏ σ) .lookup ((sρ , 0σ) ↘, sp+ ,↙ (0ρ , sσ)) (lvar (↙ i) q b) =
-      let bρ , bσ = un++₂ b in
-      let sp+ρ , sp+σ = un++₂ sp+ in
-      let leρ = +ₘ-identityʳ→ (sp+ρ , 0ρ) in
-      let leσ = +ₘ-identity²→
-           (0σ ↘, sp+σ ,↙ σ .asLinRel .linRel .rel-0ₘ (bσ , sσ)) in
-      K.ren^𝓥 (ρ .lookup sρ (lvar i q bρ)) (extendʳ >>ʳ subuse-ren (leρ ++₂ leσ))
-      where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
-    (ρ ++ᵏ σ) .lookup ((sρ , 0σ) ↘, sp+ ,↙ (0ρ , sσ)) (lvar (↘ i) q b) =
-      let bρ , bσ = un++₂ b in
-      let sp+ρ , sp+σ = un++₂ sp+ in
-      let leρ = +ₘ-identity²→
-           (ρ .asLinRel .linRel .rel-0ₘ (bρ , sρ) ↘, sp+ρ ,↙ 0ρ) in
-      let leσ = +ₘ-identityˡ→ (0σ , sp+σ) in
-      K.ren^𝓥 (σ .lookup sσ (lvar i q bσ)) (extendˡ >>ʳ subuse-ren (leρ ++₂ leσ))
-      where open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
+    ρ ++ᵏ σ = ++ᵉ $
+      ren^Env K.ren^𝓥 ρ extendʳ
+        ✴⟨ (+*-identity↘ _ ++ₙ +*-identity↙ _) ⟩
+      ren^Env K.ren^𝓥 σ extendˡ
 
     [_·_]ᵏ : ∀ {r s A B} →
       r ⊴ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
-    [ le · t ]ᵏ .M = [─ [ 1# ] ─]
-    [ le · t ]ᵏ .asLinRel = [─ [ 1# ] ─]AsLinRel
-    [ le · t ]ᵏ .sums = [ ⊴-trans le (*.identity .proj₂ _) ]₂
-    [ le · t ]ᵏ .lookup r (lvar here refl b) =
-      K.ren^𝓥 t
-        (subuse-ren [
-          ⊴-trans (r .get here)
-            (⊴-trans (*-monoˡ (b .get here)) (*.identity .proj₁ _))
-        ]₂)
+    [ le · t ]ᵏ = [-]ᵉ (⟨ [ ⊴-trans le (*.identity .proj₂ _) ]ₙ ⟩· t)
 
   module _ {fl d} where
     open WithKit (Sub-Kit {fl} {d})

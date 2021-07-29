@@ -7,12 +7,14 @@ module Data.LTree.Vector where
   open import Data.LTree
 
   open import Algebra.Core using (Op₂)
-  open import Data.Product using (_×_; _,_; uncurry)
+  open import Data.Product using (_×_; proj₁; proj₂; _,_; uncurry)
   open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×PW
     using (×-setoid)
+  open import Data.Product.Nary.NonDependent
   open import Data.Unit using (⊤; tt)
-  open import Function.Base using (id; _∘_)
+  open import Function.Base using (id; _∘_; _$_; case_of_; case_return_of_; _∋_)
   open import Function.Equality using (_⟶_; _⟨$⟩_; cong)
+  open import Function.Nary.NonDependent
   open import Level using (Level; _⊔_; 0ℓ)
   open import Relation.Binary
     using (REL; Rel; Setoid; IsEquivalence; Reflexive)
@@ -51,6 +53,64 @@ module Data.LTree.Vector where
     constructor mk
     field get : ∀ i → R (u i) (v i)
   open Lift₂ public
+
+  open import Data.Nat.Base using (ℕ; zero; suc)
+  open import Data.Fin.Base using (Fin; zero; suc)
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≗_)
+
+  {- TODO: contribute to stdlib
+  tabulate⊤ₙ : ∀ n {ls} {as : Sets n ls} → (∀ k → Projₙ as k) → Product⊤ n as
+  tabulate⊤ₙ zero f = _
+  tabulate⊤ₙ (suc n) f = f zero , tabulate⊤ₙ n λ k → f (suc k)
+
+  proj⊤ₙ : ∀ n {ls} {as : Sets n ls} k → Product⊤ n as → Projₙ as k
+  proj⊤ₙ _ zero (x , xs) = x
+  proj⊤ₙ _ (suc k) (x , xs) = proj⊤ₙ _ k xs
+  -}
+
+  map×⊤ₙ :
+    ∀ {f g} {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)} →
+    (∀ {a} {A : Set a} → F A → G A) →
+    ∀ n {as} {As : Sets n as} →
+    (Product⊤ n (smap f F n As) → Product⊤ n (smap g G n As))
+  map×⊤ₙ h zero tt = tt
+  map×⊤ₙ h (suc n) (x , xs) = h x , map×⊤ₙ h n xs
+
+  map×⊤ₙ← : ∀ {f} {F : ∀ {l} → Set l → Set (f l)} →
+    (∀ {a} {A : Set a} → F A → A) →
+    ∀ n {as} {As : Sets n as} → (Product⊤ n (smap f F n As) → Product⊤ n As)
+  map×⊤ₙ← g zero tt = tt
+  map×⊤ₙ← g (suc n) (x , xs) = g x , map×⊤ₙ← g n xs
+
+  map×⊤ₙ←∘map×⊤ₙ-→ : ∀ n {as} {As : Sets n as} {f g : Level → Level}
+    {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
+    {p} (P : Product⊤ n As → Set p)
+    (i : ∀ {a} {A : Set a} → F A → A) (j : ∀ {a} {A : Set a} → G A → F A)
+    (xs : Product⊤ n (smap g G n As)) →
+    P (map×⊤ₙ← i n (map×⊤ₙ j n xs)) → P (map×⊤ₙ← (i ∘ j) n xs)
+  map×⊤ₙ←∘map×⊤ₙ-→ zero P i j tt p = p
+  map×⊤ₙ←∘map×⊤ₙ-→ (suc n) P i j (x , xs) p =
+    map×⊤ₙ←∘map×⊤ₙ-→ n (λ xs → P (i (j x) , xs)) i j xs p
+
+  map×⊤ₙ←∘map×⊤ₙ-← : ∀ n {as} {As : Sets n as} {f g : Level → Level}
+    {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
+    {p} (P : Product⊤ n As → Set p)
+    (i : ∀ {a} {A : Set a} → F A → A) (j : ∀ {a} {A : Set a} → G A → F A)
+    (xs : Product⊤ n (smap g G n As)) →
+    P (map×⊤ₙ← (i ∘ j) n xs) → P (map×⊤ₙ← i n (map×⊤ₙ j n xs))
+  map×⊤ₙ←∘map×⊤ₙ-← zero P i j tt p = p
+  map×⊤ₙ←∘map×⊤ₙ-← (suc n) P i j (x , xs) p =
+    map×⊤ₙ←∘map×⊤ₙ-← n (λ xs → P (i (j x) , xs)) i j xs p
+
+  record Liftₙ′ {n as r} {As : Sets n as} (R : As ⇉ Set r)
+    {s} (vs : Product⊤ n (smap id (λ A → Vector A s) n As)) : Set r where
+    constructor mk
+    field get : ∀ (i : Ptr s) → uncurry⊤ₙ n R (map×⊤ₙ← (_$ i) n vs)
+  open Liftₙ′ public
+
+  Liftₙ : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
+    smap id (λ A → Vector A s) n As ⇉ Set r
+  Liftₙ {n} R = curry⊤ₙ n (Liftₙ′ R)
 
   [_] : A → Vector A [-]
   [ x ] _ = x
@@ -108,6 +168,39 @@ module Data.LTree.Vector where
             Lift₂ R (u ∘ ↙) (v ∘ ↙) × Lift₂ R (u ∘ ↘) (v ∘ ↘)
     un++₂ (mk r) = mk (r ∘ ↙) , mk (r ∘ ↘)
 
+  module _ {n as r} {As : Sets n as} {R : As ⇉ Set r} where
+
+    infix 5 _++ₙ_
+
+    [_]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
+      uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs) → Liftₙ′ R vs
+    [ r ]ₙ .get here = r
+
+    []ₙ : {vs : Product⊤ n (smap id (λ A → Vector A ε) n As)} → Liftₙ′ R vs
+    []ₙ .get (there () _)
+
+    _++ₙ_ :
+      ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
+      Liftₙ′ R (map×⊤ₙ (_∘ ↙) n vs) → Liftₙ′ R (map×⊤ₙ (_∘ ↘) n vs) →
+      Liftₙ′ R vs
+    (ru ++ₙ rv) .get (↙ i) =
+      map×⊤ₙ←∘map×⊤ₙ-→ n (uncurry⊤ₙ n R) _ _ _ (ru .get i)
+    (ru ++ₙ rv) .get (↘ i) =
+      map×⊤ₙ←∘map×⊤ₙ-→ n (uncurry⊤ₙ n R) _ _ _ (rv .get i)
+
+    un[-]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
+      Liftₙ′ R vs → uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs)
+    un[-]ₙ r = r .get here
+
+    un++ₙ :
+      ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
+      Liftₙ′ R vs →
+      Liftₙ′ R (map×⊤ₙ (_∘ ↙) n vs) × Liftₙ′ R (map×⊤ₙ (_∘ ↘) n vs)
+    un++ₙ r .proj₁ .get i =
+      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) _ _ _ (r .get (↙ i))
+    un++ₙ r .proj₂ .get j =
+      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) _ _ _ (r .get (↘ j))
+
   module _ (b : A → B) (e : B) (a : B → B → B) where
 
     fold : Vector A s → B
@@ -124,7 +217,7 @@ module Data.LTree.Vector where
 
     setoid : Setoid a ℓ → LTree → Setoid a ℓ
     setoid S s .Carrier = Vector (S .Carrier) s
-    setoid S s ._≈_ = Lift₂ (S ._≈_)
+    setoid S s ._≈_ = Liftₙ (S ._≈_)
     setoid S s .isEquivalence .refl .get i = S .refl
     setoid S s .isEquivalence .sym p .get i = S .sym (p .get i)
     setoid S s .isEquivalence .trans p q .get i =
@@ -132,16 +225,16 @@ module Data.LTree.Vector where
 
     [-]ˢ : ∀ {S} → S ⟶ setoid {a} {ℓ} S [-]
     [-]ˢ ._⟨$⟩_ = [_]
-    [-]ˢ .cong = [_]₂
+    [-]ˢ .cong = [_]ₙ
 
     []ˢ : ∀ {S} → ⊤.setoid ⊤ 0ℓ ⟶ setoid {a} {ℓ} S ε
     []ˢ ⟨$⟩ _ = []
-    []ˢ .cong _ = []₂
+    []ˢ .cong _ = []ₙ
 
     ++ˢ : ∀ {S} →
           ×-setoid (setoid S s) (setoid S t) ⟶ setoid {a} {ℓ} S (s <+> t)
     ++ˢ ⟨$⟩ (xs , ys) = xs ++ ys
-    ++ˢ .cong (p , q) = p ++₂ q
+    ++ˢ .cong (p , q) = p ++ₙ q
 
     infix 5 _++₁∼_
 

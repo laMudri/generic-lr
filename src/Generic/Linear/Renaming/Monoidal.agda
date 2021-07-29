@@ -37,14 +37,14 @@ module Generic.Linear.Renaming.Monoidal
     Γl ⇒ʳ Δl → Γr ⇒ʳ Δr → Γl ++ᶜ Γr ⇒ʳ Δl ++ᶜ Δr
   th ++ʳ ph = ++ᵉ
     (compose th extendʳ
-      ✴⟨ +*-identity↘ _ ++₂ +*-identity↙ _ ⟩
+      ✴⟨ +*-identity↘ _ ++ₙ +*-identity↙ _ ⟩
      compose ph extendˡ)
 
   ++-[]ʳ← : ∀ {Γ} → Γ ⇒ʳ Γ ++ᶜ []ᶜ
-  ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
+  ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ 0*-triv ⟩))
 
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
   ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
   ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
   ++-[]ʳ→ .sums = ⊴*-refl , _
-  ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++₂ []₂)
+  ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (⊴*-trans le b ++ₙ []ₙ)

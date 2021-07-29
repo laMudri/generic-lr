@@ -5,7 +5,7 @@ module Algebra.Relational where
   open import Algebra.Skew
   open import Data.Product
   open import Data.Unit using (⊤; tt)
-  open import Function.Base using (flip)
+  open import Function.Base using (flip; _∘_)
   open import Level
   open import Relation.Binary using (REL; Rel)
   open import Relation.Unary
@@ -76,6 +76,17 @@ module Algebra.Relational where
 
   Monotonic₂₋₁ : ∀ {c ℓ} {C : Set c} → Rel C ℓ → (C → C → C → Set ℓ) → Set _
   Monotonic₂₋₁ _≤_ [_∘_]≤_ = Monotonic₁₋₂ (flip _≤_) (λ x y z → [ y ∘ z ]≤ x)
+
+  record Universally≤ {c ℓ} {C : Set c} (_≤_ : Rel C ℓ) (P : Pred C ℓ)
+         : Set (c ⊔ ℓ) where
+    field
+      {witness} : C
+      holds : P witness
+      unique : ∀ {z} → P z → z ≤ witness
+  open Universally≤ public
+
+  Universally≥ : ∀ {c ℓ} {C : Set c} → Rel C ℓ → Pred C ℓ → Set (c ⊔ ℓ)
+  Universally≥ = Universally≤ ∘ flip
 
   -- Structures
 
@@ -199,6 +210,20 @@ module Algebra.Relational where
       ; isLeftSkewRelMonoid to *-isLeftSkewRelMonoid
       ; isRightSkewRelMonoid to *-isRightSkewRelMonoid
       )
+
+  record IsFRelSemiring
+    {c ℓ} {C : Set c} (_≤_ : Rel C ℓ)
+    (_≤0 : C → Set ℓ) (_≤[_+_] : C → C → C → Set ℓ)
+    (_≤1 : C → Set ℓ) (_≤[_*_] : C → C → C → Set ℓ)
+    : Set (c ⊔ ℓ) where
+    field
+      isRelSemiring : IsRelSemiring _≤_ _≤0 _≤[_+_] _≤1 _≤[_*_]
+      0-func : Universally≤ _≤_ _≤0
+      +-func : ∀ x y → Universally≤ _≤_ _≤[ x + y ]
+      1-func : Universally≤ _≤_ _≤1
+      *-func : ∀ x y → Universally≤ _≤_ _≤[ x * y ]
+
+    open IsRelSemiring isRelSemiring public
 
   -- Bundles
 
@@ -375,6 +400,38 @@ module Algebra.Relational where
       ; identity²→ to *-identity²→; identity²← to *-identity²←
       )
 
+  record FRelSemiring c ℓ : Set (suc (c ⊔ ℓ)) where
+    field
+      Carrier : Set c
+      _≤_ : Rel Carrier ℓ
+      _≤0 : Carrier → Set ℓ
+      _≤[_+_] : (x y z : Carrier) → Set ℓ
+      _≤1 : Carrier → Set ℓ
+      _≤[_*_] : (x y z : Carrier) → Set ℓ
+      isProset : IsProset _≤_
+      0-mono : Monotonic₁₋₀ _≤_ _≤0
+      +-mono : Monotonic₁₋₂ _≤_ _≤[_+_]
+      1-mono : Monotonic₁₋₀ _≤_ _≤1
+      *-mono : Monotonic₁₋₂ _≤_ _≤[_*_]
+      isFRelSemiring : IsFRelSemiring _≤_ _≤0 _≤[_+_] _≤1 _≤[_*_]
+
+    open IsFRelSemiring isFRelSemiring public using
+      (isRelSemiring; 0-func; +-func; 1-func; *-func)
+
+    relSemiring : RelSemiring c ℓ
+    relSemiring = record
+      { isProset = isProset
+      ; 0-mono = 0-mono
+      ; +-mono = +-mono
+      ; 1-mono = 1-mono
+      ; *-mono = *-mono
+      ; isRelSemiring = isRelSemiring
+      }
+    open RelSemiring relSemiring public hiding
+      ( Carrier; _≤_; _≤0; _≤[_+_]; _≤1; _≤[_*_]; isProset
+      ; 0-mono; +-mono; 1-mono; *-mono; isRelSemiring
+      )
+
   -- Modules
 
   module _ {cr ℓr} (R : RelSemiring cr ℓr) where
@@ -447,4 +504,51 @@ module Algebra.Relational where
         ( relMonoid to +ₘ-relMonoid; leftSkewRelMonoid to +ₘ-leftSkewRelMonoid
         ; rightSkewRelMonoid to +ₘ-rightSkewRelMonoid; inter to +ₘ-inter
         ; identity²→ to +ₘ-identity²→; identity²← to +ₘ-identity²←
+        )
+
+  module _ {cr ℓr} (R : FRelSemiring cr ℓr) where
+    private
+      module R = FRelSemiring R
+
+    record IsFRelLeftSemimodule
+      {cm ℓm} {M : Set cm} (_≤ₘ_ : Rel M ℓm)
+      (_≤0ₘ : M → Set ℓm) (_≤[_+ₘ_] : M → M → M → Set ℓm)
+      (_≤[_*ₘ_] : M → R.Carrier → M → Set ℓm) : Set (cr ⊔ ℓr ⊔ cm ⊔ ℓm)
+      where
+      field
+        isRelLeftSemimodule :
+          IsRelLeftSemimodule R.relSemiring _≤ₘ_ _≤0ₘ _≤[_+ₘ_] _≤[_*ₘ_]
+        0ₘ-func : Universally≤ _≤ₘ_ _≤0ₘ
+        +ₘ-func : ∀ u v → Universally≤ _≤ₘ_ _≤[ u +ₘ v ]
+        *ₘ-func : ∀ r v → Universally≤ _≤ₘ_ _≤[ r *ₘ v ]
+
+    record FRelLeftSemimodule cm ℓm : Set (cr ⊔ ℓr ⊔ suc (cm ⊔ ℓm)) where
+      field
+        Carrierₘ : Set cm
+        _≤ₘ_ : Rel Carrierₘ ℓm
+        _≤0ₘ : Carrierₘ → Set ℓm
+        _≤[_+ₘ_] : (x y z : Carrierₘ) → Set ℓm
+        _≤[_*ₘ_] : Carrierₘ → R.Carrier → Carrierₘ → Set ℓm
+        isProset : IsProset _≤ₘ_
+        0ₘ-mono : Monotonic₁₋₀ _≤ₘ_ _≤0ₘ
+        +ₘ-mono : Monotonic₁₋₂ _≤ₘ_ _≤[_+ₘ_]
+        *ₘ-mono : ∀ {u u′ r r′ v v′} →
+          u′ ≤ₘ u → r R.≤ r′ → v ≤ₘ v′ →
+          u ≤[ r *ₘ v ] → u′ ≤[ r′ *ₘ v′ ]
+        isFRelLeftSemimodule : IsFRelLeftSemimodule _≤ₘ_ _≤0ₘ _≤[_+ₘ_] _≤[_*ₘ_]
+
+      open IsFRelLeftSemimodule isFRelLeftSemimodule public using
+        (isRelLeftSemimodule; 0ₘ-func; +ₘ-func; *ₘ-func)
+
+      relLeftSemimodule : RelLeftSemimodule R.relSemiring cm ℓm
+      relLeftSemimodule = record
+        { isProset = isProset
+        ; 0ₘ-mono = 0ₘ-mono
+        ; +ₘ-mono = +ₘ-mono
+        ; *ₘ-mono = *ₘ-mono
+        ; isRelLeftSemimodule = isRelLeftSemimodule
+        }
+      open RelLeftSemimodule relLeftSemimodule public hiding
+        ( Carrierₘ; _≤ₘ_; _≤0ₘ; _≤[_+ₘ_]; _≤[_*ₘ_]; isProset
+        ; 0ₘ-mono; +ₘ-mono; *ₘ-mono; isRelLeftSemimodule
         )

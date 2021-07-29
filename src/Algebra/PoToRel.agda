@@ -5,6 +5,7 @@ module Algebra.PoToRel where
   open import Algebra
   open import Algebra.Po
   open import Algebra.Relational
+  open import Function.Base
   open import Level
   open import Relation.Binary
 
@@ -105,6 +106,25 @@ module Algebra.PoToRel where
       }
     } where open PoSemiring X
 
+  poSemiring-to-fRelSemiring : PoSemiring c ℓ₁ ℓ₂ → FRelSemiring c ℓ₂
+  poSemiring-to-fRelSemiring X = record
+    { isProset = isProset
+    ; 0-mono = 0-mono
+    ; +-mono = +-mono
+    ; 1-mono = 1-mono
+    ; *-mono = *-mono
+    ; isFRelSemiring = record
+      { isRelSemiring = isRelSemiring
+      ; 0-func = record { holds = X.≤-refl ; unique = id }
+      ; +-func = λ x y → record { holds = X.≤-refl ; unique = id }
+      ; 1-func = record { holds = X.≤-refl ; unique = id }
+      ; *-func = λ x y → record { holds = X.≤-refl ; unique = id }
+      }
+    }
+    where
+    module X = PoSemiring X
+    open RelSemiring (poSemiring-to-relSemiring X)
+
   poLeftSemimodule-to-relLeftSemimodule : {R : PoSemiring cr ℓr₁ ℓr₂} →
     PoLeftSemimodule R cm ℓm₁ ℓm₂ →
     RelLeftSemimodule (poSemiring-to-relSemiring R) cm ℓm₂
@@ -159,3 +179,22 @@ module Algebra.PoToRel where
         , ≤ₘ-refl
       }
     } where module R = PoSemiring R; open PoLeftSemimodule X
+
+  poLeftSemimodule-to-fRelLeftSemimodule : {R : PoSemiring cr ℓr₁ ℓr₂} →
+    PoLeftSemimodule R cm ℓm₁ ℓm₂ →
+    FRelLeftSemimodule (poSemiring-to-fRelSemiring R) cm ℓm₂
+  poLeftSemimodule-to-fRelLeftSemimodule {R = R} X = record
+    { isProset = isProset
+    ; 0ₘ-mono = 0ₘ-mono
+    ; +ₘ-mono = +ₘ-mono
+    ; *ₘ-mono = *ₘ-mono
+    ; isFRelLeftSemimodule = record
+      { isRelLeftSemimodule = isRelLeftSemimodule
+      ; 0ₘ-func = record { holds = X.≤ₘ-refl ; unique = id }
+      ; +ₘ-func = λ u v → record { holds = X.≤ₘ-refl ; unique = id }
+      ; *ₘ-func = λ r v → record { holds = X.≤ₘ-refl ; unique = id }
+      }
+    }
+    where
+    module X = PoLeftSemimodule X
+    open RelLeftSemimodule (poLeftSemimodule-to-relLeftSemimodule X)

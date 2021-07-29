@@ -55,7 +55,7 @@ module Generic.Linear.Semantics
   mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
 
   record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
-                   : Set (suc 0ℓ ⊔ v ⊔ c) where
+         : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
       ren^𝓥 : Renameable (_⟨ 𝓥 ⟩⊢ A)
       var : ∀[                   𝓥 ⇒ 𝓒 ]

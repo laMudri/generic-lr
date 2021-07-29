@@ -34,8 +34,7 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Relation.Unary.Bunched.Properties
   open import Relation.Binary using (Setoid)
   open import Relation.Binary.Construct.Always as ⊤ using ()
-  open import Relation.Binary.PropositionalEquality as ≡
-    using (_≡_; subst; subst₂)
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
   infixr 5 _⊸_
 
@@ -93,22 +92,22 @@ module Generic.Linear.Example.AnnotatedArrow
   set .var (lvar i ≡.refl _) γ0 = γ0 .get i
   set .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) γ0 x =
     m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
-      .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
+      .app✴ +*-triv ([-]ᵉ (⟨ *ₗ-triv ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
       (γ0 ++₁ [ x ]₁)
   set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ0 =
-    (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ0)
-    (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) γ0)
+    (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) γ0)
+    (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) γ0)
 
   myConst : (A B : Ty) → Term []ᶜ ((1# , A) ⊸ (0# , B) ⊸ A)
   myConst A B =
     `con (`lam _ _ , ≡.refl , `con (`lam _ _ , ≡.refl ,
-      `var (lvar (↙ (↘ here)) ≡.refl (([]₂ ++₂ [ ⊴-refl ]₂) ++₂ ⊴*-refl))))
+      `var (lvar (↙ (↘ here)) ≡.refl (([]ₙ ++ₙ [ ⊴-refl ]ₙ) ++ₙ ⊴*-refl))))
 
   ⟦myConst⟧ : (A B : Ty) → ⟦ A ⟧ → ⟦ B ⟧ → ⟦ A ⟧
-  ⟦myConst⟧ A B = semantics set {[]ᶜ} {[]ᶜ} ([]ᵉ ℑ⟨ []₂ ⟩) (myConst A B) []₁
+  ⟦myConst⟧ A B = semantics set {[]ᶜ} {[]ᶜ} ([]ᵉ ℑ⟨ []ₙ ⟩) (myConst A B) []₁
 
-  test : (x y : Base) → Set
-  test x y = {!⟦myConst⟧ base base x y!}
+  test : (x y : Base) → ⟦myConst⟧ base base x y ≡ x
+  test x y = ≡.refl
 
   -- Setoid semantics
 
@@ -133,15 +132,15 @@ module Generic.Linear.Example.AnnotatedArrow
     -- TODO: lam case could be made better by Setoid currying.
     setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ0 ⟨$⟩ x =
       m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
-        .app✴ ⊴*-refl ([-]ᵉ (⟨ ⊴*-refl ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
+        .app✴ +*-triv ([-]ᵉ (⟨ *ₗ-triv ⟩· lvar (↘ here) ≡.refl ⊴*-refl))
         ⟨$⟩ (γ0 ++₁ [ x ]₁)
     setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ0 .cong xx =
       m .get _ .app✴ _ _ .cong (setoidL₁ ⟦_⟧ˢ _ .refl ++₁∼ [ xx ]₁∼)
     setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
       m .get _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
     setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ0 =
-      (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ0) ⟨$⟩
-      (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩) ⟨$⟩ γ0)
+      (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) ⟨$⟩ γ0) ⟨$⟩
+      (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) ⟨$⟩ γ0)
     setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
       m .get _ .app✴ _ _ .cong γγ (n .get _ .app✴ _ _ .cong γγ)
 
@@ -278,14 +277,14 @@ module Generic.Linear.Example.AnnotatedArrow
     ⟦Tm⟧-rel A Rγ m0 m1 = I⋂ (_ × _) \ (γ0 , γ1) →
       ⟦ Rγ ⟧ᴿᶜ .rel γ0 γ1 ⇒ ⟦ A ⟧ᴿ .rel (m0 ⟨$⟩ γ0) (m1 ⟨$⟩ γ1)
 
-    lemma-ℑ : ∀ {s R γ γ0 γ1} → R ⊴* 0* →
+    lemma-ℑ : ∀ {s R γ γ0 γ1} → R ⊴0* →
       ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 Chk.⇒ ℑ ]
     lemma-ℑ {[-]} (mk sp) = !ᴿ-0 (sp here)
     lemma-ℑ {ε} sp = id
     lemma-ℑ {s <+> t} (mk sp) =
       1✴1→ ∘ map-✴ (lemma-ℑ (mk (sp ∘ ↙)) , lemma-ℑ (mk (sp ∘ ↘)))
 
-    lemma-✴ : ∀ {s R P Q γ γ0 γ1} → R ⊴* P +* Q →
+    lemma-✴ : ∀ {s R P Q γ γ0 γ1} → R ⊴[ P +* Q ] →
       ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 ⇒
          ⟦ ctx P γ ⟧ᴿᶜ .rel γ0 γ1 ✴ ⟦ ctx Q γ ⟧ᴿᶜ .rel γ0 γ1 ]
     lemma-✴ {[-]} (mk sp) = !ᴿ-+ (sp here)
@@ -293,7 +292,7 @@ module Generic.Linear.Example.AnnotatedArrow
     lemma-✴ {s <+> t} (mk sp) =
       inter-✴ ∘ map-✴ (lemma-✴ (mk (sp ∘ ↙)) , lemma-✴ (mk (sp ∘ ↘)))
 
-    lemma-!ᴿ : ∀ {s R r Q γ γ0 γ1} → R ⊴* r *ₗ Q →
+    lemma-!ᴿ : ∀ {s R r Q γ γ0 γ1} → R ⊴[ r *ₗ Q ] →
       ∀[ ⟦ ctx {s} R γ ⟧ᴿᶜ .rel γ0 γ1 ⇒ !ᴿ r ⟦ ctx Q γ ⟧ᴿᶜ .rel γ0 γ1 ]
     lemma-!ᴿ {[-]} {Q = Q} {γ} (mk sp) =
       !ᴿ _ ⟦ ctx Q γ ⟧ᴿᶜ .resp-≈ ([-]₁η (λ {A} → ⟦_⟧ˢ.refl A))
@@ -363,5 +362,5 @@ module Generic.Linear.Example.AnnotatedArrow
       let γγ ✴⟨ ⟦sp+⟧ ⟩ rQγγ = lemma-✴ sp+ γγ in
       mm .get _ .app✴ _ _ .semsem γγ .app✴ ⟦sp+⟧
         (!ᴿ-map
-          (nn .get _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ℑ⟨ ⊴*-refl ⟩))
+          (nn .get _ .app✴ (mk λ i → +.identity-→ .proj₂ _) ([]ᵉ ℑ⟨ 0*-triv ⟩))
           (lemma-!ᴿ sp* rQγγ))

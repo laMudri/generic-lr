@@ -26,20 +26,17 @@ module Generic.Linear.Syntax.Interpretation
 
   open import Relation.Unary.Bunched.Checked
   private
-    open module Chk0 {s} = BunchedUnit (_⊴* 0* {s})
-    open module Chk+ {s} =
-      BunchedConjunction (λ (R P Q : Vector _ s) → R ⊴* P +* Q)
-        hiding (_─✴_)
-    open module Chk* {s} =
-      BunchedScaling (λ (R : Vector _ s) r P → R ⊴* r *ₗ P)
+    open module Chk0 {s} = BunchedUnit (_⊴0* {s})
+    open module Chk+ {s} = BunchedConjunction (_⊴[_+*_] {s})
+      hiding (_─✴_)
+    open module Chk* {s} = BunchedScaling (_⊴[_*ₗ_] {s})
     open module ChkD {s} =
       BunchedDuplicable (_⊴*_ {s}) 0* _+*_
   import Relation.Unary.Bunched as Syn
   private
     open module Syn⊴ {s} = Syn.BunchedOrder (_⊴*_ {s})
-    open module Syn+ {s} =
-      Syn.BunchedConjunction (λ (R P Q : Vector _ s) → R ⊴* P +* Q)
-        using (_─✴_)
+    open module Syn+ {s} = Syn.BunchedConjunction (_⊴[_+*_] {s})
+      using (_─✴_)
 
   private
     variable

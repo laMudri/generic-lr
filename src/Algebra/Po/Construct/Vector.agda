@@ -59,8 +59,8 @@ module Algebra.Po.Construct.Vector where
     PoLeftSemimodule R c ℓ₁ ℓ₂
   Vector-poLeftSemimodule R s = record
     { Carrierₘ = Vector Carrier s
-    ; _≈ₘ_ = Lift₂ _≈_
-    ; _≤ₘ_ = Lift₂ _≤_
+    ; _≈ₘ_ = Liftₙ _≈_
+    ; _≤ₘ_ = Liftₙ _≤_
     ; 0ₘ = lift₀ 0#
     ; _+ₘ_ = lift₂ _+_
     ; _*ₘ_ = λ r v → lift₁ (r *_) v
@@ -225,19 +225,19 @@ module Algebra.Po.Construct.Vector where
 
     [│] : LinMap f s ε
     [│] .hom u = []
-    [│] .hom-cong uu = []₂
-    [│] .hom-mono uu = []₂
-    [│] .hom-0ₘ = []₂
-    [│] .hom-+ₘ _ _ = []₂
-    [│] .hom-*ₘ _ _ = []₂
+    [│] .hom-cong uu = []ₙ
+    [│] .hom-mono uu = []ₙ
+    [│] .hom-0ₘ = []ₙ
+    [│] .hom-+ₘ _ _ = []ₙ
+    [│] .hom-*ₘ _ _ = []ₙ
 
     [_│_] : LinMap f s t → LinMap f s t′ → LinMap f s (t <+> t′)
     [ M │ N ] .hom u = M .hom u ++ N .hom u
-    [ M │ N ] .hom-cong uu = M .hom-cong uu ++₂ N .hom-cong uu
-    [ M │ N ] .hom-mono uu = M .hom-mono uu ++₂ N .hom-mono uu
-    [ M │ N ] .hom-0ₘ = M .hom-0ₘ ++₂ N .hom-0ₘ
-    [ M │ N ] .hom-+ₘ u v = M .hom-+ₘ u v ++₂ N .hom-+ₘ u v
-    [ M │ N ] .hom-*ₘ r u = M .hom-*ₘ r u ++₂ N .hom-*ₘ r u
+    [ M │ N ] .hom-cong uu = M .hom-cong uu ++ₙ N .hom-cong uu
+    [ M │ N ] .hom-mono uu = M .hom-mono uu ++ₙ N .hom-mono uu
+    [ M │ N ] .hom-0ₘ = M .hom-0ₘ ++ₙ N .hom-0ₘ
+    [ M │ N ] .hom-+ₘ u v = M .hom-+ₘ u v ++ₙ N .hom-+ₘ u v
+    [ M │ N ] .hom-*ₘ r u = M .hom-*ₘ r u ++ₙ N .hom-*ₘ r u
 
     module _ {s} where
 
@@ -252,20 +252,20 @@ module Algebra.Po.Construct.Vector where
       [│_│] : Vector S.Carrier s → LinMap f s [-]
       [│ v │] .hom u = [ ∑ (λ i → f.hom (u i) S.* v i) ]
       [│ v │] .hom-cong (mk uu) =
-        [ ∑-cong {s} (mk λ i → S.*-cong (f.hom-cong (uu i)) S.refl) ]₂
+        [ ∑-cong {s} (mk λ i → S.*-cong (f.hom-cong (uu i)) S.refl) ]ₙ
       [│ v │] .hom-mono (mk uu) =
-        [ ∑-mono {s} (mk λ i → S.*-mono (f.hom-mono (uu i)) S.≤-refl) ]₂
+        [ ∑-mono {s} (mk λ i → S.*-mono (f.hom-mono (uu i)) S.≤-refl) ]ₙ
       [│ v │] .hom-0ₘ = [ S.trans
         (∑-cong {s} (mk λ i → S.trans (S.*-congʳ f.hom-0#) (S.annihilˡ _)))
-        (∑-0 s) ]₂
+        (∑-0 s) ]ₙ
       [│ v │] .hom-+ₘ x y = [ S.trans
         (∑-cong {s}
           (mk λ i → S.trans (S.*-congʳ (f.hom-+ _ _)) (S.distribˡ _ _ _)))
-        (∑-+ {s} _ _) ]₂
+        (∑-+ {s} _ _) ]ₙ
       [│ v │] .hom-*ₘ r u = [ S.trans
         (∑-cong {s}
           (mk λ i → S.trans (S.*-congʳ (f.hom-* _ _)) (S.*-assoc _ _ _)))
-        (S.sym (∑-* {s} _)) ]₂
+        (S.sym (∑-* {s} _)) ]ₙ
         where
         open SumLinear S.0# S._+_ S._≈_ S.0# S._+_ S.refl S.trans S.+-cong
           (f.hom r S.*_) (S.annihilʳ _) (λ _ _ → S.distribʳ _ _ _)

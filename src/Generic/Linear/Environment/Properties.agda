@@ -8,7 +8,7 @@ module Generic.Linear.Environment.Properties
   where
 
   open PoSemiring poSemiring
-    renaming (Carrier to Ann; _≤_ to _⊴_; refl to ⊴-refl; trans to ⊴-trans)
+    renaming (Carrier to Ann; _≤_ to _⊴_; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans)
 
   open import Algebra.Relational
   open import Data.LTree
@@ -57,13 +57,13 @@ module Generic.Linear.Environment.Properties
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .asLinRel = [ ρ .asLinRel ─ σ .asLinRel ]AsLinRel
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
-      let br , bs = un++₂ b in
+      let br , bs = un++ₙ b in
       let v = ρ .lookup r (lvar i q br) in
-      psh^𝓥 (+ₘ-identityʳ→ (r+s , σ .asLinRel .linRel .rel-0ₘ (bs , s))) v
+      psh^𝓥 (+ₘ-identityʳ→ (r+s , σ .asLinRel .linRel .rel-0ₘ (⊴*→0* bs , s))) v
     ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↘ i) q b) =
-      let br , bs = un++₂ b in
+      let br , bs = un++ₙ b in
       let v = σ .lookup s (lvar i q bs) in
-      psh^𝓥 (+ₘ-identityˡ→ (ρ .asLinRel .linRel .rel-0ₘ (br , r) , r+s)) v
+      psh^𝓥 (+ₘ-identityˡ→ (ρ .asLinRel .linRel .rel-0ₘ (⊴*→0* br , r) , r+s)) v
 
     [-]ᵉ : ∀ {r A} → ∀[ r ·ᶜ _𝓥 A Syn.⇒ [ _𝓥_ ]_⇒ᵉ [ r · A ]ᶜ ]
     [-]ᵉ (⟨_⟩·_ {Q′} sp v) .M = [─ Q′ ─]

@@ -21,7 +21,8 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Relation.Nary
   open import Relation.Unary.Bunched
 
-  open PoSemiring poSemiring renaming (Carrier to Ann)
+  open PoSemiring poSemiring renaming
+    (Carrier to Ann; ≤-refl to ⊴-refl; ≤-trans to ⊴-trans)
 
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Algebra poSemiring
@@ -65,6 +66,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     where
 
     -- open PoLeftSemimoduleMor F
+    private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
 
     map-p : (ps : Premises fl) →
       (∀ {Θ P Q} → Q ⊴* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
@@ -73,14 +75,14 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p `⊤ f r _ = _
     map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
     map-p `ℑ f r ℑ⟨ t ⟩ =
-      ℑ⟨ (⊴*-trans r (⊴*-trans (F .hom-mono t) (⊴*-reflexive (F .hom-0ₘ)))) ⟩
+      ℑ⟨ 0ₘ-mono (⊴*-trans r (F .hom-mono (0*→⊴* t))) (≈*→0* (F .hom-0ₘ)) ⟩
     map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let sp′ = ⊴*-trans r
-           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-+ₘ _ _)))
+      let sp′ = +ₘ-mono (⊴*-trans r (F .hom-mono (+*→⊴* sp))) ⊴*-refl ⊴*-refl
+           (≈*→+* (F .hom-+ₘ _ _))
       in map-p ps f ⊴*-refl s ✴⟨ sp′ ⟩ map-p qs f ⊴*-refl t
     map-p (p `· ps) f r (⟨ sp ⟩· t) =
-      let sp′ = ⊴*-trans r
-           (⊴*-trans (F .hom-mono sp) (⊴*-reflexive (F .hom-*ₘ _ _)))
+      let sp′ = *ₘ-mono (⊴*-trans r (F .hom-mono (*ₗ→⊴* sp))) ⊴-refl ⊴*-refl
+           (≈*→*ₗ (F .hom-*ₘ _ _))
       in ⟨ sp′ ⟩· map-p ps f ⊴*-refl t
     map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
       □⟨ ⊴*-trans r (F .hom-mono str)
