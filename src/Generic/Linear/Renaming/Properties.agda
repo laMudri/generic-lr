@@ -15,6 +15,7 @@ module Generic.Linear.Renaming.Properties
   open import Algebra.Relational
   open import Data.Product
   open import Data.Sum
+  open import Function.Base using (id)
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
   open import Relation.Unary
@@ -26,9 +27,9 @@ module Generic.Linear.Renaming.Properties
   open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Environment Ty poSemiring
+  open import Generic.Linear.Environment.Categorical Ty poSemiring
   open import Generic.Linear.Renaming Ty poSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
-  -- open import Generic.Linear.Extend Ty poSemiring
 
   private
     variable
@@ -72,18 +73,13 @@ module Generic.Linear.Renaming.Properties
   -}
 
   identity : Γ ⇒ʳ Γ
-  identity .M = idLinMor
-  identity .asLinRel = idAsLinRel
-  identity .sums = ⊴*-refl
-  identity .lookup le v = record { _∋_ v; basis = ⊴*-trans le (v .basis) }
+  identity = id^Env record { pure = id }
+    where open IdentityEnv
 
   1ʳ = identity
 
   select : ∀ {Γ Δ Θ : Ctx} → Γ ⇒ʳ Δ → [ 𝓥 ] Θ ⇒ᵉ Γ → [ 𝓥 ] Θ ⇒ᵉ Δ
-  select th ρ .M = th .M >>LinMor ρ .M
-  select th ρ .asLinRel = th .asLinRel >>AsLinRel ρ .asLinRel
-  select th ρ .sums = th .sums , ρ .sums
-  select th ρ .lookup (th-r , ρ-r) v = ρ .lookup ρ-r (th .lookup th-r v)
+  select th ρ = postren^Env ρ th
 
   compose : ∀ {Γ Δ Θ : Ctx} → Δ ⇒ʳ Θ → Γ ⇒ʳ Δ → Γ ⇒ʳ Θ
   compose th ph = select th ph
