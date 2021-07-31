@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
+{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
 
 module Generic.Linear.Example.LnL where
 

@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --sized-types --without-K --prop --postfix-projections #-}
+{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_; suc)
@@ -19,7 +19,6 @@ module Generic.Linear.Semantics
   open import Function.Extra
   open import Size
   open import Relation.Nary
-  -- open import Relation.Unary hiding (_⊢_)
   open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawPoSemiring
