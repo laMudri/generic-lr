@@ -43,7 +43,7 @@ module Generic.Linear.Example.HashBug where
 
   import Function.Base as F
 
-  test₀ test₁ test₂ test₃ : [ Desc , ∞ ] []ᶜ ⊢ ι
+  test₀ test₁ test₂ test₃ test₄ : [ Desc , ∞ ] []ᶜ ⊢ ι
   test₀ = lam (lam (app (var (# 1)) (var (# 0))))
   -- Yellow:   ^-------------------------------^
   test₁ = lam (lam (app (var (Ptr (((ε <+> [-]) <+> [-]) <+> ε) F.∋ # 1)) (var (# 0))))
@@ -54,3 +54,5 @@ module Generic.Linear.Example.HashBug where
   -- No yellow.                           ^ Normalised goal: ι ≡ ι
   -- C-c C-x C-h C-c C-, shows that all implicit arguments to # 1 have been
   --   solved.
+  test₄ = lam (lam (var (# 1)))
+  -- This is fine.
