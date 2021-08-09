@@ -343,3 +343,35 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     g {[-]} le = un[-]ₙ le
     g {ε} le = ≤*→0* le
     g {sl <+> sr} le = g {sl} ≤*-refl ↘, ≤*→+* le ,↙ g {sr} ≤*-refl
+
+  -- Compound linear relations
+
+  _⊕ᴿ_ : ∀ {a b sl sr tl tr} →
+    LinRel sl tl a → LinRel sr tr b → LinRel (sl <+> sr) (tl <+> tr) (a ⊔ b)
+  (R ⊕ᴿ S) .rel P Q = R .rel (P ∘ ↙) (Q ∘ ↙) × S .rel (P ∘ ↘) (Q ∘ ↘)
+  (R ⊕ᴿ S) .rel-≤ₘ (mk xx) (mk yy) (ll , rr) =
+    R .rel-≤ₘ (mk (xx ∘ ↙)) (mk (yy ∘ ↙)) ll ,
+    S .rel-≤ₘ (mk (xx ∘ ↘)) (mk (yy ∘ ↘)) rr
+  (R ⊕ᴿ S) .rel-0ₘ (mk sp0 , (ll , rr)) =
+    R .rel-0ₘ (mk (sp0 ∘ ↙) , ll) ++ₙ S .rel-0ₘ (mk (sp0 ∘ ↘) , rr)
+  (R ⊕ᴿ S) .rel-+ₘ (mk sp+ , (ll , rr)) =
+    let llR ↘, sp+R ,↙ rrR = R .rel-+ₘ (mk (sp+ ∘ ↙) , ll) in
+    let llS ↘, sp+S ,↙ rrS = S .rel-+ₘ (mk (sp+ ∘ ↘) , rr) in
+    _↘,_,↙_ {left = _ ++ _} {_ ++ _}
+      (llR , llS) (sp+R ++ₙ sp+S) (rrR , rrS)
+  (R ⊕ᴿ S) .rel-*ₘ (mk sp* , (ll , rr)) =
+    let sp*R , llR = R .rel-*ₘ (mk (sp* ∘ ↙) , ll) in
+    let sp*S , rrS = S .rel-*ₘ (mk (sp* ∘ ↘) , rr) in
+    _,_ {middle = _ ++ _} (sp*R ++ₙ sp*S) (llR , rrS)
+
+  _⊕AsLinRel_ : ∀ {a b sl sr tl tr} {M : LinMor sl tl} {N : LinMor sr tr} →
+    AsLinRel M a → AsLinRel N b → AsLinRel [ [ M │ 0ᴹ ] ─ [ 0ᴹ │ N ] ] (a ⊔ b)
+  (R ⊕AsLinRel S) .linRel = R .linRel ⊕ᴿ S .linRel
+  (R ⊕AsLinRel S) .equiv = mk⇔
+    (λ (ll , rr) →
+      ≤*-trans (R .equiv .f ll) (mk λ i → +.identity-→ .proj₂ _) ++ₙ
+      ≤*-trans (S .equiv .f rr) (mk λ i → +.identity-← .proj₁ _))
+    (λ le → let ll , rr = un++ₙ le in
+      R .equiv .g (≤*-trans ll (mk λ i → +.identity-← .proj₂ _)) ,
+      S .equiv .g (≤*-trans rr (mk λ i → +.identity-→ .proj₁ _)))
+    where open Equivalence
