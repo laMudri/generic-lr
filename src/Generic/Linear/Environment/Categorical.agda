@@ -24,11 +24,14 @@ module Generic.Linear.Environment.Categorical
     field
       pure : ∀[ _∋_ ⇒ 𝓥 ]
 
+    subuse^Env : ∀ {s P Q γ} → P ≤* Q → [ 𝓥 ] ctx P γ ⇒ᵉ ctx {s} Q γ
+    subuse^Env PQ .M = 1ᴹ
+    subuse^Env PQ .asLinRel = idAsLinRel
+    subuse^Env PQ .sums = PQ
+    subuse^Env PQ .lookup r (lvar i q b) = pure (lvar i q (≤*-trans r b))
+
     id^Env : ∀ {Γ} → [ 𝓥 ] Γ ⇒ᵉ Γ
-    id^Env .M = 1ᴹ
-    id^Env .asLinRel = idAsLinRel
-    id^Env .sums = ≤*-refl
-    id^Env .lookup r (lvar i q b) = pure (lvar i q (≤*-trans r b))
+    id^Env = subuse^Env ≤*-refl
 
   record ComposeEnv {u v w} (𝓤 : Scoped u) (𝓥 : Scoped v) (𝓦 : Scoped w)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where
