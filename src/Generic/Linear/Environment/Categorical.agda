@@ -10,6 +10,7 @@ module Generic.Linear.Environment.Categorical
   open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Algebra.Relational
+  open import Function.Base using (id)
   open import Relation.Nary
 
   open import Generic.Linear.Operations rawPoSemiring
@@ -32,6 +33,11 @@ module Generic.Linear.Environment.Categorical
 
     id^Env : ∀ {Γ} → [ 𝓥 ] Γ ⇒ᵉ Γ
     id^Env = subuse^Env ≤*-refl
+  open IdentityEnv {{...}} public
+
+  instance
+    identityEnv-∋ : IdentityEnv _∋_
+    identityEnv-∋ .pure = id
 
   record ComposeEnv {u v w} (𝓤 : Scoped u) (𝓥 : Scoped v) (𝓦 : Scoped w)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where
@@ -44,8 +50,12 @@ module Generic.Linear.Environment.Categorical
     >>^Env ρ σ .asLinRel = σ .asLinRel >>AsLinRel ρ .asLinRel
     >>^Env ρ σ .sums = σ .sums , ρ .sums
     >>^Env ρ σ .lookup (s , r) v = lift ρ r (σ .lookup s v)
+  open ComposeEnv {{...}} public
+
+  instance
+    composeEnv-𝓥-∋ : ∀ {v} {𝓥 : Scoped v} → ComposeEnv 𝓥 _∋_ 𝓥
+    composeEnv-𝓥-∋ .lift ρ r v = ρ .lookup r v
 
   postren^Env : ∀ {v} {𝓥 : Scoped v} {Γ Δ Θ} →
     [ 𝓥 ] Γ ⇒ᵉ Δ → Δ ⇒ʳ Θ → [ 𝓥 ] Γ ⇒ᵉ Θ
-  postren^Env = >>^Env λ where .lift ρ r v → ρ .lookup r v
-    where open ComposeEnv
+  postren^Env = >>^Env
