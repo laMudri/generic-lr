@@ -13,6 +13,7 @@ module Generic.Linear.Environment.Properties
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product
+  open import Function.Base using (_∘_)
   open import Relation.Unary as Syn using (IUniversal)
   open import Relation.Unary.Checked
   open import Relation.Unary.Bunched.Checked
@@ -45,28 +46,38 @@ module Generic.Linear.Environment.Properties
 
     private open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
 
-    []ᵉ : ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ []ᶜ ]
-    []ᵉ ℑ⟨ sp ⟩ .M = [─]
-    []ᵉ ℑ⟨ sp ⟩ .asLinRel = [─]AsLinRel
-    []ᵉ ℑ⟨ sp ⟩ .sums = sp
-    []ᵉ ℑ⟨ sp ⟩ .lookup _ (lvar (there () _) _ _)
+    []ᵉ′ : ∀ {R θ} → ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {ε} R θ ]
+    []ᵉ′ ℑ⟨ sp ⟩ .M = [─]
+    []ᵉ′ ℑ⟨ sp ⟩ .asLinRel = [─]AsLinRel
+    []ᵉ′ ℑ⟨ sp ⟩ .sums = sp
+    []ᵉ′ ℑ⟨ sp ⟩ .lookup _ (lvar (there () _) _ _)
 
-    ++ᵉ : ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ Γ ++ᶜ Δ ]
-    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M ─ σ .M ]
-    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .asLinRel = [ ρ .asLinRel ─ σ .asLinRel ]AsLinRel
-    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums
-    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
+    []ᵉ : ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ []ᶜ ]
+    []ᵉ = []ᵉ′
+
+    ++ᵉ′ : ∀ {s t R θ} → let Γ = ctx (R ∘ ↙) (θ ∘ ↙); Δ = ctx (R ∘ ↘) (θ ∘ ↘) in
+      ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {s <+> t} R θ ]
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M ─ σ .M ]
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .asLinRel = [ ρ .asLinRel ─ σ .asLinRel ]AsLinRel
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
       let br , bs = un++ₙ b in
       let v = ρ .lookup r (lvar i q br) in
       psh^𝓥 (+ₘ-identityʳ→ (r+s , σ .asLinRel .linRel .rel-0ₘ (≤*→0* bs , s))) v
-    ++ᵉ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↘ i) q b) =
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↘ i) q b) =
       let br , bs = un++ₙ b in
       let v = σ .lookup s (lvar i q bs) in
       psh^𝓥 (+ₘ-identityˡ→ (ρ .asLinRel .linRel .rel-0ₘ (≤*→0* br , r) , r+s)) v
 
-    [-]ᵉ : ∀ {r A} → ∀[ r ·ᶜ _𝓥 A Syn.⇒ [ _𝓥_ ]_⇒ᵉ [ r · A ]ᶜ ]
-    [-]ᵉ (⟨_⟩·_ {Q′} sp v) .M = [─ Q′ ─]
-    [-]ᵉ (⟨_⟩·_ {Q′} sp v) .asLinRel = [─ Q′ ─]AsLinRel
-    [-]ᵉ (⟨ sp ⟩· v) .sums = sp
-    [-]ᵉ (⟨ sp ⟩· v) .lookup t (lvar here refl b) =
+    ++ᵉ : ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ Γ ++ᶜ Δ ]
+    ++ᵉ = ++ᵉ′
+
+    [-]ᵉ′ : ∀ {R θ} → ∀[ R here ·ᶜ _𝓥 θ here Syn.⇒ [ _𝓥_ ]_⇒ᵉ ctx {[-]} R θ ]
+    [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .M = [─ Q′ ─]
+    [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .asLinRel = [─ Q′ ─]AsLinRel
+    [-]ᵉ′ (⟨ sp ⟩· v) .sums = sp
+    [-]ᵉ′ (⟨ sp ⟩· v) .lookup t (lvar here refl b) =
       psh^𝓥 (*ₘ-identity→ (b .get here , t)) v
+
+    [-]ᵉ : ∀ {r A} → ∀[ r ·ᶜ _𝓥 A Syn.⇒ [ _𝓥_ ]_⇒ᵉ [ r · A ]ᶜ ]
+    [-]ᵉ = [-]ᵉ′
