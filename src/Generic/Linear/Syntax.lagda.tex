@@ -32,7 +32,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open Ctx public
 
   sctx→ctx : ∀ {s} → SizedCtx s → Ctx
-  sctx→ctx (sctx P Γ) = ctx P Γ
+  sctx→ctx (sctx P γ) = ctx P γ
 
   []ᶜ : Ctx
   []ᶜ = ctx [] []
@@ -44,13 +44,13 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   [ ρ · A ]ᶜ = ctx [ ρ ] [ A ]
 
   _++ᶜ_ : Ctx → Ctx → Ctx
-  ctx P Γ ++ᶜ ctx Q Δ = ctx (P ++ Q) (Γ ++ Δ)
+  ctx P γ ++ᶜ ctx Q δ = ctx (P ++ Q) (γ ++ δ)
 
   leftᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  leftᶜ (sctx P Γ) = ctx (P ∘ ↙) (Γ ∘ ↙)
+  leftᶜ (sctx P γ) = ctx (P ∘ ↙) (γ ∘ ↙)
 
   rightᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  rightᶜ (sctx P Γ) = ctx (P ∘ ↘) (Γ ∘ ↘)
+  rightᶜ (sctx P γ) = ctx (P ∘ ↘) (γ ∘ ↘)
 \end{code}
 
 Premises to each rule form a tree.
@@ -76,7 +76,7 @@ connectives:
 %<*Premises>
 \begin{code}
     data Premises : Set where
-      ⟨_`⊢_⟩ : (PΓ : Ctx) (A : Ty) → Premises
+      ⟨_`⊢_⟩ : (Γ : Ctx) (A : Ty) → Premises
       `⊤ : {{_ : Has-⊤}} → Premises
       _`∧_ : {{_ : Has-∧}} (p q : Premises) → Premises
       `ℑ : {{_ : Has-ℑ}} → Premises
@@ -108,10 +108,16 @@ connectives:
 \end{code}
 %</System>
 
+%<*Scoped>
 \begin{code}
   Scoped : ∀ ℓ → Set (suc ℓ)
   Scoped ℓ = Ctx → Ty → Set ℓ
-
-  Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
-  Scope T QΔ PΓ A = T (PΓ ++ᶜ QΔ) A
 \end{code}
+%</Scoped>
+
+%<*Scope>
+\begin{code}
+  Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
+  Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
+\end{code}
+%</Scope>
