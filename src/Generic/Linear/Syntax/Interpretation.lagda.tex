@@ -73,13 +73,13 @@ module Generic.Linear.Syntax.Interpretation
   Dupᶜ : (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
   Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
 
-  module WithScope (⟦_,_⊢_⟧ : Ctx → Scoped ℓ) where
+  module WithScope (X : Ctx → Scoped ℓ) where
 \end{code}
 
 %<*semp>
 \begin{code}
     ⟦_⟧p : Premises fl → Ctx → Set ℓ
-    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p Δ = ⟦ Γ , Δ ⊢ A ⟧
+    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p Δ = X Γ Δ A
     ⟦ `⊤ ⟧p = U
     ⟦ `ℑ ⟧p = ℑᶜ
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
