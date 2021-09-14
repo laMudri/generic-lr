@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --prop #-}
+{-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Po
 open import Level

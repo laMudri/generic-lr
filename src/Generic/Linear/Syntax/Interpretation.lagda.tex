@@ -1,5 +1,5 @@
 \begin{code}
-{-# OPTIONS --safe --without-K --prop #-}
+{-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_)
@@ -41,7 +41,6 @@ module Generic.Linear.Syntax.Interpretation
   private
     variable
       ℓ t u : Level
-      fl : PremisesFlags
 
   infix 4 _≤ᶜ_
   infixr 5 !!_
@@ -73,19 +72,26 @@ module Generic.Linear.Syntax.Interpretation
   Dupᶜ : (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
   Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
 
-  module WithScope (X : Ctx → Scoped ℓ) where
+  module WithScope (
+\end{code}
+%<*X>
+\begin{code}[inline]
+    X : Ctx → Scoped ℓ
+\end{code}
+%</X>
+\begin{code}
+    ) where
 \end{code}
 
 %<*semp>
 \begin{code}
-    ⟦_⟧p : Premises fl → Ctx → Set ℓ
-    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p Δ = X Γ Δ A
+    ⟦_⟧p : Premises → Ctx → Set ℓ
+    ⟦ ⟨ Δ `⊢ A ⟩ ⟧p Γ = X Δ Γ A
     ⟦ `⊤ ⟧p = U
-    ⟦ `ℑ ⟧p = ℑᶜ
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
+    ⟦ `ℑ ⟧p = ℑᶜ
     ⟦ p `✴ q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
     ⟦ r `· p ⟧p = r ·ᶜ ⟦ p ⟧p
-    ⟦ `□ p ⟧p = Dupᶜ ⟦ p ⟧p
 \end{code}
 %</semp>
 \begin{code}
@@ -94,25 +100,25 @@ module Generic.Linear.Syntax.Interpretation
 
 %<*semr>
 \begin{code}
-    ⟦_⟧r : Rule fl → Scoped ℓ
+    ⟦_⟧r : Rule → Scoped ℓ
     ⟦ ps =⇒ A′ ⟧r Γ A = A′ ≡ A × ⟦ ps ⟧p Γ
 \end{code}
 %</semr>
 
 %<*sems>
 \begin{code}
-    ⟦_⟧s : System fl → Scoped ℓ
+    ⟦_⟧s : System → Scoped ℓ
     ⟦ L ▹ rs ⟧s Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r Γ A
 \end{code}
 %</sems>
 
 \begin{code}
-  ⟦_⟧p : Premises fl → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
+  ⟦_⟧p : Premises → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
   ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
 
-  ⟦_⟧r : Rule fl → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧r : Rule → (Ctx → Scoped ℓ) → Scoped ℓ
   ⟦ r ⟧r Sc = let module W = WithScope Sc in W.⟦ r ⟧r
 
-  ⟦_⟧s : System fl → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧s : System → (Ctx → Scoped ℓ) → Scoped ℓ
   ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s
 \end{code}

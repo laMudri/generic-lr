@@ -1,4 +1,5 @@
-{-# OPTIONS --safe --without-K --prop #-}
+\begin{code}
+{-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ)
@@ -31,7 +32,6 @@ module Generic.Linear.Syntax.Interpretation.Map
   private
     variable
       x y : Level
-      fl : PremisesFlags
 
   {-
   module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
@@ -41,7 +41,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 
     -- open RelLeftSemimoduleRel F
 
-    map-pᴿ : (ps : Premises fl) →
+    map-pᴿ : (ps : Premises) →
       (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
     map-pᴿ ⟨ Γ `⊢ A ⟩ f r t = {!!}
@@ -54,7 +54,7 @@ module Generic.Linear.Syntax.Interpretation.Map
       let r′ , str′ = F .rel-comm-≤ₘ (str , r) in
       □⟨ str′ , {!sp0!} , {!!} ⟩ map-pᴿ ps f r′ t
 
-    map-sᴿ : (s : System fl) →
+    map-sᴿ : (s : System) →
       (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
       (∀ {A P Q} → F .rel P Q → ⟦ s ⟧s X A (ctx P γ) → ⟦ s ⟧s Y A (ctx Q δ))
     map-sᴿ s f r t = {!!}
@@ -67,7 +67,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     -- open PoLeftSemimoduleMor F
     private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
 
-    map-p : (ps : Premises fl) →
+    map-p : (ps : Premises) →
       (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → Q ≤* F .hom P → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
     map-p (⟨ Γ `⊢ A ⟩) f r t = f r t
@@ -83,25 +83,28 @@ module Generic.Linear.Syntax.Interpretation.Map
       let sp′ = *ₘ-mono (≤*-trans r (F .hom-mono (*ₗ→≤* sp))) ≤-refl ≤*-refl
            (≈*→*ₗ (F .hom-*ₘ _ _))
       in ⟨ sp′ ⟩· map-p ps f ≤*-refl t
-    map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ ≤*-trans r (F .hom-mono str)
-       , ≤*-trans (F .hom-mono sp0) (≤*-reflexive (F .hom-0ₘ))
-       , ≤*-trans (F .hom-mono sp+) (≤*-reflexive (F .hom-+ₘ _ _))
-       ⟩ map-p ps f ≤*-refl t
 
-    map-r : (r : Rule fl) →
+    map-r : (r : Rule) →
       (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
+\end{code}
 
-    map-s : (s : System fl) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
+%<*map-s-type>
+\begin{code}
+    map-s : (s : System) →
+      (∀ {Θ P Q} → Q ≤* F .hom P →
+        ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → Q ≤* F .hom P →
+        ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
+\end{code}
+%</map-s-type>
+\begin{code}
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
   module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
 
-    map-p′ : (ps : Premises fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
+    map-p′ : (ps : Premises) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ Γ `⊢ A ⟩ f t = f t
     map-p′ `⊤ f _ = _
     map-p′ `ℑ f ℑ⟨ sp ⟩ = ℑ⟨ sp ⟩
@@ -109,13 +112,11 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =
       map-p′ ps f s ✴⟨ sp ⟩ map-p′ qs f t
     map-p′ (r `· ps) f (⟨ sp ⟩· t) = ⟨ sp ⟩· map-p′ ps f t
-    map-p′ (`□ ps) f (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ str , sp0 , sp+ ⟩ map-p′ ps f t
 
-    map-r′ : (r : Rule fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
+    map-r′ : (r : Rule) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
 
-    map-s′ : (s : System fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ s ⟧s X ⇒ ⟦ s ⟧s Y ]
+    map-s′ : (s : System) → ∀[ X ⇒ Y ] → ∀[ ⟦ s ⟧s X ⇒ ⟦ s ⟧s Y ]
     map-s′ (L ▹ rs) f (l , t) = l , map-r′ (rs l) f t
 
   open import Category.Applicative
@@ -125,7 +126,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     open RawApplicative appF
 
     sequence-p :
-      ∀ {X : Ctx → Scoped x} (ps : Premises fl) →
+      ∀ {X : Ctx → Scoped x} (ps : Premises) →
       ∀[ ⟦ ps ⟧p (λ Δ Γ B → F (X Δ Γ B)) ⇒ F ∘ ⟦ ps ⟧p X ]
     sequence-p (⟨ Γ `⊢ A ⟩) t = t
     sequence-p `⊤ tt = pure tt
@@ -135,16 +136,15 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
-    sequence-p (`□ ps) (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ str , sp0 , sp+ ⟩_ <$> sequence-p ps t
 
     sequence-r :
-      ∀ {X : Ctx → Scoped x} (r : Rule fl) → ∀ {A} →
+      ∀ {X : Ctx → Scoped x} (r : Rule) → ∀ {A} →
       ∀[ _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A ]
     sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
-      ∀ {X : Ctx → Scoped x} (s : System fl) → ∀ {A} →
+      ∀ {X : Ctx → Scoped x} (s : System) → ∀ {A} →
       ∀[ _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A ]
     sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t
+\end{code}

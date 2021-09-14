@@ -1,4 +1,5 @@
-{-# OPTIONS --safe --without-K --prop #-}
+\begin{code}
+{-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Po
 open import Level
@@ -27,12 +28,25 @@ module Generic.Linear.Renaming
   private
     variable
       ℓ : Level
+\end{code}
 
+%<*Ren>
+\begin{code}
   _⇒ʳ_ : (Γ Δ : Ctx) → Set₁
   _⇒ʳ_ = [ _∋_ ]_⇒ᵉ_
+\end{code}
+%</Ren>
 
+%<*Boxr>
+\begin{code}
   □ʳ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
   (□ʳ T) Γ = ∀[ (_⇒ʳ Γ) ⇒ T ]
+\end{code}
+%</Boxr>
 
+%<*Renameable>
+\begin{code}
   Renameable : (Ctx → Set ℓ) → Set (suc 0ℓ ⊔ ℓ)
   Renameable T = ∀[ T ⇒ □ʳ T ]
+\end{code}
+%</Renameable>

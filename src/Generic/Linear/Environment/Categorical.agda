@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --prop --postfix-projections #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Po
 open import Level hiding (lift)

@@ -1,7 +1,8 @@
-{-# OPTIONS --sized-types --without-K --prop #-}
+\begin{code}
+{-# OPTIONS --sized-types --without-K #-}
 
 open import Algebra.Po
-open import Level renaming (zero to lzero; suc to lsuc)
+open import Level
 
 module Generic.Linear.Syntax.Term
   (Ty : Set) (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ)
@@ -19,12 +20,15 @@ module Generic.Linear.Syntax.Term
 
   private
     variable
-     A : Ty
      sz : Size
-     fl : PremisesFlags
 
   infix 20 [_,_]_⊢_
+\end{code}
 
-  data [_,_]_⊢_ (d : System fl) : Size → Scoped 0ℓ where
-    `var : ∀[                          _∋_ ⇒ [ d , ↑ sz ]_⊢_ ]
-    `con : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_) ⇒ [ d , ↑ sz ]_⊢_ ]
+%<*Term>
+\begin{code}
+  data [_,_]_⊢_ (d : System) : Size → Scoped 0ℓ where
+    `var  : ∀[ _∋_                           ⇒ [ d , ↑ sz ]_⊢_ ]
+    `con  : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_)  ⇒ [ d , ↑ sz ]_⊢_ ]
+\end{code}
+%</Term>

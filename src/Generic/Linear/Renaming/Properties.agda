@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --prop --postfix-projections #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Po
 open import Function.Base using (flip; _∘_)
@@ -72,8 +72,7 @@ module Generic.Linear.Renaming.Properties
   -}
 
   identity : Γ ⇒ʳ Γ
-  identity = id^Env record { pure = id }
-    where open IdentityEnv
+  identity = id^Env
 
   1ʳ = identity
 

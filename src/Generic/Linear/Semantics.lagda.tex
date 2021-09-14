@@ -1,4 +1,5 @@
-{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_; suc)
@@ -37,31 +38,43 @@ module Generic.Linear.Semantics
     variable
       A : Ty
       ℓ v c : Level
-      fl : PremisesFlags
       𝓥 : Scoped v
       𝓒 : Scoped c
       Θ : Ctx
+\end{code}
 
+%<*Kripke>
+\begin{code}
   Kripke : (𝓥 : Scoped v) (𝓒 : Scoped c) → Ctx → Scoped _
-  Kripke = Wrap λ 𝓥 𝓒 Γ Δ A → □ʳ (([ 𝓥 ]_⇒ᵉ Γ) ─✴ᶜ _⟨ 𝓒 ⟩⊢ A) Δ
+  Kripke = Wrap λ 𝓥 𝓒 Γ Δ A →
+    □ʳ ([ 𝓥 ]_⇒ᵉ Γ ─✴ᶜ [ 𝓒 ]_⊨ A) Δ
+\end{code}
+%</Kripke>
 
+\begin{code}
   mapK𝓒 : ∀ {v c c′} {𝓥 : Scoped v} {𝓒 : Scoped c} {𝓒′ : Scoped c′} →
           ∀[ 𝓒 ⇒ 𝓒′ ] → ∀[ Kripke 𝓥 𝓒 ⇒ Kripke 𝓥 𝓒′ ]
   mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
+\end{code}
 
-  record Semantics (d : System fl) (𝓥 : Scoped v) (𝓒 : Scoped c)
+%<*Semantics>
+\begin{code}
+  record Semantics (d : System) (𝓥 : Scoped v) (𝓒 : Scoped c)
          : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
-      ren^𝓥 : Renameable (_⟨ 𝓥 ⟩⊢ A)
-      var : ∀[                   𝓥 ⇒ 𝓒 ]
-      alg : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) ⇒ 𝓒 ]
+      ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
+      var    : ∀[ 𝓥                    ⇒ 𝓒 ]
+      alg    : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒)  ⇒ 𝓒 ]
+\end{code}
+%</Semantics>
 
+\begin{code}
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
     open With-psh^𝓥 psh^𝓥
 
     [_]_⇒ᶜ_ : (𝓒′ : Scoped ℓ) (Γ Δ : Ctx) → Set ℓ
-    [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → ∀[ [ d , sz ] Δ ⊢_ ⇒ 𝓒′ Γ ]
+    [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒′ ] Γ ⊨_ ]
 
     semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → [ 𝓒 ] Γ ⇒ᶜ Δ
     body : ∀ {Γ Δ sz} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {Θ} →
@@ -77,3 +90,4 @@ module Generic.Linear.Semantics
     body ρ t .get th .app✴ r σ =
       let ρ′ = ren^Env ren^𝓥 ρ th in
       semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) t
+\end{code}

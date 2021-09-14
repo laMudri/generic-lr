@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --prop --sized-types #-}
+{-# OPTIONS --without-K --sized-types #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ; _⊔_)

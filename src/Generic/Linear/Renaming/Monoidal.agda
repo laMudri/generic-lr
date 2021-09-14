@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --prop --postfix-projections #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 -- The monoidal structure of the category of thinnings
 

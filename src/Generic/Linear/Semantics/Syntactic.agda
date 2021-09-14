@@ -1,4 +1,4 @@
-{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
 open import Level
@@ -40,15 +40,14 @@ module Generic.Linear.Semantics.Syntactic
 
   private
     variable
-      fl : PremisesFlags
-      d : System fl
+      d : System
       A : Ty
       v c : Level
       𝓥 : Scoped v
       𝓒 : Scoped c
       Γ Δ Θ : Ctx
 
-  record Kit (d : System fl) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
+  record Kit (d : System) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
     field
       ren^𝓥 : ∀ {A} → Renameable (_⟨ 𝓥 ⟩⊢ A)
       var : ∀[ _∋_ ⇒ 𝓥 ]
@@ -99,7 +98,7 @@ module Generic.Linear.Semantics.Syntactic
   Sub : Semantics d [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
   Sub = kit→sem Sub-Kit
 
-  [_]_⇒ˢ_ : (d : System fl) (Γ Δ : Ctx) → Set₁
+  [_]_⇒ˢ_ : (d : System) (Γ Δ : Ctx) → Set₁
   [ d ] Γ ⇒ˢ Δ = [ [ d , ∞ ]_⊢_ ] Γ ⇒ᵉ Δ
 
   sub : [ d ] Γ ⇒ˢ Δ → [ d , ∞ ] Δ ⊢ A → [ d , ∞ ] Γ ⊢ A
@@ -137,8 +136,8 @@ module Generic.Linear.Semantics.Syntactic
       r ≤ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
     [ le · t ]ᵏ = [-]ᵉ (⟨ [ ≤-trans le (*.identity .proj₂ _) ]ₙ ⟩· t)
 
-  module _ {fl d} where
-    open WithKit (Sub-Kit {fl} {d})
+  module _ {d} where
+    open WithKit (Sub-Kit {d})
 
     infix 5 _++ˢ_
 

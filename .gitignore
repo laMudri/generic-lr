@@ -1,5 +1,6 @@
 *.agdai
 src/latex/
+src/processed-latex/
 
 *.pdf
 

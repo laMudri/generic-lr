@@ -1,13 +1,60 @@
 \begin{code}
-{-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
 module Generic.Linear.Example.PaperExamples where
 
 open import Algebra.Po
+open import Algebra.Po.Construct.Nat
 open import Data.Product
 open import Data.Unit
 open import Level
-open import Proposition
 
+module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
+
+  open PoSemiring poSemiring using () renaming (Carrier to Ann)
+
+  infixr 5 _⊸_
+  infix 6 _⊕_
+\end{code}
+
+%<*Ty>
+\begin{code}
+  data Ty : Set where
+    ι : Ty
+    _⊸_ _⊕_ : (A B : Ty) → Ty
+    ! : (r : Ann) (A : Ty) → Ty
+\end{code}
+%</Ty>
+
+\begin{code}
+  open import Generic.Linear.Everything Ty poSemiring hiding (Ann)
+\end{code}
+
+%<*qlR>
+\begin{code}
+  data Side : Set where ll rr : Side
+
+  data `λR : Set where
+    `⊸I `⊸E : (A B : Ty) → `λR
+    `⊕I : (i : Side) (A B : Ty) → `λR
+    `!I : (r : Ann) (A : Ty) → `λR
+    `!E : (r : Ann) (A C : Ty) → `λR
+\end{code}
+%</qlR>
+
+%<*lR>
+\begin{code}
+  λR : System
+  λR = `λR ▹ λ where
+    (`⊸I A B) → ⟨ [ 1# · A ]ᶜ `⊢ B ⟩ =⇒ (A ⊸ B)
+    (`⊸E A B) → (⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩) =⇒ B
+    (`⊕I ll A B) → ⟨ []ᶜ `⊢ A ⟩ =⇒ (A ⊕ B)
+    (`⊕I rr A B) → ⟨ []ᶜ `⊢ B ⟩ =⇒ (A ⊕ B)
+    (`!I r A) → (r `· ⟨ []ᶜ `⊢ A ⟩) =⇒ (! r A)
+    (`!E r A C) → (⟨ []ᶜ `⊢ ! r A ⟩ `✴ ⟨ [ r · A ]ᶜ `⊢ C ⟩) =⇒ C
+\end{code}
+%</lR>
+
+\begin{code}
 module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   open PoSemiring poSemiring
@@ -45,7 +92,7 @@ module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 %</exIlabels>
 
 \begin{code}
-  Sys : System allPremisesFlags
+  Sys : System
   Sys .Label = `Sys
 \end{code}
 %<*exIfunrules>
