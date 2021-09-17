@@ -28,10 +28,10 @@ module Generic.Linear.Environment
       Γ Δ : Ctx
       T : Ctx → Set
       ℓ : Level
-      𝓥 : Scoped ℓ
+      𝓥 : OpenFam ℓ
 
   -- TODO: this probably should be somewhere else.
-  IsPresheaf : Scoped ℓ → Set ℓ
+  IsPresheaf : OpenFam ℓ → Set ℓ
   IsPresheaf 𝓥 =
     ∀ {s} {γ : Vector Ty s} {P Q} →
     Q ≤* P → ∀[ 𝓥 (ctx P γ) ⇒ 𝓥 (ctx Q γ) ]
@@ -39,36 +39,36 @@ module Generic.Linear.Environment
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
 
-  record [_]_⇒ᵉ_ (𝓥 : Scoped ℓ) (Γ Δ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
+  record [_]_⇒ᵉ_ (𝓥 : OpenFam ℓ) (Γ Δ : Ctx) : Set (suc 0ℓ ⊔ ℓ) where
     constructor pack
 
     open Ctx Γ renaming (shape to s; ty-ctx to γ; use-ctx to P)
     open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
-      M : LinMor t s
-      asLinRel : AsLinRel M 0ℓ
-    Mᴿ = asLinRel .linRel
+      Ψ : LinMor t s
+      asLinRel : AsLinRel Ψ 0ℓ
+    Ψᴿ = asLinRel .linRel
     field
-      sums : Mᴿ .rel Q P
-      lookup : ∀ {P′ Q′} → Mᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
+      sums : Ψᴿ .rel Q P
+      lookup : ∀ {P′ Q′} → Ψᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
 
-    sums-≤* : P ≤* M .hom Q
+    sums-≤* : P ≤* Ψ .hom Q
     sums-≤* = asLinRel .equiv .f sums
       where open Equivalence
   open [_]_⇒ᵉ_ public
 
   {- TODO: resurrect as an easy way to produce envs.
-  record _─Env (Γ : Ctx) (𝓥 : Scoped ℓ) (Δ : Ctx) : Set ℓ where
+  record _─Env (Γ : Ctx) (𝓥 : OpenFam ℓ) (Δ : Ctx) : Set ℓ where
     constructor pack
 
     open Ctx Γ renaming (shape to s; ty-ctx to γ; use-ctx to P)
     open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
-      M : LinMor s t
-      sums : Q ≤* M .hom P
-      lookup : ∀ {A P′ Q′} → Q′ ≤* M .hom P′ →
+      Ψ : LinMor s t
+      sums : Q ≤* Ψ .hom P
+      lookup : ∀ {A P′ Q′} → Q′ ≤* Ψ .hom P′ →
         LVar A (ctx P′ γ) → 𝓥 A (ctx Q′ δ)
   open _─Env public
   -}

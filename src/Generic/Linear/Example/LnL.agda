@@ -153,7 +153,7 @@ module Generic.Linear.Example.LnL where
       S : Ctx → Set t
       T : Ctx → Set t
 
-  data IntDup (T : Ctx → Set t) : Scoped t where
+  data IntDup (T : Ctx → Set t) : OpenFam t where
     lin : ∀ {A} → ∀[ T ⇒ IntDup T (lin , A) ]
     int : ∀ {X} → ∀[ Dupᶜ T ⇒ IntDup T (int , X) ]
 

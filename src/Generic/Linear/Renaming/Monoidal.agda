@@ -43,7 +43,7 @@ module Generic.Linear.Renaming.Monoidal
   ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ 0*-triv ⟩))
 
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
-  ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
+  ++-[]ʳ→ .Ψ = [ 1ᴹ │ [│] ]
   ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
   ++-[]ʳ→ .sums = ≤*-refl , _
   ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (≤*-trans le b ++ₙ []ₙ)

@@ -123,7 +123,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
     ... | ↘ i | q = q
     o-distrib-++ᶜ .lookup le v .basis = ≤*-trans le (v .basis)
 
-    o𝓒 : LR.Scoped 0ℓ
+    o𝓒 : LR.OpenFam 0ℓ
     o𝓒 Γ A = LnL.Term (Γ ᵒCtx) (_ , A ᵒTy)
 
     oreify : ∀ {Θ} →
@@ -229,7 +229,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
     open LnL.[_]_⇒ᵉ_
     open LR.[_]_⇒ᵉ_
 
-    *𝓒 : LnL.Scoped 0ℓ
+    *𝓒 : LnL.OpenFam 0ℓ
     *𝓒 Γ A = LR.Term (Γ *Ctx) (A *ΣTy)
 
     *reify : ∀ {Θ} →

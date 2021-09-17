@@ -33,35 +33,47 @@ module Generic.Linear.Syntax.Interpretation.Map
     variable
       x y : Level
 
-  {-
-  module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
-           (F : LinRel s t ℓ)
-           {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+  -- To support `□, the relation would have to be functional.
+  module MapRel {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
+    (F : LinRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
-    -- open RelLeftSemimoduleRel F
+    private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
 
-    map-pᴿ : (ps : Premises) →
-      (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
+    map-p : (ps : Premises) →
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-pᴿ ⟨ Γ `⊢ A ⟩ f r t = {!!}
-    map-pᴿ `⊤ f r t = {!!}
-    map-pᴿ (ps `∧ qs) f r t = {!!}
-    map-pᴿ `ℑ f r t = {!!}
-    map-pᴿ (ps `✴ qs) f r t = {!!}
-    map-pᴿ (p `· ps) f r t = {!!}
-    map-pᴿ (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      let r′ , str′ = F .rel-comm-≤ₘ (str , r) in
-      □⟨ str′ , {!sp0!} , {!!} ⟩ map-pᴿ ps f r′ t
+    map-p ⟨ Δ `⊢ A ⟩ f r M = f r M
+    map-p `⊤ f r _ = _
+    map-p (ps `∧ qs) f r (M , N) = map-p ps f r M , map-p qs f r N
+    map-p `ℑ f r ℑ⟨ sp ⟩ = ℑ⟨ F .rel-0ₘ (sp , r) ⟩
+    map-p (ps `✴ qs) f r (M ✴⟨ sp ⟩ N) =
+      let rM ↘, sp′ ,↙ rN = F .rel-+ₘ (sp , r) in
+      map-p ps f rM M ✴⟨ sp′ ⟩ map-p qs f rN N
+    map-p (_ `· ps) f r (⟨ sp ⟩· M) =
+      let sp′ , rM = F .rel-*ₘ (sp , r) in
+      ⟨ sp′ ⟩· map-p ps f rM M
 
-    map-sᴿ : (s : System) →
-      (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
-      (∀ {A P Q} → F .rel P Q → ⟦ s ⟧s X A (ctx P γ) → ⟦ s ⟧s Y A (ctx Q δ))
-    map-sᴿ s f r t = {!!}
-  -}
+    map-r : (r : Rule) →
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
+    map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
+\end{code}
 
-  module _ {s t} {γ : Vector Ty s} {δ : Vector Ty t}
-    (F : LinMor s t) {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+%<*map-s-type>
+\begin{code}
+    map-s : (s : System) →
+      (∀ {Θ P Q} → F .rel P Q →
+        ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q →
+        ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
+\end{code}
+%</map-s-type>
+\begin{code}
+    map-s (L ▹ rs) f r (l , M) = l , map-r (rs l) f r M
+
+  module MapMor {s t} {γ : Vector Ty s} {δ : Vector Ty t}
+    (F : LinMor s t) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
     -- open PoLeftSemimoduleMor F
@@ -88,21 +100,15 @@ module Generic.Linear.Syntax.Interpretation.Map
       (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
     map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
-\end{code}
 
-%<*map-s-type>
-\begin{code}
     map-s : (s : System) →
       (∀ {Θ P Q} → Q ≤* F .hom P →
         ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → Q ≤* F .hom P →
         ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
-\end{code}
-%</map-s-type>
-\begin{code}
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
-  module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
+  module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
 
     map-p′ : (ps : Premises) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ Γ `⊢ A ⟩ f t = f t
@@ -126,7 +132,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     open RawApplicative appF
 
     sequence-p :
-      ∀ {X : Ctx → Scoped x} (ps : Premises) →
+      ∀ {X : ExtOpenFam x} (ps : Premises) →
       ∀[ ⟦ ps ⟧p (λ Δ Γ B → F (X Δ Γ B)) ⇒ F ∘ ⟦ ps ⟧p X ]
     sequence-p (⟨ Γ `⊢ A ⟩) t = t
     sequence-p `⊤ tt = pure tt
@@ -138,12 +144,12 @@ module Generic.Linear.Syntax.Interpretation.Map
       ⟨ sp ⟩·_ <$> sequence-p ps t
 
     sequence-r :
-      ∀ {X : Ctx → Scoped x} (r : Rule) → ∀ {A} →
+      ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →
       ∀[ _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A ]
     sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
-      ∀ {X : Ctx → Scoped x} (s : System) → ∀ {A} →
+      ∀ {X : ExtOpenFam x} (s : System) → ∀ {A} →
       ∀[ _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A ]
     sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t

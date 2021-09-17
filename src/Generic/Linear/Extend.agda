@@ -20,18 +20,18 @@ module Generic.Linear.Extend
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
 
-  record FromLVar {ℓ} (_𝓥_ : Scoped ℓ) : Set (suc 0ℓ ⊔ ℓ) where
+  record FromLVar {ℓ} (_𝓥_ : OpenFam ℓ) : Set (suc 0ℓ ⊔ ℓ) where
     field fromLVar : ∀ {A} → ∀[ _∋ A ⇒ _𝓥 A ]
 
     extendˡ : ∀ {RΘ s Γ} → [ _𝓥_ ] ctx {s} 0* Γ ++ᶜ RΘ ⇒ᵉ RΘ
-    extendˡ .M = [ 0ᴹ │ 1ᴹ ]
+    extendˡ .Ψ = [ 0ᴹ │ 1ᴹ ]
     extendˡ .asLinRel = [ 0AsLinRel │ idAsLinRel ]AsLinRel
     extendˡ .sums = 0*-triv , ≤*-refl
     extendˡ .lookup (sp0 , le) (lvar i q b) =
       fromLVar (lvar (↘ i) q (0*→≤* sp0 ++ₙ ≤*-trans le b))
 
     extendʳ : ∀ {RΘ s Γ} → [ _𝓥_ ] RΘ ++ᶜ ctx {s} 0* Γ ⇒ᵉ RΘ
-    extendʳ .M = [ 1ᴹ │ 0ᴹ ]
+    extendʳ .Ψ = [ 1ᴹ │ 0ᴹ ]
     extendʳ .asLinRel = [ idAsLinRel │ 0AsLinRel ]AsLinRel
     extendʳ .sums = ≤*-refl , 0*-triv
     extendʳ .lookup (le , sp0) (lvar i q b) =

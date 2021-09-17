@@ -25,19 +25,19 @@ module Generic.Linear.Environment.Equality
   open import Relation.Binary.Setoid
   open import Relation.Nary
 
-  Scoped= : ∀ ℓ e → Set (suc (ℓ ⊔ e))
-  Scoped= ℓ e = Ctx → Ty → Setoid ℓ e
+  OpenFam= : ∀ ℓ e → Set (suc (ℓ ⊔ e))
+  OpenFam= ℓ e = Ctx → Ty → Setoid ℓ e
 
-  module Scoped= {ℓ e} (𝓥 : Scoped= ℓ e) where
+  module OpenFam= {ℓ e} (𝓥 : OpenFam= ℓ e) where
     private
       module 𝓥 Γ A = Setoid (𝓥 Γ A)
       module 𝓥I {Γ A} = 𝓥 Γ A
     open 𝓥 public using (Carrier)
     open 𝓥I public hiding (Carrier)
 
-  record [_]_=⇒ᵉ_ {ℓ e} (𝓥 : Scoped= ℓ e) (Γ Δ : Ctx)
+  record [_]_=⇒ᵉ_ {ℓ e} (𝓥 : OpenFam= ℓ e) (Γ Δ : Ctx)
          : Set (suc 0ℓ ⊔ ℓ ⊔ e) where
-    open Scoped= 𝓥
+    open OpenFam= 𝓥
     field
       env : [ (λ Γ A → Carrier Γ A) ] Γ ⇒ᵉ Δ
       lookup-resp-idx : ∀ {P′ Q′ A r r′ i i′} → i ≈ᵛ i′ →
@@ -46,7 +46,7 @@ module Generic.Linear.Environment.Equality
           (env .lookup {P′} {Q′} r′ i′)
   open [_]_=⇒ᵉ_ public
 
-  module _ {ℓ ve} {𝓥 : Scoped= ℓ ve} where
+  module _ {ℓ ve} {𝓥 : OpenFam= ℓ ve} where
 
     open Setoid
 
@@ -108,8 +108,8 @@ module Generic.Linear.Environment.Equality
 
   open import Generic.Linear.Environment.Categorical Ty poSemiring
 
-  record IdentityEnv= {v e} (𝓥 : Scoped= v e) : Set (suc 0ℓ ⊔ v ⊔ e) where
-    open Scoped= 𝓥
+  record IdentityEnv= {v e} (𝓥 : OpenFam= v e) : Set (suc 0ℓ ⊔ v ⊔ e) where
+    open OpenFam= 𝓥
     field
       pure : ∀[ _∋_ ⇒ Carrier ]
       pure-resp-idx : ∀ {Γ A} → ∀[ _≈ᵛ_ {Γ} {A} ⇒ (_≈_ on pure) ]
@@ -121,12 +121,12 @@ module Generic.Linear.Environment.Equality
     id^Env= .lookup-resp-idx [ ii ] = pure-resp-idx [ ii ]
 
   record ComposeEnv= {u v w ue ve we}
-         (𝓤 : Scoped= u ue) (𝓥 : Scoped= v ve) (𝓦 : Scoped= w we)
+         (𝓤 : OpenFam= u ue) (𝓥 : OpenFam= v ve) (𝓦 : OpenFam= w we)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w ⊔ ue ⊔ ve ⊔ we) where
     private
-      module 𝓤 = Scoped= 𝓤
-      module 𝓥 = Scoped= 𝓥
-      module 𝓦 = Scoped= 𝓦
+      module 𝓤 = OpenFam= 𝓤
+      module 𝓥 = OpenFam= 𝓥
+      module 𝓦 = OpenFam= 𝓦
     field
       lift : ∀ {s t P Q γ δ} (ρ : [ 𝓤.Carrier ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) →
         ∀ {P′ Q′} → Mᴿ ρ .rel Q′ P′ →

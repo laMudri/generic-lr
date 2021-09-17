@@ -38,7 +38,7 @@ module Generic.Linear.Multicategory (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) whe
     open EnvironmentC Obj poSemiring
 
     field
-      Hom : Scoped= ℓ e
+      Hom : OpenFam= ℓ e
 
     module Hom Γ A = Setoid (Hom Γ A)
     module IHom {Γ A} = Hom Γ A
@@ -46,7 +46,7 @@ module Generic.Linear.Multicategory (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) whe
     open Hom using (Carrier)
     open IHom hiding (Carrier)
 
-    _⇒_ : Scoped ℓ
+    _⇒_ : OpenFam ℓ
     Γ ⇒ A = Carrier Γ A
 
     _⇒ˢ_ = [ Hom ]_=⇒ᵉ_

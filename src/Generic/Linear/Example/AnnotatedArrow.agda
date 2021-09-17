@@ -76,7 +76,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ᶜ : Ctx → Set
   ⟦ ctx _ γ ⟧ᶜ = Lift₁ ⟦_⟧ γ
 
-  ⟦Tm⟧ : Scoped 0ℓ
+  ⟦Tm⟧ : OpenFam 0ℓ
   ⟦Tm⟧ Γ A = ⟦ Γ ⟧ᶜ → ⟦ A ⟧
 
   open Semantics
@@ -113,7 +113,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ˢᶜ : Ctx → Setoid 0ℓ 0ℓ
   ⟦ ctx _ γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ γ
 
-  ⟦Tm⟧ˢ : Scoped 0ℓ
+  ⟦Tm⟧ˢ : OpenFam 0ℓ
   ⟦Tm⟧ˢ Γ A = ⟦ Γ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
 
   module _ where
@@ -327,7 +327,7 @@ module Generic.Linear.Example.AnnotatedArrow
     ◇-alg : ∀ {A} (R : WRel _≤ʷ_ A) {x y} → ∀[ ◇ (R .rel x y) ⇒ R .rel x y ]
     ◇-alg R (◇⟨ sub ⟩ xy) = R .subres sub xy
 
-    ⟦Tm⟧ᴿ : Scoped 0ℓ
+    ⟦Tm⟧ᴿ : OpenFam 0ℓ
     ⟦Tm⟧ᴿ Rγ A = WRelMor ⟦ Rγ ⟧ᴿᶜ ⟦ A ⟧ᴿ
 
     wrel : Semantics AnnArr _∋_ ⟦Tm⟧ᴿ

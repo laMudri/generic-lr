@@ -191,7 +191,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
       ... | just (syn , p) | A = Typed.syn A
       ... | just (chk , q) | A = Typed.chk A q
 
-      Elab : ∀ {ℓ} → Typed.Scoped ℓ → ∀ {s uγ} →
+      Elab : ∀ {ℓ} → Typed.OpenFam ℓ → ∀ {s uγ} →
              Typed.Conc → Vector Ann s → Typing {s} uγ → Set ℓ
       Elab T 𝓙 R γ = T (Typed.ctx R ⌞ γ ⌟) 𝓙
 
@@ -203,7 +203,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
       untyCtx : Typed.Ctx → Untyped.Ctx
       untyCtx (Typed.ctx R γ) = Untyped.ctx R (untyConc ∘ γ)
 
-      data 𝓥 : Untyped.Scoped 0ℓ where
+      data 𝓥 : Untyped.OpenFam 0ℓ where
         vr : ∀ {p A Γ} → Γ Typed.∋ Typed.syn {p} A →
              𝓥 (untyCtx Γ) (just (syn , p))
 
@@ -212,7 +212,7 @@ module Generic.Linear.Example.BidiMuMuTilde where
       𝓒′ Γ (just (syn , p)) = ∃ \ A → TypedTm Γ (Typed.syn {p} A)
       𝓒′ Γ (just (chk , q)) = ∀ {p} A → TypedTm Γ (Typed.chk {p} A q)
 
-      𝓒 : Untyped.Scoped _
+      𝓒 : Untyped.OpenFam _
       𝓒 (Untyped.ctx R uγ) 𝓙 =
         Maybe $ ∀ γ → untyConc ∘ γ ≗ uγ → 𝓒′ (Typed.ctx R γ) 𝓙
 

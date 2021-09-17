@@ -182,7 +182,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
       module _ (sys : System fl) where
 
-        𝓒 : U.Scoped _
+        𝓒 : U.OpenFam _
         𝓒 (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
 
         open Semantics using (ren^𝓥; var; alg)
