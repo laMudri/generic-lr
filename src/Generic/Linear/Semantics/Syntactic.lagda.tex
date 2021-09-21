@@ -54,9 +54,9 @@ module Generic.Linear.Semantics.Syntactic
   record Kit (d : System) (𝓥 : OpenFam v)
          : Set (suc 0ℓ ⊔ v) where
     field
-      ren^𝓥 : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
-      vr : ∀[ _∋_ ⇒ 𝓥 ]
-      tm : ∀[ 𝓥 ⇒ [ d , ∞ ]_⊢_ ]
+      ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
+      vr     : ∀[ _∋_  ⇒ 𝓥             ]
+      tm     : ∀[ 𝓥    ⇒ [ d , ∞ ]_⊢_  ]
 \end{code}
 %</Kit>
 
@@ -90,9 +90,9 @@ module Generic.Linear.Semantics.Syntactic
 %<*kit-to-sem>
 \begin{code}
     kit→sem : Kit d 𝓥 → Semantics d 𝓥 [ d , ∞ ]_⊢_
-    kit→sem K .ren^𝓥 = K .ren^𝓥
-    kit→sem K .⟦var⟧ = K .tm
-    kit→sem {d = d} K .⟦con⟧ = `con ∘ map-s′ d reify
+    kit→sem          K .ren^𝓥  = K .ren^𝓥
+    kit→sem          K .⟦var⟧  = K .tm
+    kit→sem {d = d}  K .⟦con⟧  = `con ∘ map-s′ d reify
       where open Kit K using (identityEnv)
 \end{code}
 %</kit-to-sem>

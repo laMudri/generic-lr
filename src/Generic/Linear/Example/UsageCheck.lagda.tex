@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
 
 open import Algebra.Po
@@ -20,10 +21,17 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
   getLone (x ∷ []) = x
 
   module U where
+\end{code}
 
+%<*0-poSemiring>
+\begin{code}
     0-poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ
-    0-poSemiring = record { Carrier = ⊤; _≈_ = λ _ _ → ⊤; _≤_ = λ _ _ → ⊤ }
+    0-poSemiring = record
+      { Carrier = ⊤; _≈_ = λ _ _ → ⊤; _≤_ = λ _ _ → ⊤ }
+\end{code}
+%</0-poSemiring>
 
+\begin{code}
     0-rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ
     0-rawPoSemiring = PoSemiring.rawPoSemiring 0-poSemiring
 
@@ -37,9 +45,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Syntax.Term Ty 0-rawPoSemiring public
     open import Generic.Linear.Variable Ty 0-rawPoSemiring public
     open import Generic.Linear.Environment Ty 0-poSemiring public
+    open import Generic.Linear.Environment.Categorical Ty 0-poSemiring public
     open import Generic.Linear.Renaming Ty 0-poSemiring public
     open import Generic.Linear.Renaming.Properties Ty 0-poSemiring public
-    open import Generic.Linear.Extend Ty 0-poSemiring public
     open import Generic.Linear.Semantics Ty 0-poSemiring public
     open import Generic.Linear.Semantics.Syntactic Ty 0-poSemiring public
 
@@ -57,35 +65,27 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Generic.Linear.Environment Ty poSemiring
     open import Generic.Linear.Renaming Ty poSemiring
     open import Generic.Linear.Renaming.Properties Ty poSemiring
-    open import Generic.Linear.Extend Ty poSemiring
     open import Generic.Linear.Semantics Ty poSemiring
-
-    private
-      variable
-        fl : PremisesFlags
 
     uCtx : Ctx → U.Ctx
     uCtx (ctx P γ) = U.ctx _ γ
 
-    uPremises : Premises fl → U.Premises fl
+    uPremises : Premises → U.Premises
     uPremises ⟨ Γ `⊢ A ⟩ = U.⟨ uCtx Γ `⊢ A ⟩
     uPremises `⊤ = U.`⊤
     uPremises `ℑ = U.`ℑ
     uPremises (ps `∧ qs) = uPremises ps U.`∧ uPremises qs
     uPremises (ps `✴ qs) = uPremises ps U.`✴ uPremises qs
     uPremises (r `· ps) = _ U.`· uPremises ps
-    uPremises (`□ ps) = U.`□ (uPremises ps)
-    uRule : Rule fl → U.Rule fl
+    uRule : Rule → U.Rule
     uRule (ps =⇒ A) = uPremises ps U.=⇒ A
-    uSystem : System fl → U.System fl
+    uSystem : System → U.System
     uSystem (L ▹ rs) = L U.▹ λ l → uRule (rs l)
 
     open import Category.Functor
-    -- open import Category.Applicative
     open import Category.Monad
     open import Data.List.Categorical
     open RawFunctor (functor {0ℓ}) using (_<$>_)
-    -- open RawApplicative (applicative {0ℓ}) using (pure) renaming (_⊛_ to _<*>_)
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
     open import Data.LTree
     open import Data.LTree.Vector as V hiding ([]; [_]; _++_)
@@ -95,20 +95,22 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Relation.Nary
     open import Relation.Unary.Bunched
     open import Size
+\end{code}
 
-    record NonDetInverses (fl : PremisesFlags) : Set where
-      open PremisesFlags fl
+%<*NonDetInverses>
+\begin{code}
+    record NonDetInverses : Set where
       field
         0#⁻¹ : (r : Ann) → List (r ≤ 0#)
-        +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ≤ p + q)
+        +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : _ × _) → r ≤ p + q)
         1#⁻¹ : (r : Ann) → List (r ≤ 1#)
         *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
-        rep : {{_ : Has-□}} (r : Ann) →
-              List (∃ \ p → r ≤ p × p ≤ 0# × p ≤ p + p)
+\end{code}
+%</NonDetInverses>
 
-    module WithInverses (fl : PremisesFlags) (invs : NonDetInverses fl) where
+\begin{code}
+    module WithInverses (invs : NonDetInverses) where
 
-      open PremisesFlags fl
       open NonDetInverses invs
 
       0*⁻¹ : ∀ {s} (R : Vector Ann s) → List (R ≤0*)
@@ -133,21 +135,18 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       *ₗ⁻¹ {ε} r Q = (| (V.[] , []ₙ) |)
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++ₙ_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
+\end{code}
 
-      rep* : ∀ {{_ : Has-□}} {s} (R : Vector Ann s) →
-             List (∃ \ P → R ≤* P × P ≤* 0* × P ≤* P +* P)
-      rep* {[-]} R =
-        (| (×.map V.[_] (×.map [_]ₙ (×.map [_]ₙ [_]ₙ))) (rep (R here)) |)
-      rep* {ε} R = (| (V.[] , []ₙ , []ₙ , []ₙ) |)
-      rep* {s <+> t} R =
-        (| (×.zip V._++_ (×.zip _++ₙ_ (×.zip _++ₙ_ _++ₙ_)))
-             (rep* (R ∘ ↙)) (rep* (R ∘ ↘)) |)
+%<*C>
+\begin{code}
+      𝓒 : System → U.OpenFam _
+      𝓒 sys (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
+\end{code}
+%</C>
 
-      lemma-p :
-        ∀ (sys : System fl) (ps : Premises fl) {Γ} →
-        U.⟦ uPremises ps ⟧p
-          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
-          (uCtx Γ) →
+\begin{code}
+      lemma-p : ∀ (sys : System) (ps : Premises) {Γ} →
+        U.⟦ uPremises ps ⟧p (U.Scope (𝓒 sys)) (uCtx Γ) →
         List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) Γ)
       lemma-p sys ⟨ ctx Q δ `⊢ A ⟩ {ctx P γ} t = t (P V.++ Q)
       lemma-p sys `⊤ t = (| t |)
@@ -160,52 +159,50 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩· t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
         (| ⟨ sp ⟩·_ (lemma-p sys ps t) |)
-      lemma-p sys (`□ ps) {ctx P γ} (□⟨ _ , _ , _ ⟩ t) = do
-        (P′ , str , sp0 , sp+) ← rep* P
-        (| □⟨ str , sp0 , sp+ ⟩_ (lemma-p sys ps t) |)
 
-      lemma-r :
-        ∀ (sys : System fl) (r : Rule fl) {A Γ} →
-        U.⟦ uRule r ⟧r
-          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
-          (uCtx Γ) A →
+      lemma-r : ∀ (sys : System) (r : Rule) {A Γ} →
+        U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →
         List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) Γ A)
       lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
+\end{code}
 
-      lemma :
-        ∀ (sys : System fl) {A Γ} →
-        U.⟦ uSystem sys ⟧s
-          (U.Scope λ (U.ctx _ δ) B → ∀ Q → List ([ sys , ∞ ] ctx Q δ ⊢ B))
-          (uCtx Γ) A →
+%<*lemma-type>
+\begin{code}
+      lemma : ∀ (sys : System) {A Γ} →
+        U.⟦ uSystem sys ⟧s (U.Scope (𝓒 sys)) (uCtx Γ) A →
         List (⟦ sys ⟧s (Scope [ sys , ∞ ]_⊢_) Γ A)
+\end{code}
+%</lemma-type>
+\begin{code}
       lemma sys@(L ▹ rs) (l , t) = (| (l ,_) (lemma-r sys (rs l) t) |)
 
-      module _ (sys : System fl) where
+      open Semantics using (ren^𝓥; ⟦var⟧; ⟦con⟧)
+      open [_]_⇒ᵉ_
+\end{code}
 
-        𝓒 : U.OpenFam _
-        𝓒 (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
+%<*elab-sem>
+\begin{code}
+      elab-sem : ∀ sys →
+        U.Semantics (uSystem sys) U._∋_ (𝓒 sys)
+      elab-sem sys .ren^𝓥 = U.ren^∋
+      elab-sem sys .⟦var⟧ (U.lvar i q _) R =
+        (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
+      elab-sem sys .⟦con⟧ b R =
+        let rb = U.map-s′ (uSystem sys) U.reify b in
+        (| `con (lemma sys rb) |)
+\end{code}
+%</elab-sem>
 
-        open Semantics using (ren^𝓥; var; alg)
+\begin{code}
+      elab : ∀ sys {A s} {γ : Vector Ty s} →
+             U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A →
+             ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
+      elab sys = semantics U.identity
+        where open U.Semantics (elab-sem sys)
 
-        elab-sem : U.Semantics (uSystem sys) U._∋_ 𝓒
-        elab-sem .ren^𝓥 (U.lvar i q _) ρ =
-          let v = ρ .U.lookup (ρ .sums) (U.lvar i q _) in
-          U.lvar (v .U.idx) (v .U.tyq) _
-          where open [_]_⇒ᵉ_
-        elab-sem .var (U.lvar i q _) R =
-          (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
-        elab-sem .alg b R =
-          let foo = U.map-s′ (uSystem sys) U.reify b in
-          (| `con (lemma sys foo) |)
-
-        elab : ∀ {A s} {γ : Vector Ty s} →
-               U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A →
-               ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
-        elab = semantics U.identity
-          where open U.Semantics elab-sem
-
-        elab-unique :
-          ∀ {A s} {γ : Vector Ty s} →
-          (M : U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A) →
-          ∀ R → {_ : Lone (elab M R)} → [ sys , ∞ ] ctx R γ ⊢ A
-        elab-unique M R {l} with uM ∷ [] ← elab M R = uM
+      elab-unique :
+        ∀ sys {A s} {γ : Vector Ty s} →
+        (M : U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A) →
+        ∀ R → {_ : Lone (elab sys M R)} → [ sys , ∞ ] ctx R γ ⊢ A
+      elab-unique sys M R {l} with uM ∷ [] ← elab sys M R = uM
+\end{code}
