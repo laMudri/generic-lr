@@ -31,9 +31,9 @@ module Generic.Linear.Semantics.Syntactic
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
   open import Generic.Linear.Renaming Ty poSemiring
-  open import Generic.Linear.Extend Ty poSemiring
   open import Generic.Linear.Renaming.Properties Ty poSemiring
   open import Generic.Linear.Environment.Properties Ty poSemiring
+  open import Generic.Linear.Environment.Categorical Ty poSemiring
   open import Generic.Linear.Semantics Ty poSemiring
 
   infix 20 [_]_⇒ˢ_
@@ -44,38 +44,40 @@ module Generic.Linear.Semantics.Syntactic
       d : System fl
       A : Ty
       v c : Level
-      𝓥 : Scoped v
-      𝓒 : Scoped c
+      𝓥 : OpenFam v
+      𝓒 : OpenFam c
       Γ Δ Θ : Ctx
 
-  record Kit (d : System fl) (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
+  record Kit (d : System fl) (𝓥 : OpenFam v) : Set (suc 0ℓ ⊔ v) where
     field
-      ren^𝓥 : ∀ {A} → Renameable (_⟨ 𝓥 ⟩⊢ A)
-      var : ∀[ _∋_ ⇒ 𝓥 ]
-      trm : ∀[ 𝓥 ⇒ [ d , ∞ ]_⊢_ ]
+      ren^𝓥 : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
+      vr : ∀[ _∋_ ⇒ 𝓥 ]
+      tm : ∀[ 𝓥 ⇒ [ d , ∞ ]_⊢_ ]
 
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
 
     instance
-      flv : FromLVar 𝓥
-      flv .fromLVar = var
+      identityEnv : IdentityEnv 𝓥
+      identityEnv .pure = vr
 
   open Semantics
 
-  reify : {{FromLVar 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
-  reify b = b .get extendʳ .app✴ (+*-identity↘ _ ++ₙ +*-identity↙ _) extendˡ
+  reify : {{IdentityEnv 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
+  reify b =
+    b .get ↙ʳ .app✴ (+*-identity↘ _ ++ₙ +*-identity↙ _) (>>^Env id^Env ↘ʳ)
 
   module _ where
     open Kit
 
     kit→sem : Kit d 𝓥 → Semantics d 𝓥 [ d , ∞ ]_⊢_
     kit→sem K .ren^𝓥 = K .ren^𝓥
-    kit→sem K .var = K .trm
-    kit→sem {d = d} K .alg = `con ∘ map-s′ d (reify {{flv K}})
+    kit→sem K .⟦var⟧ = K .tm
+    kit→sem {d = d} K .⟦con⟧ = `con ∘ map-s′ d reify
+      where open Kit K using (identityEnv)
 
   Ren-Kit : Kit d _∋_
-  Ren-Kit = record { ren^𝓥 = ren^∋ ; var = id ; trm = `var }
+  Ren-Kit = record { ren^𝓥 = ren^∋ ; vr = id ; tm = `var }
 
   Ren : Semantics d _∋_ [ d , ∞ ]_⊢_
   Ren = kit→sem Ren-Kit
@@ -90,11 +92,11 @@ module Generic.Linear.Semantics.Syntactic
   psh^⊢ = ren⇒psh (λ {A} → ren^⊢ {A = A})
 
   instance
-    flv^⊢ : FromLVar [ d , ∞ ]_⊢_
-    flv^⊢ .fromLVar = `var
+    identityEnv^⊢ : IdentityEnv [ d , ∞ ]_⊢_
+    identityEnv^⊢ .pure = `var
 
   Sub-Kit : Kit d [ d , ∞ ]_⊢_
-  Sub-Kit = record { ren^𝓥 = ren^⊢ ; var = `var ; trm = id }
+  Sub-Kit = record { ren^𝓥 = ren^⊢ ; vr = `var ; tm = id }
 
   Sub : Semantics d [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
   Sub = kit→sem Sub-Kit
@@ -118,10 +120,7 @@ module Generic.Linear.Semantics.Syntactic
     infix 5 _++ᵏ_
 
     1ᵏ : [ 𝓥 ] Γ ⇒ᵉ Γ
-    1ᵏ .M = 1ᴹ
-    1ᵏ .asLinRel = idAsLinRel
-    1ᵏ .sums = ≤*-refl
-    1ᵏ .lookup le (lvar i q b) = K.var (lvar i q (≤*-trans le b))
+    1ᵏ = id^Env
 
     []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
     []ᵏ = []ᵉ ℑ⟨ []ₙ ⟩
@@ -129,9 +128,9 @@ module Generic.Linear.Semantics.Syntactic
     _++ᵏ_ : ∀ {Γl Δl Γr Δr} →
       [ 𝓥 ] Γl ⇒ᵉ Δl → [ 𝓥 ] Γr ⇒ᵉ Δr → [ 𝓥 ] Γl ++ᶜ Γr ⇒ᵉ Δl ++ᶜ Δr
     ρ ++ᵏ σ = ++ᵉ $
-      ren^Env K.ren^𝓥 ρ extendʳ
+      ren^Env K.ren^𝓥 ρ ↙ʳ
         ✴⟨ (+*-identity↘ _ ++ₙ +*-identity↙ _) ⟩
-      ren^Env K.ren^𝓥 σ extendˡ
+      ren^Env K.ren^𝓥 σ ↘ʳ
 
     [_·_]ᵏ : ∀ {r s A B} →
       r ≤ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ

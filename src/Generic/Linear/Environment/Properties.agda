@@ -25,29 +25,29 @@ module Generic.Linear.Environment.Properties
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
+  open import Generic.Linear.Environment.Categorical Ty poSemiring
   open import Generic.Linear.Renaming Ty poSemiring
 
   private
     variable
       Γ Δ : Ctx
-      ℓ : Level
-      _𝓥_ : Scoped ℓ
       A : Ty
       r : Ann
 
-  ren^Env : (∀ {A} → Renameable (_𝓥 A)) → Renameable ([ _𝓥_ ]_⇒ᵉ Γ)
-  ren^Env ren^𝓥 ρ ren .M = ρ .M >>LinMor ren .M
-  ren^Env ren^𝓥 ρ ren .asLinRel = ρ .asLinRel >>AsLinRel ren .asLinRel
-  ren^Env ren^𝓥 ρ ren .sums = ρ .sums , ren .sums
-  ren^Env ren^𝓥 ρ ren .lookup (P′∼Q′ , Q′∼R′) v =
-    ren^𝓥 (ρ .lookup P′∼Q′ v) record { [_]_⇒ᵉ_ ren; sums = Q′∼R′ }
+  ren^Env : ∀ {v} {_𝓥_ : OpenFam v} →
+    (∀ {A} → Renameable (_𝓥 A)) → (∀ {Δ} → Renameable ([ _𝓥_ ]_⇒ᵉ Δ))
+  ren^Env {_𝓥_ = 𝓥} ren^𝓥 ρ ren = >>^Env ren ρ
+    where
+    instance
+      composeEnv : ComposeEnv _∋_ 𝓥 𝓥
+      composeEnv .lift ren′ r v = ren^𝓥 v (record { [_]_⇒ᵉ_ ren′; sums = r })
 
-  module With-psh^𝓥 {ℓ} {_𝓥_ : Scoped ℓ} (psh^𝓥 : IsPresheaf _𝓥_) where
+  module With-psh^𝓥 {ℓ} {_𝓥_ : OpenFam ℓ} (psh^𝓥 : IsPresheaf _𝓥_) where
 
     private open module Dummy {s} = RelLeftSemimodule (Vᴿ s)
 
     []ᵉ′ : ∀ {R θ} → ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {ε} R θ ]
-    []ᵉ′ ℑ⟨ sp ⟩ .M = [─]
+    []ᵉ′ ℑ⟨ sp ⟩ .Ψ = [─]
     []ᵉ′ ℑ⟨ sp ⟩ .asLinRel = [─]AsLinRel
     []ᵉ′ ℑ⟨ sp ⟩ .sums = sp
     []ᵉ′ ℑ⟨ sp ⟩ .lookup _ (lvar (there () _) _ _)
@@ -57,7 +57,7 @@ module Generic.Linear.Environment.Properties
 
     ++ᵉ′ : ∀ {s t R θ} → let Γ = ctx (R ∘ ↙) (θ ∘ ↙); Δ = ctx (R ∘ ↘) (θ ∘ ↘) in
       ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {s <+> t} R θ ]
-    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .M = [ ρ .M ─ σ .M ]
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .Ψ = [ ρ .Ψ ─ σ .Ψ ]
     ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .asLinRel = [ ρ .asLinRel ─ σ .asLinRel ]AsLinRel
     ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums
     ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
@@ -73,7 +73,7 @@ module Generic.Linear.Environment.Properties
     ++ᵉ = ++ᵉ′
 
     [-]ᵉ′ : ∀ {R θ} → ∀[ R here ·ᶜ _𝓥 θ here Syn.⇒ [ _𝓥_ ]_⇒ᵉ ctx {[-]} R θ ]
-    [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .M = [─ Q′ ─]
+    [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .Ψ = [─ Q′ ─]
     [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .asLinRel = [─ Q′ ─]AsLinRel
     [-]ᵉ′ (⟨ sp ⟩· v) .sums = sp
     [-]ᵉ′ (⟨ sp ⟩· v) .lookup t (lvar here refl b) =

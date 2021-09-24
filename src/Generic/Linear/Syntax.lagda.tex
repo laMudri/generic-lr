@@ -6,6 +6,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product using (_×_; _,_)
+  open import Data.Unit.Polymorphic using (⊤; tt)
   open import Level
   open import Function.Base using (_∘_; _⟨_⟩_)
   open import Relation.Unary
@@ -46,11 +47,26 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   _++ᶜ_ : Ctx → Ctx → Ctx
   ctx P γ ++ᶜ ctx Q δ = ctx (P ++ Q) (γ ++ δ)
 
-  leftᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  leftᶜ (sctx P γ) = ctx (P ∘ ↙) (γ ∘ ↙)
+  IfConcat : ∀ {ℓ} → Ctx → Set ℓ → Set ℓ
+  IfConcat (ctx {[-]} P γ) X = ⊤
+  IfConcat (ctx {ε} P γ) X = ⊤
+  IfConcat (ctx {s <+> t} P γ) X = X
 
-  rightᶜ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
-  rightᶜ (sctx P γ) = ctx (P ∘ ↘) (γ ∘ ↘)
+  leftᶜ : (Γ : Ctx) → IfConcat Γ Ctx
+  leftᶜ (ctx {[-]} P γ) = _
+  leftᶜ (ctx {ε} P γ) = _
+  leftᶜ (ctx {s <+> t} P γ) = ctx {s} (P ∘ ↙) (γ ∘ ↙)
+
+  rightᶜ : (Γ : Ctx) → IfConcat Γ Ctx
+  rightᶜ (ctx {[-]} P γ) = _
+  rightᶜ (ctx {ε} P γ) = _
+  rightᶜ (ctx {s <+> t} P γ) = ctx {t} (P ∘ ↘) (γ ∘ ↘)
+
+  leftᶜ′ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
+  leftᶜ′ (sctx P γ) = ctx (P ∘ ↙) (γ ∘ ↙)
+
+  rightᶜ′ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
+  rightᶜ′ (sctx P γ) = ctx (P ∘ ↘) (γ ∘ ↘)
 \end{code}
 
 Premises to each rule form a tree.
@@ -76,7 +92,7 @@ connectives:
 %<*Premises>
 \begin{code}
     data Premises : Set where
-      ⟨_`⊢_⟩ : (Γ : Ctx) (A : Ty) → Premises
+      ⟨_`⊢_⟩ : (Δ : Ctx) (A : Ty) → Premises
       `⊤ : {{_ : Has-⊤}} → Premises
       _`∧_ : {{_ : Has-∧}} (p q : Premises) → Premises
       `ℑ : {{_ : Has-ℑ}} → Premises
@@ -108,16 +124,22 @@ connectives:
 \end{code}
 %</System>
 
-%<*Scoped>
+%<*OpenFam>
 \begin{code}
-  Scoped : ∀ ℓ → Set (suc ℓ)
-  Scoped ℓ = Ctx → Ty → Set ℓ
+  OpenType : ∀ ℓ → Set (suc ℓ)
+  OpenType ℓ = Ctx → Set ℓ
+
+  OpenFam : ∀ ℓ → Set (suc ℓ)
+  OpenFam ℓ = Ctx → Ty → Set ℓ
+
+  ExtOpenFam : ∀ ℓ → Set (suc ℓ)
+  ExtOpenFam ℓ = Ctx → OpenFam ℓ
 \end{code}
-%</Scoped>
+%</OpenFam>
 
 %<*Scope>
 \begin{code}
-  Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
+  Scope : ∀ {ℓ} → OpenFam ℓ → ExtOpenFam ℓ
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
 \end{code}
 %</Scope>

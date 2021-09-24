@@ -31,8 +31,8 @@ module Generic.Linear.Renaming
   _⇒ʳ_ : (Γ Δ : Ctx) → Set₁
   _⇒ʳ_ = [ _∋_ ]_⇒ᵉ_
 
-  □ʳ : (Ctx → Set ℓ) → (Ctx → Set (suc 0ℓ ⊔ ℓ))
+  □ʳ : OpenType ℓ → OpenType (suc 0ℓ ⊔ ℓ)
   (□ʳ T) Γ = ∀[ (_⇒ʳ Γ) ⇒ T ]
 
-  Renameable : (Ctx → Set ℓ) → Set (suc 0ℓ ⊔ ℓ)
+  Renameable : OpenType ℓ → Set (suc 0ℓ ⊔ ℓ)
   Renameable T = ∀[ T ⇒ □ʳ T ]

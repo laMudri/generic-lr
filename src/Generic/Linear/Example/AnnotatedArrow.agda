@@ -8,8 +8,6 @@ module Generic.Linear.Example.AnnotatedArrow
   (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (Base : Set)
   where
 
-  open PoSemiring poSemiring hiding (setoid) renaming (Carrier to Ann)
-
   open import Algebra.Relational
   open import Data.LTree
   open import Data.LTree.Vector hiding (setoid)
@@ -31,26 +29,15 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Relation.Binary.Construct.Always as ⊤ using ()
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
+  open PoSemiring poSemiring using () renaming (Carrier to Ann)
+
   infixr 5 _⊸_
 
   data Ty : Set where
     base : Ty
     _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
 
-  open import Generic.Linear.Operations rawPoSemiring
-  open import Generic.Linear.Algebra poSemiring
-  open import Generic.Linear.Syntax Ty Ann
-  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Ty poSemiring
-  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
-  open import Generic.Linear.Variable Ty rawPoSemiring
-  open import Generic.Linear.Environment Ty poSemiring
-  open import Generic.Linear.Renaming Ty poSemiring
-  open [_]_⇒ᵉ_
-  open import Generic.Linear.Extend Ty poSemiring
-  open import Generic.Linear.Renaming.Properties Ty poSemiring
-  open import Generic.Linear.Environment.Properties Ty poSemiring
-  open import Generic.Linear.Semantics Ty poSemiring
+  open import Generic.Linear.Everything Ty poSemiring hiding (setoid; Ann)
 
   data `AnnArr : Set where
     `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
@@ -64,7 +51,6 @@ module Generic.Linear.Example.AnnotatedArrow
     (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
   Term = [ AnnArr , ∞ ]_⊢_
-  open WithScope (Scope Term)
 
   -- pattern var i les = `var (lvar i refl les)
   -- pattern lam t = `con (`lam _ _ , refl , t)
@@ -76,7 +62,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ᶜ : Ctx → Set
   ⟦ ctx _ γ ⟧ᶜ = Lift₁ ⟦_⟧ γ
 
-  ⟦Tm⟧ : Scoped 0ℓ
+  ⟦Tm⟧ : OpenFam 0ℓ
   ⟦Tm⟧ Γ A = ⟦ Γ ⟧ᶜ → ⟦ A ⟧
 
   open Semantics
@@ -84,12 +70,12 @@ module Generic.Linear.Example.AnnotatedArrow
 
   set : Semantics AnnArr _∋_ ⟦Tm⟧
   set .ren^𝓥 = ren^∋
-  set .var (lvar i ≡.refl _) γ0 = γ0 .get i
-  set .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) γ0 x =
-    m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
+  set .⟦var⟧ (lvar i ≡.refl _) γ0 = γ0 .get i
+  set .⟦con⟧ {ctx P γ} (`lam (r , A) B , ≡.refl , m) γ0 x =
+    m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} ↙ʳ
       .app✴ +*-triv ([-]ᵉ (⟨ *ₗ-triv ⟩· lvar (↘ here) ≡.refl ≤*-refl))
       (γ0 ++₁ [ x ]₁)
-  set .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ0 =
+  set .⟦con⟧ (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) γ0 =
     (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) γ0)
     (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) γ0)
 
@@ -113,7 +99,7 @@ module Generic.Linear.Example.AnnotatedArrow
   ⟦_⟧ˢᶜ : Ctx → Setoid 0ℓ 0ℓ
   ⟦ ctx _ γ ⟧ˢᶜ = setoidL₁ ⟦_⟧ˢ γ
 
-  ⟦Tm⟧ˢ : Scoped 0ℓ
+  ⟦Tm⟧ˢ : OpenFam 0ℓ
   ⟦Tm⟧ˢ Γ A = ⟦ Γ ⟧ˢᶜ ⟶ ⟦ A ⟧ˢ
 
   module _ where
@@ -122,21 +108,21 @@ module Generic.Linear.Example.AnnotatedArrow
 
     setoid : Semantics AnnArr _∋_ ⟦Tm⟧ˢ
     setoid .ren^𝓥 = ren^∋
-    setoid .var (lvar i ≡.refl _) ⟨$⟩ γ0 = γ0 .get i
-    setoid .var (lvar i ≡.refl _) .cong γγ = γγ .get i
+    setoid .⟦var⟧ (lvar i ≡.refl _) ⟨$⟩ γ0 = γ0 .get i
+    setoid .⟦var⟧ (lvar i ≡.refl _) .cong γγ = γγ .get i
     -- TODO: lam case could be made better by Setoid currying.
-    setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ0 ⟨$⟩ x =
-      m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} extendʳ
+    setoid .⟦con⟧ {ctx P γ} (`lam (r , A) B , ≡.refl , m) ⟨$⟩ γ0 ⟨$⟩ x =
+      m .get {ctx P γ ++ᶜ [ 0# , A ]ᶜ} ↙ʳ
         .app✴ +*-triv ([-]ᵉ (⟨ *ₗ-triv ⟩· lvar (↘ here) ≡.refl ≤*-refl))
         ⟨$⟩ (γ0 ++₁ [ x ]₁)
-    setoid .alg {ctx P γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ0 .cong xx =
+    setoid .⟦con⟧ {ctx P γ} (`lam (r , A) B , ≡.refl , m) ._⟨$⟩_ γ0 .cong xx =
       m .get _ .app✴ _ _ .cong (setoidL₁ ⟦_⟧ˢ _ .refl ++₁∼ [ xx ]₁∼)
-    setoid .alg (`lam rA B , ≡.refl , m) .cong γγ xx =
+    setoid .⟦con⟧ (`lam rA B , ≡.refl , m) .cong γγ xx =
       m .get _ .app✴ _ _ .cong (γγ ++₁∼ [ xx ]₁∼)
-    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ0 =
+    setoid .⟦con⟧ (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) ⟨$⟩ γ0 =
       (m .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) ⟨$⟩ γ0) ⟨$⟩
       (n .get identity .app✴ (+*-identity↘ _) ([]ᵉ ℑ⟨ 0*-triv ⟩) ⟨$⟩ γ0)
-    setoid .alg (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
+    setoid .⟦con⟧ (`app rA B , ≡.refl , m ✴⟨ sp+ ⟩ (⟨ sp* ⟩· n)) .cong γγ =
       m .get _ .app✴ _ _ .cong γγ (n .get _ .app✴ _ _ .cong γγ)
 
   -- Relational semantics
@@ -327,26 +313,26 @@ module Generic.Linear.Example.AnnotatedArrow
     ◇-alg : ∀ {A} (R : WRel _≤ʷ_ A) {x y} → ∀[ ◇ (R .rel x y) ⇒ R .rel x y ]
     ◇-alg R (◇⟨ sub ⟩ xy) = R .subres sub xy
 
-    ⟦Tm⟧ᴿ : Scoped 0ℓ
+    ⟦Tm⟧ᴿ : OpenFam 0ℓ
     ⟦Tm⟧ᴿ Rγ A = WRelMor ⟦ Rγ ⟧ᴿᶜ ⟦ A ⟧ᴿ
 
     wrel : Semantics AnnArr _∋_ ⟦Tm⟧ᴿ
     wrel .ren^𝓥 = ren^∋
-    wrel .var v .sem0 = setoid .var v
-    wrel .var v .sem1 = setoid .var v
-    wrel .var v .semsem = go v
+    wrel .⟦var⟧ v .sem0 = setoid .⟦var⟧ v
+    wrel .⟦var⟧ v .sem1 = setoid .⟦var⟧ v
+    wrel .⟦var⟧ v .semsem = go v
       where
       -- η-expand Rγ to satisfy termination checker (s gets smaller).
       go : ∀ {A s R γ} (let Rγ = ctx {s} R γ) (v : Rγ ∋ A) →
-           ∀[ ⟦Tm⟧-rel A Rγ (setoid .var v) (setoid .var v) ]
+           ∀[ ⟦Tm⟧-rel A Rγ (setoid .⟦var⟧ v) (setoid .⟦var⟧ v) ]
       go (lvar here ≡.refl (mk le)) = !ᴿ-1 (le here)
       go {γ = γ} (lvar (↙ i) ≡.refl (mk le)) = ◇-alg ⟦ γ (↙ i) ⟧ᴿ ∘′ ✴-1→ ∘′
         map-✴ (go (lvar i ≡.refl (mk (le ∘ ↙))) , lemma-ℑ (mk (le ∘ ↘)))
       go {γ = γ} (lvar (↘ i) ≡.refl (mk le)) = ◇-alg ⟦ γ (↘ i) ⟧ᴿ ∘′ 1-✴→ ∘′
         map-✴ (lemma-ℑ (mk (le ∘ ↙)) , go (lvar i ≡.refl (mk (le ∘ ↘))))
-    wrel .alg mm .sem0 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem0) mm)
-    wrel .alg mm .sem1 = setoid .alg (map-s′ AnnArr (mapK𝓒 sem1) mm)
-    wrel .alg {ctx R γ} (`lam (r , A) B , ≡.refl , mm)
+    wrel .⟦con⟧ mm .sem0 = setoid .⟦con⟧ (map-s′ AnnArr (mapK𝓒 sem0) mm)
+    wrel .⟦con⟧ mm .sem1 = setoid .⟦con⟧ (map-s′ AnnArr (mapK𝓒 sem1) mm)
+    wrel .⟦con⟧ {ctx R γ} (`lam (r , A) B , ≡.refl , mm)
       .semsem γγ .app✴ sp xx =
       mm .get _ .app✴ _ _ .semsem
         (⟦≤⟧ᴿᶜ {P = R} (mk (λ i → ≤-trans (+.identity-→ .proj₂ _)
@@ -354,7 +340,7 @@ module Generic.Linear.Example.AnnotatedArrow
                γγ
          ✴⟨ sp ⟩
          !ᴿ-≤ (≤-trans (*.identity .proj₂ _) (+.identity-← .proj₁ _)) xx)
-    wrel .alg (`app rA B , ≡.refl , mm ✴⟨ sp+ ⟩ (⟨ sp* ⟩· nn)) .semsem γγ =
+    wrel .⟦con⟧ (`app rA B , ≡.refl , mm ✴⟨ sp+ ⟩ (⟨ sp* ⟩· nn)) .semsem γγ =
       let γγ ✴⟨ ⟦sp+⟧ ⟩ rQγγ = lemma-✴ sp+ γγ in
       mm .get _ .app✴ _ _ .semsem γγ .app✴ ⟦sp+⟧
         (!ᴿ-map

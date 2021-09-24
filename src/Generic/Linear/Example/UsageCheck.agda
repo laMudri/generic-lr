@@ -27,38 +27,11 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     0-rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ
     0-rawPoSemiring = PoSemiring.rawPoSemiring 0-poSemiring
 
-    open import Generic.Linear.Operations 0-rawPoSemiring public
-    open import Generic.Linear.Algebra 0-poSemiring public
-    open import Generic.Linear.Syntax Ty ⊤ public
-    open import Generic.Linear.Syntax.Interpretation Ty 0-rawPoSemiring
-      public
-    open import Generic.Linear.Syntax.Interpretation.Map Ty 0-poSemiring
-      public
-    open import Generic.Linear.Syntax.Term Ty 0-rawPoSemiring public
-    open import Generic.Linear.Variable Ty 0-rawPoSemiring public
-    open import Generic.Linear.Environment Ty 0-poSemiring public
-    open import Generic.Linear.Renaming Ty 0-poSemiring public
-    open import Generic.Linear.Renaming.Properties Ty 0-poSemiring public
-    open import Generic.Linear.Extend Ty 0-poSemiring public
-    open import Generic.Linear.Semantics Ty 0-poSemiring public
-    open import Generic.Linear.Semantics.Syntactic Ty 0-poSemiring public
+    open import Generic.Linear.Everything Ty 0-poSemiring public
 
   module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-    open PoSemiring poSemiring renaming (Carrier to Ann)
-
-    open import Generic.Linear.Operations rawPoSemiring
-    open import Generic.Linear.Algebra poSemiring
-    open import Generic.Linear.Syntax Ty Ann
-    open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
-    open import Generic.Linear.Syntax.Interpretation.Map Ty poSemiring
-    open import Generic.Linear.Syntax.Term Ty rawPoSemiring
-    open import Generic.Linear.Variable Ty rawPoSemiring
-    open import Generic.Linear.Environment Ty poSemiring
-    open import Generic.Linear.Renaming Ty poSemiring
-    open import Generic.Linear.Renaming.Properties Ty poSemiring
-    open import Generic.Linear.Extend Ty poSemiring
-    open import Generic.Linear.Semantics Ty poSemiring
+    open import Generic.Linear.Everything Ty poSemiring hiding (pure)
 
     private
       variable
@@ -81,11 +54,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uSystem (L ▹ rs) = L U.▹ λ l → uRule (rs l)
 
     open import Category.Functor
-    -- open import Category.Applicative
     open import Category.Monad
     open import Data.List.Categorical
     open RawFunctor (functor {0ℓ}) using (_<$>_)
-    -- open RawApplicative (applicative {0ℓ}) using (pure) renaming (_⊛_ to _<*>_)
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
     open import Data.LTree
     open import Data.LTree.Vector as V hiding ([]; [_]; _++_)
@@ -182,19 +153,19 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
       module _ (sys : System fl) where
 
-        𝓒 : U.Scoped _
+        𝓒 : U.OpenFam _
         𝓒 (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
 
-        open Semantics using (ren^𝓥; var; alg)
+        open Semantics using (ren^𝓥; ⟦var⟧; ⟦con⟧)
 
         elab-sem : U.Semantics (uSystem sys) U._∋_ 𝓒
         elab-sem .ren^𝓥 (U.lvar i q _) ρ =
           let v = ρ .U.lookup (ρ .sums) (U.lvar i q _) in
           U.lvar (v .U.idx) (v .U.tyq) _
           where open [_]_⇒ᵉ_
-        elab-sem .var (U.lvar i q _) R =
+        elab-sem .⟦var⟧ (U.lvar i q _) R =
           (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
-        elab-sem .alg b R =
+        elab-sem .⟦con⟧ b R =
           let foo = U.map-s′ (uSystem sys) U.reify b in
           (| `con (lemma sys foo) |)
 

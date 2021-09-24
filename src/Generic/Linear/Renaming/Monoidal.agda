@@ -25,7 +25,6 @@ module Generic.Linear.Renaming.Monoidal
   open import Generic.Linear.Environment.Properties Ty poSemiring
   open import Generic.Linear.Renaming Ty poSemiring
   open import Generic.Linear.Renaming.Properties Ty poSemiring
-  open import Generic.Linear.Extend Ty poSemiring
 
   open With-psh^𝓥 {_𝓥_ = _∋_} psh^∋
 
@@ -35,15 +34,15 @@ module Generic.Linear.Renaming.Monoidal
   _++ʳ_ : ∀ {Γl Γr Δl Δr} →
     Γl ⇒ʳ Δl → Γr ⇒ʳ Δr → Γl ++ᶜ Γr ⇒ʳ Δl ++ᶜ Δr
   th ++ʳ ph = ++ᵉ
-    (compose th extendʳ
+    (compose th ↙ʳ
       ✴⟨ +*-identity↘ _ ++ₙ +*-identity↙ _ ⟩
-     compose ph extendˡ)
+     compose ph ↘ʳ)
 
   ++-[]ʳ← : ∀ {Γ} → Γ ⇒ʳ Γ ++ᶜ []ᶜ
   ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ 0*-triv ⟩))
 
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
-  ++-[]ʳ→ .M = [ 1ᴹ │ [│] ]
+  ++-[]ʳ→ .Ψ = [ 1ᴹ │ [│] ]
   ++-[]ʳ→ .asLinRel = [ idAsLinRel │ [│]AsLinRel ]AsLinRel
   ++-[]ʳ→ .sums = ≤*-refl , _
   ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (≤*-trans le b ++ₙ []ₙ)

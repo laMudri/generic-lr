@@ -8,7 +8,7 @@ module Generic.Linear.Example.MuMuTilde
   (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (Base : Set)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann)
+  open PoSemiring poSemiring using () renaming (Carrier to Ann)
 
   open import Algebra.Relational
   open import Data.LTree
@@ -42,20 +42,7 @@ module Generic.Linear.Example.MuMuTilde
     com : Conc
     trm cot : (A : Ty) → Conc
 
-  open import Generic.Linear.Operations rawPoSemiring
-  open import Generic.Linear.Algebra poSemiring
-  open import Generic.Linear.Syntax Conc Ann
-  open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Conc poSemiring
-  open import Generic.Linear.Syntax.Term Conc rawPoSemiring
-  open import Generic.Linear.Variable Conc rawPoSemiring
-  open import Generic.Linear.Environment Conc poSemiring
-  open import Generic.Linear.Renaming Conc poSemiring
-  open [_]_⇒ᵉ_
-  open import Generic.Linear.Extend Conc poSemiring
-  open import Generic.Linear.Renaming.Properties Conc poSemiring
-  open import Generic.Linear.Environment.Properties Conc poSemiring
-  open import Generic.Linear.Semantics Conc poSemiring
+  open import Generic.Linear.Everything Conc poSemiring hiding (Ann)
 
   data `MMT : Set where
     `cut `μ `μ∼ : (A : Ty) → `MMT
@@ -85,7 +72,6 @@ module Generic.Linear.Example.MuMuTilde
       =⇒ trm (rA ⅋ sB)
 
   Drv = [ MMT , ∞ ]_⊢_
-  open WithScope (Scope Drv)
 
   myComm : (rA sB : Ann × Ty) →
            Drv []ᶜ (trm ((1# , (rA ⅋ sB) ^⊥) ⅋ (1# , sB ⅋ rA)))

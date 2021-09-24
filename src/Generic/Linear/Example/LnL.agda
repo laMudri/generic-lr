@@ -89,7 +89,6 @@ module Generic.Linear.Example.LnL where
     (`Ge A) → `□ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
 
   Term = [ LnL , ∞ ]_⊢_
-  open WithScope (Scope Term)
 
   open import Generic.Linear.Example.UsageCheck ΣTy public
   open WithPoSemiring poSemiring public

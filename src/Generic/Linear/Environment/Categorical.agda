@@ -21,12 +21,12 @@ module Generic.Linear.Environment.Categorical
   open import Generic.Linear.Environment Ty poSemiring
   open import Generic.Linear.Renaming Ty poSemiring
 
-  record IdentityEnv {v} (𝓥 : Scoped v) : Set (suc 0ℓ ⊔ v) where
+  record IdentityEnv {v} (𝓥 : OpenFam v) : Set (suc 0ℓ ⊔ v) where
     field
       pure : ∀[ _∋_ ⇒ 𝓥 ]
 
     subuse^Env : ∀ {s P Q γ} → P ≤* Q → [ 𝓥 ] ctx P γ ⇒ᵉ ctx {s} Q γ
-    subuse^Env PQ .M = 1ᴹ
+    subuse^Env PQ .Ψ = 1ᴹ
     subuse^Env PQ .asLinRel = idAsLinRel
     subuse^Env PQ .sums = PQ
     subuse^Env PQ .lookup r (lvar i q b) = pure (lvar i q (≤*-trans r b))
@@ -39,23 +39,23 @@ module Generic.Linear.Environment.Categorical
     identityEnv-∋ : IdentityEnv _∋_
     identityEnv-∋ .pure = id
 
-  record ComposeEnv {u v w} (𝓤 : Scoped u) (𝓥 : Scoped v) (𝓦 : Scoped w)
+  record ComposeEnv {u v w} (𝓤 : OpenFam u) (𝓥 : OpenFam v) (𝓦 : OpenFam w)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where
     field
       lift : ∀ {s t P Q γ δ} (ρ : [ 𝓤 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) →
-        ∀ {P′ Q′} → Mᴿ ρ .rel Q′ P′ → ∀[ 𝓥 (ctx Q′ δ) ⇒ 𝓦 (ctx P′ γ) ]
+        ∀ {P′ Q′} → Ψᴿ ρ .rel Q′ P′ → ∀[ 𝓥 (ctx Q′ δ) ⇒ 𝓦 (ctx P′ γ) ]
 
     >>^Env : ∀ {Γ Δ Θ} → [ 𝓤 ] Γ ⇒ᵉ Δ → [ 𝓥 ] Δ ⇒ᵉ Θ → [ 𝓦 ] Γ ⇒ᵉ Θ
-    >>^Env ρ σ .M = σ .M >>LinMor ρ .M
+    >>^Env ρ σ .Ψ = σ .Ψ >>LinMor ρ .Ψ
     >>^Env ρ σ .asLinRel = σ .asLinRel >>AsLinRel ρ .asLinRel
     >>^Env ρ σ .sums = σ .sums , ρ .sums
     >>^Env ρ σ .lookup (s , r) v = lift ρ r (σ .lookup s v)
   open ComposeEnv {{...}} public
 
   instance
-    composeEnv-𝓥-∋ : ∀ {v} {𝓥 : Scoped v} → ComposeEnv 𝓥 _∋_ 𝓥
+    composeEnv-𝓥-∋ : ∀ {v} {𝓥 : OpenFam v} → ComposeEnv 𝓥 _∋_ 𝓥
     composeEnv-𝓥-∋ .lift ρ r v = ρ .lookup r v
 
-  postren^Env : ∀ {v} {𝓥 : Scoped v} {Γ Δ Θ} →
+  postren^Env : ∀ {v} {𝓥 : OpenFam v} {Γ Δ Θ} →
     [ 𝓥 ] Γ ⇒ᵉ Δ → Δ ⇒ʳ Θ → [ 𝓥 ] Γ ⇒ᵉ Θ
   postren^Env = >>^Env

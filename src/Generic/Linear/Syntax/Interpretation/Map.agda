@@ -61,7 +61,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   -}
 
   module _ {s t} {γ : Vector Ty s} {δ : Vector Ty t}
-    (F : LinMor s t) {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+    (F : LinMor s t) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
     -- open PoLeftSemimoduleMor F
@@ -99,7 +99,7 @@ module Generic.Linear.Syntax.Interpretation.Map
       (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
     map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
-  module _ {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
+  module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
 
     map-p′ : (ps : Premises fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ Γ `⊢ A ⟩ f t = f t
@@ -125,7 +125,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     open RawApplicative appF
 
     sequence-p :
-      ∀ {X : Ctx → Scoped x} (ps : Premises fl) →
+      ∀ {X : ExtOpenFam x} (ps : Premises fl) →
       ∀[ ⟦ ps ⟧p (λ Δ Γ B → F (X Δ Γ B)) ⇒ F ∘ ⟦ ps ⟧p X ]
     sequence-p (⟨ Γ `⊢ A ⟩) t = t
     sequence-p `⊤ tt = pure tt
@@ -139,12 +139,12 @@ module Generic.Linear.Syntax.Interpretation.Map
       □⟨ str , sp0 , sp+ ⟩_ <$> sequence-p ps t
 
     sequence-r :
-      ∀ {X : Ctx → Scoped x} (r : Rule fl) → ∀ {A} →
+      ∀ {X : ExtOpenFam x} (r : Rule fl) → ∀ {A} →
       ∀[ _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A ]
     sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
-      ∀ {X : Ctx → Scoped x} (s : System fl) → ∀ {A} →
+      ∀ {X : ExtOpenFam x} (s : System fl) → ∀ {A} →
       ∀[ _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A ]
     sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t

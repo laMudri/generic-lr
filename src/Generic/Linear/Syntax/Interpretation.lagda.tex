@@ -55,64 +55,48 @@ module Generic.Linear.Syntax.Interpretation
 
   pattern !!_ PQ = refl , PQ , refl
 
-  _⇒ᵏᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (Γ : Ctx) → Set (t ⊔ u)
+  _⇒ᵏᶜ_ : (T : OpenType t) (U : OpenType u) (Γ : Ctx) → Set (t ⊔ u)
   (T ⇒ᵏᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ⇒ᵏ (λ Q → U (ctx Q γ))) R
 
-  ℑᶜ : Ctx → Set ℓ
+  ℑᶜ : OpenType ℓ
   ℑᶜ (ctx R γ) = ℑ R
 
-  _✴ᶜ_ : (T U : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  _✴ᶜ_ : (T U : OpenType ℓ) (Γ : Ctx) → Set ℓ
   (T ✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ✴ (λ Q → U (ctx Q γ))) R
 
-  _─✴ᶜ_ : (T : Ctx → Set t) (U : Ctx → Set u) (Γ : Ctx) → Set (t ⊔ u)
+  _─✴ᶜ_ : (T : OpenType t) (U : OpenType u) (Γ : Ctx) → Set (t ⊔ u)
   (T ─✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ─✴ (λ Q → U (ctx Q γ))) R
 
-  _·ᶜ_ : (r : Ann) (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  _·ᶜ_ : (r : Ann) (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
   (r ·ᶜ T) (ctx R γ) = (r · (λ P → T (ctx P γ))) R
 
-  Dupᶜ : (T : Ctx → Set ℓ) (Γ : Ctx) → Set ℓ
+  Dupᶜ : (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
   Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
-
-  module WithScope (X : Ctx → Scoped ℓ) where
 \end{code}
 
 %<*semp>
 \begin{code}
-    ⟦_⟧p : Premises fl → Ctx → Set ℓ
-    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p Δ = X Γ Δ A
-    ⟦ `⊤ ⟧p = U
-    ⟦ `ℑ ⟧p = ℑᶜ
-    ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
-    ⟦ p `✴ q ⟧p = ⟦ p ⟧p ✴ᶜ ⟦ q ⟧p
-    ⟦ r `· p ⟧p = r ·ᶜ ⟦ p ⟧p
-    ⟦ `□ p ⟧p = Dupᶜ ⟦ p ⟧p
+  ⟦_⟧p : Premises fl → ExtOpenFam ℓ → OpenType ℓ
+  ⟦ ⟨ Δ `⊢ A ⟩ ⟧p X Γ = X Δ Γ A
+  ⟦ `⊤ ⟧p X = U
+  ⟦ p `∧ q ⟧p X = ⟦ p ⟧p X ∩ ⟦ q ⟧p X
+  ⟦ `ℑ ⟧p X = ℑᶜ
+  ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ᶜ ⟦ q ⟧p X
+  ⟦ r `· p ⟧p X = r ·ᶜ ⟦ p ⟧p X
+  ⟦ `□ p ⟧p X = Dupᶜ (⟦ p ⟧p X)
 \end{code}
 %</semp>
-\begin{code}
-    -- ⟦ `□ p ⟧p = Dup (⟦ p ⟧p)
-\end{code}
 
 %<*semr>
 \begin{code}
-    ⟦_⟧r : Rule fl → Scoped ℓ
-    ⟦ ps =⇒ A′ ⟧r Γ A = A′ ≡ A × ⟦ ps ⟧p Γ
+  ⟦_⟧r : Rule fl → ExtOpenFam ℓ → OpenFam ℓ
+  ⟦ ps =⇒ A′ ⟧r X Γ A = A′ ≡ A × ⟦ ps ⟧p X Γ
 \end{code}
 %</semr>
 
 %<*sems>
 \begin{code}
-    ⟦_⟧s : System fl → Scoped ℓ
-    ⟦ L ▹ rs ⟧s Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r Γ A
+  ⟦_⟧s : System fl → ExtOpenFam ℓ → OpenFam ℓ
+  ⟦ L ▹ rs ⟧s X Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r X Γ A
 \end{code}
 %</sems>
-
-\begin{code}
-  ⟦_⟧p : Premises fl → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
-  ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
-
-  ⟦_⟧r : Rule fl → (Ctx → Scoped ℓ) → Scoped ℓ
-  ⟦ r ⟧r Sc = let module W = WithScope Sc in W.⟦ r ⟧r
-
-  ⟦_⟧s : System fl → (Ctx → Scoped ℓ) → Scoped ℓ
-  ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s
-\end{code}

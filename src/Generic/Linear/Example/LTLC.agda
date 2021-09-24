@@ -46,7 +46,6 @@ module Generic.Linear.Example.LTLC where
     (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ =⇒ B
 
   Term = [ LTLC , ∞ ]_⊢_
-  open WithScope (Scope Term)
 
   pattern var i les = `var (lvar i refl les)
   pattern lam t = `con (`lam _ _ , refl , t)
