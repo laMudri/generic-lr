@@ -3,6 +3,7 @@
 module Generic.Linear.Example.LR where
 
   open import Algebra.Po
+  open import Data.Bool.Base
   open import Data.Hand
   open import Data.LTree
   open import Data.LTree.Vector
@@ -100,7 +101,8 @@ module Generic.Linear.Example.LR where
       `ze → `ℑ =⇒ nat
       `su → ⟨ []ᶜ `⊢ nat ⟩ =⇒ nat
       (`iter Z) →
-        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) =⇒ Z
+        let bf = boxFlags true true false in
+        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ bf (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) =⇒ Z
 
     Term = [ LR , ∞ ]_⊢_
 
@@ -134,7 +136,7 @@ module Generic.Linear.Example.LR where
     pattern uze = V.`con (`ze , refl , ℑ⟨ _ ⟩)
     pattern usu s = V.`con (`su , refl , s)
     pattern uiter T e s t =
-      V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ ⟩ (s , t)))
+      V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ , _ ⟩ (s , t)))
 
   private
     open WithLLFlags allLLFlags

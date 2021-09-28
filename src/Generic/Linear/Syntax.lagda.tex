@@ -3,6 +3,7 @@
 
 module Generic.Linear.Syntax (Ty Ann : Set) where
 
+  open import Data.Bool.Base
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product using (_×_; _,_)
@@ -10,6 +11,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Level
   open import Function.Base using (_∘_; _⟨_⟩_)
   open import Relation.Unary
+  open import Relation.Unary.Bunched using (BoxFlags; boxFlags)
 
   infix 25 _++ᶜ_
 

@@ -1,5 +1,5 @@
 \begin{code}
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ)
@@ -12,6 +12,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Algebra.Po.Construct.Vector
   open import Algebra.Relational
   open import Algebra.Relational.Relation
+  open import Data.Bool.Extra
   open import Data.Unit.Polymorphic
   open import Data.Product
   open import Data.LTree
@@ -33,9 +34,8 @@ module Generic.Linear.Syntax.Interpretation.Map
     variable
       x y : Level
 
-  -- To support `□, the relation would have to be functional.
-  module MapRel {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
-    (F : LinRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
+  module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
+           (F : LinFuncRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
     private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
@@ -43,70 +43,26 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p : (ps : Premises) →
       (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-p ⟨ Δ `⊢ A ⟩ f r M = f r M
+    map-p ⟨ Γ `⊢ A ⟩ f r M = f r M
     map-p `⊤ f r _ = _
     map-p (ps `∧ qs) f r (M , N) = map-p ps f r M , map-p qs f r N
-    map-p `ℑ f r ℑ⟨ sp ⟩ = ℑ⟨ F .rel-0ₘ (sp , r) ⟩
-    map-p (ps `✴ qs) f r (M ✴⟨ sp ⟩ N) =
-      let rM ↘, sp′ ,↙ rN = F .rel-+ₘ (sp , r) in
-      map-p ps f rM M ✴⟨ sp′ ⟩ map-p qs f rN N
-    map-p (_ `· ps) f r (⟨ sp ⟩· M) =
-      let sp′ , rM = F .rel-*ₘ (sp , r) in
-      ⟨ sp′ ⟩· map-p ps f rM M
+    map-p `ℑ f r ℑ⟨ sp0 ⟩ = ℑ⟨ F .rel-0ₘ (sp0 , r) ⟩
+    map-p (ps `✴ qs) f r (M ✴⟨ sp+ ⟩ N) =
+      let rM ↘, sp+′ ,↙ rN = F .rel-+ₘ (sp+ , r) in
+      map-p ps f rM M ✴⟨ sp+′ ⟩ map-p qs f rN N
+    map-p (p `· ps) f r (⟨ sp* ⟩· M) =
+      let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
+      ⟨ sp*′ ⟩· map-p ps f r′ M
 
     map-r : (r : Rule) →
       (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
     map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
-\end{code}
 
-%<*map-s-type>
-\begin{code}
     map-s : (s : System) →
-      (∀ {Θ P Q} → F .rel P Q →
-        ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → F .rel P Q →
-        ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
-\end{code}
-%</map-s-type>
-\begin{code}
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
     map-s (L ▹ rs) f r (l , M) = l , map-r (rs l) f r M
-
-  module MapMor {s t} {γ : Vector Ty s} {δ : Vector Ty t}
-    (F : LinMor s t) {X : ExtOpenFam x} {Y : ExtOpenFam y}
-    where
-
-    -- open PoLeftSemimoduleMor F
-    private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
-
-    map-p : (ps : Premises) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-p (⟨ Γ `⊢ A ⟩) f r t = f r t
-    map-p `⊤ f r _ = _
-    map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
-    map-p `ℑ f r ℑ⟨ t ⟩ =
-      ℑ⟨ 0ₘ-mono (≤*-trans r (F .hom-mono (0*→≤* t))) (≈*→0* (F .hom-0ₘ)) ⟩
-    map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let sp′ = +ₘ-mono (≤*-trans r (F .hom-mono (+*→≤* sp))) ≤*-refl ≤*-refl
-           (≈*→+* (F .hom-+ₘ _ _))
-      in map-p ps f ≤*-refl s ✴⟨ sp′ ⟩ map-p qs f ≤*-refl t
-    map-p (p `· ps) f r (⟨ sp ⟩· t) =
-      let sp′ = *ₘ-mono (≤*-trans r (F .hom-mono (*ₗ→≤* sp))) ≤-refl ≤*-refl
-           (≈*→*ₗ (F .hom-*ₘ _ _))
-      in ⟨ sp′ ⟩· map-p ps f ≤*-refl t
-
-    map-r : (r : Rule) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
-    map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
-
-    map-s : (s : System) →
-      (∀ {Θ P Q} → Q ≤* F .hom P →
-        ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P →
-        ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
-    map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
 
   module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
 

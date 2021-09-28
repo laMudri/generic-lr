@@ -76,7 +76,6 @@ module Generic.Linear.Semantics
     open With-psh^𝓥 psh^𝓥
 
     open Equivalence
-    open MapRel
 \end{code}
 
 %<*Comp>
@@ -102,7 +101,7 @@ module Generic.Linear.Semantics
 \begin{code}
     semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .sums) v
     semantics ρ (`con t) = ⟦con⟧ $
-      map-s (ρ .asLinRel .linRel) d
+      map-s (ρ .Ψ) d
         (λ r → body (record { [_]_⇒ᵉ_ ρ; sums = r }))
         (ρ .sums) t
 \end{code}

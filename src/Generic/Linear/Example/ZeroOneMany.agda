@@ -4,12 +4,17 @@ module Generic.Linear.Example.ZeroOneMany where
 
   open import Algebra.Po
   open import Algebra.Skew
+  open import Data.Bool.Base using (Bool; true; false)
+  open import Data.Bool.Extra
   open import Data.List
   open import Data.Product
+  open import Data.Unit using (⊤; tt)
   open import Function.Base
   open import Level using (0ℓ)
   open import Relation.Binary.PropositionalEquality as ≡ using
     (_≡_; refl; trans; sym; isEquivalence)
+  open import Relation.Unary.Bunched
+  open BunchedDuplicable
 
   infix 7 _*_
   infix 6 _+_
@@ -273,10 +278,19 @@ module Generic.Linear.Example.ZeroOneMany where
   *⁻¹ uω u1 = []
   *⁻¹ uω uω = (uω , ≤-refl) ∷ []
 
-  rep : ∀ x → List (∃ \ y → x ≤ y × y ≤ u0 × y ≤ y + y)
-  rep u0 = (u0 , ≤-refl , ≤-refl , ≤-refl) ∷ []
-  rep u1 = []
-  rep uω = (uω , ≤-refl , ω≤0 , ≤-refl) ∷ []
+  rep : ∀ bf x → List
+    (Dup _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z) bf (λ _ → ⊤) x)
+  rep bf u0 =
+    □⟨ ≤-refl , pure-If ≤-refl , pure-If ≤-refl , pure-If (≡⇒≤ ∘ annihilʳ) ⟩ _
+    ∷ []
+  rep bf u1 = []
+  rep bf uω =
+    □⟨ ≤-refl , pure-If ω≤0 , pure-If ≤-refl , pure-If lemma ⟩ _ ∷ []
+    where
+    lemma : ∀ r → uω ≤ r * uω
+    lemma u0 = ω≤0
+    lemma u1 = ≤-refl
+    lemma uω = ≤-refl
 
   ω*-del : ∀ x → uω * x ≤ u0
   ω*-del u0 = ≤-refl
@@ -287,6 +301,16 @@ module Generic.Linear.Example.ZeroOneMany where
   ω*-dup u0 = ≤-refl
   ω*-dup u1 = ≤-refl
   ω*-dup uω = ≤-refl
+
+  ω*-cojoin : ∀ x → uω * x ≤ uω * (uω * x)
+  ω*-cojoin u0 = ≤-refl
+  ω*-cojoin u1 = ≤-refl
+  ω*-cojoin uω = ≤-refl
+
+  ω*-scl : ∀ x r → uω * x ≤ r * (uω * x)
+  ω*-scl x u0 = ω*-del x
+  ω*-scl x u1 = ≤-refl
+  ω*-scl x uω = ω*-cojoin x
 
   ω*-≤ : ∀ x → uω * x ≤ x
   ω*-≤ u0 = ≤-refl

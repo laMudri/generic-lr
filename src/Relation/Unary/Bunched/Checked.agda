@@ -2,10 +2,11 @@
 
 module Relation.Unary.Bunched.Checked {a} {A : Set a} where
 
-  import Relation.Unary.Bunched {a} {A} as B
+  import Relation.Unary.Bunched as B
   open B public using
     ( module BunchedUnit; module BunchedScaling; module BunchedDuplicable
-    ; ◇⟨_⟩_; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_; □⟨_,_,_⟩_
+    ; ◇⟨_⟩_; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_; □⟨_,_,_,_⟩_
+    ; BoxFlags; boxFlags
     )
 
   open import Data.Product

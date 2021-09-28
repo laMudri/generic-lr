@@ -83,27 +83,6 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   Vᴾ = Vector-poLeftSemimodule poSemiring
 
-  LinMor : ∀ (s t : LTree) → Set _
-  LinMor s t = PoLeftSemimoduleMor id-PoSemiringMor (Vᴾ s) (Vᴾ t)
-  open PoLeftSemimoduleMor public
-
-  idLinMor : ∀ {s} → LinMor s s
-  idLinMor = 1ᴹ
-
-  _>>_ : ∀ {a b c} {A : Set a} {B : Set b} {C : Set c} →
-    (A → B) → (B → C) → (A → C)
-  (f >> g) x = g (f x)
-
-  _>>LinMor_ : ∀ {s t u} → LinMor s t → LinMor t u → LinMor s u
-  (F >>LinMor G) .hom = F .hom >> G .hom
-  (F >>LinMor G) .hom-cong = F .hom-cong >> G .hom-cong
-  (F >>LinMor G) .hom-mono = F .hom-mono >> G .hom-mono
-  (F >>LinMor G) .hom-0ₘ = ≈*-trans (G .hom-cong (F .hom-0ₘ)) (G .hom-0ₘ)
-  (F >>LinMor G) .hom-+ₘ u v =
-    ≈*-trans (G .hom-cong (F .hom-+ₘ _ _)) (G .hom-+ₘ _ _)
-  (F >>LinMor G) .hom-*ₘ r u =
-    ≈*-trans (G .hom-cong (F .hom-*ₘ _ _)) (G .hom-*ₘ _ _)
-
   -- LinRel
 
   Annᶠᴿ : FRelSemiring 0ℓ 0ℓ
@@ -114,264 +93,226 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   Vᴿ : LTree → RelLeftSemimodule _ 0ℓ 0ℓ
   Vᴿ s = FRelLeftSemimodule.relLeftSemimodule (Vᶠᴿ s)
 
-  open FRelSemiring Annᶠᴿ renaming
+  open FRelSemiring Annᶠᴿ public using (_≤0; _≤[_+_]; _≤[_*_])
+  open FRelSemiring Annᶠᴿ hiding (_≤0; _≤[_+_]; _≤[_*_]) renaming
     (+-comm to +-comm↔; +-inter to +-inter↔; *-mono to *-mono↔)
-  private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
+  private
+    module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
+  open Dummy
+  open Dummy public using (0ₘ-mono; +ₘ-mono; *ₘ-mono)
 
-  LinRel : ∀ (s t : LTree) ℓ → Set _
-  LinRel s t ℓ = RelLeftSemimoduleRel (Vᴿ s) (Vᴿ t) ℓ
-  open RelLeftSemimoduleRel public
+  -- LinFuncRel
 
-  record AsLinRel (M : LinMor s t) ℓ : Set (suc ℓ) where
-    field
-      linRel : LinRel s t ℓ
-      equiv : ∀ {P Q} → linRel .rel P Q ⇔ Q ≤* M .hom P
-  open AsLinRel public
-  open Equivalence public using () renaming (f to to; g to from)
+  LinFuncRel : ∀ (s t : LTree) ℓ → Set _
+  LinFuncRel s t ℓ = RelLeftSemimoduleFuncRel (Vᴿ s) (Vᴿ t) ℓ
+  open RelLeftSemimoduleFuncRel public
 
-  idLinRel : ∀ {s} → LinRel s s 0ℓ
-  idLinRel .rel x x′ = x′ ≤* x
-  idLinRel .rel-≤ₘ xx yy le = ≤*-trans yy (≤*-trans le xx)
-  idLinRel .rel-0ₘ (sp0 , le) = 0ₘ-mono le sp0
-  idLinRel .rel-+ₘ (sp+ , le) =
-    ≤*-refl ↘, +ₘ-mono le ≤*-refl ≤*-refl sp+ ,↙ ≤*-refl
-  idLinRel .rel-*ₘ (sp* , le) = *ₘ-mono le ≤-refl ≤*-refl sp* , ≤*-refl
+  -- Composition
 
-  id⇔ : ∀ {a} {A : Set a} → A ⇔ A
-  id⇔ = mk⇔ id id
+  1ᴿ : ∀ {s} → LinFuncRel s s 0ℓ
+  1ᴿ .rel x y = y ≤* x
+  1ᴿ .rel-≤ₘ xx yy r = ≤*-trans yy (≤*-trans r xx)
+  1ᴿ .rel-0ₘ (sp0 , r) = 0ₘ-mono r sp0
+  1ᴿ .rel-+ₘ (sp+ , r) = ≤*-refl ↘, +ₘ-mono r ≤*-refl ≤*-refl sp+ ,↙ ≤*-refl
+  1ᴿ .rel-*ₘ (sp* , r) = ≤*-refl , *ₘ-mono r ≤-refl ≤*-refl sp*
+  1ᴿ .func x = ≤*-refl , id
 
-  idAsLinRel : AsLinRel {s} idLinMor 0ℓ
-  idAsLinRel .linRel = idLinRel
-  idAsLinRel .equiv = id⇔
+  _>>ᴿ_ : ∀ {a b s t u} →
+    LinFuncRel s t a → LinFuncRel t u b → LinFuncRel s u (a ⊔ b)
+  (F >>ᴿ G) .rel x z = (x ⟨ F .rel ⟩_) ◇ (_⟨ G .rel ⟩ z)
+  (F >>ᴿ G) .rel-≤ₘ xx zz (f , g) =
+    F .rel-≤ₘ xx ≤*-refl f , G .rel-≤ₘ ≤*-refl zz g
+  (F >>ᴿ G) .rel-0ₘ (sp0 , (f , g)) = G .rel-0ₘ (F .rel-0ₘ (sp0 , f) , g)
+  (F >>ᴿ G) .rel-+ₘ (sp+ , (f , g)) =
+    let fl ↘, sp+f ,↙ fr = F .rel-+ₘ (sp+ , f) in
+    let gl ↘, sp+g ,↙ gr = G .rel-+ₘ (sp+f , g) in
+    (fl , gl) ↘, sp+g ,↙ (fr , gr)
+  (F >>ᴿ G) .rel-*ₘ (sp* , (f , g)) =
+    let f′ , sp*f = F .rel-*ₘ (sp* , f) in
+    let g′ , sp*g = G .rel-*ₘ (sp*f , g) in
+    (f′ , g′) , sp*g
+  (F >>ᴿ G) .func x =
+    let _,_ {y} f uy = F .func x in
+    let g , uz = G .func y in
+    (f , g) , λ (f′ , g′) → uz (G .rel-≤ₘ (uy f′) ≤*-refl g′)
 
-  _>>ᴿ_ : ∀ {a b c r s} {A : Set a} {B : Set b} {C : Set c}
-    (R : REL A B r) (S : REL B C s) (x : A) (z : C) → Set (b ⊔ r ⊔ s)
-  (R >>ᴿ S) x z = (λ y → R x y) ◇ (λ y → S y z)
+  -- Parallel addition
 
-  _>>LinRel_ : ∀ {a b s t u} → LinRel s t a → LinRel t u b → LinRel s u (a ⊔ b)
-  (R >>LinRel S) .rel = R .rel >>ᴿ S .rel
-  (R >>LinRel S) .rel-≤ₘ xx yy (r , s) =
-    R .rel-≤ₘ xx ≤*-refl r , S .rel-≤ₘ ≤*-refl yy s
-  (R >>LinRel S) .rel-0ₘ (sp0 , (r , s)) =
-    S .rel-0ₘ (R .rel-0ₘ (sp0 , r) , s)
-  (R >>LinRel S) .rel-+ₘ (sp+ , (r , s)) =
-    let rl ↘, sp+r ,↙ rr = R .rel-+ₘ (sp+ , r) in
-    let sl ↘, sp+s ,↙ sr = S .rel-+ₘ (sp+r , s) in
-    (rl , sl) ↘, sp+s ,↙ (rr , sr)
-  (R >>LinRel S) .rel-*ₘ (sp* , (r , s)) =
-    let sp*r , ri = R .rel-*ₘ (sp* , r) in
-    let sp*s , si = S .rel-*ₘ (sp*r , s) in
-    sp*s , (ri , si)
+  0ᴿ : ∀ {s t} → LinFuncRel s t 0ℓ
+  0ᴿ .rel x y = y ≤0ₘ
+  0ᴿ .rel-≤ₘ xx yy le0 = 0ₘ-mono yy le0
+  0ᴿ .rel-0ₘ (sp0 , le0) = le0
+  0ᴿ .rel-+ₘ (sp+ , le0) = +ₘ-identity²← le0
+  0ᴿ .rel-*ₘ (sp* , le0) = swap-◇ (*ₘ-annihilʳ← le0)
+  0ᴿ .func x = 0*-triv , 0*→≤*
 
-  module _ {a b s t u} {M : LinMor s t} {N : LinMor t u} where
+  _+ᴿ_ : ∀ {a b s t} →
+    LinFuncRel s t a → LinFuncRel s t b → LinFuncRel s t (a ⊔ b)
+  (F +ᴿ G) .rel x y = F .rel x ↘- y ≤[_+ₘ_] -↙ G .rel x
+  (F +ᴿ G) .rel-≤ₘ xx yy (f ↘, sp ,↙ g) =
+    F .rel-≤ₘ xx ≤*-refl f
+      ↘, +ₘ-mono yy ≤*-refl ≤*-refl sp ,↙
+    G .rel-≤ₘ xx ≤*-refl g
+  (F +ᴿ G) .rel-0ₘ (sp0 , (f ↘, sp ,↙ g)) =
+    +ₘ-identity²→ (F .rel-0ₘ (sp0 , f) ↘, sp ,↙ G .rel-0ₘ (sp0 , g))
+  (F +ᴿ G) .rel-+ₘ (sp+ , (f ↘, sp ,↙ g)) =
+    let fl ↘, spf ,↙ fr = F .rel-+ₘ (sp+ , f) in
+    let gl ↘, spg ,↙ gr = G .rel-+ₘ (sp+ , g) in
+    let spl ↘, sp′ ,↙ spr = +ₘ-inter (spf ↘, sp ,↙ spg) in
+    (fl ↘, spl ,↙ gl) ↘, sp′ ,↙ (fr ↘, spr ,↙ gr)
+  (F +ᴿ G) .rel-*ₘ (sp* , (f ↘, sp ,↙ g)) =
+    let f′ , spf = F .rel-*ₘ (sp* , f) in
+    let g′ , spg = G .rel-*ₘ (sp* , g) in
+    let sp*′ , sp′ = *ₘ-distribʳ← (spf ↘, sp ,↙ spg) in
+    (f′ ↘, sp′ ,↙ g′) , sp*′
+  (F +ᴿ G) .func x =
+    let f , uf = F .func x in
+    let g , ug = G .func x in
+    (f ↘, +*-triv ,↙ g) , λ (f′ ↘, sp′ ,↙ g′) →
+      +*→≤* (+ₘ-mono ≤*-refl (uf f′) (ug g′) sp′)
 
-    _>>AsLinRel_ : AsLinRel M a → AsLinRel N b → AsLinRel (M >>LinMor N) (a ⊔ b)
-    (R >>AsLinRel S) .linRel = R .linRel >>LinRel S .linRel
-    (R >>AsLinRel S) .equiv = mk⇔
-      (λ { (r , s) → ≤*-trans (S .equiv .to s) (N .hom-mono (R .equiv .to r)) })
-      (λ le → R .equiv .from ≤*-refl , S .equiv .from le)
+  -- Shape
+  --  Vertical
 
-  0LinRel : ∀ {s t} → LinRel s t 0ℓ
-  0LinRel .rel P Q = Q ≤0ₘ
-  0LinRel .rel-≤ₘ xx yy le0 = 0ₘ-mono yy le0
-  0LinRel .rel-0ₘ (sp0 , le0) = le0
-  0LinRel .rel-+ₘ (sp+ , le0) = +ₘ-identity²← le0
-  0LinRel .rel-*ₘ (sp* , le0) = *ₘ-annihilʳ← le0
-
-  0AsLinRel : ∀ {s t} → AsLinRel {s} {t} 0ᴹ 0ℓ
-  0AsLinRel .linRel = 0LinRel
-  0AsLinRel .equiv = mk⇔ 0*→≤* ≤*→0*
-
-  {-
-  subLinRel : ∀ {s} → LinRel s s 0ℓ
-  subLinRel .rel x x′ = x′ ≤* x
-  subLinRel .rel-0ₘ (sp0 , sub) = 0ₘ-mono sub sp0
-  subLinRel .rel-+ₘ (sp+ , sub) =
-    ≤*-refl ↘, +ₘ-mono sub ≤*-refl ≤*-refl sp+ ,↙ ≤*-refl
-  subLinRel .rel-*ₘ (sp* , sub) = *ₘ-mono sub ≤-refl ≤*-refl sp* , ≤*-refl
-  -}
-
-  [─]ᴿ : ∀ {u} → LinRel ε u 0ℓ
-  [─]ᴿ .rel P Q = Q ≤0ₘ
-  [─]ᴿ .rel-≤ₘ xx yy sp0 = 0ₘ-mono yy sp0
-  [─]ᴿ .rel-0ₘ (sp , sp0) = sp0
-  [─]ᴿ .rel-+ₘ (sp , sp0) = +ₘ-identity²← sp0
-  [─]ᴿ .rel-*ₘ (sp , sp0) = *ₘ-annihilʳ← sp0
-
-  [─]AsLinRel : ∀ {u} → AsLinRel {ε} {u} ([─]) _
-  [─]AsLinRel .linRel = [─]ᴿ
-  [─]AsLinRel .equiv = mk⇔ 0*→≤* ≤*→0*
+  [─]ᴿ : ∀ {u} → LinFuncRel ε u 0ℓ
+  [─]ᴿ = 0ᴿ
 
   [_─_]ᴿ : ∀ {a b s t u} →
-    LinRel s u a → LinRel t u b → LinRel (s <+> t) u (a ⊔ b)
-  [ R ─ S ]ᴿ .rel P Q = R .rel (P ∘ ↙) ↘- Q ≤[_+ₘ_] -↙ S .rel (P ∘ ↘)
-  [ R ─ S ]ᴿ .rel-≤ₘ (mk xx) yy (r ↘, r+s ,↙ s) =
-    R .rel-≤ₘ (mk (xx ∘ ↙)) ≤*-refl r
-    ↘, +ₘ-mono yy ≤*-refl ≤*-refl r+s ,↙
-    S .rel-≤ₘ (mk (xx ∘ ↘)) ≤*-refl s
-  [ R ─ S ]ᴿ .rel-0ₘ (sp0 , (r ↘, r+s ,↙ s)) =
-    let sp0r , sp0s = un++ₙ sp0 in
-    +ₘ-identity²→ (R .rel-0ₘ (sp0r , r) ↘, r+s ,↙ S .rel-0ₘ (sp0s , s))
-  [ R ─ S ]ᴿ .rel-+ₘ (sp+ , (r ↘, r+s ,↙ s)) =
-    let sp+r , sp+s = un++ₙ sp+ in
-    let rl ↘, sp+r′ ,↙ rr = R .rel-+ₘ (sp+r , r) in
-    let sl ↘, sp+s′ ,↙ sr = S .rel-+ₘ (sp+s , s) in
-    let sp+r₂ ↘, l+r ,↙ sp+s₂ = +ₘ-inter (sp+r′ ↘, r+s ,↙ sp+s′) in
-    (rl ↘, sp+r₂ ,↙ sl) ↘, l+r ,↙ (rr ↘, sp+s₂ ,↙ sr)
-  [ R ─ S ]ᴿ .rel-*ₘ (sp* , (r ↘, r+s ,↙ s)) =
-    let sp*r , sp*s = un++ₙ sp* in
-    let sp*r′ , r′ = R .rel-*ₘ (sp*r , r) in
-    let sp*s′ , s′ = S .rel-*ₘ (sp*s , s) in
-    let sp*′ , l+r = *ₘ-distribʳ← (sp*r′ ↘, r+s ,↙ sp*s′) in
-    sp*′ , (r′ ↘, l+r ,↙ s′)
+    LinFuncRel s u a → LinFuncRel t u b → LinFuncRel (s <+> t) u (a ⊔ b)
+  [ F ─ G ]ᴿ .rel x y = F .rel (x ∘ ↙) ↘- y ≤[_+ₘ_] -↙ G .rel (x ∘ ↘)
+  [ F ─ G ]ᴿ .rel-≤ₘ (mk xx) yy (f ↘, f+g ,↙ g) =
+    F .rel-≤ₘ (mk (xx ∘ ↙)) ≤*-refl f
+    ↘, +ₘ-mono yy ≤*-refl ≤*-refl f+g ,↙
+    G .rel-≤ₘ (mk (xx ∘ ↘)) ≤*-refl g
+  [ F ─ G ]ᴿ .rel-0ₘ (sp0 , (f ↘, f+g ,↙ g)) =
+    let sp0f , sp0g = un++ₙ sp0 in
+    +ₘ-identity²→ (F .rel-0ₘ (sp0f , f) ↘, f+g ,↙ G .rel-0ₘ (sp0g , g))
+  [ F ─ G ]ᴿ .rel-+ₘ (sp+ , (f ↘, f+g ,↙ g)) =
+    let sp+f , sp+g = un++ₙ sp+ in
+    let fl ↘, sp+f′ ,↙ fr = F .rel-+ₘ (sp+f , f) in
+    let gl ↘, sp+g′ ,↙ gr = G .rel-+ₘ (sp+g , g) in
+    let sp+r₂ ↘, l+r ,↙ sp+s₂ = +ₘ-inter (sp+f′ ↘, f+g ,↙ sp+g′) in
+    (fl ↘, sp+r₂ ,↙ gl) ↘, l+r ,↙ (fr ↘, sp+s₂ ,↙ gr)
+  [ F ─ G ]ᴿ .rel-*ₘ (sp* , (f ↘, f+g ,↙ g)) =
+    let sp*f , sp*g = un++ₙ sp* in
+    let f′ , sp*f′ = F .rel-*ₘ (sp*f , f) in
+    let g′ , sp*g′ = G .rel-*ₘ (sp*g , g) in
+    let sp*′ , l+r = *ₘ-distribʳ← (sp*f′ ↘, f+g ,↙ sp*g′) in
+    (f′ ↘, l+r ,↙ g′) , sp*′
+  [ F ─ G ]ᴿ .func x =
+    let f , uf = F .func (x ∘ ↙) in
+    let g , ug = G .func (x ∘ ↘) in
+    (f ↘, +*-triv ,↙ g) , λ (f′ ↘, sp′ ,↙ g′) →
+      +*→≤* (+ₘ-mono ≤*-refl (uf f′) (ug g′) sp′)
 
-  [_─_]AsLinRel : ∀ {a b s t u} {M : LinMor s u} {N : LinMor t u} →
-    AsLinRel M a → AsLinRel N b → AsLinRel [ M ─ N ] (a ⊔ b)
-  [ R ─ S ]AsLinRel .linRel = [ R .linRel ─ S .linRel ]ᴿ
-  [ R ─ S ]AsLinRel .equiv = mk⇔
-    (λ { (ll ↘, sp+ ,↙ rr) →
-      ≤*-trans (+*→≤* sp+) (+*-mono (R .equiv .f ll) (S .equiv .f rr)) })
-    (λ le → R .equiv .g ≤*-refl ↘, ≤*→+* le ,↙ S .equiv .g ≤*-refl)
-    where
-    open PoLeftSemimodule (Vᴾ _) renaming (+ₘ-mono to +*-mono)
-    open Equivalence
+  [─_─]ᴿ : ∀ {u} → Vector Ann u → LinFuncRel [-] u 0ℓ
+  [─ y′ ─]ᴿ .rel x y = y ≤[ x here *ₘ y′ ]
+  [─ y′ ─]ᴿ .rel-≤ₘ (mk xx) yy sp = *ₘ-mono yy (xx here) ≤*-refl sp
+  [─ y′ ─]ᴿ .rel-0ₘ (sp0 , sp) = *ₘ-annihilˡ→ (sp0 .get here , sp)
+  [─ y′ ─]ᴿ .rel-+ₘ (sp+ , sp) = *ₘ-distribˡ→ (sp+ .get here , sp)
+  [─ y′ ─]ᴿ .rel-*ₘ (sp* , sp) = swap-◇ (*ₘ-assoc→ (sp* .get here , sp))
+  [─ y′ ─]ᴿ .func x = *ₗ-triv , *ₗ→≤*
 
-  -- TODO: maybe Q′ should be a (linear) predicate on vectors, rather than
-  -- a concrete vector.
-  [─_─]ᴿ : ∀ {u} → Vector Ann u → LinRel [-] u 0ℓ
-  [─ Q′ ─]ᴿ .rel P Q = Q ≤[ P here *ₘ Q′ ]
-  [─ Q′ ─]ᴿ .rel-≤ₘ (mk xx) yy sp = *ₘ-mono yy (xx here) ≤*-refl sp
-  [─ Q′ ─]ᴿ .rel-0ₘ (sp0 , sp) = *ₘ-annihilˡ→ (sp0 .get here , sp)
-  [─ Q′ ─]ᴿ .rel-+ₘ (sp+ , sp) = *ₘ-distribˡ→ (sp+ .get here , sp)
-  [─ Q′ ─]ᴿ .rel-*ₘ (sp* , sp) = *ₘ-assoc→ (sp* .get here , sp)
+  --  Horizontal
 
-  [─_─]AsLinRel : ∀ {u} (Q′ : Vector Ann u) → AsLinRel [─ Q′ ─] 0ℓ
-  [─ Q′ ─]AsLinRel .linRel = [─ Q′ ─]ᴿ
-  [─ Q′ ─]AsLinRel .equiv = mk⇔ *ₗ→≤* ≤*→*ₗ
-
-  [│]ᴿ : ∀ {s} → LinRel s ε 0ℓ
+  [│]ᴿ : ∀ {s} → LinFuncRel s ε 0ℓ
   [│]ᴿ .rel _ _ = ⊤
   [│]ᴿ .rel-≤ₘ _ _ _ = _
   [│]ᴿ .rel-0ₘ _ = []ₙ
   [│]ᴿ .rel-+ₘ _ = _↘,_,↙_ {left = []} {[]} _ []ₙ _
-  [│]ᴿ .rel-*ₘ _ = _,_ {middle = []} []ₙ _
-
-  [│]AsLinRel : ∀ {s} → AsLinRel ([│] {s = s}) 0ℓ
-  [│]AsLinRel .linRel = [│]ᴿ
-  [│]AsLinRel .equiv = mk⇔ (const []ₙ) _
+  [│]ᴿ .rel-*ₘ _ = _,_ {middle = []} _ []ₙ
+  [│]ᴿ .func _ = _,_ {witness = []} _ (λ _ → []ₙ)
 
   [_│_]ᴿ : ∀ {a b s t u} →
-    LinRel s t a → LinRel s u b → LinRel s (t <+> u) (a ⊔ b)
-  [ R │ S ]ᴿ .rel P Q = R .rel P (Q ∘ ↙) × S .rel P (Q ∘ ↘)
-  [ R │ S ]ᴿ .rel-≤ₘ xx (mk yy) (ll , rr) =
-    R .rel-≤ₘ xx (mk (yy ∘ ↙)) ll , S .rel-≤ₘ xx (mk (yy ∘ ↘)) rr
-  [ R │ S ]ᴿ .rel-0ₘ (sp0 , (ll , rr)) =
-    R .rel-0ₘ (sp0 , ll) ++ₙ S .rel-0ₘ (sp0 , rr)
-  [ R │ S ]ᴿ .rel-+ₘ (sp+ , (ll , rr)) =
-    let llR ↘, sp+R ,↙ rrR = R .rel-+ₘ (sp+ , ll) in
-    let llS ↘, sp+S ,↙ rrS = S .rel-+ₘ (sp+ , rr) in
-    _↘,_,↙_ {left = _ ++ _} {_ ++ _} (llR , llS) (sp+R ++ₙ sp+S) (rrR , rrS)
-  [ R │ S ]ᴿ .rel-*ₘ (sp* , (ll , rr)) =
-    let sp*R , llR = R .rel-*ₘ (sp* , ll) in
-    let sp*S , rrS = S .rel-*ₘ (sp* , rr) in
-    _,_ {middle = _ ++ _} (sp*R ++ₙ sp*S) (llR , rrS)
+    LinFuncRel s t a → LinFuncRel s u b → LinFuncRel s (t <+> u) (a ⊔ b)
+  [ F │ G ]ᴿ .rel x y = F .rel x (y ∘ ↙) × G .rel x (y ∘ ↘)
+  [ F │ G ]ᴿ .rel-≤ₘ xx (mk yy) (ll , rr) =
+    F .rel-≤ₘ xx (mk (yy ∘ ↙)) ll , G .rel-≤ₘ xx (mk (yy ∘ ↘)) rr
+  [ F │ G ]ᴿ .rel-0ₘ (sp0 , (ll , rr)) =
+    F .rel-0ₘ (sp0 , ll) ++ₙ G .rel-0ₘ (sp0 , rr)
+  [ F │ G ]ᴿ .rel-+ₘ (sp+ , (ll , rr)) =
+    let llF ↘, sp+F ,↙ rrF = F .rel-+ₘ (sp+ , ll) in
+    let llG ↘, sp+G ,↙ rrG = G .rel-+ₘ (sp+ , rr) in
+    _↘,_,↙_ {left = _ ++ _} {_ ++ _} (llF , llG) (sp+F ++ₙ sp+G) (rrF , rrG)
+  [ F │ G ]ᴿ .rel-*ₘ (sp* , (ll , rr)) =
+    let llF , sp*F = F .rel-*ₘ (sp* , ll) in
+    let rrG , sp*G = G .rel-*ₘ (sp* , rr) in
+    _,_ {middle = _ ++ _} (llF , rrG) (sp*F ++ₙ sp*G)
+  [ F │ G ]ᴿ .func x =
+    let f , uf = F .func x in
+    let g , ug = G .func x in
+    _,_ {witness = _ ++ _} (f , g) (λ (f′ , g′) → uf f′ ++ₙ ug g′)
 
-  [_│_]AsLinRel : ∀ {a b s t u} {M : LinMor s t} {N : LinMor s u} →
-    AsLinRel M a → AsLinRel N b → AsLinRel [ M │ N ] (a ⊔ b)
-  [ R │ S ]AsLinRel .linRel = [ R .linRel │ S .linRel ]ᴿ
-  [ R │ S ]AsLinRel .equiv = mk⇔
-    (λ (ll , rr) → R .equiv .f ll ++ₙ S .equiv .f rr)
-    (λ le → let ll , rr = un++ₙ le in R .equiv .g ll , S .equiv .g rr)
-    where open Equivalence
-
-  [│_│]ᴿ : ∀ {s} → Vector Ann s → LinRel s [-] 0ℓ
-  [│_│]ᴿ {[-]} P′ .rel P Q = Q here ≤[ P here * P′ here ]
-  [│_│]ᴿ {ε} P′ .rel P Q = Q ≤0ₘ
-  [│_│]ᴿ {sl <+> sr} P′ .rel P Q =
-    [│ P′ ∘ ↙ │]ᴿ .rel (P ∘ ↙) ↘- Q ≤[_+ₘ_] -↙ [│ P′ ∘ ↘ │]ᴿ .rel (P ∘ ↘)
-  [│_│]ᴿ {[-]} P′ .rel-≤ₘ (mk xx) (mk yy) r =
+  [│_│]ᴿ : ∀ {s} → Vector Ann s → LinFuncRel s [-] 0ℓ
+  [│_│]ᴿ {[-]} x′ .rel x y = y here ≤[ x here * x′ here ]
+  [│_│]ᴿ {ε} x′ .rel x y = y ≤0ₘ
+  [│_│]ᴿ {sl <+> sr} x′ .rel x y =
+    [│ x′ ∘ ↙ │]ᴿ .rel (x ∘ ↙) ↘- y ≤[_+ₘ_] -↙ [│ x′ ∘ ↘ │]ᴿ .rel (x ∘ ↘)
+  [│_│]ᴿ {[-]} x′ .rel-≤ₘ (mk xx) (mk yy) r =
     *-mono↔ (yy here) (xx here) ≤-refl r
-  [│_│]ᴿ {ε} P′ .rel-≤ₘ xx yy sp = 0ₘ-mono yy sp
-  [│_│]ᴿ {sl <+> sr} P′ .rel-≤ₘ xx yy (l ↘, sp ,↙ r) =
+  [│_│]ᴿ {ε} x′ .rel-≤ₘ xx yy sp = 0ₘ-mono yy sp
+  [│_│]ᴿ {sl <+> sr} x′ .rel-≤ₘ xx yy (l ↘, sp ,↙ r) =
     let xx↙ , xx↘ = un++ₙ xx in
-    [│ P′ ∘ ↙ │]ᴿ .rel-≤ₘ xx↙ ≤*-refl l
+    [│ x′ ∘ ↙ │]ᴿ .rel-≤ₘ xx↙ ≤*-refl l
     ↘, +ₘ-mono yy ≤*-refl ≤*-refl sp ,↙
-    [│ P′ ∘ ↘ │]ᴿ .rel-≤ₘ xx↘ ≤*-refl r
-  [│_│]ᴿ {[-]} P′ .rel-0ₘ (mk sp0 , r) = [ annihilˡ→ (sp0 here , r) ]ₙ
-  [│_│]ᴿ {ε} P′ .rel-0ₘ (mk sp0 , sp) = sp
-  [│_│]ᴿ {sl <+> sr} P′ .rel-0ₘ (mk sp0 , (l ↘, mk sp ,↙ r)) =
-    let mk sp0l = [│ P′ ∘ ↙ │]ᴿ .rel-0ₘ (mk (sp0 ∘ ↙) , l) in
-    let mk sp0r = [│ P′ ∘ ↘ │]ᴿ .rel-0ₘ (mk (sp0 ∘ ↘) , r) in
+    [│ x′ ∘ ↘ │]ᴿ .rel-≤ₘ xx↘ ≤*-refl r
+  [│_│]ᴿ {[-]} x′ .rel-0ₘ (mk sp0 , r) = [ annihilˡ→ (sp0 here , r) ]ₙ
+  [│_│]ᴿ {ε} x′ .rel-0ₘ (mk sp0 , sp) = sp
+  [│_│]ᴿ {sl <+> sr} x′ .rel-0ₘ (mk sp0 , (l ↘, mk sp ,↙ r)) =
+    let mk sp0l = [│ x′ ∘ ↙ │]ᴿ .rel-0ₘ (mk (sp0 ∘ ↙) , l) in
+    let mk sp0r = [│ x′ ∘ ↘ │]ᴿ .rel-0ₘ (mk (sp0 ∘ ↘) , r) in
     [ +-identity²→ (sp0l here ↘, sp here ,↙ sp0r here) ]ₙ
-  [│_│]ᴿ {[-]} P′ .rel-+ₘ (mk sp+ , r) =
+  [│_│]ᴿ {[-]} x′ .rel-+ₘ (mk sp+ , r) =
     let ll ↘, sp+′ ,↙ rr = distribˡ→ (sp+ here , r) in
     _↘,_,↙_ {left = [ _ ]} {[ _ ]} ll [ sp+′ ]ₙ rr
-  [│_│]ᴿ {ε} P′ .rel-+ₘ (mk sp+ , mk r) =
+  [│_│]ᴿ {ε} x′ .rel-+ₘ (mk sp+ , mk r) =
     let ll ↘, sp+′ ,↙ rr = +-identity²← (r here) in
     _↘,_,↙_ {left = [ _ ]} {[ _ ]} [ ll ]ₙ [ sp+′ ]ₙ [ rr ]ₙ
-  [│_│]ᴿ {sl <+> sr} P′ .rel-+ₘ (mk sp+ , (l ↘, mk sp ,↙ r)) =
-    let ll ↘, mk sp+l ,↙ rl = [│ P′ ∘ ↙ │]ᴿ .rel-+ₘ (mk (sp+ ∘ ↙) , l) in
-    let lr ↘, mk sp+r ,↙ rr = [│ P′ ∘ ↘ │]ᴿ .rel-+ₘ (mk (sp+ ∘ ↘) , r) in
+  [│_│]ᴿ {sl <+> sr} x′ .rel-+ₘ (mk sp+ , (l ↘, mk sp ,↙ r)) =
+    let ll ↘, mk sp+l ,↙ rl = [│ x′ ∘ ↙ │]ᴿ .rel-+ₘ (mk (sp+ ∘ ↙) , l) in
+    let lr ↘, mk sp+r ,↙ rr = [│ x′ ∘ ↘ │]ᴿ .rel-+ₘ (mk (sp+ ∘ ↘) , r) in
     let sp+l′ ↘, sp+′ ,↙ sp+r′ = +-inter↔ (sp+l here ↘, sp here ,↙ sp+r here) in
     _↘,_,↙_ {left = [ _ ]} {[ _ ]}
       (ll ↘, [ sp+l′ ]ₙ ,↙ lr) [ sp+′ ]ₙ (rl ↘, [ sp+r′ ]ₙ ,↙ rr)
-  [│_│]ᴿ {[-]} P′ .rel-*ₘ (mk sp* , r) =
+  [│_│]ᴿ {[-]} x′ .rel-*ₘ (mk sp* , r) =
     let r′ , sp*′ = *-assoc→ (sp* here , r) in
-    _,_ {middle = [ _ ]} [ r′ ]ₙ sp*′
-  [│_│]ᴿ {ε} P′ .rel-*ₘ (mk sp* , mk sp) =
+    _,_ {middle = [ _ ]} sp*′ [ r′ ]ₙ
+  [│_│]ᴿ {ε} x′ .rel-*ₘ (mk sp* , mk sp) =
     let sp*′ , sp′ = annihilʳ← (sp here) in
-    _,_ {middle = [ _ ]} [ sp*′ ]ₙ [ sp′ ]ₙ
-  [│_│]ᴿ {sl <+> sr} P′ .rel-*ₘ (mk sp* , (l ↘, mk sp ,↙ r)) =
-    let mk sp*l , l′ = [│ P′ ∘ ↙ │]ᴿ .rel-*ₘ (mk (sp* ∘ ↙) , l) in
-    let mk sp*r , r′ = [│ P′ ∘ ↘ │]ᴿ .rel-*ₘ (mk (sp* ∘ ↘) , r) in
+    _,_ {middle = [ _ ]} [ sp′ ]ₙ [ sp*′ ]ₙ
+  [│_│]ᴿ {sl <+> sr} x′ .rel-*ₘ (mk sp* , (l ↘, mk sp ,↙ r)) =
+    let l′ , mk sp*l = [│ x′ ∘ ↙ │]ᴿ .rel-*ₘ (mk (sp* ∘ ↙) , l) in
+    let r′ , mk sp*r = [│ x′ ∘ ↘ │]ᴿ .rel-*ₘ (mk (sp* ∘ ↘) , r) in
     let sp*′ , sp′ = distribʳ← (sp*l here ↘, sp here ,↙ sp*r here) in
-    _,_ {middle = [ _ ]} [ sp*′ ]ₙ (l′ ↘, [ sp′ ]ₙ ,↙ r′)
+    _,_ {middle = [ _ ]} (l′ ↘, [ sp′ ]ₙ ,↙ r′) [ sp*′ ]ₙ
+  [│_│]ᴿ {[-]} x′ .func x = _,_ {witness = [ _ ]} ≤-refl (λ r′ → *ₗ→≤* [ r′ ]ₙ)
+  [│_│]ᴿ {ε} x′ .func x = 0*-triv , 0*→≤*
+  [│_│]ᴿ {sl <+> sr} x′ .func x =
+    let l , ul = [│ x′ ∘ ↙ │]ᴿ .func (x ∘ ↙) in
+    let r , ur = [│ x′ ∘ ↘ │]ᴿ .func (x ∘ ↘) in
+    (l ↘, +*-triv ,↙ r) , λ (l′ ↘, sp′ ,↙ r′) →
+      +*→≤* (+ₘ-mono ≤*-refl (ul l′) (ur r′) sp′)
 
-  [│_│]AsLinRel : ∀ {s} (P′ : Vector Ann s) → AsLinRel [│ P′ │] 0ℓ
-  [│ P′ │]AsLinRel .linRel = [│ P′ │]ᴿ
-  [│ P′ │]AsLinRel .equiv = mk⇔ (f {P′ = P′}) (g {P′ = P′})
-    where
-    open Sum 0# _+_
+  -- Compound
 
-    f : ∀ {s P Q P′} → [│ P′ │]ᴿ .rel P Q → Q ≤* [ (∑ {s} λ i → P i * P′ i) ]
-    f {[-]} r = [ r ]ₙ
-    f {ε} r = 0*→≤* r
-    f {sl <+> sr} (ll ↘, sp+ ,↙ rr) =
-      +*→≤* (+ₘ-mono ≤*-refl (f {sl} ll) (f {sr} rr) sp+)
-
-    g : ∀ {s P Q P′} → Q ≤* [ (∑ {s} λ i → P i * P′ i) ] → [│ P′ │]ᴿ .rel P Q
-    g {[-]} le = un[-]ₙ le
-    g {ε} le = ≤*→0* le
-    g {sl <+> sr} le = g {sl} ≤*-refl ↘, ≤*→+* le ,↙ g {sr} ≤*-refl
-
-  -- Compound linear relations
-
-  _⊕ᴿ_ : ∀ {a b sl sr tl tr} →
-    LinRel sl tl a → LinRel sr tr b → LinRel (sl <+> sr) (tl <+> tr) (a ⊔ b)
-  (R ⊕ᴿ S) .rel P Q = R .rel (P ∘ ↙) (Q ∘ ↙) × S .rel (P ∘ ↘) (Q ∘ ↘)
-  (R ⊕ᴿ S) .rel-≤ₘ (mk xx) (mk yy) (ll , rr) =
-    R .rel-≤ₘ (mk (xx ∘ ↙)) (mk (yy ∘ ↙)) ll ,
-    S .rel-≤ₘ (mk (xx ∘ ↘)) (mk (yy ∘ ↘)) rr
-  (R ⊕ᴿ S) .rel-0ₘ (mk sp0 , (ll , rr)) =
-    R .rel-0ₘ (mk (sp0 ∘ ↙) , ll) ++ₙ S .rel-0ₘ (mk (sp0 ∘ ↘) , rr)
-  (R ⊕ᴿ S) .rel-+ₘ (mk sp+ , (ll , rr)) =
-    let llR ↘, sp+R ,↙ rrR = R .rel-+ₘ (mk (sp+ ∘ ↙) , ll) in
-    let llS ↘, sp+S ,↙ rrS = S .rel-+ₘ (mk (sp+ ∘ ↘) , rr) in
+  _⊕ᴿ_ : ∀ {a b sl sr tl tr} → LinFuncRel sl tl a → LinFuncRel sr tr b →
+    LinFuncRel (sl <+> sr) (tl <+> tr) (a ⊔ b)
+  (F ⊕ᴿ G) .rel x y = F .rel (x ∘ ↙) (y ∘ ↙) × G .rel (x ∘ ↘) (y ∘ ↘)
+  (F ⊕ᴿ G) .rel-≤ₘ (mk xx) (mk yy) (ll , rr) =
+    F .rel-≤ₘ (mk (xx ∘ ↙)) (mk (yy ∘ ↙)) ll ,
+    G .rel-≤ₘ (mk (xx ∘ ↘)) (mk (yy ∘ ↘)) rr
+  (F ⊕ᴿ G) .rel-0ₘ (mk sp0 , (ll , rr)) =
+    F .rel-0ₘ (mk (sp0 ∘ ↙) , ll) ++ₙ G .rel-0ₘ (mk (sp0 ∘ ↘) , rr)
+  (F ⊕ᴿ G) .rel-+ₘ (mk sp+ , (ll , rr)) =
+    let llF ↘, sp+F ,↙ rrF = F .rel-+ₘ (mk (sp+ ∘ ↙) , ll) in
+    let llG ↘, sp+G ,↙ rrG = G .rel-+ₘ (mk (sp+ ∘ ↘) , rr) in
     _↘,_,↙_ {left = _ ++ _} {_ ++ _}
-      (llR , llS) (sp+R ++ₙ sp+S) (rrR , rrS)
-  (R ⊕ᴿ S) .rel-*ₘ (mk sp* , (ll , rr)) =
-    let sp*R , llR = R .rel-*ₘ (mk (sp* ∘ ↙) , ll) in
-    let sp*S , rrS = S .rel-*ₘ (mk (sp* ∘ ↘) , rr) in
-    _,_ {middle = _ ++ _} (sp*R ++ₙ sp*S) (llR , rrS)
-
-  _⊕AsLinRel_ : ∀ {a b sl sr tl tr} {M : LinMor sl tl} {N : LinMor sr tr} →
-    AsLinRel M a → AsLinRel N b → AsLinRel [ [ M │ 0ᴹ ] ─ [ 0ᴹ │ N ] ] (a ⊔ b)
-  (R ⊕AsLinRel S) .linRel = R .linRel ⊕ᴿ S .linRel
-  (R ⊕AsLinRel S) .equiv = mk⇔
-    (λ (ll , rr) →
-      ≤*-trans (R .equiv .f ll) (mk λ i → +.identity-→ .proj₂ _) ++ₙ
-      ≤*-trans (S .equiv .f rr) (mk λ i → +.identity-← .proj₁ _))
-    (λ le → let ll , rr = un++ₙ le in
-      R .equiv .g (≤*-trans ll (mk λ i → +.identity-← .proj₂ _)) ,
-      S .equiv .g (≤*-trans rr (mk λ i → +.identity-→ .proj₁ _)))
-    where open Equivalence
+      (llF , llG) (sp+F ++ₙ sp+G) (rrF , rrG)
+  (F ⊕ᴿ G) .rel-*ₘ (mk sp* , (ll , rr)) =
+    let llF , sp*F = F .rel-*ₘ (mk (sp* ∘ ↙) , ll) in
+    let rrG , sp*G = G .rel-*ₘ (mk (sp* ∘ ↘) , rr) in
+    _,_ {middle = _ ++ _} (llF , rrG) (sp*F ++ₙ sp*G)
+  (F ⊕ᴿ G) .func x =
+    let f , uf = F .func (x ∘ ↙) in
+    let g , ug = G .func (x ∘ ↘) in
+    _,_ {witness = _ ++ _} (f , g) (λ (f′ , g′) → uf f′ ++ₙ ug g′)

@@ -22,6 +22,9 @@ module Algebra.Relational where
       snd : Q middle
   open _◇_ public
 
+  swap-◇ : ∀ {a p q} {A : Set a} {P : Pred A p} {Q : Pred A q} → P ◇ Q → Q ◇ P
+  swap-◇ (p , q) = q , p
+
   record _↘_↙_ {a b p q r} {A : Set a} {B : Set b}
                (P : Pred A p) (R : REL A B r) (Q : Pred B q)
                : Set (a ⊔ b ⊔ p ⊔ q ⊔ r) where
@@ -77,15 +80,16 @@ module Algebra.Relational where
   Monotonic₂₋₁ : ∀ {c ℓ} {C : Set c} → Rel C ℓ → (C → C → C → Set ℓ) → Set _
   Monotonic₂₋₁ _≤_ [_∘_]≤_ = Monotonic₁₋₂ (flip _≤_) (λ x y z → [ y ∘ z ]≤ x)
 
-  record Universally≤ {c ℓ} {C : Set c} (_≤_ : Rel C ℓ) (P : Pred C ℓ)
-         : Set (c ⊔ ℓ) where
+  record Universally≤ {c ℓ p} {C : Set c} (_≤_ : Rel C ℓ) (P : Pred C p)
+         : Set (c ⊔ ℓ ⊔ p) where
+    constructor _,_
     field
       {witness} : C
       holds : P witness
       unique : ∀ {z} → P z → z ≤ witness
   open Universally≤ public
 
-  Universally≥ : ∀ {c ℓ} {C : Set c} → Rel C ℓ → Pred C ℓ → Set (c ⊔ ℓ)
+  Universally≥ : ∀ {c ℓ p} {C : Set c} → Rel C ℓ → Pred C p → Set (c ⊔ ℓ ⊔ p)
   Universally≥ = Universally≤ ∘ flip
 
   -- Structures

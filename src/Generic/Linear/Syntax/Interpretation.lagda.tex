@@ -12,6 +12,7 @@ module Generic.Linear.Syntax.Interpretation
   open RawPoSemiring rawPoSemiring renaming (Carrier to Ann)
 
   open import Algebra using (Op₂; Opₗ)
+  open import Data.Bool.Base
   open import Data.Product as ×
   open import Data.Unit
   open import Function
@@ -31,7 +32,7 @@ module Generic.Linear.Syntax.Interpretation
       hiding (_─✴_)
     open module Chk* {s} = BunchedScaling (_≤[_*ₗ_] {s})
     open module ChkD {s} =
-      BunchedDuplicable (_≤*_ {s}) 0* _+*_
+      BunchedDuplicable (_≤*_ {s}) _≤0* _≤[_+*_] _≤[_*ₗ_]
   import Relation.Unary.Bunched as Syn
   private
     open module Syn≤ {s} = Syn.BunchedOrder (_≤*_ {s})
@@ -69,8 +70,8 @@ module Generic.Linear.Syntax.Interpretation
   _·ᶜ_ : (r : Ann) (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
   (r ·ᶜ T) (ctx R γ) = (r · (λ P → T (ctx P γ))) R
 
-  Dupᶜ : (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
-  Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
+  Dupᶜ : (bf : BoxFlags) (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
+  Dupᶜ bf T (ctx R γ) = Dup bf (λ P → T (ctx P γ)) R
 \end{code}
 
 %<*semp>

@@ -46,16 +46,9 @@ module Generic.Linear.Environment
     open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
-      Ψ : LinMor t s
-      asLinRel : AsLinRel Ψ 0ℓ
-    Ψᴿ = asLinRel .linRel
-    field
-      sums : Ψᴿ .rel Q P
-      lookup : ∀ {P′ Q′} → Ψᴿ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
-
-    sums-≤* : P ≤* Ψ .hom Q
-    sums-≤* = asLinRel .equiv .f sums
-      where open Equivalence
+      Ψ : LinFuncRel t s 0ℓ
+      sums : Ψ .rel Q P
+      lookup : ∀ {P′ Q′} → Ψ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
   open [_]_⇒ᵉ_ public
 
   {- TODO: resurrect as an easy way to produce envs.

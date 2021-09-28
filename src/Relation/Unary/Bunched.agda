@@ -1,12 +1,15 @@
 {-# OPTIONS --safe --without-K #-}
 
-module Relation.Unary.Bunched {a} {A : Set a} where
+module Relation.Unary.Bunched where
 
+  open import Data.Bool.Base
+  open import Data.Bool.Extra
   open import Data.Product
+  open import Data.Unit.Polymorphic using (⊤; tt)
   open import Level
   open import Relation.Unary
 
-  module BunchedOrder {ℓ} (_≤_ : A → A → Set ℓ) where
+  module BunchedOrder {a ℓ} {A : Set a} (_≤_ : A → A → Set ℓ) where
 
     infixr 8 _⇒ᵏ_
 
@@ -22,7 +25,7 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   open BunchedOrder public using (◇⟨_⟩_)
 
-  module BunchedUnit {ℓ} (_∼0 : A → Set ℓ) where
+  module BunchedUnit {a ℓ} {A : Set a} (_∼0 : A → Set ℓ) where
 
     record ℑ {v} (x : A) : Set (ℓ ⊔ v) where
       constructor ℑ⟨_⟩
@@ -31,7 +34,7 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   open BunchedUnit public using (ℑ⟨_⟩)
 
-  module BunchedConjunction {ℓ} (_∼_+_ : A → A → A → Set ℓ) where
+  module BunchedConjunction {a ℓ} {A : Set a} (_∼_+_ : A → A → A → Set ℓ) where
 
     infixr 8 _─✴_
     infixr 9 _✴_ _✴⟨_⟩_
@@ -59,7 +62,9 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   open BunchedConjunction public using (_✴⟨_⟩_; lam✴; app✴)
 
-  module BunchedScaling {r ℓ} {R : Set r} (_∼_*ₗ_ : A → R → A → Set ℓ) where
+  module BunchedScaling {a r ℓ} {A : Set a} {R : Set r}
+    (_∼_*ₗ_ : A → R → A → Set ℓ)
+    where
 
     infixr 10 _·_ ⟨_⟩·_
 
@@ -72,19 +77,27 @@ module Relation.Unary.Bunched {a} {A : Set a} where
 
   open BunchedScaling public using (⟨_⟩·_)
 
+  record BoxFlags : Set where
+    constructor boxFlags
+    field p0 p+ p* : Bool
+
   module BunchedDuplicable
-    {ℓ} (_≤_ : A → A → Set ℓ) (0# : A) (_+_ : A → A → A)
+    {a r ℓ} {A : Set a} {R : Set r} (_≤_ : A → A → Set ℓ)
+    (_∼0 : A → Set ℓ) (_∼_+_ : A → A → A → Set ℓ) (_∼_*ₗ_ : A → R → A → Set ℓ)
     where
 
-    infixr 10 □⟨_,_,_⟩_
+    infixr 10 □⟨_,_,_,_⟩_
 
-    record Dup {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
-      constructor □⟨_,_,_⟩_
+    record Dup (bf : BoxFlags) {t} (T : A → Set t) (x : A)
+           : Set (a ⊔ r ⊔ ℓ ⊔ t) where
+      constructor □⟨_,_,_,_⟩_
+      open BoxFlags bf
       field
         {y} : _
         strengthen : x ≤ y
-        split-0 : y ≤ 0#
-        split-+ : y ≤ (y + y)
+        split-0 : If p0 (y ∼0)
+        split-+ : If p+ (y ∼ y + y)
+        split-* : If p* (∀ r → y ∼ r *ₗ y)
         T-prf : T y
 
-  open BunchedDuplicable public using (□⟨_,_,_⟩_)
+  open BunchedDuplicable public using (□⟨_,_,_,_⟩_)

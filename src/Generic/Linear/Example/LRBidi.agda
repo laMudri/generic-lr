@@ -66,9 +66,10 @@ module Generic.Linear.Example.LRBidi where
         =⇒ (syn , Z)
       `ze → `ℑ =⇒ (chk , nat)
       `su → ⟨ []ᶜ `⊢ (chk , nat) ⟩ =⇒ (chk , nat)
-      (`iter Z) → ⟨ []ᶜ `⊢ (syn , nat) ⟩ `✴
-                  `□ (⟨ []ᶜ `⊢ (chk , Z) ⟩ `∧ ⟨ [ u1 , syn , Z ]ᶜ `⊢ (chk , Z) ⟩)
-                  =⇒ (syn , Z)
+      (`iter Z) →
+        ⟨ []ᶜ `⊢ (syn , nat) ⟩ `✴
+        `□⁰⁺ (⟨ []ᶜ `⊢ (chk , Z) ⟩ `∧ ⟨ [ u1 , syn , Z ]ᶜ `⊢ (chk , Z) ⟩)
+        =⇒ (syn , Z)
 
     Term = [ LR , ∞ ]_⊢_
 
@@ -106,7 +107,7 @@ module Generic.Linear.Example.LRBidi where
     pattern uze = V.`con (`ze , refl , ℑ⟨ _ ⟩)
     pattern usu s = V.`con (`su , refl , s)
     pattern uiter T e s t =
-      V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ ⟩ (s , t)))
+      V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ , _ ⟩ (s , t)))
 
   open WithLLFlags allLLFlags
 

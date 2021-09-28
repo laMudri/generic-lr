@@ -19,9 +19,16 @@ module Generic.Linear.Operations (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ) 
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≗_)
   open import Relation.Nary
 
+  -- _≤0 _≤[_+_] _≤[_*_]
   infix 4 _≈*_ _≤*_ _≤0* _≤[_+*_] _≤[_*ₗ_]
   infixr 6 _+*_
   infixr 8 _*ₗ_
+
+  -- _≤0 : Ann → Set
+  -- _≤0 = _≤ 0#
+  -- _≤[_+_] _≤[_*_] : (x y z : Ann) → Set
+  -- x ≤[ y + z ] = x ≤ y + z
+  -- x ≤[ y * z ] = x ≤ y * z
 
   _≈*_ = Liftₙ _≈_
   _≤*_ = Liftₙ _≤_

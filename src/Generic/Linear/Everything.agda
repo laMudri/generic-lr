@@ -18,6 +18,7 @@ module Generic.Linear.Everything
   open import Generic.Linear.Syntax.Term Ty rawPoSemiring public
   open import Generic.Linear.Variable Ty rawPoSemiring public
   open import Generic.Linear.Environment Ty poSemiring public
+  open import Generic.Linear.Environment.Categorical Ty poSemiring public
   open import Generic.Linear.Environment.Properties Ty poSemiring public
   open import Generic.Linear.Renaming Ty poSemiring public
   open import Generic.Linear.Renaming.Properties Ty poSemiring public
