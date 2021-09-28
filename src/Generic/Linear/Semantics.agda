@@ -70,8 +70,8 @@ module Generic.Linear.Semantics
     semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .sums) v
     semantics ρ (`con t) = ⟦con⟧ $
       map-s (ρ .Ψ) d
-        (λ r → body (record { [_]_⇒ᵉ_ ρ; sums = ρ .asLinRel .equiv .g r }))
-        (sums-≤* ρ) t
+        (λ r → body (record { [_]_⇒ᵉ_ ρ; sums = r }))
+        (ρ .sums) t
       where open Equivalence
 
     body ρ t .get th .app✴ r σ =

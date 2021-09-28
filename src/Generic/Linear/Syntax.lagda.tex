@@ -3,6 +3,7 @@
 
 module Generic.Linear.Syntax (Ty Ann : Set) where
 
+  open import Data.Bool.Base
   open import Data.LTree
   open import Data.LTree.Vector
   open import Data.Product using (_×_; _,_)
@@ -10,6 +11,7 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   open import Level
   open import Function.Base using (_∘_; _⟨_⟩_)
   open import Relation.Unary
+  open import Relation.Unary.Bunched using (BoxFlags; boxFlags)
 
   open import Generic.Linear.Syntax.Core public
 
@@ -98,9 +100,14 @@ connectives:
       `ℑ : {{_ : Has-ℑ}} → Premises
       _`✴_ : {{_ : Has-✴}} (p q : Premises) → Premises
       _`·_ : {{_ : Has-·}} (r : Ann) (p : Premises) → Premises
-      `□ : {{_ : Has-□}} (p : Premises) → Premises
+      `□ : {{_ : Has-□}} (bf : BoxFlags) (p : Premises) → Premises
 \end{code}
 %</Premises>
+
+\begin{code}
+    pattern `□⁰⁺ˣ p = `□ (boxFlags true true true) p
+    pattern `□⁰⁺ p = `□ (boxFlags true true false) p
+\end{code}
 
 %<*Rule>
 \begin{code}

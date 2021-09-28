@@ -76,17 +76,17 @@ module Generic.Linear.Example.LnL where
       =⇒ lin , C
     (`⊸i A B) → ⟨ [ u1 , lin , A ]ᶜ `⊢ lin , B ⟩ =⇒ lin , A t⊸ B
     (`⊸e A B) → ⟨ []ᶜ `⊢ lin , A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ lin , B
-    (`Fi X) → `□ ⟨ []ᶜ `⊢ int , X ⟩ =⇒ lin , tF X
+    (`Fi X) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X ⟩ =⇒ lin , tF X
     (`Fe X C) →
       ⟨ []ᶜ `⊢ lin , tF X ⟩ `✴ ⟨ [ uω , int , X ]ᶜ `⊢ lin , C ⟩ =⇒ lin , C
 
-    `1i → `□ `⊤ =⇒ int , t1
-    (`×i X Y) → `□ (⟨ []ᶜ `⊢ int , X ⟩ `∧ ⟨ []ᶜ `⊢ int , Y ⟩) =⇒ int , X t× Y
-    (`×e i X Y) → `□ ⟨ []ᶜ `⊢ int , X t× Y ⟩ =⇒ int , [ X > i < Y ]
-    (`→i X Y) → `□ ⟨ [ uω , int , X ]ᶜ `⊢ int , Y ⟩ =⇒ int , X t→ Y
-    (`→e X Y) → `□ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩) =⇒ int , Y
-    (`Gi A) → `□ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ int , tG A
-    (`Ge A) → `□ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
+    `1i → `□⁰⁺ˣ `⊤ =⇒ int , t1
+    (`×i X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X ⟩ `∧ ⟨ []ᶜ `⊢ int , Y ⟩) =⇒ int , X t× Y
+    (`×e i X Y) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X t× Y ⟩ =⇒ int , [ X > i < Y ]
+    (`→i X Y) → `□⁰⁺ˣ ⟨ [ uω , int , X ]ᶜ `⊢ int , Y ⟩ =⇒ int , X t→ Y
+    (`→e X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩) =⇒ int , Y
+    (`Gi A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ int , tG A
+    (`Ge A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
 
   Term = [ LnL , ∞ ]_⊢_
 
@@ -111,16 +111,16 @@ module Generic.Linear.Example.LnL where
   pattern u⊗e C s t = V.`con (`⊗e _ _ C , refl , s ✴⟨ _ ⟩ t)
   pattern u⊸i t = V.`con (`⊸i _ _ , refl , t)
   pattern u⊸e s t = V.`con (`⊸e _ _ , refl , s ✴⟨ _ ⟩ t)
-  pattern uFi s = V.`con (`Fi _ , refl , □⟨ _ , _ , _ ⟩ s)
+  pattern uFi s = V.`con (`Fi _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
   pattern uFe C s t = V.`con (`Fe _ C , refl , s ✴⟨ _ ⟩ t)
 
-  pattern u1i = V.`con (`1i , refl , □⟨ _ , _ , _ ⟩ tt)
-  pattern u×i s t = V.`con (`×i _ _ , refl , □⟨ _ , _ , _ ⟩ (s , t))
-  pattern u×e i s = V.`con (`×e i _ _ , refl , □⟨ _ , _ , _ ⟩ s)
-  pattern u→i t = V.`con (`→i _ _ , refl , □⟨ _ , _ , _ ⟩ t)
-  pattern u→e s t = V.`con (`→e _ _ , refl , □⟨ _ , _ , _ ⟩ (s , t))
-  pattern uGi s = V.`con (`Gi _ , refl , □⟨ _ , _ , _ ⟩ s)
-  pattern uGe s = V.`con (`Ge _ , refl , □⟨ _ , _ , _ ⟩ s)
+  pattern u1i = V.`con (`1i , refl , □⟨ _ , _ , _ , _ ⟩ tt)
+  pattern u×i s t = V.`con (`×i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ (s , t))
+  pattern u×e i s = V.`con (`×e i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
+  pattern u→i t = V.`con (`→i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ t)
+  pattern u→e s t = V.`con (`→e _ _ , refl , □⟨ _ , _ , _ , _ ⟩ (s , t))
+  pattern uGi s = V.`con (`Gi _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
+  pattern uGe s = V.`con (`Ge _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
 
   private
     myCojoin : (A : Ty lin) → Term []ᶜ (lin , t! A t⊸ t! (t! A))

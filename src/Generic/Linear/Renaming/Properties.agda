@@ -99,8 +99,7 @@ module Generic.Linear.Renaming.Properties
   ren^□ = duplicate
 
   subuse-ren : ∀ {γ} → P ≤* Q → ctx P γ ⇒ʳ ctx Q γ
-  subuse-ren PQ .Ψ = idLinMor
-  subuse-ren PQ .asLinRel = idAsLinRel
+  subuse-ren PQ .Ψ = 1ᴿ
   subuse-ren PQ .sums = PQ
   subuse-ren PQ .lookup PQ′ v = psh^∋ PQ′ v
 
@@ -120,13 +119,11 @@ module Generic.Linear.Renaming.Properties
   -}
 
   ↙ʳ : ∀ {Γ t δ} → Γ ++ᶜ ctx {t} 0* δ ⇒ʳ Γ
-  ↙ʳ .Ψ = [ 1ᴹ │ 0ᴹ ]
-  ↙ʳ .asLinRel = [ idAsLinRel │ 0AsLinRel ]AsLinRel
+  ↙ʳ .Ψ = [ 1ᴿ │ 0ᴿ ]ᴿ
   ↙ʳ .sums = ≤*-refl , 0*-triv
   ↙ʳ .lookup (le , sp0) v = psh^∋ le v ↙ᵛ sp0
 
   ↘ʳ : ∀ {s γ Δ} → ctx {s} 0* γ ++ᶜ Δ ⇒ʳ Δ
-  ↘ʳ .Ψ = [ 0ᴹ │ 1ᴹ ]
-  ↘ʳ .asLinRel = [ 0AsLinRel │ idAsLinRel ]AsLinRel
+  ↘ʳ .Ψ = [ 0ᴿ │ 1ᴿ ]ᴿ
   ↘ʳ .sums = 0*-triv , ≤*-refl
   ↘ʳ .lookup (sp0 , le) v = sp0 ↘ᵛ psh^∋ le v

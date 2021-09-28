@@ -1,4 +1,4 @@
-{-# OPTIONS --safe --without-K --prop #-}
+{-# OPTIONS --safe --without-K --prop --postfix-projections #-}
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ)
@@ -11,6 +11,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Algebra.Po.Construct.Vector
   open import Algebra.Relational
   open import Algebra.Relational.Relation
+  open import Data.Bool.Extra
   open import Data.Unit.Polymorphic
   open import Data.Product
   open import Data.LTree
@@ -33,71 +34,55 @@ module Generic.Linear.Syntax.Interpretation.Map
       x y : Level
       fl : PremisesFlags
 
-  {-
   module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
-           (F : LinRel s t ℓ)
-           {X : Ctx → Scoped x} {Y : Ctx → Scoped y}
+           (F : LinFuncRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
     -- open RelLeftSemimoduleRel F
 
-    map-pᴿ : (ps : Premises fl) →
-      (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
-      (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-pᴿ ⟨ Γ `⊢ A ⟩ f r t = {!!}
-    map-pᴿ `⊤ f r t = {!!}
-    map-pᴿ (ps `∧ qs) f r t = {!!}
-    map-pᴿ `ℑ f r t = {!!}
-    map-pᴿ (ps `✴ qs) f r t = {!!}
-    map-pᴿ (p `· ps) f r t = {!!}
-    map-pᴿ (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      let r′ , str′ = F .rel-comm-≤ₘ (str , r) in
-      □⟨ str′ , {!sp0!} , {!!} ⟩ map-pᴿ ps f r′ t
-
-    map-sᴿ : (s : System fl) →
-      (∀ {Θ A P Q} → F .rel P Q → X Θ A (ctx P γ) → Y Θ A (ctx Q δ)) →
-      (∀ {A P Q} → F .rel P Q → ⟦ s ⟧s X A (ctx P γ) → ⟦ s ⟧s Y A (ctx Q δ))
-    map-sᴿ s f r t = {!!}
-  -}
-
-  module _ {s t} {γ : Vector Ty s} {δ : Vector Ty t}
-    (F : LinMor s t) {X : ExtOpenFam x} {Y : ExtOpenFam y}
-    where
-
-    -- open PoLeftSemimoduleMor F
-    private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
-
     map-p : (ps : Premises fl) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-p (⟨ Γ `⊢ A ⟩) f r t = f r t
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
+    map-p ⟨ Γ `⊢ A ⟩ f r M = f r M
     map-p `⊤ f r _ = _
-    map-p (ps `∧ qs) f r (s , t) = map-p ps f r s , map-p qs f r t
-    map-p `ℑ f r ℑ⟨ t ⟩ =
-      ℑ⟨ 0ₘ-mono (≤*-trans r (F .hom-mono (0*→≤* t))) (≈*→0* (F .hom-0ₘ)) ⟩
-    map-p (ps `✴ qs) f r (s ✴⟨ sp ⟩ t) =
-      let sp′ = +ₘ-mono (≤*-trans r (F .hom-mono (+*→≤* sp))) ≤*-refl ≤*-refl
-           (≈*→+* (F .hom-+ₘ _ _))
-      in map-p ps f ≤*-refl s ✴⟨ sp′ ⟩ map-p qs f ≤*-refl t
-    map-p (p `· ps) f r (⟨ sp ⟩· t) =
-      let sp′ = *ₘ-mono (≤*-trans r (F .hom-mono (*ₗ→≤* sp))) ≤-refl ≤*-refl
-           (≈*→*ₗ (F .hom-*ₘ _ _))
-      in ⟨ sp′ ⟩· map-p ps f ≤*-refl t
-    map-p (`□ ps) f r (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ ≤*-trans r (F .hom-mono str)
-       , ≤*-trans (F .hom-mono sp0) (≤*-reflexive (F .hom-0ₘ))
-       , ≤*-trans (F .hom-mono sp+) (≤*-reflexive (F .hom-+ₘ _ _))
-       ⟩ map-p ps f ≤*-refl t
+    map-p (ps `∧ qs) f r (M , N) = map-p ps f r M , map-p qs f r N
+    map-p `ℑ f r ℑ⟨ sp0 ⟩ = ℑ⟨ F .rel-0ₘ (sp0 , r) ⟩
+    map-p (ps `✴ qs) f r (M ✴⟨ sp+ ⟩ N) =
+      let rM ↘, sp+′ ,↙ rN = F .rel-+ₘ (sp+ , r) in
+      map-p ps f rM M ✴⟨ sp+′ ⟩ map-p qs f rN N
+    map-p (p `· ps) f r (⟨ sp* ⟩· M) =
+      let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
+      ⟨ sp*′ ⟩· map-p ps f r′ M
+    map-p (`□ bf ps) f {P} {Q} P∼Q (□⟨_,_,_,_⟩_ {P′} str sp0 sp+ sp* M) =
+      let _,_ {Q′} P′∼Q′ uQ′ = F .func P′ in
+      let open BoxFlags bf in
+      let
+        P′∼Q : F .rel P′ Q
+        P′∼Q = F .rel-≤ₘ str ≤*-refl P∼Q
+        Q≤Q′ : Q ≤* Q′
+        Q≤Q′ = uQ′ P′∼Q
+        sp0′ : If p0 (Q′ ≤0*)
+        sp0′ = for-If sp0 λ sp0 → F .rel-0ₘ (sp0 , P′∼Q′)
+        sp+′ : If p+ (Q′ ≤[ Q′ +* Q′ ])
+        sp+′ = for-If sp+ λ sp+ →
+          let rl ↘, sp ,↙ rr = F .rel-+ₘ (sp+ , P′∼Q′) in
+          +ₘ-mono ≤*-refl (F .func _ .unique rl) (F .func _ .unique rr) sp
+        sp*′ : If p* (∀ s → Q′ ≤[ s *ₗ Q′ ])
+        sp*′ = for-If sp* λ sp* s →
+          let r′ , sp = F .rel-*ₘ (sp* s , P′∼Q′) in
+          *ₘ-mono ≤*-refl ≤-refl (F .func _ .unique r′) sp
+      in
+      □⟨ Q≤Q′ , sp0′ , sp+′ , sp*′ ⟩ map-p ps f P′∼Q′ M
 
     map-r : (r : Rule fl) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
-    map-r (ps =⇒ A) f r (q , t) = q , map-p ps f r t
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
+    map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
 
     map-s : (s : System fl) →
-      (∀ {Θ P Q} → Q ≤* F .hom P → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
-      (∀ {P Q} → Q ≤* F .hom P → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
-    map-s (L ▹ rs) f r (l , t) = l , map-r (rs l) f r t
+      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {P Q} → F .rel P Q → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
+    map-s (L ▹ rs) f r (l , M) = l , map-r (rs l) f r M
 
   module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
 
@@ -109,8 +94,8 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =
       map-p′ ps f s ✴⟨ sp ⟩ map-p′ qs f t
     map-p′ (r `· ps) f (⟨ sp ⟩· t) = ⟨ sp ⟩· map-p′ ps f t
-    map-p′ (`□ ps) f (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ str , sp0 , sp+ ⟩ map-p′ ps f t
+    map-p′ (`□ bf ps) f (□⟨ str , sp0 , sp+ , sp* ⟩ t) =
+      □⟨ str , sp0 , sp+ , sp* ⟩ map-p′ ps f t
 
     map-r′ : (r : Rule fl) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
@@ -135,8 +120,8 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
-    sequence-p (`□ ps) (□⟨ str , sp0 , sp+ ⟩ t) =
-      □⟨ str , sp0 , sp+ ⟩_ <$> sequence-p ps t
+    sequence-p (`□ bf ps) (□⟨ str , sp0 , sp+ , sp* ⟩ t) =
+      □⟨ str , sp0 , sp+ , sp* ⟩_ <$> sequence-p ps t
 
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule fl) → ∀ {A} →

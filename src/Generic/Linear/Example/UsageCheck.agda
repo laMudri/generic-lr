@@ -7,7 +7,7 @@ open import Relation.Binary using (Rel)
 module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
   open import Data.Empty
-  open import Data.List as L using (List; []; _∷_; [_])
+  open import Data.List as L using (List; []; _∷_)
   open import Data.Unit hiding (_≤_)
   open import Proposition
 
@@ -47,7 +47,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uPremises (ps `∧ qs) = uPremises ps U.`∧ uPremises qs
     uPremises (ps `✴ qs) = uPremises ps U.`✴ uPremises qs
     uPremises (r `· ps) = _ U.`· uPremises ps
-    uPremises (`□ ps) = U.`□ (uPremises ps)
+    uPremises (`□ bf ps) = U.`□ bf (uPremises ps)
     uRule : Rule fl → U.Rule fl
     uRule (ps =⇒ A) = uPremises ps U.=⇒ A
     uSystem : System fl → U.System fl
@@ -55,6 +55,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
     open import Category.Functor
     open import Category.Monad
+    open import Data.Bool.Extra
     open import Data.List.Categorical
     open RawFunctor (functor {0ℓ}) using (_<$>_)
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
@@ -62,9 +63,11 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Data.LTree.Vector as V hiding ([]; [_]; _++_)
     open import Data.Product as × hiding (_<*>_)
     open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×
-    open import Function.Base using (_∘_)
+    open import Data.Wrap
+    open import Function.Base using (_∘_; _$_)
     open import Relation.Nary
     open import Relation.Unary.Bunched
+    open BunchedDuplicable
     open import Size
 
     record NonDetInverses (fl : PremisesFlags) : Set where
@@ -74,8 +77,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : Ann × Ann) → r ≤ p + q)
         1#⁻¹ : (r : Ann) → List (r ≤ 1#)
         *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
-        rep : {{_ : Has-□}} (r : Ann) →
-              List (∃ \ p → r ≤ p × p ≤ 0# × p ≤ p + p)
+        rep : {{_ : Has-□}} (bf : BoxFlags) (r : Ann) →
+          List (Dup _≤_ _≤0 _≤[_+_] _≤[_*_] bf (λ _ → ⊤) r)
+              -- List (∃ \ p → r ≤ p × p ≤ 0# × p ≤ p + p)
 
     module WithInverses (fl : PremisesFlags) (invs : NonDetInverses fl) where
 
@@ -105,14 +109,21 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++ₙ_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
 
-      rep* : ∀ {{_ : Has-□}} {s} (R : Vector Ann s) →
-             List (∃ \ P → R ≤* P × P ≤* 0* × P ≤* P +* P)
-      rep* {[-]} R =
-        (| (×.map V.[_] (×.map [_]ₙ (×.map [_]ₙ [_]ₙ))) (rep (R here)) |)
-      rep* {ε} R = (| (V.[] , []ₙ , []ₙ , []ₙ) |)
-      rep* {s <+> t} R =
-        (| (×.zip V._++_ (×.zip _++ₙ_ (×.zip _++ₙ_ _++ₙ_)))
-             (rep* (R ∘ ↙)) (rep* (R ∘ ↘)) |)
+      rep* : ∀ {{_ : Has-□}} (bf : BoxFlags) {s} (R : Vector Ann s) →
+        List (Dup _≤*_ _≤0* _≤[_+*_] _≤[_*ₗ_] bf (λ _ → ⊤) R)
+      rep* bf {[-]} R = do
+        □⟨ str , sp0 , sp+ , sp* ⟩ _ ← rep bf (R here)
+        pure $ □⟨_,_,_,_⟩_ {y = V.[ _ ]} [ str ]ₙ (map-If [_]ₙ sp0)
+          (map-If [_]ₙ sp+) (map-If (λ z r → [ z r ]ₙ) sp*) _
+      rep* bf {ε} R = pure $
+        □⟨_,_,_,_⟩_ {y = V.[]} []ₙ (pure-If []ₙ) (pure-If []ₙ)
+          (pure-If (λ r → []ₙ)) _
+      rep* bf {s <+> t} R = do
+        □⟨ strl , sp0l , sp+l , sp*l ⟩ _ ← rep* bf {s} (R ∘ ↙)
+        □⟨ strr , sp0r , sp+r , sp*r ⟩ _ ← rep* bf {t} (R ∘ ↘)
+        pure $ □⟨_,_,_,_⟩_ {y = _ V.++ _} (strl ++ₙ strr)
+          (zip-If _++ₙ_ sp0l sp0r) (zip-If _++ₙ_ sp+l sp+r)
+          (zip-If (λ x y r → x r ++ₙ y r) sp*l sp*r) _
 
       lemma-p :
         ∀ (sys : System fl) (ps : Premises fl) {Γ} →
@@ -131,9 +142,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩· t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
         (| ⟨ sp ⟩·_ (lemma-p sys ps t) |)
-      lemma-p sys (`□ ps) {ctx P γ} (□⟨ _ , _ , _ ⟩ t) = do
-        (P′ , str , sp0 , sp+) ← rep* P
-        (| □⟨ str , sp0 , sp+ ⟩_ (lemma-p sys ps t) |)
+      lemma-p sys (`□ bf ps) {ctx P γ} (□⟨ _ , _ , _ , _ ⟩ t) = do
+        (□⟨ str , sp0 , sp+ , sp* ⟩ _) ← rep* bf P
+        (| □⟨ str , sp0 , sp+ , sp* ⟩_ (lemma-p sys ps t) |)
 
       lemma-r :
         ∀ (sys : System fl) (r : Rule fl) {A Γ} →
