@@ -27,6 +27,7 @@ module Generic.Linear.Example.AnnotatedArrow
   open import Relation.Unary.Checked as Chk using (Pred)
   open import Relation.Unary.Bunched.Checked
   open import Relation.Unary.Bunched.Properties
+  open import Relation.Unary.Extra
   open import Relation.Binary using (Setoid)
   open import Relation.Binary.Construct.Always as ⊤ using ()
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
@@ -148,11 +149,6 @@ module Generic.Linear.Example.AnnotatedArrow
       resp-≈ : ∀ {a a′ b b′} → a A.≈ a′ → b A.≈ b′ → ∀[ rel a b ⇒ rel a′ b′ ]
       subres : ∀ {a b w w′} → w′ ≤ w → rel a b w → rel a b w′
   open WRel public
-
-  -- TODO: move somewhere else (Relation.Unary.Extras?)
-
-  I⋂ : ∀ {a i ℓ} {A : Set a} (I : Set i) → (I → Pred A ℓ) → Pred A _
-  I⋂ I P = λ x → {i : I} → P i x
 
   record WRelMor {W ≤ʷ A B} (R : WRel {W} ≤ʷ A) (S : WRel ≤ʷ B) : Set where
     constructor wRelMor
