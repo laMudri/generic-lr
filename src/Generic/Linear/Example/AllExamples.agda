@@ -12,4 +12,5 @@ import Generic.Linear.Example.MuMuTilde
 import Generic.Linear.Example.PaperExamples
 import Generic.Linear.Example.Translation.LnL-LR
 import Generic.Linear.Example.UsageCheck
+import Generic.Linear.Example.WRel
 import Generic.Linear.Example.ZeroOneMany

@@ -1,0 +1,229 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
+
+module Generic.Linear.Example.WRel where
+
+  open import Algebra.Po
+  open import Algebra.Relational
+  open import Data.LTree
+  open import Data.LTree.Vector
+  open import Data.Product as ×
+  open import Data.Unit using (⊤; tt)
+  open import Data.Wrap renaming ([_] to mk)
+  open import Function.Base using (id; _∘_)
+  open import Level
+  open import Proposition
+  open import Relation.Binary using (Rel)
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+  open import Relation.Unary.Bunched.Properties
+  open import Relation.Unary.Bunched.Synth
+  open import Relation.Unary.Extra
+  open import Relation.Nary
+  open import Size
+
+  module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
+    open PoSemiring poSemiring renaming (Carrier to Ann)
+
+    infixr 9 _∘ᴿ_
+
+    record WRel {W : Set} (_≤_ : Rel W 0ℓ) : Set₁ where
+      no-eta-equality
+      field
+        set : Set 0ℓ
+        rel : (a : set) → W → Set
+        subres : ∀ {a w w′} → w′ ≤ w → rel a w → rel a w′
+    open WRel public
+
+    record WRelMor {W ≤ʷ} (R S : WRel {W} ≤ʷ) : Set where
+      constructor wRelMor
+      field
+        set⇒ : R .set → S .set
+        rel⇒ : ∀[ (I⋂ _ \ x → R .rel x ⇒ S .rel (set⇒ x)) ]
+    open WRelMor public
+
+    idᴿ : ∀ {W ≤ʷ} {R : WRel {W} ≤ʷ} → WRelMor R R
+    idᴿ .set⇒ = id
+    idᴿ .rel⇒ = id
+
+    _∘ᴿ_ : ∀ {W ≤ʷ} {R S T : WRel {W} ≤ʷ} →
+      WRelMor S T → WRelMor R S → WRelMor R T
+    (g ∘ᴿ f) .set⇒ = g .set⇒ ∘ f .set⇒
+    (g ∘ᴿ f) .rel⇒ = g .rel⇒ ∘ f .rel⇒
+
+    module WithWorlds
+      (worlds : CommutativeRelMonoid 0ℓ 0ℓ)
+      where
+
+      open CommutativeRelMonoid worlds public renaming
+        (Carrier to W; _≤_ to _≤ʷ_; refl to ≤ʷ-refl)
+      open BunchedOrder _≤ʷ_ public
+      open BunchedUnit _≤ε public hiding (ℑ⟨_⟩)
+      open BunchedConjunction _≤[_∙_] public hiding (_✴⟨_⟩_)
+      open BunchedCommutativeMonoid worlds public
+
+      Iᴿ : WRel _≤ʷ_
+      Iᴿ .set = ⊤
+      Iᴿ .rel _ = ℑ
+      Iᴿ .subres sub ℑ⟨ sp ⟩ = ℑ⟨ ε-mono sub sp ⟩
+
+      _⊗ᴿ_ : (R S : WRel _≤ʷ_) → WRel _≤ʷ_
+      (R ⊗ᴿ S) .set = R .set × S .set
+      (R ⊗ᴿ S) .rel (a , b) = R .rel a ✴ S .rel b
+      (R ⊗ᴿ S) .subres sub (r ✴⟨ sp ⟩ s) =
+        r ✴⟨ ∙-mono sub ≤ʷ-refl ≤ʷ-refl sp ⟩ s
+
+      _⊸ᴿ_ : (R S : WRel _≤ʷ_) → WRel _≤ʷ_
+      (R ⊸ᴿ S) .set = R .set → S .set
+      (R ⊸ᴿ S) .rel f = I⋂ _ \ x → R .rel x ─✴ S .rel (f x)
+      (R ⊸ᴿ S) .subres sub rf .app✴ sp xx =
+        rf .app✴ (∙-mono ≤ʷ-refl sub ≤ʷ-refl sp) xx
+
+      private
+        variable
+          R R′ S S′ T T′ : WRel _≤ʷ_
+
+      ◇-alg : ∀ (R : WRel _≤ʷ_) {x} → ∀[ ◇ (R .rel x) ⇒ R .rel x ]
+      ◇-alg R (◇⟨ sub ⟩ r) = R .subres sub r
+
+      map-⊗ᴿ : WRelMor R R′ → WRelMor S S′ → WRelMor (R ⊗ᴿ S) (R′ ⊗ᴿ S′)
+      map-⊗ᴿ f g .set⇒ = ×.map (f .set⇒) (g .set⇒)
+      map-⊗ᴿ f g .rel⇒ = map-✴ (f .rel⇒ , g .rel⇒)
+
+      ⊗ᴿ-unitˡ→ : WRelMor (Iᴿ ⊗ᴿ R) R
+      ⊗ᴿ-unitˡ→ .set⇒ = proj₂
+      ⊗ᴿ-unitˡ→ {R} .rel⇒ = ◇-alg R ∘ 1-✴→
+      ⊗ᴿ-unitʳ→ : WRelMor (R ⊗ᴿ Iᴿ) R
+      ⊗ᴿ-unitʳ→ .set⇒ = proj₁
+      ⊗ᴿ-unitʳ→ {R} .rel⇒ = ◇-alg R ∘ ✴-1→
+      ⊗ᴿ-unit²→ : WRelMor (Iᴿ ⊗ᴿ Iᴿ) Iᴿ
+      ⊗ᴿ-unit²→ .set⇒ = _
+      ⊗ᴿ-unit²→ .rel⇒ = 1✴1→
+
+      ⊗ᴿ-unitˡ← : WRelMor R (Iᴿ ⊗ᴿ R)
+      ⊗ᴿ-unitˡ← .set⇒ = tt ,_
+      ⊗ᴿ-unitˡ← .rel⇒ = 1-✴← ∘ pure-◇
+      ⊗ᴿ-unitʳ← : WRelMor R (R ⊗ᴿ Iᴿ)
+      ⊗ᴿ-unitʳ← .set⇒ = _, tt
+      ⊗ᴿ-unitʳ← .rel⇒ = ✴-1← ∘ pure-◇
+      ⊗ᴿ-unit²← : WRelMor Iᴿ (Iᴿ ⊗ᴿ Iᴿ)
+      ⊗ᴿ-unit²← .set⇒ = _
+      ⊗ᴿ-unit²← .rel⇒ = 1✴1←
+
+      ⊗ᴿ-inter : WRelMor ((R ⊗ᴿ R′) ⊗ᴿ (S ⊗ᴿ S′)) ((R ⊗ᴿ S) ⊗ᴿ (R′ ⊗ᴿ S′))
+      ⊗ᴿ-inter .set⇒ = uncurry (×.zip _,_ _,_)
+      ⊗ᴿ-inter .rel⇒ = inter-✴
+
+      curryᴿ : WRelMor (R ⊗ᴿ S) T → WRelMor R (S ⊸ᴿ T)
+      curryᴿ f .set⇒ = curry (f .set⇒)
+      curryᴿ f .rel⇒ r .app✴ sp s = f .rel⇒ (r ✴⟨ sp ⟩ s)
+
+      uncurryᴿ : WRelMor R (S ⊸ᴿ T) → WRelMor (R ⊗ᴿ S) T
+      uncurryᴿ f .set⇒ = uncurry (f .set⇒)
+      uncurryᴿ f .rel⇒ (r ✴⟨ sp ⟩ s) = f .rel⇒ r .app✴ sp s
+
+      record Bang : Set₁ where
+        field
+          !ᴿ : Ann → WRel _≤ʷ_ → WRel _≤ʷ_
+          !ᴿ-map : ∀ {r R S} → WRelMor R S → WRelMor (!ᴿ r R) (!ᴿ r S)
+          !ᴿ-0 : ∀ {r R} → r ≤ 0# → WRelMor (!ᴿ r R) Iᴿ
+          !ᴿ-+ : ∀ {r p q R} → r ≤ p + q → WRelMor (!ᴿ r R) (!ᴿ p R ⊗ᴿ !ᴿ q R)
+          !ᴿ-1 : ∀ {r R} → r ≤ 1# → WRelMor (!ᴿ r R) R
+          !ᴿ-* : ∀ {r p q R} → r ≤ p * q → WRelMor (!ᴿ r R) (!ᴿ p (!ᴿ q R))
+          !ᴿ-I : ∀ {r} → WRelMor Iᴿ (!ᴿ r Iᴿ)
+          !ᴿ-⊗ : ∀ {r R S} → WRelMor (!ᴿ r R ⊗ᴿ !ᴿ r S) (!ᴿ r (R ⊗ᴿ S))
+
+  module WithSyntax (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (BaseTy : Set) where
+    open PoSemiring poSemiring using () renaming (Carrier to Ann)
+
+    infixr 5 _⊸_
+
+    data Ty : Set where
+      base : BaseTy → Ty
+      _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
+
+    open import Generic.Linear.Everything Ty poSemiring hiding (Ann)
+
+    data `AnnArr : Set where
+      `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
+
+    flags : PremisesFlags
+    flags = record noPremisesFlags { Has-✴ = ⊤ᴾ ; Has-· = ⊤ᴾ }
+
+    AnnArr : System flags
+    AnnArr = `AnnArr ▹ λ where
+      (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
+      (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
+
+    Term = [ AnnArr , ∞ ]_⊢_
+
+    open WithPoSemiring poSemiring
+
+    module WithWRelSemantics
+      (worlds : CommutativeRelMonoid 0ℓ 0ℓ) (open WithWorlds worlds)
+      (base⟦_⟧ : BaseTy → WRel _≤ʷ_) (bang : Bang)
+      where
+
+      open Bang bang public
+
+      ⟦_⟧ : Ty → WRel _≤ʷ_
+      ⟦ base α ⟧ = base⟦ α ⟧
+      ⟦ (r , A) ⊸ B ⟧ = !ᴿ r ⟦ A ⟧ ⊸ᴿ ⟦ B ⟧
+
+      module ⟦_⟧ᶜ where
+        go : ∀ {s} (P : Vector Ann s) (γ : Vector Ty s) → WRel _≤ʷ_
+        go {[-]} P γ = !ᴿ (P here) ⟦ γ here ⟧
+        go {ε} P γ = Iᴿ
+        go {s <+> t} P γ = go (P ∘ ↙) (γ ∘ ↙) ⊗ᴿ go (P ∘ ↘) (γ ∘ ↘)
+      ⟦_⟧ᶜ : Ctx → WRel _≤ʷ_
+      ⟦ ctx P γ ⟧ᶜ = ⟦_⟧ᶜ.go P γ
+
+      ⟦_⊢_⟧ : OpenFam 0ℓ
+      ⟦ Γ ⊢ A ⟧ = WRelMor ⟦ Γ ⟧ᶜ ⟦ A ⟧
+
+      ctx-0 : ∀ {s R γ} → R ≤0* → WRelMor ⟦ ctx {s} R γ ⟧ᶜ Iᴿ
+      ctx-0 {[-]} (mk sp0) = !ᴿ-0 (sp0 here)
+      ctx-0 {ε} _ = idᴿ
+      ctx-0 {s <+> t} (mk sp0) =
+        ⊗ᴿ-unit²→ ∘ᴿ map-⊗ᴿ (ctx-0 (mk (sp0 ∘ ↙))) (ctx-0 (mk (sp0 ∘ ↘)))
+
+      ctx-+ : ∀ {s R P Q γ} → R ≤[ P +* Q ] →
+        WRelMor ⟦ ctx {s} R γ ⟧ᶜ (⟦ ctx P γ ⟧ᶜ ⊗ᴿ ⟦ ctx Q γ ⟧ᶜ)
+      ctx-+ {[-]} (mk sp+) = !ᴿ-+ (sp+ here)
+      ctx-+ {ε} _ = ⊗ᴿ-unit²←
+      ctx-+ {s <+> t} (mk sp+) =
+        ⊗ᴿ-inter ∘ᴿ map-⊗ᴿ (ctx-+ (mk (sp+ ∘ ↙))) (ctx-+ (mk (sp+ ∘ ↘)))
+
+      ctx-* : ∀ {s R r P γ} → R ≤[ r *ₗ P ] →
+        WRelMor ⟦ ctx {s} R γ ⟧ᶜ (!ᴿ r ⟦ ctx P γ ⟧ᶜ)
+      ctx-* {[-]} (mk sp*) = !ᴿ-* (sp* here)
+      ctx-* {ε} _ = !ᴿ-I
+      ctx-* {s <+> t} (mk sp*) =
+        !ᴿ-⊗ ∘ᴿ map-⊗ᴿ (ctx-* (mk (sp* ∘ ↙))) (ctx-* (mk (sp* ∘ ↘)))
+
+      lookupᴿ : ∀ {Γ A} → Γ ∋ A → ⟦ Γ ⊢ A ⟧
+      lookupᴿ (lvar i q b) = go i q b
+        where
+        go : ∀ {s P γ A} (i : Ptr s) → γ i ≡ A → P ≤* ⟨ i ∣ → ⟦ ctx P γ ⊢ A ⟧
+        go here ≡.refl b = !ᴿ-1 (b .get here)
+        go (↙ i) q b =
+          let b′ , br = un++ₙ b; sp0 = ≤*→0* br in
+          ⊗ᴿ-unitʳ→ ∘ᴿ map-⊗ᴿ (go i q b′) (ctx-0 sp0)
+        go (↘ i) q b =
+          let bl , b′ = un++ₙ b; sp0 = ≤*→0* bl in
+          ⊗ᴿ-unitˡ→ ∘ᴿ map-⊗ᴿ (ctx-0 sp0) (go i q b′)
+
+      open Semantics
+
+      wrel : Semantics AnnArr _∋_ ⟦_⊢_⟧
+      wrel .ren^𝓥 = ren^∋
+      wrel .⟦var⟧ = lookupᴿ
+      wrel .⟦con⟧ (`lam (r , A) B , ≡.refl , m) = curryᴿ (reify m)
+      wrel .⟦con⟧ {ctx R γ}
+        (`app (r , A) B , ≡.refl , _✴⟨_⟩_ {P} {rQ} m sp+ (⟨_⟩·_ {Q} sp* n)) =
+        let n′ : WRelMor ⟦ ctx Q γ ⟧ᶜ ⟦ A ⟧
+            n′ = reify n ∘ᴿ ⊗ᴿ-unitʳ←
+            m′ : WRelMor (⟦ ctx P γ ⟧ᶜ ⊗ᴿ !ᴿ r ⟦ A ⟧) ⟦ B ⟧
+            m′ = uncurryᴿ (reify m ∘ᴿ ⊗ᴿ-unitʳ←)
+        in
+        m′ ∘ᴿ map-⊗ᴿ idᴿ (!ᴿ-map n′ ∘ᴿ ctx-* sp*) ∘ᴿ ctx-+ sp+
+\end{code}
