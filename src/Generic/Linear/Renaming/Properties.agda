@@ -48,7 +48,7 @@ module Generic.Linear.Renaming.Properties
   basis (psh^∋ QP lv) = ≤*-trans QP (basis lv)
 
   ren^∋ : Renameable (_∋ A)
-  ren^∋ v th = th .lookup (th .sums) v
+  ren^∋ v th = th .lookup (th .fit-here) v
 
   open With-psh^𝓥 {_𝓥_ = _∋_} psh^∋
 
@@ -65,12 +65,12 @@ module Generic.Linear.Renaming.Properties
   thinning-sub-1ᴹ {Γ} th (var (↙ i) q) =
     thinning-sub-1ᴹ
       {leftᶜ (ctx→sctx Γ)}
-      record { Ψ = topᴹ (th .Ψ); sums = ≤*-refl; lookup = th .lookup ∘ leftᵛ }
+      record { Ψ = topᴹ (th .Ψ); fit-here = ≤*-refl; lookup = th .lookup ∘ leftᵛ }
       (var i q)
   thinning-sub-1ᴹ {Γ} th (var (↘ i) q) =
     thinning-sub-1ᴹ
       {rightᶜ (ctx→sctx Γ)}
-      record { Ψ = botᴹ (th .Ψ); sums = ≤*-refl; lookup = th .lookup ∘ rightᵛ }
+      record { Ψ = botᴹ (th .Ψ); fit-here = ≤*-refl; lookup = th .lookup ∘ rightᵛ }
       (var i q)
   -}
 
@@ -100,7 +100,7 @@ module Generic.Linear.Renaming.Properties
 
   subuse-ren : ∀ {γ} → P ≤* Q → ctx P γ ⇒ʳ ctx Q γ
   subuse-ren PQ .Ψ = 1ᴿ
-  subuse-ren PQ .sums = PQ
+  subuse-ren PQ .fit-here = PQ
   subuse-ren PQ .lookup PQ′ v = psh^∋ PQ′ v
 
   ren⇒psh : (∀ {A} → Renameable ([ 𝓥 ]_⊨ A)) → IsPresheaf 𝓥
@@ -112,18 +112,18 @@ module Generic.Linear.Renaming.Properties
     (λ Q′ → Renaming (ctx P′ γ) (ctx Q′ δ)) ◇ Q ≤*_
   nat^Th {P′ = P′} (PP , th) .middle = unrow (row P′ *ᴹ th .Ψ)
   nat^Th (PP , th) .fst .Ψ = th .Ψ
-  nat^Th (PP , th) .fst .sums = ≤*-refl
+  nat^Th (PP , th) .fst .fit-here = ≤*-refl
   nat^Th (PP , th) .fst .lookup v = th .lookup v
   nat^Th (PP , th) .snd =
-    ≤*-trans (th .sums) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ≤ᴹ-refl))
+    ≤*-trans (th .fit-here) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ≤ᴹ-refl))
   -}
 
   ↙ʳ : ∀ {Γ t δ} → Γ ++ᶜ ctx {t} 0* δ ⇒ʳ Γ
   ↙ʳ .Ψ = [ 1ᴿ │ 0ᴿ ]ᴿ
-  ↙ʳ .sums = ≤*-refl , 0*-triv
+  ↙ʳ .fit-here = ≤*-refl , 0*-triv
   ↙ʳ .lookup (le , sp0) v = psh^∋ le v ↙ᵛ sp0
 
   ↘ʳ : ∀ {s γ Δ} → ctx {s} 0* γ ++ᶜ Δ ⇒ʳ Δ
   ↘ʳ .Ψ = [ 0ᴿ │ 1ᴿ ]ᴿ
-  ↘ʳ .sums = 0*-triv , ≤*-refl
+  ↘ʳ .fit-here = 0*-triv , ≤*-refl
   ↘ʳ .lookup (sp0 , le) v = sp0 ↘ᵛ psh^∋ le v

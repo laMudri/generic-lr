@@ -109,13 +109,13 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
     o-distrib-[]ᶜ : LnL.[]ᶜ LnL.⇒ʳ (LR.[]ᶜ ᵒCtx)
     o-distrib-[]ᶜ .Ψ = 1ᴿ
-    o-distrib-[]ᶜ .sums = []ₙ
+    o-distrib-[]ᶜ .fit-here = []ₙ
     o-distrib-[]ᶜ .lookup _ (LnL.lvar (there () i) q b)
 
     o-distrib-++ᶜ : ∀ {Γ Δ} →
       Γ ᵒCtx LnL.++ᶜ Δ ᵒCtx LnL.⇒ʳ (Γ LR.++ᶜ Δ) ᵒCtx
     o-distrib-++ᶜ .Ψ = 1ᴿ
-    o-distrib-++ᶜ .sums = ≤*-refl ++ₙ ≤*-refl
+    o-distrib-++ᶜ .fit-here = ≤*-refl ++ₙ ≤*-refl
     o-distrib-++ᶜ .lookup _ v .idx = v .idx
     o-distrib-++ᶜ .lookup _ v .tyq with v .idx | v .tyq
     ... | ↙ i | q = q
@@ -173,7 +173,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       where
       th : ∀ {s R γ} → LnL.ctx (uω *ₗ R) γ LnL.⇒ʳ LnL.ctx {s} R γ
       th .Ψ = 1ᴿ
-      th {R = R} .sums .get i = ω*-≤ (R i)
+      th {R = R} .fit-here .get i = ω*-≤ (R i)
       th .lookup le (LnL.lvar i q b) = LnL.lvar i q (≤*-trans le b)
 
       pr0 : uω *ₗ R ≤0*
@@ -192,7 +192,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       σ : ∀ {A} →
         LnL.[ LnL ] LnL.[ uω · _ , tG A ]ᶜ ⇒ˢ LnL.[ uω · _ , A ]ᶜ
       σ .Ψ = [─ [ uω ] ─]ᴿ
-      σ .sums = *ₗ-triv
+      σ .fit-here = *ₗ-triv
       σ .lookup {P′} {Q′} le (LnL.lvar here refl b) =
         LnL.`con (`Ge _ , refl ,
           □⟨ ≤*-refl , pure-If [ P′≤0 ]ₙ , pure-If [ P′≤+ ]ₙ
@@ -220,13 +220,13 @@ module Generic.Linear.Example.Translation.LnL-LR where
 
     *-distrib-[]ᶜ : LR.[]ᶜ LR.⇒ʳ LnL.[]ᶜ *Ctx
     *-distrib-[]ᶜ .Ψ = 1ᴿ
-    *-distrib-[]ᶜ .sums = []ₙ
+    *-distrib-[]ᶜ .fit-here = []ₙ
     *-distrib-[]ᶜ .lookup _ (LR.lvar (there () i) q b)
 
     *-distrib-++ᶜ : ∀ {Γ Δ} →
       Γ *Ctx LR.++ᶜ Δ *Ctx LR.⇒ʳ (Γ LnL.++ᶜ Δ) *Ctx
     *-distrib-++ᶜ .Ψ = 1ᴿ
-    *-distrib-++ᶜ .sums = ≤*-refl ++ₙ ≤*-refl
+    *-distrib-++ᶜ .fit-here = ≤*-refl ++ₙ ≤*-refl
     *-distrib-++ᶜ .lookup _ v .idx = v .idx
     *-distrib-++ᶜ .lookup _ v .tyq with v .idx | v .tyq
     ... | ↙ i | q = q

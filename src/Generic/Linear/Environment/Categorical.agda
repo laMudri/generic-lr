@@ -27,7 +27,7 @@ module Generic.Linear.Environment.Categorical
 
     subuse^Env : ∀ {s P Q γ} → P ≤* Q → [ 𝓥 ] ctx P γ ⇒ᵉ ctx {s} Q γ
     subuse^Env PQ .Ψ = 1ᴿ
-    subuse^Env PQ .sums = PQ
+    subuse^Env PQ .fit-here = PQ
     subuse^Env PQ .lookup r (lvar i q b) = pure (lvar i q (≤*-trans r b))
 
     id^Env : ∀ {Γ} → [ 𝓥 ] Γ ⇒ᵉ Γ
@@ -46,7 +46,7 @@ module Generic.Linear.Environment.Categorical
 
     >>^Env : ∀ {Γ Δ Θ} → [ 𝓤 ] Γ ⇒ᵉ Δ → [ 𝓥 ] Δ ⇒ᵉ Θ → [ 𝓦 ] Γ ⇒ᵉ Θ
     >>^Env ρ σ .Ψ = σ .Ψ >>ᴿ ρ .Ψ
-    >>^Env ρ σ .sums = σ .sums , ρ .sums
+    >>^Env ρ σ .fit-here = σ .fit-here , ρ .fit-here
     >>^Env ρ σ .lookup (s , r) v = lift ρ r (σ .lookup s v)
   open ComposeEnv {{...}} public
 

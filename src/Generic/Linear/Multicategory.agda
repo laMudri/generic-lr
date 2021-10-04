@@ -67,7 +67,7 @@ module Generic.Linear.Multicategory (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) whe
 
     open ComposeEnv= {𝓤 = Hom} {𝓥 = Hom} {𝓦 = Hom} record
       { lift = λ σ r f → f ∘ record
-        { env = record { [_]_⇒ᵉ_ σ; sums = r }
+        { env = relocate σ r
         ; lookup-resp-idx = {!!}
         }
       ; lift-resp-idx = {!!}
@@ -77,15 +77,15 @@ module Generic.Linear.Multicategory (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) whe
     _∘ˢ_ : ∀ {Γ Δ Θ} → Δ ⇒ˢ Θ → Γ ⇒ˢ Δ → Γ ⇒ˢ Θ
     σ ∘ˢ τ = {!!}
       -- pack (σ .M >>LinMor τ .M) (σ .asLinRel >>AsLinRel τ .asLinRel)
-      -- (σ .sums , τ .sums)
-      -- λ (leσ , leτ) v → σ .lookup leσ v ∘ record { [_]_⇒ᵉ_ τ; sums = leτ }
+      -- (σ .fit-here , τ .fit-here)
+      -- λ (leσ , leτ) v → σ .lookup leσ v ∘ relocate τ leτ
 
     field
       ∘-resp-≈ : ∀ {Γ Δ A} {f f′ : Δ ⇒ A} {σ σ′ : Γ ⇒ˢ Δ} →
         f ≈ f′ → σ ≈ˢ σ′ → f ∘ σ ≈ f′ ∘ σ′
 
       identityˡ : ∀ {Γ Δ A} (i : Δ ∋ A) (σ : Γ ⇒ˢ Δ) →
-        id i ∘ σ ≈ σ .env .lookup (σ .env .sums) i
+        id i ∘ σ ≈ σ .env .lookup (σ .env .fit-here) i
       identityʳ : ∀ {Γ A} (f : Γ ⇒ A) → f ∘ idˢ ≈ f
       assoc : ∀ {Γ Δ Θ A} (f : Θ ⇒ A) (σ : Δ ⇒ˢ Θ) (τ : Γ ⇒ˢ Δ) →
         f ∘ (σ ∘ˢ τ) ≈ (f ∘ σ) ∘ τ

@@ -47,9 +47,14 @@ module Generic.Linear.Environment
 
     field
       Ψ : LinFuncRel t s 0ℓ
-      sums : Ψ .rel Q P
+      fit-here : Ψ .rel Q P
       lookup : ∀ {P′ Q′} → Ψ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
   open [_]_⇒ᵉ_ public
+
+  relocate : ∀ {𝓥 : OpenFam ℓ} {s t P P′ Q Q′ γ δ} →
+    (ρ : [ 𝓥 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) → ρ .Ψ .rel Q′ P′ →
+    [ 𝓥 ] ctx P′ γ ⇒ᵉ ctx Q′ δ
+  relocate ρ r = record { [_]_⇒ᵉ_ ρ; fit-here = r }
 
   {- TODO: resurrect as an easy way to produce envs.
   record _─Env (Γ : Ctx) (𝓥 : OpenFam ℓ) (Δ : Ctx) : Set ℓ where
@@ -60,7 +65,7 @@ module Generic.Linear.Environment
 
     field
       Ψ : LinMor s t
-      sums : Q ≤* Ψ .hom P
+      fit-here : Q ≤* Ψ .hom P
       lookup : ∀ {A P′ Q′} → Q′ ≤* Ψ .hom P′ →
         LVar A (ctx P′ γ) → 𝓥 A (ctx Q′ δ)
   open _─Env public

@@ -99,11 +99,9 @@ module Generic.Linear.Semantics
 
 %<*semantics>
 \begin{code}
-    semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .sums) v
+    semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .fit-here) v
     semantics ρ (`con t) = ⟦con⟧ $
-      map-s (ρ .Ψ) d
-        (λ r → body (record { [_]_⇒ᵉ_ ρ; sums = r }))
-        (ρ .sums) t
+      map-s (ρ .Ψ) d (λ r → body (relocate ρ r)) (ρ .fit-here) t
 \end{code}
 %</semantics>
 

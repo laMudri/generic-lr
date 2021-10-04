@@ -43,5 +43,5 @@ module Generic.Linear.Renaming.Monoidal
 
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
   ++-[]ʳ→ .Ψ = [ 1ᴿ │ [│]ᴿ ]ᴿ
-  ++-[]ʳ→ .sums = ≤*-refl , _
+  ++-[]ʳ→ .fit-here = ≤*-refl , _
   ++-[]ʳ→ .lookup (le , _) (lvar i q b) = lvar (↙ i) q (≤*-trans le b ++ₙ []ₙ)

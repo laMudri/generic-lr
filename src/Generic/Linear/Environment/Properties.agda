@@ -40,7 +40,7 @@ module Generic.Linear.Environment.Properties
     where
     instance
       composeEnv : ComposeEnv _∋_ 𝓥 𝓥
-      composeEnv .lift ren′ r v = ren^𝓥 v (record { [_]_⇒ᵉ_ ren′; sums = r })
+      composeEnv .lift ren′ r v = ren^𝓥 v (relocate ren′ r)
 
   module With-psh^𝓥 {ℓ} {_𝓥_ : OpenFam ℓ} (psh^𝓥 : IsPresheaf _𝓥_) where
 
@@ -48,7 +48,7 @@ module Generic.Linear.Environment.Properties
 
     []ᵉ′ : ∀ {R θ} → ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {ε} R θ ]
     []ᵉ′ ℑ⟨ sp ⟩ .Ψ = [─]ᴿ
-    []ᵉ′ ℑ⟨ sp ⟩ .sums = sp
+    []ᵉ′ ℑ⟨ sp ⟩ .fit-here = sp
     []ᵉ′ ℑ⟨ sp ⟩ .lookup _ (lvar (there () _) _ _)
 
     []ᵉ : ∀[ ℑᶜ ⇒ [ _𝓥_ ]_⇒ᵉ []ᶜ ]
@@ -57,7 +57,7 @@ module Generic.Linear.Environment.Properties
     ++ᵉ′ : ∀ {s t R θ} → let Γ = ctx (R ∘ ↙) (θ ∘ ↙); Δ = ctx (R ∘ ↘) (θ ∘ ↘) in
       ∀[ [ _𝓥_ ]_⇒ᵉ Γ ✴ᶜ [ _𝓥_ ]_⇒ᵉ Δ ⇒ [ _𝓥_ ]_⇒ᵉ ctx {s <+> t} R θ ]
     ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .Ψ = [ ρ .Ψ ─ σ .Ψ ]ᴿ
-    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .sums = ρ .sums ↘, sp ,↙ σ .sums
+    ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .fit-here = ρ .fit-here ↘, sp ,↙ σ .fit-here
     ++ᵉ′ (ρ ✴⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
       let br , bs = un++ₙ b in
       let v = ρ .lookup r (lvar i q br) in
@@ -72,7 +72,7 @@ module Generic.Linear.Environment.Properties
 
     [-]ᵉ′ : ∀ {R θ} → ∀[ R here ·ᶜ _𝓥 θ here Syn.⇒ [ _𝓥_ ]_⇒ᵉ ctx {[-]} R θ ]
     [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .Ψ = [─ Q′ ─]ᴿ
-    [-]ᵉ′ (⟨ sp ⟩· v) .sums = sp
+    [-]ᵉ′ (⟨ sp ⟩· v) .fit-here = sp
     [-]ᵉ′ (⟨ sp ⟩· v) .lookup t (lvar here refl b) =
       psh^𝓥 (*ₘ-identity→ (b .get here , t)) v
 

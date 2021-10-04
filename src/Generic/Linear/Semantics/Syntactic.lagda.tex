@@ -141,8 +141,8 @@ module Generic.Linear.Semantics.Syntactic
 
   -- _>>ˢ_ : Substitution d Γ Δ → Substitution d Δ Θ → Substitution d Γ Θ
   -- (ρ >>ˢ σ) .M = ρ .M *ᴹ σ .M
-  -- (ρ >>ˢ σ) .sums = {!!}
-  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (≤*-trans (ρ .sums) {!!}) (ρ .lookup v)))
+  -- (ρ >>ˢ σ) .fit-here = {!!}
+  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (≤*-trans (ρ .fit-here) {!!}) (ρ .lookup v)))
 
   module WithKit (K : Kit d 𝓥) where
     private
