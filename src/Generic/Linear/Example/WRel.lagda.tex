@@ -30,15 +30,16 @@ module Generic.Linear.Example.WRel where
       no-eta-equality
       field
         set : Set 0ℓ
-        rel : (a : set) → W → Set
-        subres : ∀ {a w w′} → w′ ≤ w → rel a w → rel a w′
+        rel : (a b : set) → W → Set
+        subres : ∀ {a b w w′} → w′ ≤ w → rel a b w → rel a b w′
     open WRel public
 
     record WRelMor {W ≤ʷ} (R S : WRel {W} ≤ʷ) : Set where
       constructor wRelMor
       field
         set⇒ : R .set → S .set
-        rel⇒ : ∀[ (I⋂ _ \ x → R .rel x ⇒ S .rel (set⇒ x)) ]
+        rel⇒ :
+          ∀[ (I⋂ (_ × _) \ (x , y) → R .rel x y ⇒ S .rel (set⇒ x) (set⇒ y)) ]
     open WRelMor public
 
     idᴿ : ∀ {W ≤ʷ} {R : WRel {W} ≤ʷ} → WRelMor R R
@@ -63,18 +64,19 @@ module Generic.Linear.Example.WRel where
 
       Iᴿ : WRel _≤ʷ_
       Iᴿ .set = ⊤
-      Iᴿ .rel _ = ℑ
+      Iᴿ .rel _ _ = ℑ
       Iᴿ .subres sub ℑ⟨ sp ⟩ = ℑ⟨ ε-mono sub sp ⟩
 
       _⊗ᴿ_ : (R S : WRel _≤ʷ_) → WRel _≤ʷ_
       (R ⊗ᴿ S) .set = R .set × S .set
-      (R ⊗ᴿ S) .rel (a , b) = R .rel a ✴ S .rel b
+      (R ⊗ᴿ S) .rel (a , b) (a′ , b′) = R .rel a a′ ✴ S .rel b b′
       (R ⊗ᴿ S) .subres sub (r ✴⟨ sp ⟩ s) =
         r ✴⟨ ∙-mono sub ≤ʷ-refl ≤ʷ-refl sp ⟩ s
 
       _⊸ᴿ_ : (R S : WRel _≤ʷ_) → WRel _≤ʷ_
       (R ⊸ᴿ S) .set = R .set → S .set
-      (R ⊸ᴿ S) .rel f = I⋂ _ \ x → R .rel x ─✴ S .rel (f x)
+      (R ⊸ᴿ S) .rel f g =
+        I⋂ (_ × _) \ (x , y) → R .rel x y ─✴ S .rel (f x) (g y)
       (R ⊸ᴿ S) .subres sub rf .app✴ sp xx =
         rf .app✴ (∙-mono ≤ʷ-refl sub ≤ʷ-refl sp) xx
 
@@ -82,7 +84,7 @@ module Generic.Linear.Example.WRel where
         variable
           R R′ S S′ T T′ : WRel _≤ʷ_
 
-      ◇-alg : ∀ (R : WRel _≤ʷ_) {x} → ∀[ ◇ (R .rel x) ⇒ R .rel x ]
+      ◇-alg : ∀ (R : WRel _≤ʷ_) {x y} → ∀[ ◇ (R .rel x y) ⇒ R .rel x y ]
       ◇-alg R (◇⟨ sub ⟩ r) = R .subres sub r
 
       map-⊗ᴿ : WRelMor R R′ → WRelMor S S′ → WRelMor (R ⊗ᴿ S) (R′ ⊗ᴿ S′)
@@ -141,7 +143,7 @@ module Generic.Linear.Example.WRel where
       base : BaseTy → Ty
       _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
 
-    open import Generic.Linear.Everything Ty poSemiring hiding (Ann)
+    open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
 
     data `AnnArr : Set where
       `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
@@ -158,12 +160,12 @@ module Generic.Linear.Example.WRel where
 
     open WithPoSemiring poSemiring
 
-    module WithWRelSemantics
+    module WithSemantics
       (worlds : CommutativeRelMonoid 0ℓ 0ℓ) (open WithWorlds worlds)
       (base⟦_⟧ : BaseTy → WRel _≤ʷ_) (bang : Bang)
       where
 
-      open Bang bang public
+      open Bang bang
 
       ⟦_⟧ : Ty → WRel _≤ʷ_
       ⟦ base α ⟧ = base⟦ α ⟧
@@ -214,11 +216,11 @@ module Generic.Linear.Example.WRel where
 
       open Semantics
 
-      wrel : Semantics AnnArr _∋_ ⟦_⊢_⟧
-      wrel .ren^𝓥 = ren^∋
-      wrel .⟦var⟧ = lookupᴿ
-      wrel .⟦con⟧ (`lam (r , A) B , ≡.refl , m) = curryᴿ (reify m)
-      wrel .⟦con⟧ {ctx R γ}
+      Wrel : Semantics AnnArr _∋_ ⟦_⊢_⟧
+      Wrel .ren^𝓥 = ren^∋
+      Wrel .⟦var⟧ = lookupᴿ
+      Wrel .⟦con⟧ (`lam (r , A) B , ≡.refl , m) = curryᴿ (reify m)
+      Wrel .⟦con⟧ {ctx R γ}
         (`app (r , A) B , ≡.refl , _✴⟨_⟩_ {P} {rQ} m sp+ (⟨_⟩·_ {Q} sp* n)) =
         let n′ : WRelMor ⟦ ctx Q γ ⟧ᶜ ⟦ A ⟧
             n′ = reify n ∘ᴿ ⊗ᴿ-unitʳ←
@@ -226,4 +228,7 @@ module Generic.Linear.Example.WRel where
             m′ = uncurryᴿ (reify m ∘ᴿ ⊗ᴿ-unitʳ←)
         in
         m′ ∘ᴿ map-⊗ᴿ idᴿ (!ᴿ-map n′ ∘ᴿ ctx-* sp*) ∘ᴿ ctx-+ sp+
+
+      wrel : ∀ {sz Γ A} → [ AnnArr , sz ] Γ ⊢ A → ⟦ Γ ⊢ A ⟧
+      wrel = semantics Wrel 1ʳ
 \end{code}
