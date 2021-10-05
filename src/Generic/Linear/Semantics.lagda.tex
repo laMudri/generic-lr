@@ -87,28 +87,25 @@ module Generic.Linear.Semantics
 
 %<*semantics-type>
 \begin{code}
-    semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → [ 𝓒 ] Γ ⇒ᶜ Δ
-\end{code}
-%</semantics-type>
-%<*body-type>
-\begin{code}
-    body : ∀ {Γ Δ sz} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {Θ} →
+    semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz} →
+      ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒 ] Γ ⊨_ ]
+    body : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz Θ} →
       ∀[ Scope [ d , sz ]_⊢_ Θ Δ ⇒ Kripke 𝓥 𝓒 Θ Γ ]
 \end{code}
-%</body-type>
+%</semantics-type>
 
 %<*semantics>
 \begin{code}
     semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .fit-here) v
-    semantics ρ (`con t) = ⟦con⟧ $
-      map-s (ρ .Ψ) d (λ r → body (relocate ρ r)) (ρ .fit-here) t
+    semantics ρ (`con M) = ⟦con⟧ $
+      map-s (ρ .Ψ) d (λ r → body (relocate ρ r)) (ρ .fit-here) M
 \end{code}
 %</semantics>
 
 %<*body>
 \begin{code}
-    body ρ t .get th .app✴ r σ =
+    body ρ M .get th .app✴ r σ =
       let ρ′ = ren^Env ren^𝓥 ρ th in
-      semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) t
+      semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) M
 \end{code}
 %</body>
