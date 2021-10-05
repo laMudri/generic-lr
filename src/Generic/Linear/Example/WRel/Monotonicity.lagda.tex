@@ -1,0 +1,161 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
+
+module Generic.Linear.Example.WRel.Monotonicity where
+
+  open import Algebra.Po
+  open import Algebra.Relational
+  open import Data.LTree
+  open import Data.LTree.Vector
+  open import Data.Product as ×
+  open import Data.Unit using (⊤; tt)
+  open import Function.Base as F using (id; _∘_)
+  open import Level
+  open import Relation.Binary using (Rel; Poset)
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+  open import Relation.Unary.Bunched.Synth
+  open import Relation.Unary using (U)
+  open import Relation.Nary
+  open import Size
+
+  open import Generic.Linear.Example.WRel
+  open import Generic.Linear.Example.Mono
+
+  module WithPoset (poset : Poset 0ℓ 0ℓ 0ℓ) where
+    open Poset poset renaming (_≤_ to _≤ˢ_)
+
+    open WithPoSemiring poSemiring
+
+    0CRM : CommutativeRelMonoid 0ℓ 0ℓ
+    0CRM = record
+      { Carrier = ⊤
+      ; _≤_ = λ _ _ → ⊤
+      ; _≤ε = λ _ → ⊤
+      ; _≤[_∙_] = λ _ _ _ → ⊤
+      ; isProset = _
+      ; ε-mono = _
+      ; ∙-mono = _
+      ; isCommutativeRelMonoid = _
+      }
+    open WithWorlds 0CRM
+
+    Baseᴿ : WRel _≤ʷ_
+    Baseᴿ .set = Carrier
+    Baseᴿ .rel x y _ = x ≤ˢ y
+    Baseᴿ .subres _ = id
+
+    !ᴿ : WayUp → WRel _≤ʷ_ → WRel _≤ʷ_
+    !ᴿ a R .set = R .set
+    !ᴿ ↑↑ R .rel = R .rel
+    !ᴿ ↓↓ R .rel x y = R .rel y x
+    !ᴿ ?? R .rel x y = U
+    !ᴿ ~~ R .rel x y = R .rel x y ∩ R .rel y x
+    !ᴿ a R .subres _ = id
+
+    !ᴿ-map : ∀ {a} {R S : WRel _≤ʷ_} → WRelMor R S → WRelMor (!ᴿ a R) (!ᴿ a S)
+    !ᴿ-map f .set⇒ = f .set⇒
+    !ᴿ-map {↑↑} f .rel⇒ = f .rel⇒
+    !ᴿ-map {↓↓} f .rel⇒ = f .rel⇒
+    !ᴿ-map {??} f .rel⇒ = _
+    !ᴿ-map {~~} f .rel⇒ = ×.map (f .rel⇒) (f .rel⇒)
+
+    !ᴿ-≤ : ∀ {a b} {R : WRel _≤ʷ_} → a ≤ b → WRelMor (!ᴿ a R) (!ᴿ b R)
+    !ᴿ-≤ ab .set⇒ = id
+    !ᴿ-≤ ≤-refl .rel⇒ r = r
+    !ᴿ-≤ ≡≤↑ .rel⇒ (r , s) = r
+    !ᴿ-≤ ≡≤↓ .rel⇒ (r , s) = s
+    !ᴿ-≤ ↑≤? .rel⇒ r = _
+    !ᴿ-≤ ↓≤? .rel⇒ r = _
+    !ᴿ-≤ ≡≤? .rel⇒ (r , s) = _
+
+    !ᴿ-0 : ∀ {a R} → a ≤ ?? → WRelMor (!ᴿ a R) Iᴿ
+    !ᴿ-0 = _
+
+    !ᴿ-+ : ∀ {a b c R} → a ≤ b ∧ c → WRelMor (!ᴿ a R) (!ᴿ b R ⊗ᴿ !ᴿ c R)
+    !ᴿ-+ le .set⇒ x = x , x
+    !ᴿ-+ {a} {↑↑} {↑↑} le .rel⇒ r = !ᴿ-≤ le .rel⇒ r ✴⟨ _ ⟩ !ᴿ-≤ le .rel⇒ r
+    !ᴿ-+ {a} {↑↑} {↓↓} le .rel⇒ r =
+      !ᴿ-≤ le .rel⇒ r .proj₁ ✴⟨ _ ⟩ !ᴿ-≤ le .rel⇒ r .proj₂
+    !ᴿ-+ {a} {↑↑} {??} le .rel⇒ r = !ᴿ-≤ le .rel⇒ r ✴⟨ _ ⟩ _
+    !ᴿ-+ {.(↑↑ ∧ ~~)} {↑↑} {~~} ≤-refl .rel⇒ (r , s) = r ✴⟨ _ ⟩ (r , s)
+    !ᴿ-+ {a} {↓↓} {↑↑} le .rel⇒ r =
+      !ᴿ-≤ le .rel⇒ r .proj₂ ✴⟨ _ ⟩ !ᴿ-≤ le .rel⇒ r .proj₁
+    !ᴿ-+ {a} {↓↓} {↓↓} le .rel⇒ r = !ᴿ-≤ le .rel⇒ r ✴⟨ _ ⟩ !ᴿ-≤ le .rel⇒ r
+    !ᴿ-+ {a} {↓↓} {??} le .rel⇒ r = !ᴿ-≤ le .rel⇒ r ✴⟨ _ ⟩ _
+    !ᴿ-+ {.(↓↓ ∧ ~~)} {↓↓} {~~} ≤-refl .rel⇒ (r , s) = s ✴⟨ _ ⟩ (r , s)
+    !ᴿ-+ {a} {??} {c} le .rel⇒ r = _ ✴⟨ _ ⟩ !ᴿ-≤ le .rel⇒ r
+    !ᴿ-+ {.(~~ ∧ c)} {~~} {c} ≤-refl .rel⇒ r = r ✴⟨ _ ⟩ !ᴿ-≤ (~~≤ {c}) .rel⇒ r
+
+    !ᴿ-1 : ∀ {a R} → a ≤ ↑↑ → WRelMor (!ᴿ a R) R
+    !ᴿ-1 le .set⇒ = id
+    !ᴿ-1 {.↑↑} ≤-refl .rel⇒ r = r
+    !ᴿ-1 {.~~} ≡≤↑ .rel⇒ r = r .proj₁
+
+    !ᴿ-* : ∀ {a b c R} → a ≤ b * c → WRelMor (!ᴿ a R) (!ᴿ b (!ᴿ c R))
+    !ᴿ-* le .WithPoSemiring.set⇒ = id
+    !ᴿ-* {a} {↑↑} {c} le .WithPoSemiring.rel⇒ r = !ᴿ-≤ le .rel⇒ r
+    !ᴿ-* {a} {↓↓} {↑↑} le .WithPoSemiring.rel⇒ r = !ᴿ-≤ le .rel⇒ r
+    !ᴿ-* {a} {↓↓} {↓↓} le .WithPoSemiring.rel⇒ r = !ᴿ-≤ le .rel⇒ r
+    !ᴿ-* {a} {↓↓} {??} le .WithPoSemiring.rel⇒ r = _
+    !ᴿ-* {a} {↓↓} {~~} le .WithPoSemiring.rel⇒ r = ×.swap (!ᴿ-≤ le .rel⇒ r)
+    !ᴿ-* {a} {??} {c} le .WithPoSemiring.rel⇒ r = _
+    !ᴿ-* {.(~~ * ↑↑)} {~~} {↑↑} ≤-refl .WithPoSemiring.rel⇒ r = r
+    !ᴿ-* {.(~~ * ↓↓)} {~~} {↓↓} ≤-refl .WithPoSemiring.rel⇒ r = ×.swap r
+    !ᴿ-* {a} {~~} {??} le .WithPoSemiring.rel⇒ r = _
+    !ᴿ-* {.(~~ * ~~)} {~~} {~~} ≤-refl .WithPoSemiring.rel⇒ r = r , ×.swap r
+
+    !ᴿ-I : ∀ {a} → WRelMor Iᴿ (!ᴿ a Iᴿ)
+    !ᴿ-I .set⇒ = id
+    !ᴿ-I {↑↑} .rel⇒ = _
+    !ᴿ-I {↓↓} .rel⇒ = _
+    !ᴿ-I {??} .rel⇒ = _
+    !ᴿ-I {~~} .rel⇒ = _
+
+    !ᴿ-⊗ : ∀ {a R S} → WRelMor (!ᴿ a R ⊗ᴿ !ᴿ a S) (!ᴿ a (R ⊗ᴿ S))
+    !ᴿ-⊗ .set⇒ = id
+    !ᴿ-⊗ {↑↑} .rel⇒ r = r
+    !ᴿ-⊗ {↓↓} .rel⇒ r = r
+    !ᴿ-⊗ {??} .rel⇒ _ = _
+    !ᴿ-⊗ {~~} .rel⇒ ((r , s) ✴⟨ _ ⟩ (r′ , s′)) = (r ✴⟨ _ ⟩ r′) , (s ✴⟨ _ ⟩ s′)
+
+    bang : Bang
+    bang = record
+      { !ᴿ = !ᴿ
+      ; !ᴿ-map = !ᴿ-map
+      ; !ᴿ-0 = !ᴿ-0
+      ; !ᴿ-+ = !ᴿ-+
+      ; !ᴿ-1 = !ᴿ-1
+      ; !ᴿ-* = !ᴿ-*
+      ; !ᴿ-I = !ᴿ-I
+      ; !ᴿ-⊗ = !ᴿ-⊗
+      }
+
+    open WithSyntax poSemiring ⊤ public
+    open WithSemantics 0CRM (λ _ → Baseᴿ) bang public
+
+  open import Data.LTree.Automation
+  open import Data.Nat
+
+  open import Data.Integer
+  open import Data.Integer.Properties
+  open WithPoset ≤-poset
+
+  open import Generic.Linear.Example.UsageCheck Ty as UC
+  open UC.WithPoSemiring poSemiring
+  open WithInverses flags record
+    { 0#⁻¹ = ??⁻¹ ; +⁻¹ = ∧⁻¹ ; 1#⁻¹ = ↑↑⁻¹ ; *⁻¹ = *⁻¹ ; rep = λ {{}} }
+
+  pattern uvar i = U.`var (U.lvar i ≡.refl _)
+  pattern ulam M = U.`con (`lam _ _ , ≡.refl , M)
+  pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴⟨ _ ⟩ (⟨ _ ⟩· N))
+
+  test : [ AnnArr , ∞ ]
+    [ ~~ , (↑↑ , base tt) ⊸ (↑↑ , base tt) ⊸ base tt ]ᶜ ++ᶜ
+    [ ~~ , (↓↓ , base tt) ⊸ base tt ]ᶜ
+    ⊢ ((↑↑ , base tt) ⊸ (↓↓ , base tt) ⊸ base tt)
+  test =
+    let #0 = Ptr ((((([-] <+> [-]) <+> [-]) <+> [-]) <+> ε) <+> ε) F.∋ # 0 in
+    elab-unique AnnArr
+    (ulam (ulam (uapp (uapp (uvar (#0)) (uvar (# 2))) (uapp (uvar (# 1)) (uvar (# 3))))))
+    ([ ~~ ] ++ [ ~~ ])
+\end{code}
