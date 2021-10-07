@@ -43,9 +43,10 @@ module Generic.Linear.Semantics.Syntactic
     variable
       d : System
       A : Ty
-      v c : Level
+      i v c : Level
+      I : Set i
       𝓥 : OpenFam v
-      𝓒 : OpenFam c
+      𝓒 : I ─OpenFam c
       Γ Δ Θ : Ctx
 \end{code}
 

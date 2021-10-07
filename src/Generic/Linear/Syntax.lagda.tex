@@ -126,17 +126,21 @@ connectives:
   OpenType : ∀ ℓ → Set (suc ℓ)
   OpenType ℓ = Ctx → Set ℓ
 
+  _─OpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
+  I ─OpenFam ℓ = Ctx → I → Set ℓ
   OpenFam : ∀ ℓ → Set (suc ℓ)
-  OpenFam ℓ = Ctx → Ty → Set ℓ
+  OpenFam ℓ = Ty ─OpenFam ℓ
 
+  _─ExtOpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
+  I ─ExtOpenFam ℓ = Ctx → I ─OpenFam ℓ
   ExtOpenFam : ∀ ℓ → Set (suc ℓ)
-  ExtOpenFam ℓ = Ctx → OpenFam ℓ
+  ExtOpenFam ℓ = Ty ─ExtOpenFam ℓ
 \end{code}
 %</OpenFam>
 
 %<*Scope>
 \begin{code}
-  Scope : ∀ {ℓ} → OpenFam ℓ → ExtOpenFam ℓ
+  Scope : ∀ {i} {I : Set i} {ℓ} → I ─OpenFam ℓ → I ─ExtOpenFam ℓ
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
 \end{code}
 %</Scope>

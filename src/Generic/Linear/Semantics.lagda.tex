@@ -37,31 +37,28 @@ module Generic.Linear.Semantics
   private
     variable
       A : Ty
-      ℓ v c : Level
-      𝓥 : OpenFam v
-      𝓒 : OpenFam c
-      Θ : Ctx
+      i j ℓ v c : Level
+      I : Set i
+      J : Set j
 \end{code}
 
 %<*Kripke>
 \begin{code}
-  Kripke :
-    (𝓥 : OpenFam v) (𝓒 : OpenFam c) → ExtOpenFam _
-  Kripke = Wrap λ 𝓥 𝓒 Δ Γ A →
-    □ʳ ([ 𝓥 ]_⇒ᵉ Δ ─✴ᶜ [ 𝓒 ]_⊨ A) Γ
+  Kripke : (𝓥 : OpenFam v) (𝓒 : I ─OpenFam c) → I ─ExtOpenFam _
+  Kripke = Wrap λ 𝓥 𝓒 Δ Γ A → □ʳ ([ 𝓥 ]_⇒ᵉ Δ ─✴ᶜ [ 𝓒 ]_⊨ A) Γ
 \end{code}
 %</Kripke>
 
 \begin{code}
-  mapK𝓒 : ∀ {v c c′} {𝓥 : OpenFam v} {𝓒 : OpenFam c} {𝓒′ : OpenFam c′} →
-          ∀[ 𝓒 ⇒ 𝓒′ ] → ∀[ Kripke 𝓥 𝓒 ⇒ Kripke 𝓥 𝓒′ ]
-  mapK𝓒 f b .get th .app✴ sp ρ = f (b .get th .app✴ sp ρ)
+  mapK𝓒 :
+    ∀ {v c c′} {𝓥 : OpenFam v} {𝓒 : I ─OpenFam c} {𝓒′ : J ─OpenFam c′} {A B} →
+    ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] → ∀ {Δ Γ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B
+  mapK𝓒 f b .get ren .app✴ sp ρ = f (b .get ren .app✴ sp ρ)
 \end{code}
 
 %<*Semantics>
 \begin{code}
-  record Semantics (d : System)
-         (𝓥 : OpenFam v) (𝓒 : OpenFam c)
+  record Semantics (d : System) (𝓥 : OpenFam v) (𝓒 : OpenFam c)
          : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
@@ -77,6 +74,13 @@ module Generic.Linear.Semantics
 
     open Equivalence
 \end{code}
+
+%<*extend>
+\begin{code}
+    extend : ∀ {Γ Δ Θ} → [ 𝓥 ] Γ ⇒ᵉ Δ → Kripke 𝓥 ([ 𝓥 ]_⇒ᵉ_) Θ Γ (Δ ++ᶜ Θ)
+    extend ρ .get ren .app✴ sp σ = ++ᵉ (ren^Env ren^𝓥 ρ ren ✴⟨ sp ⟩ σ)
+\end{code}
+%</extend>
 
 %<*Comp>
 \begin{code}
@@ -104,8 +108,6 @@ module Generic.Linear.Semantics
 
 %<*body>
 \begin{code}
-    body ρ M .get th .app✴ r σ =
-      let ρ′ = ren^Env ren^𝓥 ρ th in
-      semantics (++ᵉ (ρ′ ✴⟨ r ⟩ σ)) M
+    body ρ M = mapK𝓒 (λ σ → semantics σ M) (extend ρ)
 \end{code}
 %</body>
