@@ -50,7 +50,7 @@ module Generic.Linear.Renaming.Properties
   ren^∋ : Renameable (_∋ A)
   ren^∋ v th = th .lookup (th .fit-here) v
 
-  open With-psh^𝓥 {_𝓥_ = _∋_} psh^∋
+  open With-psh^𝓥 {𝓥 = _∋_} psh^∋
 
   {-
   -- The rows of a thinning's matrix are a selection of standard basis vectors

@@ -26,7 +26,7 @@ module Generic.Linear.Renaming.Monoidal
   open import Generic.Linear.Renaming Ty poSemiring
   open import Generic.Linear.Renaming.Properties Ty poSemiring
 
-  open With-psh^𝓥 {_𝓥_ = _∋_} psh^∋
+  open With-psh^𝓥 {𝓥 = _∋_} psh^∋
 
   []ʳ : []ᶜ ⇒ʳ []ᶜ
   []ʳ = identity
