@@ -4,9 +4,14 @@ module Generic.Linear.Example.PaperExamples where
 
 open import Algebra.Po
 open import Algebra.Po.Construct.Nat
+open import Data.LTree
+open import Data.LTree.Vector
 open import Data.Product
-open import Data.Unit
+open import Data.Unit using (⊤; tt)
 open import Level
+open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Unary.Bunched
+open import Size
 
 module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
@@ -56,6 +61,33 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
       ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# · A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# · B ]ᶜ `⊢ C ⟩) =⇒ C
 \end{code}
 %</lR>
+
+%<*patterns>
+\begin{code}
+  pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
+  pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
+  pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
+  pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
+  pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
+\end{code}
+%</patterns>
+
+%<*lR-term>
+\begin{code}
+  test : ∀ r A B → [ λR , ∞ ] []ᶜ ⊢ (! r (A ⊕ B) ⊸ ! r (B ⊕ A))
+  test r A B =
+    let prf0 : 0# ≤ r * 0#; prf0 = ≤-reflexive (sym (annihilʳ _)) in
+    let prf1 : r ≤ r * 1#; prf1 = ≤-reflexive (sym (*-identityʳ _)) in
+    let prf2 = (≤*-refl ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ in
+    ⊸I (!E (+*-identity↘ _)
+      (`var (lvar (↙ (↘ here)) ≡.refl (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ)))
+      (!I (([]ₙ ++ₙ [ prf0 ]ₙ) ++ₙ [ prf1 ]ₙ)
+        (⊕E (+*-identity↘ _ ++ₙ []ₙ)
+          (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
+          (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
+          (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
+\end{code}
+%</lR-term>
 
 \begin{code}
 module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
