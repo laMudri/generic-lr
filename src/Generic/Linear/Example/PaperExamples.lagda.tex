@@ -15,7 +15,7 @@ open import Size
 
 module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
-  open PoSemiring poSemiring using () renaming (Carrier to Ann)
+  open PoSemiring poSemiring using () renaming (Carrier to Ann) public
 
   infixr 5 _⊸_
   infix 6 _⊕_
@@ -31,7 +31,7 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 %</Ty>
 
 \begin{code}
-  open import Generic.Linear.Everything Ty poSemiring hiding (Ann)
+  open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
 \end{code}
 
 %<*qlR>
@@ -72,22 +72,15 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 \end{code}
 %</patterns>
 
-%<*lR-term>
 \begin{code}
-  test : ∀ r A B → [ λR , ∞ ] []ᶜ ⊢ (! r (A ⊕ B) ⊸ ! r (B ⊕ A))
-  test r A B =
-    let prf0 : 0# ≤ r * 0#; prf0 = ≤-reflexive (sym (annihilʳ _)) in
-    let prf1 : r ≤ r * 1#; prf1 = ≤-reflexive (sym (*-identityʳ _)) in
-    let prf2 = (≤*-refl ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ in
-    ⊸I (!E (+*-identity↘ _)
-      (`var (lvar (↙ (↘ here)) ≡.refl (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ)))
-      (!I (([]ₙ ++ₙ [ prf0 ]ₙ) ++ₙ [ prf1 ]ₙ)
-        (⊕E (+*-identity↘ _ ++ₙ []ₙ)
-          (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
-          (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
-          (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
+  _ : Ann → Ty → Ty → Ty
+  _ = λ r A B →
 \end{code}
-%</lR-term>
+%<*BangrAToB>
+\begin{code}[inline]
+    (! r A) ⊸ B
+\end{code}
+%</BangrAToB>
 
 \begin{code}
 module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
