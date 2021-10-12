@@ -9,7 +9,7 @@ module Generic.Linear.Example.WRel.Monotonicity where
   open import Data.LTree.Vector
   open import Data.Product as ×
   open import Data.Unit using (⊤; tt)
-  open import Function.Base as F using (id; _∘_)
+  open import Function.Base as F using (id; _∘_; _$_)
   open import Level
   open import Relation.Binary using (Rel; Poset)
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
@@ -24,7 +24,7 @@ module Generic.Linear.Example.WRel.Monotonicity where
   module WithPoset (poset : Poset 0ℓ 0ℓ 0ℓ) where
     open Poset poset renaming (_≤_ to _≤ˢ_)
 
-    open WithPoSemiring poSemiring
+    open WithPoSemiring poSemiring public
 
     0CRM : CommutativeRelMonoid 0ℓ 0ℓ
     0CRM = record
@@ -38,12 +38,19 @@ module Generic.Linear.Example.WRel.Monotonicity where
       ; isCommutativeRelMonoid = _
       }
     open WithWorlds 0CRM
+\end{code}
 
+%<*BaseR>
+\begin{code}
     Baseᴿ : WRel _≤ʷ_
     Baseᴿ .set = Carrier
     Baseᴿ .rel x y _ = x ≤ˢ y
     Baseᴿ .subres _ = id
+\end{code}
+%</BaseR>
 
+%<*BangR>
+\begin{code}
     !ᴿ : WayUp → WRel _≤ʷ_ → WRel _≤ʷ_
     !ᴿ a R .set = R .set
     !ᴿ ↑↑ R .rel = R .rel
@@ -51,7 +58,10 @@ module Generic.Linear.Example.WRel.Monotonicity where
     !ᴿ ?? R .rel x y = U
     !ᴿ ~~ R .rel x y = R .rel x y ∩ R .rel y x
     !ᴿ a R .subres _ = id
+\end{code}
+%</BangR>
 
+\begin{code}
     !ᴿ-map : ∀ {a} {R S : WRel _≤ʷ_} → WRelMor R S → WRelMor (!ᴿ a R) (!ᴿ a S)
     !ᴿ-map f .set⇒ = f .set⇒
     !ᴿ-map {↑↑} f .rel⇒ = f .rel⇒
@@ -134,9 +144,9 @@ module Generic.Linear.Example.WRel.Monotonicity where
     open WithSemantics 0CRM (λ _ → Baseᴿ) bang public
 
   open import Data.LTree.Automation
-  open import Data.Nat
+  open import Data.Nat using (ℕ)
 
-  open import Data.Integer
+  open import Data.Integer as ℤ
   open import Data.Integer.Properties
   open WithPoset ≤-poset
 
@@ -144,18 +154,47 @@ module Generic.Linear.Example.WRel.Monotonicity where
   open UC.WithPoSemiring poSemiring
   open WithInverses record
     { 0#⁻¹ = ??⁻¹ ; +⁻¹ = ∧⁻¹ ; 1#⁻¹ = ↑↑⁻¹ ; *⁻¹ = *⁻¹ }
+\end{code}
 
+%<*patterns>
+\begin{code}
   pattern uvar i = U.`var (U.lvar i ≡.refl _)
   pattern ulam M = U.`con (`lam _ _ , ≡.refl , M)
   pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴⟨ _ ⟩ (⟨ _ ⟩· N))
+\end{code}
+%</patterns>
 
-  test : [ AnnArr , ∞ ]
+%<*minus>
+\begin{code}
+  minus : [ AnnArr , ∞ ]
     [ ~~ , (↑↑ , base tt) ⊸ (↑↑ , base tt) ⊸ base tt ]ᶜ ++ᶜ
     [ ~~ , (↓↓ , base tt) ⊸ base tt ]ᶜ
     ⊢ ((↑↑ , base tt) ⊸ (↓↓ , base tt) ⊸ base tt)
-  test =
+  minus =
     let #0 = Ptr ((((([-] <+> [-]) <+> [-]) <+> [-]) <+> ε) <+> ε) F.∋ # 0 in
     elab-unique AnnArr
     (ulam (ulam (uapp (uapp (uvar (#0)) (uvar (# 2))) (uapp (uvar (# 1)) (uvar (# 3))))))
     ([ ~~ ] ++ [ ~~ ])
 \end{code}
+%</minus>
+
+%<*minus-set>
+\begin{code}
+  minus-set⇒ : wrel minus .set⇒ (ℤ._+_ , ℤ.-_) ≡ λ x y → x ℤ.+ (ℤ.- y)
+  minus-set⇒ = ≡.refl
+\end{code}
+%</minus-set>
+
+%<*thm>
+\begin{code}
+  minus-mono = wrel minus .rel⇒ $
+    ((λ where .app✴ _ xx .app✴ _ yy → +-mono-≤ xx yy) ,
+     (λ where .app✴ _ xx .app✴ _ yy → +-mono-≤ xx yy))
+      ✴⟨ _ ⟩
+    ((λ where .app✴ _ xx → neg-mono-≤ xx) ,
+     (λ where .app✴ _ xx → neg-mono-≤ xx))
+
+  thm : ∀ {x x′ y y′} → x ℤ.≤ x′ → y′ ℤ.≤ y → x ℤ.+ (ℤ.- y) ℤ.≤ x′ ℤ.+ (ℤ.- y′)
+  thm xx yy = minus-mono .app✴ _ xx .app✴ _ yy
+\end{code}
+%</thm>
