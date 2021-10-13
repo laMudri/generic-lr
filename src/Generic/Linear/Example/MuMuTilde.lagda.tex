@@ -1,92 +1,68 @@
+\begin{code}
 {-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
 
 open import Algebra.Po
 open import Level using (0ℓ)
-open import Relation.Binary using (Rel)
 
 module Generic.Linear.Example.MuMuTilde
   (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) (Base : Set)
   where
 
-  open PoSemiring poSemiring renaming (Carrier to Ann)
+  open PoSemiring poSemiring using () renaming (Carrier to Ann)
 
-  open import Algebra.Relational
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.LTree.Matrix
   open import Data.Product as ×
-  open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×PW
-    using (×-setoid)
-  open import Data.Unit using (⊤; tt)
-  open import Function.Base using (id; _∘_; _∘′_; _$_; λ-; _$-)
-  open import Function.Equality using (_⟶_; _⇨_; _⟨$⟩_; cong)
-  open import Proposition
   open import Size
-  open import Relation.Unary
-  open import Relation.Unary.Bunched
-  open import Relation.Unary.Bunched.Properties
-  open import Relation.Binary using (Setoid)
-  open import Relation.Binary.Construct.Always as ⊤ using ()
-  open import Relation.Binary.PropositionalEquality as ≡
-    using (_≡_; subst; subst₂)
 
   infixr 5 _⅋_
   infixl 6 _^⊥
+\end{code}
 
+%<*Ty>
+\begin{code}
   data Ty : Set where
     base : Ty
     _⅋_ : (rA sB : Ann × Ty) → Ty
     _^⊥ : (A : Ty) → Ty
+\end{code}
+%</Ty>
 
+%<*Conc>
+\begin{code}
   data Conc : Set where
     com : Conc
     trm cot : (A : Ty) → Conc
+\end{code}
+%</Conc>
 
-  open import Generic.Linear.Operations rawPoSemiring
-  open import Generic.Linear.Algebra poSemiring
-  open import Generic.Linear.Syntax Conc Ann
-  open import Generic.Linear.Syntax.Interpretation Conc rawPoSemiring
-  open import Generic.Linear.Syntax.Interpretation.Map Conc poSemiring
-  open import Generic.Linear.Syntax.Term Conc rawPoSemiring
-  open import Generic.Linear.Variable Conc rawPoSemiring
-  open import Generic.Linear.Environment Conc poSemiring
-  open import Generic.Linear.Renaming Conc poSemiring
-  open [_]_⇒ᵉ_
-  open import Generic.Linear.Extend Conc poSemiring
-  open import Generic.Linear.Renaming.Properties Conc poSemiring
-  open import Generic.Linear.Environment.Properties Conc poSemiring
-  open import Generic.Linear.Semantics Conc poSemiring
+\begin{code}
+  open import Generic.Linear.Everything Conc poSemiring hiding (Ann)
+\end{code}
 
+%<*MMT>
+\begin{code}
   data `MMT : Set where
     `cut `μ `μ∼ : (A : Ty) → `MMT
     `λ `λ∼ : (A : Ty) → `MMT
     `⟨-,-⟩ `μ⟨-,-⟩ : (rA sB : Ann × Ty) → `MMT
 
-  flags : PremisesFlags
-  flags = allPremisesFlags
-
-  MMT : System flags
+  MMT : System
   MMT = `MMT ▹ λ where
-    (`cut A) → ⟨ []ᶜ `⊢ trm A ⟩ `✴ ⟨ []ᶜ `⊢ cot A ⟩
-               =⇒ com
-    (`μ A) → ⟨ [ 1# , cot A ]ᶜ `⊢ com ⟩
-             =⇒ trm A
-    (`μ∼ A) → ⟨ [ 1# , trm A ]ᶜ `⊢ com ⟩
-              =⇒ cot A
-    (`λ A) → ⟨ []ᶜ `⊢ cot A ⟩
-             =⇒ trm (A ^⊥)
-    (`λ∼ A) → ⟨ []ᶜ `⊢ trm A ⟩
-              =⇒ cot (A ^⊥)
+    (`cut A)  → ⟨ []ᶜ `⊢ trm A ⟩ `✴ ⟨ []ᶜ `⊢ cot A ⟩  =⇒ com
+    (`μ A)    → ⟨ [ 1# , cot A ]ᶜ `⊢ com ⟩            =⇒ trm A
+    (`μ∼ A)   → ⟨ [ 1# , trm A ]ᶜ `⊢ com ⟩            =⇒ cot A
+    (`λ A)    → ⟨ []ᶜ `⊢ cot A ⟩                      =⇒ trm (A ^⊥)
+    (`λ∼ A)   → ⟨ []ᶜ `⊢ trm A ⟩                      =⇒ cot (A ^⊥)
     (`⟨-,-⟩ rA@(r , A) sB@(s , B)) →
-      r `· ⟨ []ᶜ `⊢ cot A ⟩ `✴ s `· ⟨ []ᶜ `⊢ cot B ⟩
-      =⇒ cot (rA ⅋ sB)
+      r `· ⟨ []ᶜ `⊢ cot A ⟩ `✴ s `· ⟨ []ᶜ `⊢ cot B ⟩  =⇒ cot (rA ⅋ sB)
     (`μ⟨-,-⟩ rA@(r , A) sB@(s , B)) →
-      ⟨ [ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ `⊢ com ⟩
-      =⇒ trm (rA ⅋ sB)
+      ⟨ [ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ `⊢ com ⟩    =⇒ trm (rA ⅋ sB)
+\end{code}
+%</MMT>
 
-  Drv = [ MMT , ∞ ]_⊢_
-  open WithScope (Scope Drv)
-
+\begin{code}
+  {-
   myComm : (rA sB : Ann × Ty) →
            Drv []ᶜ (trm ((1# , (rA ⅋ sB) ^⊥) ⅋ (1# , sB ⅋ rA)))
   myComm rA@(r , A) sB@(s , B) =
@@ -126,3 +102,5 @@ module Generic.Linear.Example.MuMuTilde
                     (([]ₙ ++ₙ ([ ≤-refl ]ₙ ++ₙ [ ≤-refl ]ₙ)) ++ₙ []ₙ)))
       )
     )
+  -}
+\end{code}
