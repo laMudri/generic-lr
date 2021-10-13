@@ -94,10 +94,13 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×
     open import Data.Wrap
     open import Function.Base using (_∘_; _$_)
+    open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
     open import Relation.Nary
     open import Relation.Unary.Bunched
     open BunchedDuplicable
     open import Size
+
+    pattern uvar i = U.`var (U.lvar i ≡.refl _)
 \end{code}
 
 %<*NonDetInverses>

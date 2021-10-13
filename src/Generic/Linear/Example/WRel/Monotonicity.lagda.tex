@@ -158,7 +158,6 @@ module Generic.Linear.Example.WRel.Monotonicity where
 
 %<*patterns>
 \begin{code}
-  pattern uvar i = U.`var (U.lvar i ≡.refl _)
   pattern ulam M = U.`con (`lam _ _ , ≡.refl , M)
   pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴⟨ _ ⟩ (⟨ _ ⟩· N))
 \end{code}
