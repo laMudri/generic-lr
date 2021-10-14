@@ -188,8 +188,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
 %<*elab-sem>
 \begin{code}
-      elab-sem : ∀ sys →
-        U.Semantics (uSystem sys) U._∋_ (𝓒 sys)
+      elab-sem : ∀ sys → U.Semantics (uSystem sys) U._∋_ (𝓒 sys)
       elab-sem sys .ren^𝓥 = U.ren^∋
       elab-sem sys .⟦var⟧ (U.lvar i q _) R =
         (| `var (| (lvar i q) (⟨ i ∣⁻¹ R) |) |)
