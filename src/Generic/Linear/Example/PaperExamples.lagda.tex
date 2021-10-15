@@ -34,10 +34,14 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
 \end{code}
 
-%<*qlR>
+%<*Side>
 \begin{code}
   data Side : Set where ll rr : Side
+\end{code}
+%</Side>
 
+%<*qlR>
+\begin{code}
   data `λR : Set where
     `⊸I `⊸E : (A B : Ty) → `λR
     `⊕I : (i : Side) (A B : Ty) → `λR
