@@ -186,14 +186,24 @@ module Generic.Linear.Example.WRel.Monotonicity where
 
 %<*thm>
 \begin{code}
+  private
+    variable
+      x x′ y y′ : ℤ
+
   minus-mono = wrel minus .rel⇒ $
     ((λ where .app✴ _ xx .app✴ _ yy → +-mono-≤ xx yy) ,
      (λ where .app✴ _ xx .app✴ _ yy → +-mono-≤ xx yy))
       ✴⟨ _ ⟩
     ((λ where .app✴ _ xx → neg-mono-≤ xx) ,
      (λ where .app✴ _ xx → neg-mono-≤ xx))
+\end{code}
 
-  thm : ∀ {x x′ y y′} → x ℤ.≤ x′ → y′ ℤ.≤ y → x ℤ.+ (ℤ.- y) ℤ.≤ x′ ℤ.+ (ℤ.- y′)
+%<*thm-type>
+\begin{code}
+  thm : x ℤ.≤ x′ → y′ ℤ.≤ y → x ℤ.+ (ℤ.- y) ℤ.≤ x′ ℤ.+ (ℤ.- y′)
+\end{code}
+%</thm-type>
+\begin{code}
   thm xx yy = minus-mono .app✴ _ xx .app✴ _ yy
 \end{code}
 %</thm>
