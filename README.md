@@ -18,4 +18,4 @@ We also have the other two examples from the paper: world-indexed relations in
 ## Compiles with
 
 - Agda version 2.6.2
-- agda-stdlib version 0.17
+- agda-stdlib version 1.7
