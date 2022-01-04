@@ -91,10 +91,8 @@ connectives:
 \begin{code}
   data Premises : Set where
     ⟨_`⊢_⟩ : (Δ : Ctx) (A : Ty) → Premises
-    `⊤ : Premises
-    _`∧_ : (p q : Premises) → Premises
-    `ℑ : Premises
-    _`✴_ : (p q : Premises) → Premises
+    `⊤ : Premises;  _`∧_ : (p q : Premises) → Premises
+    `ℑ : Premises;  _`✴_ : (p q : Premises) → Premises
     _`·_ : (r : Ann) (p : Premises) → Premises
 \end{code}
 %</Premises>
@@ -103,9 +101,7 @@ connectives:
 \begin{code}
   record Rule : Set where
     constructor _=⇒_
-    field
-      premises : Premises
-      conclusion : Ty
+    field premises : Premises; conclusion : Ty
   open Rule public
 \end{code}
 %</Rule>
@@ -114,33 +110,45 @@ connectives:
 \begin{code}
   record System : Set₁ where
     constructor _▹_
-    field
-      Label : Set
-      rules : (l : Label) → Rule
+    field Label : Set; rules : (l : Label) → Rule
   open System public
 \end{code}
 %</System>
+
+\begin{code}
+  _─OpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
+  I ─OpenFam ℓ = Ctx → I → Set ℓ
+
+  _─ExtOpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
+  I ─ExtOpenFam ℓ = Ctx → I ─OpenFam ℓ
+\end{code}
 
 %<*OpenFam>
 \begin{code}
   OpenType : ∀ ℓ → Set (suc ℓ)
   OpenType ℓ = Ctx → Set ℓ
 
-  _─OpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
-  I ─OpenFam ℓ = Ctx → I → Set ℓ
   OpenFam : ∀ ℓ → Set (suc ℓ)
-  OpenFam ℓ = Ty ─OpenFam ℓ
+  OpenFam ℓ = Ctx → Ty → Set ℓ
 
-  _─ExtOpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
-  I ─ExtOpenFam ℓ = Ctx → I ─OpenFam ℓ
   ExtOpenFam : ∀ ℓ → Set (suc ℓ)
-  ExtOpenFam ℓ = Ty ─ExtOpenFam ℓ
+  ExtOpenFam ℓ = Ctx → OpenFam ℓ
 \end{code}
 %</OpenFam>
 
+\begin{code}
+  private
+    module Simplified where
+\end{code}
+
 %<*Scope>
+\begin{code}
+      Scope : ∀ {ℓ} → OpenFam ℓ → ExtOpenFam ℓ
+      Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
+\end{code}
+%</Scope>
+
 \begin{code}
   Scope : ∀ {i} {I : Set i} {ℓ} → I ─OpenFam ℓ → I ─ExtOpenFam ℓ
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
 \end{code}
-%</Scope>

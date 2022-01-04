@@ -78,10 +78,8 @@ module Generic.Linear.Syntax.Interpretation
 \begin{code}
   ⟦_⟧p : Premises → ExtOpenFam ℓ → OpenType ℓ
   ⟦ ⟨ Δ `⊢ A ⟩ ⟧p X Γ = X Δ Γ A
-  ⟦ `⊤ ⟧p X = U
-  ⟦ p `∧ q ⟧p X = ⟦ p ⟧p X ∩ ⟦ q ⟧p X
-  ⟦ `ℑ ⟧p X = ℑᶜ
-  ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ᶜ ⟦ q ⟧p X
+  ⟦ `⊤ ⟧p X = U;   ⟦ p `∧ q ⟧p X = ⟦ p ⟧p X ∩ ⟦ q ⟧p X
+  ⟦ `ℑ ⟧p X = ℑᶜ;  ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ᶜ ⟦ q ⟧p X
   ⟦ r `· p ⟧p X = r ·ᶜ ⟦ p ⟧p X
 \end{code}
 %</semp>

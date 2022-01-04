@@ -169,11 +169,13 @@ module Generic.Linear.Example.WRel.Monotonicity where
     [ ~~ , (↑↑ , base tt) ⊸ (↑↑ , base tt) ⊸ base tt ]ᶜ ++ᶜ
     [ ~~ , (↓↓ , base tt) ⊸ base tt ]ᶜ
     ⊢ ((↑↑ , base tt) ⊸ (↓↓ , base tt) ⊸ base tt)
-  minus =
-    let #0 = Ptr ((((([-] <+> [-]) <+> [-]) <+> [-]) <+> ε) <+> ε) F.∋ # 0 in
-    elab-unique AnnArr
-    (ulam (ulam (uapp (uapp (uvar (#0)) (uvar (# 2))) (uapp (uvar (# 1)) (uvar (# 3))))))
+  minus = elab-unique AnnArr
+    (ulam (ulam (uapp  (uapp (uvar (#0)) (uvar (# 2)))
+                       (uapp (uvar (# 1)) (uvar (# 3))))))
     ([ ~~ ] ++ [ ~~ ])
+    where
+    #0 : Ptr ((((([-] <+> [-]) <+> [-]) <+> [-]) <+> ε) <+> ε)
+    #0 = # 0
 \end{code}
 %</minus>
 
