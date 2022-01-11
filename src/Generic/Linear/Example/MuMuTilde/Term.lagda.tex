@@ -18,7 +18,8 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
   open import Generic.Linear.Everything Conc poSemiring
   open import Generic.Linear.Example.UsageCheck Conc
   open WithPoSemiring poSemiring
-  open WithInverses record { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ }
+  open WithInverses record
+    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 \end{code}
 
 %<*patterns>

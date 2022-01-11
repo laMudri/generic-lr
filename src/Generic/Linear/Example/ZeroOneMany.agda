@@ -278,19 +278,10 @@ module Generic.Linear.Example.ZeroOneMany where
   *⁻¹ uω u1 = []
   *⁻¹ uω uω = (uω , ≤-refl) ∷ []
 
-  rep : ∀ bf x → List
-    (Dup _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z) bf (λ _ → ⊤) x)
-  rep bf u0 =
-    □⟨ ≤-refl , pure-If ≤-refl , pure-If ≤-refl , pure-If (≡⇒≤ ∘ annihilʳ) ⟩ _
-    ∷ []
-  rep bf u1 = []
-  rep bf uω =
-    □⟨ ≤-refl , pure-If ω≤0 , pure-If ≤-refl , pure-If lemma ⟩ _ ∷ []
-    where
-    lemma : ∀ r → uω ≤ r * uω
-    lemma u0 = ω≤0
-    lemma u1 = ≤-refl
-    lemma uω = ≤-refl
+  rep : ∀ x → List (Dup _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ _ → ⊤) x)
+  rep u0 = □⟨ ≤-refl , ≤-refl , ≤-refl ⟩ _ ∷ []
+  rep u1 = []
+  rep uω = □⟨ ≤-refl , ω≤0 , ≤-refl ⟩ _ ∷ []
 
   ω*-del : ∀ x → uω * x ≤ u0
   ω*-del u0 = ≤-refl

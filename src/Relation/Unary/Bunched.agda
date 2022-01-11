@@ -77,27 +77,20 @@ module Relation.Unary.Bunched where
 
   open BunchedScaling public using (⟨_⟩·_)
 
-  record BoxFlags : Set where
-    constructor boxFlags
-    field p0 p+ p* : Bool
-
   module BunchedDuplicable
-    {a r ℓ} {A : Set a} {R : Set r} (_≤_ : A → A → Set ℓ)
-    (_∼0 : A → Set ℓ) (_∼_+_ : A → A → A → Set ℓ) (_∼_*ₗ_ : A → R → A → Set ℓ)
+    {a ℓ} {A : Set a} (_≤_ : A → A → Set ℓ)
+    (_∼0 : A → Set ℓ) (_∼_+_ : A → A → A → Set ℓ)
     where
 
-    infixr 10 □⟨_,_,_,_⟩_
+    infixr 10 □⟨_,_,_⟩_
 
-    record Dup (bf : BoxFlags) {t} (T : A → Set t) (x : A)
-           : Set (a ⊔ r ⊔ ℓ ⊔ t) where
-      constructor □⟨_,_,_,_⟩_
-      open BoxFlags bf
+    record Dup {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
+      constructor □⟨_,_,_⟩_
       field
         {y} : _
         strengthen : x ≤ y
-        split-0 : If p0 (y ∼0)
-        split-+ : If p+ (y ∼ y + y)
-        split-* : If p* (∀ r → y ∼ r *ₗ y)
+        split-0 : y ∼0
+        split-+ : y ∼ y + y
         T-prf : T y
 
-  open BunchedDuplicable public using (□⟨_,_,_,_⟩_)
+  open BunchedDuplicable public using (□⟨_,_,_⟩_)

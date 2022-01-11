@@ -6,9 +6,12 @@ module Generic.Linear.Example.Mono where
   open import Algebra.Po
   open import Algebra.Relational
   open import Data.Product
+  open import Data.Unit using (⊤; tt)
   open import Level
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary using (U; _∩_)
+  open import Relation.Unary.Bunched
+  open BunchedDuplicable
 
   infix 7 _*_
   infix 5 _∧_
@@ -357,3 +360,6 @@ module Generic.Linear.Example.Mono where
   *⁻¹ ~~ ↓↓ = (?? , ↓≤?) ∷ []
   *⁻¹ ~~ ?? = (?? , ≤-refl) ∷ []
   *⁻¹ ~~ ~~ = (~~ , ~~≤) ∷ []
+
+  rep : ∀ a → List (Dup _≤_ (_≤ ??) (λ x y z → x ≤ y ∧ z) (λ _ → ⊤) a)
+  rep a = □⟨ ≤-refl , ≤?? , meet a a .unique (≤-refl , ≤-refl) ⟩ _ ∷ []

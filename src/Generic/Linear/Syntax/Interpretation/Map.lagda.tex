@@ -26,7 +26,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open PoSemiring poSemiring renaming (Carrier to Ann)
 
   open import Generic.Linear.Operations rawPoSemiring
-  open import Generic.Linear.Algebra poSemiring
+  open import Generic.Linear.Algebra poSemiring hiding (+ₘ-mono)
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
 
@@ -53,6 +53,21 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p (p `· ps) f r (⟨ sp* ⟩· M) =
       let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
       ⟨ sp*′ ⟩· map-p ps f r′ M
+    map-p (`□ ps) f {P} {Q} P∼Q (□⟨_,_,_⟩_ {P′} str sp0 sp+ M) =
+      let _,_ {Q′} P′∼Q′ uQ′ = F .func P′ in
+      let
+        P′∼Q : F .rel P′ Q
+        P′∼Q = F .rel-≤ₘ str ≤*-refl P∼Q
+        Q≤Q′ : Q ≤* Q′
+        Q≤Q′ = uQ′ P′∼Q
+        sp0′ : Q′ ≤0*
+        sp0′ = F .rel-0ₘ (sp0 , P′∼Q′)
+        sp+′ : Q′ ≤[ Q′ +* Q′ ]
+        sp+′ =
+          let rl ↘, sp ,↙ rr = F .rel-+ₘ (sp+ , P′∼Q′) in
+          +ₘ-mono ≤*-refl (F .func _ .unique rl) (F .func _ .unique rr) sp
+      in
+      □⟨ Q≤Q′ , sp0′ , sp+′ ⟩ map-p ps f P′∼Q′ M
 
     map-r : (r : Rule) →
       (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
@@ -80,6 +95,8 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =
       map-p′ ps f s ✴⟨ sp ⟩ map-p′ qs f t
     map-p′ (r `· ps) f (⟨ sp ⟩· t) = ⟨ sp ⟩· map-p′ ps f t
+    map-p′ (`□ ps) f (□⟨ str , sp0 , sp+ ⟩ t) =
+      □⟨ str , sp0 , sp+ ⟩ map-p′ ps f t
 
     map-r′ : (r : Rule) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
@@ -110,6 +127,8 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
       ⟨ sp ⟩·_ <$> sequence-p ps t
+    sequence-p (`□ ps) (□⟨ str , sp0 , sp+ ⟩ t) =
+      □⟨ str , sp0 , sp+ ⟩_ <$> sequence-p ps t
 
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →

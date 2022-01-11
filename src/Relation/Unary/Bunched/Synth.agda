@@ -6,8 +6,7 @@ module Relation.Unary.Bunched.Synth {a} {A : Set a} where
   open B public using
     ( module BunchedConjunction; module BunchedScaling
     ; module BunchedDuplicable; module BunchedOrder
-    ; ◇⟨_⟩_; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_; □⟨_,_,_,_⟩_
-    ; BoxFlags; boxFlags
+    ; ◇⟨_⟩_; ℑ⟨_⟩; _✴⟨_⟩_; lam✴; app✴; ⟨_⟩·_; □⟨_,_,_⟩_
     )
 
   open import Data.Product

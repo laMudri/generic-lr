@@ -10,7 +10,6 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
   open import Data.Empty
   open import Data.List as L using (List; []; _∷_)
   open import Data.Unit hiding (_≤_)
-  open import Proposition
 
   Lone : ∀ {a} {A : Set a} → List A → Set
   Lone [] = ⊥
@@ -77,6 +76,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uPremises (ps `∧ qs) = uPremises ps U.`∧ uPremises qs
     uPremises (ps `✴ qs) = uPremises ps U.`✴ uPremises qs
     uPremises (r `· ps) = _ U.`· uPremises ps
+    uPremises (`□ ps) = U.`□ (uPremises ps)
     uRule : Rule → U.Rule
     uRule (ps =⇒ A) = uPremises ps U.=⇒ A
     uSystem : System → U.System
@@ -113,6 +113,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
 \end{code}
 %</NonDetInverses>
+\begin{code}
+        rep : (r : Ann) → List (Dup _≤_ (_≤ 0#) (λ x y z → x ≤ y + z) (λ _ → ⊤) r)
+\end{code}
 
 \begin{code}
     module WithInverses (invs : NonDetInverses) where
@@ -141,6 +144,18 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       *ₗ⁻¹ {ε} r Q = (| (V.[] , []ₙ) |)
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++ₙ_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
+
+      rep* : ∀ {s} (R : Vector Ann s) →
+        List (Dup _≤*_ _≤0* _≤[_+*_] (λ _ → ⊤) R)
+      rep* {[-]} R = do
+        □⟨ str , sp0 , sp+ ⟩ _ ← rep (R here)
+        pure $ □⟨_,_,_⟩_ {y = V.[ _ ]} [ str ]ₙ [ sp0 ]ₙ [ sp+ ]ₙ _
+      rep* {ε} R = pure $ □⟨_,_,_⟩_ {y = V.[]} []ₙ []ₙ []ₙ _
+      rep* {s <+> t} R = do
+        □⟨ strl , sp0l , sp+l ⟩ _ ← rep* {s} (R ∘ ↙)
+        □⟨ strr , sp0r , sp+r ⟩ _ ← rep* {t} (R ∘ ↘)
+        pure $ □⟨_,_,_⟩_ {y = _ V.++ _}
+          (strl ++ₙ strr) (sp0l ++ₙ sp0r) (sp+l ++ₙ sp+r) _
 \end{code}
 
 %<*C>
@@ -165,6 +180,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩· t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
         (| ⟨ sp ⟩·_ (lemma-p sys ps t) |)
+      lemma-p sys (`□ ps) {ctx P γ} (□⟨ _ , _ , _ ⟩ t) = do
+        (□⟨ str , sp0 , sp+ ⟩ _) ← rep* P
+        (| □⟨ str , sp0 , sp+ ⟩_ (lemma-p sys ps t) |)
 
       lemma-r : ∀ (sys : System) (r : Rule) {A Γ} →
         U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →
