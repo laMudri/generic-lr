@@ -46,3 +46,18 @@ import Algebra.Po.Relation
 import Algebra.Skew
 import Algebra.PoToRel
 import Function.Extra
+
+import Generic.Linear.Syntax
+import Generic.Linear.Example.PaperExamples
+import Generic.Linear.Example.MuMuTilde.Term
+import Generic.Linear.Example.WRel
+import Generic.Linear.Example.UsageCheck
+import Generic.Linear.Example.PaperExamples.HeavyI
+import Generic.Linear.Example.WRel.Monotonicity
+import Generic.Linear.Example.MuMuTilde
+import Generic.Linear.Semantics
+import Generic.Linear.Semantics.Syntactic
+import Generic.Linear.Renaming
+import Generic.Linear.Syntax.Term
+import Generic.Linear.Syntax.Interpretation.Map
+import Generic.Linear.Syntax.Interpretation
