@@ -21,3 +21,4 @@ src/processed-latex/
 *.auctex-auto
 
 *.envrc
+result
