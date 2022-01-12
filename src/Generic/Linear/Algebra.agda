@@ -213,6 +213,30 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   [─ y′ ─]ᴿ .rel-*ₘ (sp* , sp) = swap-◇ (*ₘ-assoc→ (sp* .get here , sp))
   [─ y′ ─]ᴿ .func x = *ₗ-triv , *ₗ→≤*
 
+  topᴿ : ∀ {a s t u} → LinFuncRel (s <+> t) u a → LinFuncRel s u a
+  topᴿ F .rel x y = F .rel (x ++ 0*) y
+  topᴿ F .rel-≤ₘ xx yy = F .rel-≤ₘ (xx ++ₙ ≤*-refl) yy
+  topᴿ F .rel-0ₘ (sp0 , f) = F .rel-0ₘ (sp0 ++ₙ 0*-triv , f)
+  topᴿ F .rel-+ₘ (sp+ , f) =
+    let _ ↘, sp+0 ,↙ _ = +ₘ-identity²← 0*-triv in
+    F .rel-+ₘ (sp+ ++ₙ sp+0 , f)
+  topᴿ F .rel-*ₘ (sp* , f) =
+    let sp*0 , _ = *ₘ-annihilʳ← 0*-triv in
+    F .rel-*ₘ (sp* ++ₙ sp*0 , f)
+  topᴿ F .func x = F .func (x ++ 0*)
+
+  botᴿ : ∀ {a s t u} → LinFuncRel (s <+> t) u a → LinFuncRel t u a
+  botᴿ F .rel x y = F .rel (0* ++ x) y
+  botᴿ F .rel-≤ₘ xx yy = F .rel-≤ₘ (≤*-refl ++ₙ xx) yy
+  botᴿ F .rel-0ₘ (sp0 , f) = F .rel-0ₘ (0*-triv ++ₙ sp0 , f)
+  botᴿ F .rel-+ₘ (sp+ , f) =
+    let _ ↘, sp+0 ,↙ _ = +ₘ-identity²← 0*-triv in
+    F .rel-+ₘ (sp+0 ++ₙ sp+ , f)
+  botᴿ F .rel-*ₘ (sp* , f) =
+    let sp*0 , _ = *ₘ-annihilʳ← 0*-triv in
+    F .rel-*ₘ (sp*0 ++ₙ sp* , f)
+  botᴿ F .func x = F .func (0* ++ x)
+
   --  Horizontal
 
   [│]ᴿ : ∀ {s} → LinFuncRel s ε 0ℓ

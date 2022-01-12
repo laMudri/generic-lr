@@ -18,7 +18,7 @@ module Generic.Linear.Environment.Properties
   open import Relation.Unary as Syn using (IUniversal)
   open import Relation.Unary.Checked
   open import Relation.Unary.Bunched.Checked
-  open import Relation.Binary.PropositionalEquality
+  open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
 
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Algebra poSemiring
@@ -74,8 +74,25 @@ module Generic.Linear.Environment.Properties
     [-]ᵉ′ : ∀ {R θ} → ∀[ R here ·ᶜ [ 𝓥 ]_⊨ θ here Syn.⇒ [ 𝓥 ]_⇒ᵉ ctx {[-]} R θ ]
     [-]ᵉ′ (⟨_⟩·_ {Q′} sp v) .Ψ = [─ Q′ ─]ᴿ
     [-]ᵉ′ (⟨ sp ⟩· v) .fit-here = sp
-    [-]ᵉ′ (⟨ sp ⟩· v) .lookup t (lvar here refl b) =
+    [-]ᵉ′ (⟨ sp ⟩· v) .lookup t (lvar here ≡.refl b) =
       psh^𝓥 (*ₘ-identity→ (b .get here , t)) v
 
     [-]ᵉ : ∀ {r A} → ∀[ r ·ᶜ [ 𝓥 ]_⊨ A Syn.⇒ [ 𝓥 ]_⇒ᵉ [ r · A ]ᶜ ]
     [-]ᵉ = [-]ᵉ′
+
+    []ᵉ⁻¹ : ∀[ [ 𝓥 ]_⇒ᵉ []ᶜ ⇒ ℑᶜ ]
+    []ᵉ⁻¹ ρ = ℑ⟨ ρ .Ψ .rel-0ₘ ([]ₙ , ρ .fit-here) ⟩
+
+    ++ᵉ⁻¹ : ∀[ [ 𝓥 ]_⇒ᵉ Γ ++ᶜ Δ ⇒ [ 𝓥 ]_⇒ᵉ Γ ✴ᶜ [ 𝓥 ]_⇒ᵉ Δ ]
+    ++ᵉ⁻¹ ρ =
+      let rl ↘, sp+ ,↙ rr =
+           ρ .Ψ .rel-+ₘ (+*-identity↘ _ ++ₙ +*-identity↙ _ , ρ .fit-here) in
+      pack (topᴿ (ρ .Ψ)) rl (λ r v → ρ .lookup r (v ↙ᵛ 0*-triv))
+        ✴⟨ sp+ ⟩
+      pack (botᴿ (ρ .Ψ)) rr (λ r v → ρ .lookup r (0*-triv ↘ᵛ v))
+
+    [-]ᵉ⁻¹ : ∀ {r A} → ∀[ [ 𝓥 ]_⇒ᵉ [ r · A ]ᶜ Syn.⇒ r ·ᶜ [ 𝓥 ]_⊨ A ]
+    [-]ᵉ⁻¹ ρ =
+      let r , sp* =
+           ρ .Ψ .rel-*ₘ {x = [ 1# ]} ([ *.identity .proj₂ _ ]ₙ , ρ .fit-here) in
+      ⟨ sp* ⟩· ρ .lookup r (hereᵛ ≡.refl ≤-refl)
