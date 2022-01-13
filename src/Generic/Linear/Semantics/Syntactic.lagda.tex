@@ -140,11 +140,6 @@ module Generic.Linear.Semantics.Syntactic
   sub : [ d ] Γ ⇒ˢ Δ → [ d , ∞ ] Δ ⊢ A → [ d , ∞ ] Γ ⊢ A
   sub σ t = semantics Sub σ t
 
-  -- _>>ˢ_ : Substitution d Γ Δ → Substitution d Δ Θ → Substitution d Γ Θ
-  -- (ρ >>ˢ σ) .M = ρ .M *ᴹ σ .M
-  -- (ρ >>ˢ σ) .fit-here = {!!}
-  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (≤*-trans (ρ .fit-here) {!!}) (ρ .lookup v)))
-
   module WithKit (K : Kit d 𝓥) where
     private
       module K = Kit K
