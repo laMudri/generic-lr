@@ -1,5 +1,5 @@
 \begin{code}
-{-# OPTIONS --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
 module Generic.Linear.Example.PaperExamples where
 
 open import Algebra.Po
@@ -66,16 +66,6 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 \end{code}
 %</lR>
 
-%<*patterns>
-\begin{code}
-  pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
-  pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
-  pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
-  pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
-  pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
-\end{code}
-%</patterns>
-
 \begin{code}
   _ : Ann → Ty → Ty → Ty
   _ = λ r A B →
@@ -85,6 +75,51 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     (! r A) ⊸ B
 \end{code}
 %</BangrAToB>
+
+\begin{code}
+module CPP0Concrete where
+
+  open import Generic.Linear.Example.ZeroOneMany
+    renaming (u0 to 0#; u1 to 1#; uω to ω#)
+  open CPP0 poSemiring
+
+  open import Data.LTree.Automation
+  open import Data.Nat using (ℕ)
+  open import Data.Nat.Properties using (_<?_)
+  open import Relation.Nullary.Decidable using (True)
+
+  open import Generic.Linear.Example.UsageCheck Ty
+  open WithPoSemiring poSemiring
+  open WithInverses record { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ }
+\end{code}
+
+%<*patterns>
+\begin{code}
+  pattern ⊸I M = U.`con (`⊸I _ _ , ≡.refl , M)
+  pattern !I M = U.`con (`!I _ _ , ≡.refl , ⟨ _ ⟩· M)
+  pattern !E M N = U.`con (`!E _ _ _ , ≡.refl , M ✴⟨ _ ⟩ N)
+  pattern ⊕I i M = U.`con (`⊕I i _ _ , ≡.refl , M)
+  pattern ⊕E M N O = U.`con (`⊕E _ _ _ , ≡.refl , M ✴⟨ _ ⟩ (N , O))
+
+  var# : ∀ {s} m {m< : True (m <? size s)} {d sz Γ} →
+    U.[ d , ↑ sz ] U.ctx {s} _ Γ ⊢ Γ (#_ m {m<})
+  var# {s} m {m<} = U.`var (U.lvar (#_ {s} m {m<}) ≡.refl _)
+\end{code}
+%</patterns>
+
+%<*cojoin>
+\begin{code}
+  cojoin-!ω : ∀ {A} → [ λR , ∞ ] []ᶜ ⊢ (! ω# A ⊸ ! ω# (! ω# A))
+  cojoin-!ω = elab-unique _ (⊸I (!E (var# 0) (!I (!I (var# 1))))) []
+\end{code}
+%</cojoin>
+
+\begin{code}
+  foo : ∀ {A B} → [ λR , ∞ ] []ᶜ ⊢ (! ω# A ⊕ ! ω# B ⊸ ! ω# (A ⊕ B))
+  foo = elab-unique _
+    (⊸I (⊕E (var# 0)  (!E (var# 1) (!I (⊕I ll (var# 2))))
+                      (!E (var# 1) (!I (⊕I rr (var# 2)))))) []
+\end{code}
 
 \begin{code}
 module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
