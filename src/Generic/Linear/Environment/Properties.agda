@@ -41,7 +41,7 @@ module Generic.Linear.Environment.Properties
     where
     instance
       composeEnv : ComposeEnv _∋_ 𝓥 𝓥
-      composeEnv .lift ren′ r v = ren^𝓥 v (relocate ren′ r)
+      composeEnv .lift ren′ v = ren^𝓥 v ren′
 
   module With-psh^𝓥 {ℓ} {𝓥 : OpenFam ℓ} (psh^𝓥 : IsPresheaf 𝓥) where
 

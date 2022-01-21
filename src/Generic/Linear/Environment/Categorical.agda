@@ -42,17 +42,17 @@ module Generic.Linear.Environment.Categorical
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where
     field
       lift : ∀ {s t P Q γ δ} (ρ : [ 𝓤 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) →
-        ∀ {P′ Q′} → ρ .Ψ .rel Q′ P′ → ∀[ 𝓥 (ctx Q′ δ) ⇒ 𝓦 (ctx P′ γ) ]
+        ∀[ 𝓥 (ctx Q δ) ⇒ 𝓦 (ctx P γ) ]
 
     >>^Env : ∀ {Γ Δ Θ} → [ 𝓤 ] Γ ⇒ᵉ Δ → [ 𝓥 ] Δ ⇒ᵉ Θ → [ 𝓦 ] Γ ⇒ᵉ Θ
     >>^Env ρ σ .Ψ = σ .Ψ >>ᴿ ρ .Ψ
     >>^Env ρ σ .fit-here = σ .fit-here , ρ .fit-here
-    >>^Env ρ σ .lookup (s , r) v = lift ρ r (σ .lookup s v)
+    >>^Env ρ σ .lookup (s , r) v = lift (relocate ρ r) (σ .lookup s v)
   open ComposeEnv {{...}} public
 
   instance
     composeEnv-𝓥-∋ : ∀ {v} {𝓥 : OpenFam v} → ComposeEnv 𝓥 _∋_ 𝓥
-    composeEnv-𝓥-∋ .lift ρ r v = ρ .lookup r v
+    composeEnv-𝓥-∋ .lift ρ v = ρ .lookup (ρ .fit-here) v
 
   postren^Env : ∀ {v} {𝓥 : OpenFam v} {Γ Δ Θ} →
     [ 𝓥 ] Γ ⇒ᵉ Δ → Δ ⇒ʳ Θ → [ 𝓥 ] Γ ⇒ᵉ Θ

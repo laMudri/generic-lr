@@ -52,8 +52,7 @@ module Generic.Linear.Semantics.Syntactic
 
 %<*Kit>
 \begin{code}
-  record Kit (d : System) (𝓥 : OpenFam v)
-         : Set (suc 0ℓ ⊔ v) where
+  record Kit (d : System) (𝓥 : OpenFam v) : Set (suc 0ℓ ⊔ v) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
       vr     : ∀[ _∋_  ⇒ 𝓥             ]
