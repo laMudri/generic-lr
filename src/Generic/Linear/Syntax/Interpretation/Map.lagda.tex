@@ -39,23 +39,29 @@ module Generic.Linear.Syntax.Interpretation.Map
     where
 
     private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
+\end{code}
 
+%<*map-p>
+\begin{code}
     map-p : (ps : Premises) →
-      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-p ⟨ Γ `⊢ A ⟩ f r M = f r M
-    map-p `⊤ f r _ = _
-    map-p (ps `∧ qs) f r (M , N) = map-p ps f r M , map-p qs f r N
-    map-p `ℑ f r ℑ⟨ sp0 ⟩ = ℑ⟨ F .rel-0ₘ (sp0 , r) ⟩
-    map-p (ps `✴ qs) f r (M ✴⟨ sp+ ⟩ N) =
+    map-p ⟨ Γ `⊢ A ⟩ f r M               = f r M
+    map-p `⊤ f r _                       = _
+    map-p (ps `∧ qs) f r (M , N)         = map-p ps f r M , map-p qs f r N
+    map-p `ℑ f r ℑ⟨ sp0 ⟩                = ℑ⟨ F .rel-0ₘ (sp0 , r) ⟩
+    map-p (ps `✴ qs) f r (M ✴⟨ sp+ ⟩ N)  =
       let rM ↘, sp+′ ,↙ rN = F .rel-+ₘ (sp+ , r) in
       map-p ps f rM M ✴⟨ sp+′ ⟩ map-p qs f rN N
-    map-p (p `· ps) f r (⟨ sp* ⟩· M) =
+    map-p (p `· ps) f r (⟨ sp* ⟩· M)     =
       let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
       ⟨ sp*′ ⟩· map-p ps f r′ M
+\end{code}
+%</map-p>
 
+\begin{code}
     map-r : (r : Rule) →
-      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
       (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
     map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
 \end{code}
@@ -63,7 +69,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 %<*map-s-type>
 \begin{code}
     map-s : (s : System) →
-      (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
       (∀ {P Q} → F .rel P Q → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
 \end{code}
 %</map-s-type>
