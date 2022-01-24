@@ -35,9 +35,12 @@ module Generic.Linear.Example.WRel where
         set : Set 0ℓ
         rel : (a b : set) → W → Set
         subres : ∀ {a b w w′} → w′ ≤ w → rel a b w → rel a b w′
-    open WRel public
 \end{code}
 %</WRel>
+
+\begin{code}
+    open WRel public
+\end{code}
 
 %<*WRelMor>
 \begin{code}
@@ -47,9 +50,12 @@ module Generic.Linear.Example.WRel where
         set⇒ : R .set → S .set
         rel⇒ :
           ∀[ (I⋂ (_ × _) \ (x , y) → R .rel x y ⇒ S .rel (set⇒ x) (set⇒ y)) ]
-    open WRelMor public
 \end{code}
 %</WRelMor>
+
+\begin{code}
+    open WRelMor public
+\end{code}
 
 \begin{code}
     idᴿ : ∀ {W ≤ʷ} {R : WRel {W} ≤ʷ} → WRelMor R R
