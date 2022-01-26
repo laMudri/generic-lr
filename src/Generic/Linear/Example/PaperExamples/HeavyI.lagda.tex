@@ -1,39 +1,75 @@
 \begin{code}
-{-# OPTIONS --sized-types --without-K --postfix-projections #-}
+{-# OPTIONS --sized-types --without-K --postfix-projections --prop #-}
 
-open import Algebra.Po
+-- open import Algebra.Po
 open import Level
 
 module Generic.Linear.Example.PaperExamples.HeavyI
-  (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
+  -- (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   where
 
-open import Algebra.Po.Construct.Nat
+-- open import Algebra.Po.Construct.Nat
 open import Data.LTree
+open import Data.LTree.Automation
 open import Data.LTree.Vector
+open import Data.Nat using (ℕ)
+open import Data.Nat.Properties using (_<?_)
 open import Data.Product
 open import Data.Unit using (⊤; tt)
 open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
+open import Relation.Nullary.Decidable using (True)
 open import Relation.Unary.Bunched
 open import Size
 
 open import Generic.Linear.Example.PaperExamples
-open CPP0 poSemiring
+open import Generic.Linear.Example.ZeroOneMany
+  renaming (u0 to 0#; u1 to 1#; uω to ω#)
+open CPP0 poSemiring hiding (_≤_; 0#; _+_; 1#; _*_; ≤-refl; +-identityʳ)
 \end{code}
 
-%<*lR-term>
 \begin{code}
-test : ∀ r A B → [ λR , ∞ ] []ᶜ ⊢ (! r (A ⊕ B) ⊸ ! r (B ⊕ A))
-test r A B =
-  let prf0 : 0# ≤ r * 0#; prf0 = ≤-reflexive (sym (annihilʳ _)) in
-  let prf1 : r ≤ r * 1#; prf1 = ≤-reflexive (sym (*-identityʳ _)) in
-  let prf2 = (≤*-refl ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ in
-  ⊸I (!E (+*-identity↘ _)
-    (`var (lvar (↙ (↘ here)) ≡.refl (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ)))
-    (!I (([]ₙ ++ₙ [ prf0 ]ₙ) ++ₙ [ prf1 ]ₙ)
-      (⊕E (+*-identity↘ _ ++ₙ []ₙ)
-        (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
-        (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
-        (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
+pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
+pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
+pattern !I′ P sp M = `con (`!I _ _ , ≡.refl , ⟨_⟩·_ {z = P} sp M)
+pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
+pattern !E′ P Q sp M N = `con (`!E _ _ _ , ≡.refl , _✴⟨_⟩_ {y = P} {Q} M sp N)
+pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
+pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
+
+var# : ∀ {s} m {m< : True (m <? size s)} {d sz P Γ} →
+  P ≤* ⟨ #_ m {m<} ∣ →
+  [ d , ↑ sz ] ctx {s} P Γ ⊢ Γ (#_ m {m<})
+var# {s} m {m<} b = `var (lvar (#_ m {m<}) ≡.refl b)
 \end{code}
-%</lR-term>
+
+%%<*lR-term>
+%\begin{code}
+%test : ∀ r A B → [ λR , ∞ ] []ᶜ ⊢ (! r (A ⊕ B) ⊸ ! r (B ⊕ A))
+%test r A B =
+%  let prf0 : 0# ≤ r * 0#; prf0 = ≤-reflexive (sym (annihilʳ _)) in
+%  let prf1 : r ≤ r * 1#; prf1 = ≤-reflexive (sym (*-identityʳ _)) in
+%  let prf2 = (≤*-refl ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ in
+%  ⊸I (!E (+*-identity↘ _)
+%    (`var (lvar (↙ (↘ here)) ≡.refl (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ)))
+%    (!I (([]ₙ ++ₙ [ prf0 ]ₙ) ++ₙ [ prf1 ]ₙ)
+%      (⊕E (+*-identity↘ _ ++ₙ []ₙ)
+%        (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
+%        (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
+%        (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
+%\end{code}
+%%</lR-term>
+
+%<*cojoin-explicit>
+\begin{code}
+cojoin-!ω : ∀ A → [ λR , ∞ ] []ᶜ ⊢ (! ω# A ⊸ ! ω# (! ω# A))
+cojoin-!ω A =
+  ⊸I (!E′ ([] ++ [ 1# ]) ([] ++ [ 0# ]) ([]ₙ ++ₙ [ ≤-refl ]ₙ)
+    (var# 0 (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ))
+    (!I′  (([] ++ [ 0# ]) ++ [ ω# ])
+          (([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ [ ≤-refl ]ₙ)
+      (!I′  ((([] ++ [ 0# ]) ++ [ ω# ]) ++ [])
+            ((([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ [ ≤-refl ]ₙ) ++ₙ []ₙ)
+        (var# 1
+          (((([]ₙ ++ₙ [ ≤-refl ]ₙ) ++ₙ [ ω≤1 ]ₙ) ++ₙ []ₙ) ++ₙ []ₙ)))))
+\end{code}
+%</cojoin-explicit>
