@@ -50,11 +50,15 @@ module Generic.Linear.Semantics
 %</Kripke>
 
 \begin{code}
-  mapK𝓒 :
-    ∀ {v c c′} {𝓥 : OpenFam v} {𝓒 : I ─OpenFam c} {𝓒′ : J ─OpenFam c′} {A B} →
-    ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] → ∀ {Δ Γ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B
-  mapK𝓒 f b .get ren .app✴ sp ρ = f (b .get ren .app✴ sp ρ)
+  module _ {v c c′} {𝓥 : OpenFam v} {𝓒 : I ─OpenFam c} {𝓒′ : J ─OpenFam c′} where
 \end{code}
+%<*mapKC>
+\begin{code}
+    mapK𝓒 :  ∀ {A B} → ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] →
+             ∀ {Δ Γ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B
+    mapK𝓒 f b .get ren .app✴ sp ρ = f (b .get ren .app✴ sp ρ)
+\end{code}
+%</mapKC>
 
 %<*Semantics>
 \begin{code}

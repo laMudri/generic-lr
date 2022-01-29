@@ -161,7 +161,8 @@ module Generic.Linear.Example.WRel where
           !ᴿ : Ann → WRel _≤ʷ_ → WRel _≤ʷ_
           !ᴿ-map : ∀ {r R S} → WRelMor R S → WRelMor (!ᴿ r R) (!ᴿ r S)
           !ᴿ-0 : ∀ {r R} → r ≤ 0# → WRelMor (!ᴿ r R) Iᴿ
-          !ᴿ-+ : ∀ {r p q R} → r ≤ p + q → WRelMor (!ᴿ r R) (!ᴿ p R ⊗ᴿ !ᴿ q R)
+          !ᴿ-+ : ∀ {r p q R} → r ≤ p + q →
+            WRelMor (!ᴿ r R) (!ᴿ p R ⊗ᴿ !ᴿ q R)
           !ᴿ-1 : ∀ {r R} → r ≤ 1# → WRelMor (!ᴿ r R) R
           !ᴿ-* : ∀ {r p q R} → r ≤ p * q → WRelMor (!ᴿ r R) (!ᴿ p (!ᴿ q R))
           !ᴿ-I : ∀ {r} → WRelMor Iᴿ (!ᴿ r Iᴿ)
@@ -299,8 +300,7 @@ module Generic.Linear.Example.WRel where
         let  n′ : WRelMor ⟦ ctx Q γ ⟧ᶜ ⟦ A ⟧
              n′ = reify n ∘ᴿ ⊗ᴿ-unitʳ←
              m′ : WRelMor (⟦ ctx P γ ⟧ᶜ ⊗ᴿ !ᴿ r ⟦ A ⟧) ⟦ B ⟧
-             m′ = uncurryᴿ (reify m ∘ᴿ ⊗ᴿ-unitʳ←)
-        in
+             m′ = uncurryᴿ (reify m ∘ᴿ ⊗ᴿ-unitʳ←) in
         m′ ∘ᴿ map-⊗ᴿ idᴿ (!ᴿ-map n′ ∘ᴿ ctx-* sp*) ∘ᴿ ctx-+ sp+
 \end{code}
 %</Wrel>
