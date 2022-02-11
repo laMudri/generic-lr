@@ -81,7 +81,8 @@ module Generic.Linear.Semantics
 
 %<*extend>
 \begin{code}
-    extend : ∀ {Γ Δ Θ} → [ 𝓥 ] Γ ⇒ᵉ Δ → Kripke 𝓥 ([ 𝓥 ]_⇒ᵉ_) Θ Γ (Δ ++ᶜ Θ)
+    extend : ∀ {Γ Δ Θ} →
+      [ 𝓥 ] Γ ⇒ᵉ Δ → Kripke 𝓥 ([ 𝓥 ]_⇒ᵉ_) Θ Γ (Δ ++ᶜ Θ)
     extend ρ .get ren .app✴ sp σ = ++ᵉ (ren^Env ren^𝓥 ρ ren ✴⟨ sp ⟩ σ)
 \end{code}
 %</extend>
