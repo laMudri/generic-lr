@@ -103,4 +103,3 @@ module Generic.Linear.Example.MuMuTilde
       )
     )
   -}
-

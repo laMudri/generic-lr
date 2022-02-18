@@ -205,5 +205,3 @@ module Generic.Linear.Example.WRel.Monotonicity where
 
 
   thm xx yy = minus-mono .app✴ _ xx .app✴ _ yy
-
-

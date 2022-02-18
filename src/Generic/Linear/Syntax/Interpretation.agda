@@ -99,5 +99,3 @@ module Generic.Linear.Syntax.Interpretation
 
   ⟦_⟧s : System → ExtOpenFam ℓ → OpenFam ℓ
   ⟦ L ▹ rs ⟧s X Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r X Γ A
-
-

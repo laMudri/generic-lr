@@ -44,5 +44,3 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
       (uμ⟨-,-⟩ (ucut (uλ u⟨ uvar (# 3) , uvar (# 2) ⟩) (uvar (# 0))))
       (uvar (# 1))))
     []
-
-

@@ -147,5 +147,3 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   Scope : ∀ {i} {I : Set i} {ℓ} → I ─OpenFam ℓ → I ─ExtOpenFam ℓ
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
-
-

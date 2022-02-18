@@ -35,5 +35,3 @@ test r A B =
         (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
         (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
         (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
-
-

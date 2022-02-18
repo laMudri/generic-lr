@@ -30,5 +30,3 @@ module Generic.Linear.Syntax.Term
   data [_,_]_⊢_ (d : System) : Size → OpenFam 0ℓ where
     `var  : ∀[ _∋_                           ⇒ [ d , ↑ sz ]_⊢_ ]
     `con  : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_)  ⇒ [ d , ↑ sz ]_⊢_ ]
-
-

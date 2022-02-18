@@ -109,5 +109,3 @@ module Generic.Linear.Semantics
 
 
     body ρ M = mapK𝓒 (λ σ → semantics σ M) (extend ρ)
-
-

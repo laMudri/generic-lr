@@ -48,5 +48,3 @@ module Generic.Linear.Renaming
 
   Renameable : OpenType ℓ → Set (suc 0ℓ ⊔ ℓ)
   Renameable T = ∀[ T ⇒ □ʳ T ]
-
-

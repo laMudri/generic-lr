@@ -228,4 +228,3 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         (M : U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A) →
         ∀ R → {_ : Lone (elab sys M R)} → [ sys , ∞ ] ctx R γ ⊢ A
       elab-unique sys M R {l} with uM ∷ [] ← elab sys M R = uM
-

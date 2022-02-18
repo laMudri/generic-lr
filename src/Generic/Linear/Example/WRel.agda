@@ -308,5 +308,3 @@ module Generic.Linear.Example.WRel where
 
       wrel : ∀ {sz Γ A} → [ AnnArr , sz ] Γ ⊢ A → ⟦ Γ ⊢ A ⟧
       wrel = semantics Wrel 1ʳ
-
-

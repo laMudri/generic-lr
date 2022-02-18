@@ -182,4 +182,3 @@ module Generic.Linear.Semantics.Syntactic
     [_·_]ˢ : ∀ {r s A B} →
       r ≤ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
     [_·_]ˢ = [_·_]ᵏ
-
