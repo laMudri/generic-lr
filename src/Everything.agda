@@ -52,6 +52,7 @@ import Generic.Linear.Example.PaperExamples
 import Generic.Linear.Example.MuMuTilde.Term
 import Generic.Linear.Example.WRel
 import Generic.Linear.Example.UsageCheck
+import Generic.Linear.Example.UsageCheck.Example
 import Generic.Linear.Example.PaperExamples.HeavyI
 import Generic.Linear.Example.WRel.Monotonicity
 import Generic.Linear.Example.MuMuTilde
