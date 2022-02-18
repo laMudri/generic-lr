@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -40,74 +40,74 @@ module Generic.Linear.Semantics
       i j ℓ v c : Level
       I : Set i
       J : Set j
-\end{code}
 
-%<*Kripke>
-\begin{code}
+
+
+
   Kripke : (𝓥 : OpenFam v) (𝓒 : I ─OpenFam c) → I ─ExtOpenFam _
   Kripke = Wrap λ 𝓥 𝓒 Δ Γ A → □ʳ ([ 𝓥 ]_⇒ᵉ Δ ─✴ᶜ [ 𝓒 ]_⊨ A) Γ
-\end{code}
-%</Kripke>
 
-\begin{code}
+
+
+
   mapK𝓒 :
     ∀ {v c c′} {𝓥 : OpenFam v} {𝓒 : I ─OpenFam c} {𝓒′ : J ─OpenFam c′} {A B} →
     ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] → ∀ {Δ Γ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B
   mapK𝓒 f b .get ren .app✴ sp ρ = f (b .get ren .app✴ sp ρ)
-\end{code}
 
-%<*Semantics>
-\begin{code}
+
+
+
   record Semantics (d : System) (𝓥 : OpenFam v) (𝓒 : OpenFam c)
          : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
       ⟦var⟧  : ∀[ 𝓥                    ⇒ 𝓒 ]
       ⟦con⟧  : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒)  ⇒ 𝓒 ]
-\end{code}
-%</Semantics>
 
-\begin{code}
+
+
+
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
     open With-psh^𝓥 psh^𝓥
 
     open Equivalence
-\end{code}
 
-%<*extend>
-\begin{code}
+
+
+
     extend : ∀ {Γ Δ Θ} → [ 𝓥 ] Γ ⇒ᵉ Δ → Kripke 𝓥 ([ 𝓥 ]_⇒ᵉ_) Θ Γ (Δ ++ᶜ Θ)
     extend ρ .get ren .app✴ sp σ = ++ᵉ (ren^Env ren^𝓥 ρ ren ✴⟨ sp ⟩ σ)
-\end{code}
-%</extend>
 
-%<*Comp>
-\begin{code}
+
+
+
+
     [_]_⇒ᶜ_ : (𝓒′ : OpenFam ℓ) (Γ Δ : Ctx) → Set ℓ
     [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒′ ] Γ ⊨_ ]
-\end{code}
-%</Comp>
 
-%<*semantics-type>
-\begin{code}
+
+
+
+
     semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz} →
       ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒 ] Γ ⊨_ ]
     body : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz Θ} →
       ∀[ Scope [ d , sz ]_⊢_ Θ Δ ⇒ Kripke 𝓥 𝓒 Θ Γ ]
-\end{code}
-%</semantics-type>
 
-%<*semantics>
-\begin{code}
+
+
+
+
     semantics ρ (`var v) = ⟦var⟧ $ ρ .lookup (ρ .fit-here) v
     semantics ρ (`con M) = ⟦con⟧ $
       map-s (ρ .Ψ) d (λ r → body (relocate ρ r)) (ρ .fit-here) M
-\end{code}
-%</semantics>
 
-%<*body>
-\begin{code}
+
+
+
+
     body ρ M = mapK𝓒 (λ σ → semantics σ M) (extend ρ)
-\end{code}
-%</body>
+
+

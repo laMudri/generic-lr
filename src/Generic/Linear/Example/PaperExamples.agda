@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 module Generic.Linear.Example.PaperExamples where
 
@@ -19,40 +19,40 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   infixr 5 _⊸_
   infix 6 _⊕_
-\end{code}
 
-%<*Ty>
-\begin{code}
+
+
+
   data Ty : Set where
     ι : Ty
     _⊸_ _⊕_ : (A B : Ty) → Ty
     ! : (r : Ann) (A : Ty) → Ty
-\end{code}
-%</Ty>
 
-\begin{code}
+
+
+
   open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
-\end{code}
 
-%<*Side>
-\begin{code}
+
+
+
   data Side : Set where ll rr : Side
-\end{code}
-%</Side>
 
-%<*qlR>
-\begin{code}
+
+
+
+
   data `λR : Set where
     `⊸I `⊸E : (A B : Ty) → `λR
     `⊕I : (i : Side) (A B : Ty) → `λR
     `⊕E : (A B C : Ty) → `λR
     `!I : (r : Ann) (A : Ty) → `λR
     `!E : (r : Ann) (A C : Ty) → `λR
-\end{code}
-%</qlR>
 
-%<*lR>
-\begin{code}
+
+
+
+
   λR : System
   λR = `λR ▹ λ where
     (`⊸I A B)     → ⟨ [ 1# · A ]ᶜ `⊢ B ⟩                       =⇒ (A ⊸ B)
@@ -63,30 +63,30 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     (`⊕I rr A B)  → ⟨ []ᶜ `⊢ B ⟩                               =⇒ (A ⊕ B)
     (`⊕E A B C)   →
       ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# · A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# · B ]ᶜ `⊢ C ⟩) =⇒ C
-\end{code}
-%</lR>
 
-%<*patterns>
-\begin{code}
+
+
+
+
   pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
   pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
   pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
   pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
   pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
-\end{code}
-%</patterns>
 
-\begin{code}
+
+
+
   _ : Ann → Ty → Ty → Ty
   _ = λ r A B →
-\end{code}
-%<*BangrAToB>
-\begin{code}[inline]
-    (! r A) ⊸ B
-\end{code}
-%</BangrAToB>
 
-\begin{code}
+
+
+    (! r A) ⊸ B
+
+
+
+
 module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   open PoSemiring poSemiring
@@ -97,48 +97,48 @@ module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
   infixr 5 _·_⊸_
   infixr 6 _⊕_
-\end{code}
 
-%<*exItypes>
-\begin{code}
+
+
+
   data Ty : Set where
     ι : Ty
     _·_⊸_ : (r : Ann) (A B : Ty) → Ty
     _⊕_ : (A B : Ty) → Ty
-\end{code}
-%</exItypes>
 
-\begin{code}
+
+
+
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
   open import Generic.Linear.Syntax.Term Ty rawPoSemiring
-\end{code}
 
-%<*exIlabels>
-\begin{code}
+
+
+
   data `Sys : Set where
     `lam `app : (r : Ann) (A B : Ty) → `Sys
     `inl `inr : (A B : Ty) → `Sys
     `case : (A B C : Ty) → `Sys
-\end{code}
-%</exIlabels>
 
-\begin{code}
+
+
+
   Sys : System
   Sys .Label = `Sys
-\end{code}
-%<*exIfunrules>
-\begin{code}
+
+
+
   Sys .rules (`lam r A B) =
     ⟨ [ r , A ]ᶜ `⊢ B ⟩
     =⇒ r · A ⊸ B
   Sys .rules (`app r A B) =
     ⟨ []ᶜ `⊢ r · A ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩
     =⇒ B
-\end{code}
-%</exIfunrules>
-%<*exIsumrules>
-\begin{code}
+
+
+
+
   Sys .rules (`inl A B) =
     ⟨ []ᶜ `⊢ A ⟩
     =⇒ A ⊕ B
@@ -148,5 +148,5 @@ module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   Sys .rules (`case A B C) =
     ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# , A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# , B ]ᶜ `⊢ C ⟩)
     =⇒ C
-\end{code}
-%</exIsumrules>
+
+

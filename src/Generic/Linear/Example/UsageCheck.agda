@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -20,17 +20,17 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
   getLone (x ∷ []) = x
 
   module U where
-\end{code}
 
-%<*0-poSemiring>
-\begin{code}
+
+
+
     0-poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ
     0-poSemiring = record
       { Carrier = ⊤; _≈_ = λ _ _ → ⊤; _≤_ = λ _ _ → ⊤ }
-\end{code}
-%</0-poSemiring>
 
-\begin{code}
+
+
+
     0-rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ
     0-rawPoSemiring = PoSemiring.rawPoSemiring 0-poSemiring
 
@@ -101,23 +101,23 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Size
 
     pattern uvar i = U.`var (U.lvar i ≡.refl _)
-\end{code}
 
-%<*NonDetInverses>
-\begin{code}
+
+
+
     record NonDetInverses : Set where
       field
         0#⁻¹ : (r : Ann) → List (r ≤ 0#)
         +⁻¹ : (r : Ann) → List (∃ \ ((p , q) : _ × _) → r ≤ p + q)
         1#⁻¹ : (r : Ann) → List (r ≤ 1#)
         *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
-\end{code}
-%</NonDetInverses>
-\begin{code}
-        rep : (r : Ann) → List (Dup _≤_ (_≤ 0#) (λ x y z → x ≤ y + z) (λ _ → ⊤) r)
-\end{code}
 
-\begin{code}
+
+
+        rep : (r : Ann) → List (Dup _≤_ (_≤ 0#) (λ x y z → x ≤ y + z) (λ _ → ⊤) r)
+
+
+
     module WithInverses (invs : NonDetInverses) where
 
       open NonDetInverses invs
@@ -156,16 +156,16 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         □⟨ strr , sp0r , sp+r ⟩ _ ← rep* {t} (R ∘ ↘)
         pure $ □⟨_,_,_⟩_ {y = _ V.++ _}
           (strl ++ₙ strr) (sp0l ++ₙ sp0r) (sp+l ++ₙ sp+r) _
-\end{code}
 
-%<*C>
-\begin{code}
+
+
+
       𝓒 : System → U.OpenFam _
       𝓒 sys (U.ctx _ γ) A = ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
-\end{code}
-%</C>
 
-\begin{code}
+
+
+
       lemma-p : ∀ (sys : System) (ps : Premises) {Γ} →
         U.⟦ uPremises ps ⟧p (U.Scope (𝓒 sys)) (uCtx Γ) →
         List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) Γ)
@@ -188,24 +188,24 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →
         List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) Γ A)
       lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
-\end{code}
 
-%<*lemma-type>
-\begin{code}
+
+
+
       lemma : ∀ (sys : System) {A Γ} →
         U.⟦ uSystem sys ⟧s (U.Scope (𝓒 sys)) (uCtx Γ) A →
         List (⟦ sys ⟧s (Scope [ sys , ∞ ]_⊢_) Γ A)
-\end{code}
-%</lemma-type>
-\begin{code}
+
+
+
       lemma sys@(L ▹ rs) (l , t) = (| (l ,_) (lemma-r sys (rs l) t) |)
 
       open Semantics using (ren^𝓥; ⟦var⟧; ⟦con⟧)
       open [_]_⇒ᵉ_
-\end{code}
 
-%<*elab-sem>
-\begin{code}
+
+
+
       elab-sem : ∀ sys → U.Semantics (uSystem sys) U._∋_ (𝓒 sys)
       elab-sem sys .ren^𝓥 = U.ren^∋
       elab-sem sys .⟦var⟧ (U.lvar i q _) R =
@@ -213,10 +213,10 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       elab-sem sys .⟦con⟧ b R =
         let rb = U.map-s′ (uSystem sys) U.reify b in
         (| `con (lemma sys rb) |)
-\end{code}
-%</elab-sem>
 
-\begin{code}
+
+
+
       elab : ∀ sys {A s} {γ : Vector Ty s} →
              U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A →
              ∀ R → List ([ sys , ∞ ] ctx R γ ⊢ A)
@@ -228,4 +228,4 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         (M : U.[ uSystem sys , ∞ ] U.ctx _ γ ⊢ A) →
         ∀ R → {_ : Lone (elab sys M R)} → [ sys , ∞ ] ctx R γ ⊢ A
       elab-unique sys M R {l} with uM ∷ [] ← elab sys M R = uM
-\end{code}
+

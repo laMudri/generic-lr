@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -19,10 +19,10 @@ open import Size
 
 open import Generic.Linear.Example.PaperExamples
 open CPP0 poSemiring
-\end{code}
 
-%<*lR-term>
-\begin{code}
+
+
+
 test : ∀ r A B → [ λR , ∞ ] []ᶜ ⊢ (! r (A ⊕ B) ⊸ ! r (B ⊕ A))
 test r A B =
   let prf0 : 0# ≤ r * 0#; prf0 = ≤-reflexive (sym (annihilʳ _)) in
@@ -35,5 +35,5 @@ test r A B =
         (`var (lvar (↙ (↙ (↘ here))) ≡.refl (≤*-refl ++ₙ []ₙ)))
         (⊕I rr (`var (lvar (↙ (↘ here)) ≡.refl prf2)))
         (⊕I ll (`var (lvar (↙ (↘ here)) ≡.refl prf2))))))
-\end{code}
-%</lR-term>
+
+

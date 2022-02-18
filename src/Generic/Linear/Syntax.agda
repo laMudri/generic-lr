@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --safe --without-K #-}
 
 module Generic.Linear.Syntax (Ty Ann : Set) where
@@ -66,28 +66,28 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   rightᶜ′ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
   rightᶜ′ (sctx P γ) = ctx (P ∘ ↘) (γ ∘ ↘)
-\end{code}
 
-Premises to each rule form a tree.
-At each leaf is a premise, which binds one Ctx's worth of new variables.
-Annotations are shared out to the premises via separation logic
-connectives:
-\begin{verbatim}
-\item separating conjunction (`I, _`*_) – e.g, ⊗-introduction
-\item sharing conjunction (`⊤, _`∧_)    – e.g, &-introduction
-\item scaling (_`·_)                    – e.g, !-introduction
-\item the duplicable modality (`□)      – e.g, recursion rules
-\end{verbatim}
 
-\begin{code}
+-- Premises to each rule form a tree.
+-- At each leaf is a premise, which binds one Ctx's worth of new variables.
+-- Annotations are shared out to the premises via separation logic
+-- connectives:
+-- \begin{verbatim}
+-- \item separating conjunction (`I, _`*_) – e.g, ⊗-introduction
+-- \item sharing conjunction (`⊤, _`∧_)    – e.g, &-introduction
+-- \item scaling (_`·_)                    – e.g, !-introduction
+-- \item the duplicable modality (`□)      – e.g, recursion rules
+-- \end{verbatim}
+
+
   infix 1 _=⇒_ _▹_
   infixr 2 _`✴_
   infixr 2 _`∧_
   infixr 3 _`·_
-\end{code}
 
-%<*Premises>
-\begin{code}
+
+
+
   data Premises : Set where
     ⟨_`⊢_⟩ : (Δ : Ctx) (A : Ty) → Premises
     `⊤ : Premises
@@ -95,39 +95,39 @@ connectives:
     `ℑ : Premises
     _`✴_ : (p q : Premises) → Premises
     _`·_ : (r : Ann) (p : Premises) → Premises
-\end{code}
-%</Premises>
-\begin{code}
-    `□ : (p : Premises) → Premises
-\end{code}
 
-%<*Rule>
-\begin{code}
+
+
+    `□ : (p : Premises) → Premises
+
+
+
+
   record Rule : Set where
     constructor _=⇒_
     field
       premises : Premises
       conclusion : Ty
-\end{code}
-%</Rule>
 
-%<*System>
-\begin{code}
+
+
+
+
   record System : Set₁ where
     constructor _▹_
     field
       Label : Set
       rules : (l : Label) → Rule
-\end{code}
-%</System>
 
-\begin{code}
+
+
+
   open Rule public
   open System public
-\end{code}
 
-%<*OpenFam>
-\begin{code}
+
+
+
   OpenType : ∀ ℓ → Set (suc ℓ)
   OpenType ℓ = Ctx → Set ℓ
 
@@ -140,12 +140,12 @@ connectives:
   I ─ExtOpenFam ℓ = Ctx → I ─OpenFam ℓ
   ExtOpenFam : ∀ ℓ → Set (suc ℓ)
   ExtOpenFam ℓ = Ty ─ExtOpenFam ℓ
-\end{code}
-%</OpenFam>
 
-%<*Scope>
-\begin{code}
+
+
+
+
   Scope : ∀ {i} {I : Set i} {ℓ} → I ─OpenFam ℓ → I ─ExtOpenFam ℓ
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
-\end{code}
-%</Scope>
+
+

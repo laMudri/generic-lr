@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --safe --without-K #-}
 
 open import Algebra.Po
@@ -71,10 +71,10 @@ module Generic.Linear.Syntax.Interpretation
 
   Dupᶜ : (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
   Dupᶜ T (ctx R γ) = Dup (λ P → T (ctx P γ)) R
-\end{code}
 
-%<*semp>
-\begin{code}
+
+
+
   ⟦_⟧p : Premises → ExtOpenFam ℓ → OpenType ℓ
   ⟦ ⟨ Δ `⊢ A ⟩ ⟧p X Γ = X Δ Γ A
   ⟦ `⊤ ⟧p X = U
@@ -82,22 +82,22 @@ module Generic.Linear.Syntax.Interpretation
   ⟦ `ℑ ⟧p X = ℑᶜ
   ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ᶜ ⟦ q ⟧p X
   ⟦ r `· p ⟧p X = r ·ᶜ ⟦ p ⟧p X
-\end{code}
-%</semp>
-\begin{code}
-  ⟦ `□ p ⟧p X = Dupᶜ (⟦ p ⟧p X)
-\end{code}
 
-%<*semr>
-\begin{code}
+
+
+  ⟦ `□ p ⟧p X = Dupᶜ (⟦ p ⟧p X)
+
+
+
+
   ⟦_⟧r : Rule → ExtOpenFam ℓ → OpenFam ℓ
   ⟦ ps =⇒ A′ ⟧r X Γ A = A′ ≡ A × ⟦ ps ⟧p X Γ
-\end{code}
-%</semr>
 
-%<*sems>
-\begin{code}
+
+
+
+
   ⟦_⟧s : System → ExtOpenFam ℓ → OpenFam ℓ
   ⟦ L ▹ rs ⟧s X Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r X Γ A
-\end{code}
-%</sems>
+
+

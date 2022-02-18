@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K #-}
 
 open import Algebra.Po
@@ -23,12 +23,12 @@ module Generic.Linear.Syntax.Term
      sz : Size
 
   infix 20 [_,_]_⊢_
-\end{code}
 
-%<*Term>
-\begin{code}
+
+
+
   data [_,_]_⊢_ (d : System) : Size → OpenFam 0ℓ where
     `var  : ∀[ _∋_                           ⇒ [ d , ↑ sz ]_⊢_ ]
     `con  : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_)  ⇒ [ d , ↑ sz ]_⊢_ ]
-\end{code}
-%</Term>
+
+

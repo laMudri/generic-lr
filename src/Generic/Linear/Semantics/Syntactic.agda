@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -48,20 +48,20 @@ module Generic.Linear.Semantics.Syntactic
       𝓥 : OpenFam v
       𝓒 : I ─OpenFam c
       Γ Δ Θ : Ctx
-\end{code}
 
-%<*Kit>
-\begin{code}
+
+
+
   record Kit (d : System) (𝓥 : OpenFam v)
          : Set (suc 0ℓ ⊔ v) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
       vr     : ∀[ _∋_  ⇒ 𝓥             ]
       tm     : ∀[ 𝓥    ⇒ [ d , ∞ ]_⊢_  ]
-\end{code}
-%</Kit>
 
-\begin{code}
+
+
+
     psh^𝓥 : IsPresheaf 𝓥
     psh^𝓥 = ren⇒psh (λ {A} → ren^𝓥 {A})
 
@@ -70,42 +70,42 @@ module Generic.Linear.Semantics.Syntactic
       identityEnv .pure = vr
 
   open Semantics
-\end{code}
 
-%<*reify>
-\begin{code}
+
+
+
   reify : {{IdentityEnv 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
   reify {x = ctx Q δ} {ctx P γ} {A} b =
     b .get ↙ʳ .app✴ prf (>>^Env id^Env ↘ʳ)
     where
     prf : (P ++ Q) ≤[ (P ++ 0*) +* (0* ++ Q) ]
     prf = +*-identity↘ _ ++ₙ +*-identity↙ _
-\end{code}
-%</reify>
 
-\begin{code}
+
+
+
   module _ where
     open Kit
-\end{code}
 
-%<*kit-to-sem>
-\begin{code}
+
+
+
     kit→sem : Kit d 𝓥 → Semantics d 𝓥 [ d , ∞ ]_⊢_
     kit→sem          K .ren^𝓥  = K .ren^𝓥
     kit→sem          K .⟦var⟧  = K .tm
     kit→sem {d = d}  K .⟦con⟧  = `con ∘ map-s′ d reify
       where open Kit K using (identityEnv)
-\end{code}
-%</kit-to-sem>
 
-%<*Ren-Kit>
-\begin{code}
+
+
+
+
   Ren-Kit : Kit d _∋_
   Ren-Kit = record { ren^𝓥 = ren^∋ ; vr = id ; tm = `var }
-\end{code}
-%</Ren-Kit>
 
-\begin{code}
+
+
+
   Ren : Semantics d _∋_ [ d , ∞ ]_⊢_
   Ren = kit→sem Ren-Kit
 
@@ -121,16 +121,16 @@ module Generic.Linear.Semantics.Syntactic
   instance
     identityEnv^⊢ : IdentityEnv [ d , ∞ ]_⊢_
     identityEnv^⊢ .pure = `var
-\end{code}
 
-%<*Sub-Kit>
-\begin{code}
+
+
+
   Sub-Kit : Kit d [ d , ∞ ]_⊢_
   Sub-Kit = record { ren^𝓥 = ren^⊢ ; vr = `var ; tm = id }
-\end{code}
-%</Sub-Kit>
 
-\begin{code}
+
+
+
   Sub : Semantics d [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
   Sub = kit→sem Sub-Kit
 
@@ -182,4 +182,4 @@ module Generic.Linear.Semantics.Syntactic
     [_·_]ˢ : ∀ {r s A B} →
       r ≤ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
     [_·_]ˢ = [_·_]ᵏ
-\end{code}
+

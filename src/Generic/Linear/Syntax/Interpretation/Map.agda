@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -73,16 +73,16 @@ module Generic.Linear.Syntax.Interpretation.Map
       (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
     map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
-\end{code}
 
-%<*map-s-type>
-\begin{code}
+
+
+
     map-s : (s : System) →
       (∀ {Θ P Q} → F .rel P Q → ∀[ X Θ (ctx P γ) ⇒ Y Θ (ctx Q δ) ]) →
       (∀ {P Q} → F .rel P Q → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
-\end{code}
-%</map-s-type>
-\begin{code}
+
+
+
     map-s (L ▹ rs) f r (l , M) = l , map-r (rs l) f r M
 
   module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
@@ -100,14 +100,14 @@ module Generic.Linear.Syntax.Interpretation.Map
 
     map-r′ : (r : Rule) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
-\end{code}
 
-%<*map-s-prime-type>
-\begin{code}
+
+
+
     map-s′ : (s : System) → ∀[ X ⇒ Y ] → ∀[ ⟦ s ⟧s X ⇒ ⟦ s ⟧s Y ]
-\end{code}
-%</map-s-prime-type>
-\begin{code}
+
+
+
     map-s′ (L ▹ rs) f (l , t) = l , map-r′ (rs l) f t
 
   open import Category.Applicative
@@ -140,4 +140,4 @@ module Generic.Linear.Syntax.Interpretation.Map
       ∀[ _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A ]
     sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t
-\end{code}
+

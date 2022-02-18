@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
@@ -17,31 +17,31 @@ module Generic.Linear.Example.MuMuTilde
 
   infixr 5 _⅋_
   infixl 6 _^⊥
-\end{code}
 
-%<*Ty>
-\begin{code}
+
+
+
   data Ty : Set where
     base : Ty
     _⅋_ : (rA sB : Ann × Ty) → Ty
     _^⊥ : (A : Ty) → Ty
-\end{code}
-%</Ty>
 
-%<*Conc>
-\begin{code}
+
+
+
+
   data Conc : Set where
     com : Conc
     trm cot : (A : Ty) → Conc
-\end{code}
-%</Conc>
 
-\begin{code}
+
+
+
   open import Generic.Linear.Everything Conc poSemiring hiding (Ann)
-\end{code}
 
-%<*MMT>
-\begin{code}
+
+
+
   data `MMT : Set where
     `cut `μ `μ∼ : (A : Ty) → `MMT
     `λ `λ∼ : (A : Ty) → `MMT
@@ -58,10 +58,10 @@ module Generic.Linear.Example.MuMuTilde
       r `· ⟨ []ᶜ `⊢ cot A ⟩ `✴ s `· ⟨ []ᶜ `⊢ cot B ⟩  =⇒ cot (rA ⅋ sB)
     (`μ⟨-,-⟩ rA@(r , A) sB@(s , B)) →
       ⟨ [ r , cot A ]ᶜ ++ᶜ [ s , cot B ]ᶜ `⊢ com ⟩    =⇒ trm (rA ⅋ sB)
-\end{code}
-%</MMT>
 
-\begin{code}
+
+
+
   {-
   myComm : (rA sB : Ann × Ty) →
            Drv []ᶜ (trm ((1# , (rA ⅋ sB) ^⊥) ⅋ (1# , sB ⅋ rA)))
@@ -103,4 +103,4 @@ module Generic.Linear.Example.MuMuTilde
       )
     )
   -}
-\end{code}
+

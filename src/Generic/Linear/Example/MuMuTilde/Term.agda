@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
@@ -20,10 +20,10 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
   open WithPoSemiring poSemiring
   open WithInverses record
     { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
-\end{code}
 
-%<*patterns>
-\begin{code}
+
+
+
   pattern ucut v e = U.`con (`cut _ , ≡.refl , v ✴⟨ _ ⟩ e)
   pattern uμ c = U.`con (`μ _ , ≡.refl , c)
   pattern uμ∼ c = U.`con (`μ∼ _ , ≡.refl , c)
@@ -32,11 +32,11 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
   pattern u⟨_,_⟩ e f =
     U.`con (`⟨-,-⟩ _ _ , ≡.refl , (⟨ _ ⟩· e) ✴⟨ _ ⟩ (⟨ _ ⟩· f))
   pattern uμ⟨-,-⟩ c = U.`con (`μ⟨-,-⟩ _ _ , ≡.refl , c)
-\end{code}
-%</patterns>
 
-%<*myComm>
-\begin{code}
+
+
+
+
   myComm : (A B : Ty) → let 1A = 1# , A; 1B = 1# , B in
     [ MMT , ∞ ] []ᶜ ⊢ trm ((1# , (1A ⅋ 1B) ^⊥) ⅋ (1# , 1B ⅋ 1A))
   myComm A B = elab-unique MMT
@@ -44,5 +44,5 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
       (uμ⟨-,-⟩ (ucut (uλ u⟨ uvar (# 3) , uvar (# 2) ⟩) (uvar (# 0))))
       (uvar (# 1))))
     []
-\end{code}
-%</myComm>
+
+

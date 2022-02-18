@@ -1,4 +1,4 @@
-\begin{code}
+
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 module Generic.Linear.Example.WRel.Monotonicity where
@@ -38,19 +38,19 @@ module Generic.Linear.Example.WRel.Monotonicity where
       ; isCommutativeRelMonoid = _
       }
     open WithWorlds 0CRM
-\end{code}
 
-%<*BaseR>
-\begin{code}
+
+
+
     Baseᴿ : WRel _≤ʷ_
     Baseᴿ .set = Carrier
     Baseᴿ .rel x y _ = x ≤ˢ y
     Baseᴿ .subres _ = id
-\end{code}
-%</BaseR>
 
-%<*BangR>
-\begin{code}
+
+
+
+
     !ᴿ : WayUp → WRel _≤ʷ_ → WRel _≤ʷ_
     !ᴿ a R .set = R .set
     !ᴿ ↑↑ R .rel = R .rel
@@ -58,10 +58,10 @@ module Generic.Linear.Example.WRel.Monotonicity where
     !ᴿ ?? R .rel x y = U
     !ᴿ ~~ R .rel x y = R .rel x y ∩ R .rel y x
     !ᴿ a R .subres _ = id
-\end{code}
-%</BangR>
 
-\begin{code}
+
+
+
     !ᴿ-map : ∀ {a} {R S : WRel _≤ʷ_} → WRelMor R S → WRelMor (!ᴿ a R) (!ᴿ a S)
     !ᴿ-map f .set⇒ = f .set⇒
     !ᴿ-map {↑↑} f .rel⇒ = f .rel⇒
@@ -154,17 +154,17 @@ module Generic.Linear.Example.WRel.Monotonicity where
   open UC.WithPoSemiring poSemiring
   open WithInverses record
     { 0#⁻¹ = ??⁻¹ ; +⁻¹ = ∧⁻¹ ; 1#⁻¹ = ↑↑⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
-\end{code}
 
-%<*patterns>
-\begin{code}
+
+
+
   pattern ulam M = U.`con (`lam _ _ , ≡.refl , M)
   pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴⟨ _ ⟩ (⟨ _ ⟩· N))
-\end{code}
-%</patterns>
 
-%<*minus>
-\begin{code}
+
+
+
+
   minus : [ AnnArr , ∞ ]
     [ ~~ , (↑↑ , base tt) ⊸ (↑↑ , base tt) ⊸ base tt ]ᶜ ++ᶜ
     [ ~~ , (↓↓ , base tt) ⊸ base tt ]ᶜ
@@ -174,18 +174,18 @@ module Generic.Linear.Example.WRel.Monotonicity where
     elab-unique AnnArr
     (ulam (ulam (uapp (uapp (uvar (#0)) (uvar (# 2))) (uapp (uvar (# 1)) (uvar (# 3))))))
     ([ ~~ ] ++ [ ~~ ])
-\end{code}
-%</minus>
 
-%<*minus-set>
-\begin{code}
+
+
+
+
   minus-set⇒ : wrel minus .set⇒ (ℤ._+_ , ℤ.-_) ≡ λ x y → x ℤ.+ (ℤ.- y)
   minus-set⇒ = ≡.refl
-\end{code}
-%</minus-set>
 
-%<*thm>
-\begin{code}
+
+
+
+
   private
     variable
       x x′ y y′ : ℤ
@@ -196,14 +196,14 @@ module Generic.Linear.Example.WRel.Monotonicity where
       ✴⟨ _ ⟩
     ((λ where .app✴ _ xx → neg-mono-≤ xx) ,
      (λ where .app✴ _ xx → neg-mono-≤ xx))
-\end{code}
 
-%<*thm-type>
-\begin{code}
+
+
+
   thm : x ℤ.≤ x′ → y′ ℤ.≤ y → x ℤ.+ (ℤ.- y) ℤ.≤ x′ ℤ.+ (ℤ.- y′)
-\end{code}
-%</thm-type>
-\begin{code}
+
+
+
   thm xx yy = minus-mono .app✴ _ xx .app✴ _ yy
-\end{code}
-%</thm>
+
+
