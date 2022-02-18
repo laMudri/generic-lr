@@ -69,11 +69,11 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 
 
   pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
+  pattern ⊸E sp M N = `con (`⊸E _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
   pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
   pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
   pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
   pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
-
 
 
 
@@ -148,5 +148,3 @@ module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   Sys .rules (`case A B C) =
     ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# , A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# , B ]ᶜ `⊢ C ⟩)
     =⇒ C
-
-

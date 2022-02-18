@@ -49,6 +49,7 @@ import Function.Extra
 
 import Generic.Linear.Syntax
 import Generic.Linear.Example.PaperExamples
+import Generic.Linear.Example.Environment
 import Generic.Linear.Example.MuMuTilde.Term
 import Generic.Linear.Example.WRel
 import Generic.Linear.Example.UsageCheck
