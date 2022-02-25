@@ -1,0 +1,20 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
+module Generic.Simple.Syntax.Term (Ty : Set) where
+
+  open import Level
+  open import Size
+  open import Relation.Unary
+
+  open import Generic.Simple.Syntax Ty
+  open import Generic.Simple.Environment Ty
+
+  private
+    variable
+      A : Ty
+      sz : Size
+
+  data Tm (d : System) : Size → Scoped 0ℓ where
+    `var : ∀[ Var                      A ⇒ Tm d (↑ sz) A ]
+    `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]
+\end{code}
