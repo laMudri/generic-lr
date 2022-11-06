@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K #-}
 
 -- The shape of a binary tree
@@ -13,12 +14,18 @@ module Data.LTree where
   infix 5 _<+>_
 
   -- A tree is either a box (there), empty, or a pair of trees
+\end{code}
 
+%<*LTree>
+\begin{code}
   data LTree : Set where
     [-] : LTree
     ε : LTree
     _<+>_ : (s t : LTree) → LTree
+\end{code}
+%</LTree>
 
+\begin{code}
   private
     variable
       s s′ t : LTree
@@ -69,3 +76,4 @@ module Data.LTree where
 
   _==_ : (i j : Ptr s) → Bool
   i == j = does (i ≟ j)
+\end{code}
