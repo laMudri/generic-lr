@@ -1,0 +1,74 @@
+\begin{code}
+{-# OPTIONS --safe --without-K #-}
+
+open import Algebra.Po
+open import Level using (Level; 0ℓ; _⊔_)
+open import Relation.Binary using (Rel)
+
+module Specific.Syntax (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
+
+  open PoSemiring poSemiring renaming (Carrier to Ann)
+
+  open import Relation.Unary.Checked using (U; _∩_)
+  open import Relation.Nary using (∀[_]; _⇒_)
+
+  infix 40 _⊢_
+  infixr 60 _⊗_ _⊸_ _&_ _⊕_
+\end{code}
+
+%<*Ty>
+\begin{code}
+  data Ty : Set where
+    ι I ⊤ O : Ty
+    _⊗_ _⊸_ _&_ _⊕_ : (A B : Ty) → Ty
+    ! : Ann → Ty → Ty
+\end{code}
+%</Ty>
+
+\begin{code}
+  open import Generic.Linear.Operations rawPoSemiring
+  open import Generic.Linear.Syntax Ty Ann
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+\end{code}
+
+%<*Bind>
+\begin{code}
+  Bind : Ctx → (Ctx → Set) → (Ctx → Set)
+  Bind Δ T Γ = T (Γ ++ᶜ Δ)
+\end{code}
+%</Bind>
+
+\begin{code}
+  private
+    variable
+      A B C : Ty
+      r : Ann
+\end{code}
+
+%<*lr>
+\begin{code}
+  data _⊢_ : Ctx → Ty → Set where
+    var  : ∀[ _∋ A                               ⇒ _⊢ A ]
+    Ii   : ∀[ ℑ                                  ⇒ _⊢ I ]
+    Ie   : ∀[ _⊢ I ✴ _⊢ C                        ⇒ _⊢ C ]
+    ⊗i   : ∀[ _⊢ A ✴ _⊢ B                        ⇒ _⊢ A ⊗ B ]
+    ⊗e   : ∀[  _⊢ A ⊗ B ✴ Bind ([ 1# ∙ A ]ᶜ ++ᶜ [ 1# ∙ B ]ᶜ) (_⊢ C)
+               ⇒
+               _⊢ C ]
+    ⊸i   : ∀[ Bind [ 1# ∙ A ]ᶜ (_⊢ B)            ⇒ _⊢ A ⊸ B ]
+    ⊸e   : ∀[ _⊢ A ⊸ B ✴ _⊢ A                    ⇒ _⊢ B ]
+    ⊤i   : ∀[ U                                  ⇒ _⊢ ⊤ ]
+    &i   : ∀[ _⊢ A ∩ _⊢ B                        ⇒ _⊢ A & B ]
+    &e0  : ∀[ _⊢ A & B                           ⇒ _⊢ A ]
+    &e1  : ∀[ _⊢ A & B                           ⇒ _⊢ B ]
+    Oe   : ∀[ _⊢ O ✴ U                           ⇒ _⊢ C ]
+    ⊕i0  : ∀[ _⊢ A                               ⇒ _⊢ A ⊕ B ]
+    ⊕i1  : ∀[ _⊢ B                               ⇒ _⊢ A ⊕ B ]
+    ⊕e   : ∀[  _⊢ O ✴ (Bind [ 1# ∙ A ]ᶜ (_⊢ C) ∩ Bind [ 1# ∙ B ]ᶜ (_⊢ C))
+               ⇒
+               _⊢ C ]
+    !i   : ∀[ r · _⊢ A                           ⇒ _⊢ ! r A ]
+    !e   : ∀[ _⊢ ! r A ✴ Bind [ r ∙ A ]ᶜ (_⊢ C)  ⇒ _⊢ C ]
+\end{code}
+%</lr>

@@ -1,0 +1,100 @@
+\begin{code}
+{-# OPTIONS --safe --without-K #-}
+
+module Relation.Unary.Bunched.Display
+\end{code}
+%<*BunchedParams>
+\begin{code}
+  {A R : Set} (_≤0 : A → Set) (_≤[_+_] : A → A → A → Set)
+  (_≤[_*ₗ_] : A → R → A → Set)
+\end{code}
+%</BunchedParams>
+\begin{code}
+  (_≤_ : A → A → Set)
+  where
+
+open import Data.Unit using (⊤; tt)
+open import Data.Product
+\end{code}
+
+%<*PointwiseUnit>
+\begin{code}
+U : A → Set
+U _ = ⊤
+\end{code}
+%</PointwiseUnit>
+
+%<*PointwiseConjunction>
+\begin{code}
+_∩_ : (T U : A → Set) → A → Set
+(T ∩ U) x = T x × U x
+\end{code}
+%</PointwiseConjunction>
+
+%<*PointwiseImplication>
+\begin{code}
+_⇒_ : (T U : A → Set) → A → Set
+(T ⇒ U) x = T x → U x
+\end{code}
+%</PointwiseImplication>
+
+%<*BunchedUnit>
+\begin{code}
+record ℑ (x : A) : Set where
+  constructor ℑ⟨_⟩
+  field
+    split : x ≤0
+\end{code}
+%</BunchedUnit>
+
+%<*BunchedConjunction>
+\begin{code}
+record _✴_ (T U : A → Set) (x : A) : Set where
+  constructor _✴⟨_⟩_
+  field
+    {y z} : A
+    T-prf : T y
+    split : x ≤[ y + z ]
+    U-prf : U z
+\end{code}
+%</BunchedConjunction>
+
+%<*BunchedImplication>
+\begin{code}
+record _─✴_ (T U : A → Set) (x : A) : Set where
+  constructor lam✴
+  field
+    app✴ : ∀ {y z} (split : z ≤[ x + y ]) (T-prf : T y) → U z
+\end{code}
+%</BunchedImplication>
+
+%<*BunchedScaling>
+\begin{code}
+record _·_ (r : R) (T : A → Set) (x : A) : Set where
+  constructor ⟨_⟩·_
+  field
+    {z} : A
+    split : x ≤[ r *ₗ z ]
+    T-prf : T z
+\end{code}
+%</BunchedScaling>
+
+%<*forallb>
+\begin{code}
+∀[_] : (A → Set) → Set
+∀[ T ] = ∀ {x} → T x
+\end{code}
+%</forallb>
+
+%<*Box>
+\begin{code}
+record □⁰⁺ (T : A → Set) (x : A) : Set where
+  constructor □⟨_,_,_⟩_
+  field
+    {y} : A
+    strengthen : x ≤ y
+    split-0 : y ≤0
+    split-+ : y ≤[ y + y ]
+    T-prf : T y
+\end{code}
+%</Box>

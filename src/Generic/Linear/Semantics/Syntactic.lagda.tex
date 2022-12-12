@@ -75,7 +75,7 @@ module Generic.Linear.Semantics.Syntactic
 \begin{code}
   reify : {{IdentityEnv 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
   reify {x = ctx Q δ} {ctx P γ} {A} b =
-    b .get ↙ʳ .app✴ prf (>>^Env id^Env ↘ʳ)
+    b .get ↙ʳ .app✴ (mkᶜ prf) (>>^Env id^Env ↘ʳ)
     where
     prf : (P ++ Q) ≤[ (P ++ 0*) +* (0* ++ Q) ]
     prf = +*-identity↘ _ ++ₙ +*-identity↙ _
@@ -155,18 +155,18 @@ module Generic.Linear.Semantics.Syntactic
     1ᵏ = id^Env
 
     []ᵏ : [ 𝓥 ] []ᶜ ⇒ᵉ []ᶜ
-    []ᵏ = []ᵉ ℑ⟨ []ₙ ⟩
+    []ᵏ = []ᵉ ℑᶜ⟨ []ₙ ⟩
 
     _++ᵏ_ : ∀ {Γl Δl Γr Δr} →
       [ 𝓥 ] Γl ⇒ᵉ Δl → [ 𝓥 ] Γr ⇒ᵉ Δr → [ 𝓥 ] Γl ++ᶜ Γr ⇒ᵉ Δl ++ᶜ Δr
     ρ ++ᵏ σ = ++ᵉ $
       ren^Env K.ren^𝓥 ρ ↙ʳ
-        ✴⟨ (+*-identity↘ _ ++ₙ +*-identity↙ _) ⟩
+        ✴ᶜ⟨ (+*-identity↘ _ ++ₙ +*-identity↙ _) ⟩
       ren^Env K.ren^𝓥 σ ↘ʳ
 
-    [_·_]ᵏ : ∀ {r s A B} →
-      r ≤ s → 𝓥 [ 1# · A ]ᶜ B → [ 𝓥 ] [ r · A ]ᶜ ⇒ᵉ [ s · B ]ᶜ
-    [ le · t ]ᵏ = [-]ᵉ (⟨ [ ≤-trans le (*.identity .proj₂ _) ]ₙ ⟩· t)
+    [_∙_]ᵏ : ∀ {r s A B} →
+      r ≤ s → 𝓥 [ 1# ∙ A ]ᶜ B → [ 𝓥 ] [ r ∙ A ]ᶜ ⇒ᵉ [ s ∙ B ]ᶜ
+    [ le ∙ t ]ᵏ = [-]ᵉ (⟨ [ ≤-trans le (*.identity .proj₂ _) ]ₙ ⟩·ᶜ t)
 
   module _ {d} where
     open WithKit (Sub-Kit {d})
@@ -183,7 +183,7 @@ module Generic.Linear.Semantics.Syntactic
       [ d ] Γl ⇒ˢ Δl → [ d ] Γr ⇒ˢ Δr → [ d ] Γl ++ᶜ Γr ⇒ˢ Δl ++ᶜ Δr
     _++ˢ_ = _++ᵏ_
 
-    [_·_]ˢ : ∀ {r s A B} →
-      r ≤ s → [ d , ∞ ] [ 1# · A ]ᶜ ⊢ B → [ d ] [ r · A ]ᶜ ⇒ˢ [ s · B ]ᶜ
-    [_·_]ˢ = [_·_]ᵏ
+    [_∙_]ˢ : ∀ {r s A B} →
+      r ≤ s → [ d , ∞ ] [ 1# ∙ A ]ᶜ ⊢ B → [ d ] [ r ∙ A ]ᶜ ⇒ˢ [ s ∙ B ]ᶜ
+    [_∙_]ˢ = [_∙_]ᵏ
 \end{code}

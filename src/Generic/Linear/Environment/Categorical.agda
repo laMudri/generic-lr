@@ -41,8 +41,7 @@ module Generic.Linear.Environment.Categorical
   record ComposeEnv {u v w} (𝓤 : OpenFam u) (𝓥 : OpenFam v) (𝓦 : OpenFam w)
          : Set (suc 0ℓ ⊔ u ⊔ v ⊔ w) where
     field
-      lift : ∀ {s t P Q γ δ} (ρ : [ 𝓤 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) →
-        ∀[ 𝓥 (ctx Q δ) ⇒ 𝓦 (ctx P γ) ]
+      lift : ∀ {Γ Δ} (ρ : [ 𝓤 ] Γ ⇒ᵉ Δ) → ∀[ 𝓥 Δ ⇒ 𝓦 Γ ]
 
     >>^Env : ∀ {Γ Δ Θ} → [ 𝓤 ] Γ ⇒ᵉ Δ → [ 𝓥 ] Δ ⇒ᵉ Θ → [ 𝓦 ] Γ ⇒ᵉ Θ
     >>^Env ρ σ .Ψ = σ .Ψ >>ᴿ ρ .Ψ

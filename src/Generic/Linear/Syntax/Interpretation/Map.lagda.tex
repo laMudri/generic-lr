@@ -21,7 +21,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡
   open import Relation.Nary
-  open import Relation.Unary.Bunched
+  -- open import Relation.Unary.Bunched
 
   open PoSemiring poSemiring renaming (Carrier to Ann)
 
@@ -46,16 +46,16 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p : (ps : Premises) →
       (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
-    map-p ⟨ Γ `⊢ A ⟩ f r M               = f r M
-    map-p `⊤ f r _                       = _
-    map-p (ps `∧ qs) f r (M , N)         = map-p ps f r M , map-p qs f r N
-    map-p `ℑ f r ℑ⟨ sp0 ⟩                = ℑ⟨ F .rel-0ₘ (sp0 , r) ⟩
-    map-p (ps `✴ qs) f r (M ✴⟨ sp+ ⟩ N)  =
+    map-p ⟨ Γ `⊢ A ⟩ f r M                = f r M
+    map-p `⊤ f r _                        = _
+    map-p (ps `∧ qs) f r (M , N)          = map-p ps f r M , map-p qs f r N
+    map-p `ℑ f r ℑᶜ⟨ sp0 ⟩                = ℑᶜ⟨ F .rel-0ₘ (sp0 , r) ⟩
+    map-p (ps `✴ qs) f r (M ✴ᶜ⟨ sp+ ⟩ N)  =
       let rM ↘, sp+′ ,↙ rN = F .rel-+ₘ (sp+ , r) in
-      map-p ps f rM M ✴⟨ sp+′ ⟩ map-p qs f rN N
-    map-p (p `· ps) f r (⟨ sp* ⟩· M)     =
+      map-p ps f rM M ✴ᶜ⟨ sp+′ ⟩ map-p qs f rN N
+    map-p (p `· ps) f r (⟨ sp* ⟩·ᶜ M)     =
       let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
-      ⟨ sp*′ ⟩· map-p ps f r′ M
+      ⟨ sp*′ ⟩·ᶜ map-p ps f r′ M
 \end{code}
 %</map-p>
 
@@ -81,11 +81,11 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ : (ps : Premises) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
     map-p′ ⟨ Γ `⊢ A ⟩ f t = f t
     map-p′ `⊤ f _ = _
-    map-p′ `ℑ f ℑ⟨ sp ⟩ = ℑ⟨ sp ⟩
+    map-p′ `ℑ f ℑᶜ⟨ sp ⟩ = ℑᶜ⟨ sp ⟩
     map-p′ (ps `∧ qs) f (s , t) = map-p′ ps f s , map-p′ qs f t
-    map-p′ (ps `✴ qs) f (s ✴⟨ sp ⟩ t) =
-      map-p′ ps f s ✴⟨ sp ⟩ map-p′ qs f t
-    map-p′ (r `· ps) f (⟨ sp ⟩· t) = ⟨ sp ⟩· map-p′ ps f t
+    map-p′ (ps `✴ qs) f (s ✴ᶜ⟨ sp ⟩ t) =
+      map-p′ ps f s ✴ᶜ⟨ sp ⟩ map-p′ qs f t
+    map-p′ (r `· ps) f (⟨ sp ⟩·ᶜ t) = ⟨ sp ⟩·ᶜ map-p′ ps f t
 
     map-r′ : (r : Rule) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
@@ -112,10 +112,10 @@ module Generic.Linear.Syntax.Interpretation.Map
     sequence-p `⊤ tt = pure tt
     sequence-p `ℑ t = pure t
     sequence-p (ps `∧ qs) (s , t) = _,_ <$> sequence-p ps s ⊛ sequence-p qs t
-    sequence-p (ps `✴ qs) (s ✴⟨ sp ⟩ t) =
-      _✴⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
-    sequence-p (ρ `· ps) (⟨ sp ⟩· t) =
-      ⟨ sp ⟩·_ <$> sequence-p ps t
+    sequence-p (ps `✴ qs) (s ✴ᶜ⟨ sp ⟩ t) =
+      _✴ᶜ⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
+    sequence-p (ρ `· ps) (⟨ sp ⟩·ᶜ t) =
+      ⟨ sp ⟩·ᶜ_ <$> sequence-p ps t
 
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →

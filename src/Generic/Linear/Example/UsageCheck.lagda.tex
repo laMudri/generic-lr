@@ -156,15 +156,15 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         List (⟦ ps ⟧p (Scope [ sys , ∞ ]_⊢_) Γ)
       lemma-p sys ⟨ ctx Q δ `⊢ A ⟩ {ctx P γ} t = t (P V.++ Q)
       lemma-p sys `⊤ t = (| t |)
-      lemma-p sys `ℑ t = (| ℑ⟨_⟩ (0*⁻¹ _) |)
+      lemma-p sys `ℑ t = (| ℑᶜ⟨_⟩ (0*⁻¹ _) |)
       lemma-p sys (ps `∧ qs) (s , t) =
         (| _,_ (lemma-p sys ps s) (lemma-p sys qs t) |)
-      lemma-p sys (ps `✴ qs) {ctx P γ} (s ✴⟨ _ ⟩ t) = do
+      lemma-p sys (ps `✴ qs) {ctx P γ} (s ✴ᶜ⟨ _ ⟩ t) = do
         ((Pl , Pr) , sp) ← +*⁻¹ P
-        (| _✴⟨ sp ⟩_ (lemma-p sys ps s) (lemma-p sys qs t) |)
-      lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩· t) = do
+        (| _✴ᶜ⟨ sp ⟩_ (lemma-p sys ps s) (lemma-p sys qs t) |)
+      lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩·ᶜ t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
-        (| ⟨ sp ⟩·_ (lemma-p sys ps t) |)
+        (| ⟨ sp ⟩·ᶜ_ (lemma-p sys ps t) |)
 
       lemma-r : ∀ (sys : System) (r : Rule) {A Γ} →
         U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →

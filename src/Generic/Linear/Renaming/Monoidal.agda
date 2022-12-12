@@ -15,11 +15,11 @@ module Generic.Linear.Renaming.Monoidal
   open import Data.LTree.Vector
   open import Data.Product
   open import Data.Unit
-  open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
   open import Generic.Linear.Variable Ty rawPoSemiring
   open import Generic.Linear.Environment Ty poSemiring
   open import Generic.Linear.Environment.Properties Ty poSemiring
@@ -35,11 +35,11 @@ module Generic.Linear.Renaming.Monoidal
     Γl ⇒ʳ Δl → Γr ⇒ʳ Δr → Γl ++ᶜ Γr ⇒ʳ Δl ++ᶜ Δr
   th ++ʳ ph = ++ᵉ
     (compose th ↙ʳ
-      ✴⟨ +*-identity↘ _ ++ₙ +*-identity↙ _ ⟩
+      ✴ᶜ⟨ +*-identity↘ _ ++ₙ +*-identity↙ _ ⟩
      compose ph ↘ʳ)
 
   ++-[]ʳ← : ∀ {Γ} → Γ ⇒ʳ Γ ++ᶜ []ᶜ
-  ++-[]ʳ← = ++ᵉ (identity ✴⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑ⟨ 0*-triv ⟩))
+  ++-[]ʳ← = ++ᵉ (identity ✴ᶜ⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑᶜ⟨ 0*-triv ⟩))
 
   ++-[]ʳ→ : ∀ {Γ} → Γ ++ᶜ []ᶜ ⇒ʳ Γ
   ++-[]ʳ→ .Ψ = [ 1ᴿ │ [│]ᴿ ]ᴿ

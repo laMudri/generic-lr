@@ -41,8 +41,8 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
   [_]ᶜ : Ann × Ty → Ctx
   [(r , A)]ᶜ = ctx [ r ] [ A ]
 
-  [_·_]ᶜ : Ann → Ty → Ctx
-  [ ρ · A ]ᶜ = ctx [ ρ ] [ A ]
+  [_∙_]ᶜ : Ann → Ty → Ctx
+  [ ρ ∙ A ]ᶜ = ctx [ ρ ] [ A ]
 
   _++ᶜ_ : Ctx → Ctx → Ctx
   ctx P γ ++ᶜ ctx Q δ = ctx (P ++ Q) (γ ++ δ)

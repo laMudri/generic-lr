@@ -25,62 +25,48 @@ module Generic.Linear.Syntax.Interpretation
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Syntax Ty Ann
 
-  open import Relation.Unary.Bunched.Checked
-  private
-    open module Chk0 {s} = BunchedUnit (_≤0* {s})
-    open module Chk+ {s} = BunchedConjunction (_≤[_+*_] {s})
-      hiding (_─✴_)
-    open module Chk* {s} = BunchedScaling (_≤[_*ₗ_] {s})
-    open module ChkD {s} =
-      BunchedDuplicable (_≤*_ {s}) _≤0* _≤[_+*_] _≤[_*ₗ_]
-  import Relation.Unary.Bunched as Syn
-  private
-    open module Syn≤ {s} = Syn.BunchedOrder (_≤*_ {s})
-    open module Syn+ {s} = Syn.BunchedConjunction (_≤[_+*_] {s})
-      using (_─✴_)
-
   private
     variable
       ℓ t u : Level
 
   infix 4 _≤ᶜ_
-  infixr 5 !!_
-  infixr 8 _⇒ᵏᶜ_ _─✴ᶜ_
-  infixr 9 _✴ᶜ_
-  infixr 10 _·ᶜ_
 
-  _≤ᶜ_ : (Γ Δ : Ctx) → Set
-  ctx {s} P γ ≤ᶜ ctx {t} Q δ = Σ (s ≡ t) λ where
-    refl → P ≤* Q × γ ≡ δ
+  data _≤ᶜ_ (Γ : Ctx) : Ctx → Set where
+    mkᶜ : ∀ {Q} → Γ .use-ctx ≤* Q → Γ ≤ᶜ ctx Q (Γ .ty-ctx)
+  data _≤0ᶜ (Γ : Ctx) : Set where
+    mkᶜ : Γ .use-ctx ≤0* → Γ ≤0ᶜ
+  data _≤[_+ᶜ_] (Θ : Ctx) : (Γ Δ : Ctx) → Set where
+    mkᶜ : ∀ {P Q} → Θ .use-ctx ≤[ P +* Q ] → Θ ≤[ ctx P (Θ .ty-ctx) +ᶜ ctx Q (Θ .ty-ctx) ]
+  data _≤[_*ₗᶜ_] (Γ : Ctx) r : (Δ : Ctx) → Set where
+    mkᶜ : ∀ {Q} → Γ .use-ctx ≤[ r *ₗ Q ] → Γ ≤[ r *ₗᶜ ctx Q (Γ .ty-ctx) ]
 
-  pattern !!_ PQ = refl , PQ , refl
+  open import Relation.Unary.Bunched.Checked as Chk
+  open BunchedUnit _≤0ᶜ public
+  open BunchedConjunction _≤[_+ᶜ_] using (_✴_; map-✴) public
+  open BunchedScaling _≤[_*ₗᶜ_] public
+  open BunchedDuplicable _≤ᶜ_ _≤0ᶜ _≤[_+ᶜ_] _≤[_*ₗᶜ_] public
+  import Relation.Unary.Bunched as Syn
+  open Syn.BunchedOrder _≤ᶜ_ public
+  open Syn.BunchedConjunction _≤[_+ᶜ_] using (_─✴_; lam✴; app✴) public
 
-  _⇒ᵏᶜ_ : (T : OpenType t) (U : OpenType u) (Γ : Ctx) → Set (t ⊔ u)
-  (T ⇒ᵏᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ⇒ᵏ (λ Q → U (ctx Q γ))) R
+  infixr 9 _✴ᶜ⟨_⟩_
+  infixr 10 ⟨_⟩·ᶜ_
+  infixr 10 □ᶜ⟨_,_,_,_⟩_
 
-  ℑᶜ : OpenType ℓ
-  ℑᶜ (ctx R γ) = ℑ R
-
-  _✴ᶜ_ : (T U : OpenType ℓ) (Γ : Ctx) → Set ℓ
-  (T ✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ✴ (λ Q → U (ctx Q γ))) R
-
-  _─✴ᶜ_ : (T : OpenType t) (U : OpenType u) (Γ : Ctx) → Set (t ⊔ u)
-  (T ─✴ᶜ U) (ctx R γ) = ((λ P → T (ctx P γ)) ─✴ (λ Q → U (ctx Q γ))) R
-
-  _·ᶜ_ : (r : Ann) (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
-  (r ·ᶜ T) (ctx R γ) = (r · (λ P → T (ctx P γ))) R
-
-  Dupᶜ : (bf : BoxFlags) (T : OpenType ℓ) (Γ : Ctx) → Set ℓ
-  Dupᶜ bf T (ctx R γ) = Dup bf (λ P → T (ctx P γ)) R
+  pattern ℑᶜ⟨_⟩ sp = Chk.ℑ⟨ mkᶜ sp ⟩
+  pattern _✴ᶜ⟨_⟩_ t sp u = t Chk.✴⟨ mkᶜ sp ⟩ u
+  pattern ⟨_⟩·ᶜ_ sp t = Chk.⟨ mkᶜ sp ⟩· t
+  pattern □ᶜ⟨_,_,_,_⟩_ str sp0 sp+ sp* t =
+    Chk.□⟨ mkᶜ str , mkᶜ sp0 , mkᶜ sp+ , mkᶜ sp* ⟩ t
 \end{code}
 
 %<*semp>
 \begin{code}
   ⟦_⟧p : Premises → ExtOpenFam ℓ → OpenType ℓ
   ⟦ ⟨ Δ `⊢ A ⟩ ⟧p X Γ = X Δ Γ A
-  ⟦ `⊤ ⟧p X = U;   ⟦ p `∧ q ⟧p X = ⟦ p ⟧p X ∩ ⟦ q ⟧p X
-  ⟦ `ℑ ⟧p X = ℑᶜ;  ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ᶜ ⟦ q ⟧p X
-  ⟦ r `· p ⟧p X = r ·ᶜ ⟦ p ⟧p X
+  ⟦ `⊤ ⟧p X = U;  ⟦ p `∧ q ⟧p X = ⟦ p ⟧p X ∩ ⟦ q ⟧p X
+  ⟦ `ℑ ⟧p X = ℑ;  ⟦ p `✴ q ⟧p X = ⟦ p ⟧p X ✴ ⟦ q ⟧p X
+  ⟦ r `· p ⟧p X = r · ⟦ p ⟧p X
 \end{code}
 %</semp>
 

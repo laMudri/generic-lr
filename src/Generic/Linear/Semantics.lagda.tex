@@ -45,7 +45,7 @@ module Generic.Linear.Semantics
 %<*Kripke>
 \begin{code}
   Kripke : (𝓥 : OpenFam v) (𝓒 : I ─OpenFam c) → I ─ExtOpenFam _
-  Kripke = Wrap λ 𝓥 𝓒 Δ Γ A → □ʳ ([ 𝓥 ]_⇒ᵉ Δ ─✴ᶜ [ 𝓒 ]_⊨ A) Γ
+  Kripke = Wrap λ 𝓥 𝓒 Δ Γ A → □ʳ ([ 𝓥 ]_⇒ᵉ Δ ─✴ [ 𝓒 ]_⊨ A) Γ
 \end{code}
 %</Kripke>
 
