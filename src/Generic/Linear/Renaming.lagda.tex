@@ -40,13 +40,13 @@ module Generic.Linear.Renaming
 %<*Boxr>
 \begin{code}
   □ʳ : OpenType ℓ → OpenType (suc 0ℓ ⊔ ℓ)
-  (□ʳ T) Γ = ∀[ (_⇒ʳ Γ) ⇒ T ]
+  (□ʳ T) Γ = (_⇒ʳ Γ) ⊆ T
 \end{code}
 %</Boxr>
 
 %<*Renameable>
 \begin{code}
   Renameable : OpenType ℓ → Set (suc 0ℓ ⊔ ℓ)
-  Renameable T = ∀[ T ⇒ □ʳ T ]
+  Renameable T = T ⊆ □ʳ T
 \end{code}
 %</Renameable>

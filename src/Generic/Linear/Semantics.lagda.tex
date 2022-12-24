@@ -19,7 +19,7 @@ module Generic.Linear.Semantics
   open import Function using (Equivalence; _$_)
   open import Function.Extra
   open import Size
-  open import Relation.Nary
+  open import Relation.Nary.Extra using (_⊆_)
   open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawPoSemiring
@@ -54,7 +54,7 @@ module Generic.Linear.Semantics
 \end{code}
 %<*mapKC>
 \begin{code}
-    mapK𝓒 :  ∀ {A B} → ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] →
+    mapK𝓒 :  ∀ {A B} → [ 𝓒 ]_⊨ A ⊆ [ 𝓒′ ]_⊨ B →
              ∀ {Δ Γ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B
     mapK𝓒 f b .get ren .app✴ sp ρ = f (b .get ren .app✴ sp ρ)
 \end{code}
@@ -66,8 +66,8 @@ module Generic.Linear.Semantics
          : Set (suc 0ℓ ⊔ v ⊔ c) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
-      ⟦var⟧  : ∀[ 𝓥                    ⇒ 𝓒 ]
-      ⟦con⟧  : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒)  ⇒ 𝓒 ]
+      ⟦var⟧  : 𝓥                    ⊆ 𝓒
+      ⟦con⟧  : ⟦ d ⟧s (Kripke 𝓥 𝓒)  ⊆ 𝓒
 \end{code}
 %</Semantics>
 
@@ -90,16 +90,16 @@ module Generic.Linear.Semantics
 %<*Comp>
 \begin{code}
     [_]_⇒ᶜ_ : (𝓒′ : OpenFam ℓ) (Γ Δ : Ctx) → Set ℓ
-    [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒′ ] Γ ⊨_ ]
+    [ 𝓒′ ] Γ ⇒ᶜ Δ = ∀ {sz} → [ d , sz ] Δ ⊢_ ⊆ [ 𝓒′ ] Γ ⊨_
 \end{code}
 %</Comp>
 
 %<*semantics-type>
 \begin{code}
     semantics : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz} →
-      ∀[ [ d , sz ] Δ ⊢_ ⇒ [ 𝓒 ] Γ ⊨_ ]
+      [ d , sz ] Δ ⊢_ ⊆ [ 𝓒 ] Γ ⊨_
     body : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz Θ} →
-      ∀[ Scope [ d , sz ]_⊢_ Θ Δ ⇒ Kripke 𝓥 𝓒 Θ Γ ]
+      Scope [ d , sz ]_⊢_ Θ Δ ⊆ Kripke 𝓥 𝓒 Θ Γ
 \end{code}
 %</semantics-type>
 

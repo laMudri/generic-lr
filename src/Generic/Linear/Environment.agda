@@ -34,7 +34,7 @@ module Generic.Linear.Environment
   IsPresheaf : OpenFam ℓ → Set ℓ
   IsPresheaf 𝓥 =
     ∀ {s} {γ : Vector Ty s} {P Q} →
-    Q ≤* P → ∀[ 𝓥 (ctx P γ) ⇒ 𝓥 (ctx Q γ) ]
+    Q ≤* P → 𝓥 (ctx P γ) ⊆ 𝓥 (ctx Q γ)
 
   -- Working with relations is nicer than working with functions, but to
   -- implement `map` for `□, we need the relation to be backed by a function.
@@ -48,7 +48,7 @@ module Generic.Linear.Environment
     field
       Ψ : LinFuncRel t s 0ℓ
       fit-here : Ψ .rel Q P
-      lookup : ∀ {P′ Q′} → Ψ .rel Q′ P′ → ∀[ ctx Q′ δ ∋_ ⇒ 𝓥 (ctx P′ γ) ]
+      lookup : ∀ {P′ Q′} → Ψ .rel Q′ P′ → ctx Q′ δ ∋_ ⊆ 𝓥 (ctx P′ γ)
   open [_]_⇒ᵉ_ public
 
   relocate : ∀ {𝓥 : OpenFam ℓ} {s t P P′ Q Q′ γ δ} →

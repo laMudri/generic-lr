@@ -89,10 +89,10 @@ module Generic.Linear.Renaming.Properties
   infixr 5 _>>ʳ_
   _>>ʳ_ = compose
 
-  extract : ∀[ □ʳ T ⇒ T ]
+  extract : □ʳ T ⊆ T
   extract t = t identity
 
-  duplicate : ∀[ □ʳ T ⇒ □ʳ (□ʳ T) ]
+  duplicate : □ʳ T ⊆ □ʳ (□ʳ T)
   duplicate t ρ σ = t (compose ρ σ)
 
   ren^□ : Renameable (□ʳ T)

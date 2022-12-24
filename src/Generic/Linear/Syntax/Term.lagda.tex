@@ -12,7 +12,7 @@ module Generic.Linear.Syntax.Term
 
   open import Function.Extra
   open import Size
-  open import Relation.Nary
+  open import Relation.Nary.Extra using (_⊆_)
 
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
@@ -28,7 +28,7 @@ module Generic.Linear.Syntax.Term
 %<*Term>
 \begin{code}
   data [_,_]_⊢_ (d : System) : Size → OpenFam 0ℓ where
-    `var  : ∀[ _∋_                           ⇒ [ d , ↑ sz ]_⊢_ ]
-    `con  : ∀[ ⟦ d ⟧s (Scope [ d , sz ]_⊢_)  ⇒ [ d , ↑ sz ]_⊢_ ]
+    `var  : _∋_                           ⊆ [ d , ↑ sz ]_⊢_
+    `con  : ⟦ d ⟧s (Scope [ d , sz ]_⊢_)  ⊆ [ d , ↑ sz ]_⊢_
 \end{code}
 %</Term>

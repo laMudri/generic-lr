@@ -18,7 +18,7 @@ module Generic.Linear.Example.WRel where
   open import Relation.Unary.Bunched.Properties
   open import Relation.Unary.Bunched.Synth
   open import Relation.Unary.Extra
-  open import Relation.Nary
+  open import Relation.Unary using (IUniversal; _⇒_; _⊆_)
   open import Size
 
   module WithPoSemiring (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
@@ -48,8 +48,7 @@ module Generic.Linear.Example.WRel where
       constructor wRelMor
       field
         set⇒ : R .set → S .set
-        rel⇒ :
-          ∀[ (I⋂ (_ × _) \ (x , y) → R .rel x y ⇒ S .rel (set⇒ x) (set⇒ y)) ]
+        rel⇒ : ∀ {x y} → R .rel x y ⊆ S .rel (set⇒ x) (set⇒ y)
 \end{code}
 %</WRelMor>
 
@@ -114,7 +113,7 @@ module Generic.Linear.Example.WRel where
         variable
           R R′ S S′ T T′ : WRel _≤ʷ_
 
-      ◇-alg : ∀ (R : WRel _≤ʷ_) {x y} → ∀[ ◇ (R .rel x y) ⇒ R .rel x y ]
+      ◇-alg : ∀ (R : WRel _≤ʷ_) {x y} → ◇ (R .rel x y) ⊆ R .rel x y
       ◇-alg R (◇⟨ sub ⟩ r) = R .subres sub r
 
       map-⊗ᴿ : WRelMor R R′ → WRelMor S S′ → WRelMor (R ⊗ᴿ S) (R′ ⊗ᴿ S′)
@@ -295,8 +294,9 @@ module Generic.Linear.Example.WRel where
       Wrel .ren^𝓥 = ren^∋
       Wrel .⟦var⟧ = lookupᴿ
       Wrel .⟦con⟧ (`lam (r , A) B , ≡.refl , m) = curryᴿ (reify m)
-      Wrel .⟦con⟧ {ctx R γ}
-        (`app (r , A) B , ≡.refl , _✴⟨_⟩_ {P} {rQ} m sp+ (⟨_⟩·_ {Q} sp* n)) =
+      Wrel .⟦con⟧ {ctx R γ} (`app (r , A) B , ≡.refl ,
+        _✴⟨_⟩_ {ctx P .γ} {ctx rQ .γ} m (mkᶜ sp+)
+          (⟨_⟩·_ {ctx Q .γ} (mkᶜ sp*) n)) =
         let  n′ : WRelMor ⟦ ctx Q γ ⟧ᶜ ⟦ A ⟧
              n′ = reify n ∘ᴿ ⊗ᴿ-unitʳ←
              m′ : WRelMor (⟦ ctx P γ ⟧ᶜ ⊗ᴿ !ᴿ r ⟦ A ⟧) ⟦ B ⟧

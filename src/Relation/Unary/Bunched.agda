@@ -57,7 +57,7 @@ module Relation.Unary.Bunched where
 
     map-✴ : ∀ {t t′ u u′} {T : A → Set t} {T′ : A → Set t′}
                           {U : A → Set u} {U′ : A → Set u′} →
-            ∀[ T ⇒ T′ ] × ∀[ U ⇒ U′ ] → ∀[ T ✴ U ⇒ T′ ✴ U′ ]
+            T ⊆ T′ × U ⊆ U′ → T ✴ U ⊆ T′ ✴ U′
     map-✴ (f , g) (t ✴⟨ sp ⟩ u) = f t ✴⟨ sp ⟩ g u
 
   open BunchedConjunction public using (_✴⟨_⟩_; lam✴; app✴)

@@ -38,6 +38,13 @@ _⇒_ : (T U : A → Set) → A → Set
 \end{code}
 %</PointwiseImplication>
 
+%<*Entails>
+\begin{code}
+_⊆_ : (T U : A → Set) → Set
+T ⊆ U = ∀ {x} → (T x → U x)
+\end{code}
+%</Entails>
+
 %<*BunchedUnit>
 \begin{code}
 record ℑ (x : A) : Set where

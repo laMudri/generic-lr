@@ -20,8 +20,8 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Function.Base
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡
-  open import Relation.Nary
-  -- open import Relation.Unary.Bunched
+  open import Relation.Nary.Extra using (_⊆_)
+  -- open import Relation.Unary.Checked using (_⊆_)
 
   open PoSemiring poSemiring renaming (Carrier to Ann)
 
@@ -44,7 +44,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 %<*map-p>
 \begin{code}
     map-p : (ps : Premises) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
       (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
     map-p ⟨ Γ `⊢ A ⟩ f r M                = f r M
     map-p `⊤ f r _                        = _
@@ -61,16 +61,16 @@ module Generic.Linear.Syntax.Interpretation.Map
 
 \begin{code}
     map-r : (r : Rule) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
-      (∀ {P Q} → F .rel P Q → ∀[ ⟦ r ⟧r X (ctx P γ) ⇒ ⟦ r ⟧r Y (ctx Q δ) ])
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
+      (∀ {P Q} → F .rel P Q → ⟦ r ⟧r X (ctx P γ) ⊆ ⟦ r ⟧r Y (ctx Q δ))
     map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
 \end{code}
 
 %<*map-s-type>
 \begin{code}
     map-s : (s : System) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → ∀[ X Θ (ctx P′ γ) ⇒ Y Θ (ctx Q′ δ) ]) →
-      (∀ {P Q} → F .rel P Q → ∀[ ⟦ s ⟧s X (ctx P γ) ⇒ ⟦ s ⟧s Y (ctx Q δ) ])
+      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
+      (∀ {P Q} → F .rel P Q → ⟦ s ⟧s X (ctx P γ) ⊆ ⟦ s ⟧s Y (ctx Q δ))
 \end{code}
 %</map-s-type>
 \begin{code}
@@ -78,7 +78,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 
   module _ {X : ExtOpenFam x} {Y : ExtOpenFam y} where
 
-    map-p′ : (ps : Premises) → ∀[ X ⇒ Y ] → ∀[ ⟦ ps ⟧p X ⇒ ⟦ ps ⟧p Y ]
+    map-p′ : (ps : Premises) → X ⊆ Y → ⟦ ps ⟧p X ⊆ ⟦ ps ⟧p Y
     map-p′ ⟨ Γ `⊢ A ⟩ f t = f t
     map-p′ `⊤ f _ = _
     map-p′ `ℑ f ℑᶜ⟨ sp ⟩ = ℑᶜ⟨ sp ⟩
@@ -87,13 +87,13 @@ module Generic.Linear.Syntax.Interpretation.Map
       map-p′ ps f s ✴ᶜ⟨ sp ⟩ map-p′ qs f t
     map-p′ (r `· ps) f (⟨ sp ⟩·ᶜ t) = ⟨ sp ⟩·ᶜ map-p′ ps f t
 
-    map-r′ : (r : Rule) → ∀[ X ⇒ Y ] → ∀[ ⟦ r ⟧r X ⇒ ⟦ r ⟧r Y ]
+    map-r′ : (r : Rule) → X ⊆ Y → ⟦ r ⟧r X ⊆ ⟦ r ⟧r Y
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
 \end{code}
 
 %<*map-s-prime-type>
 \begin{code}
-    map-s′ : (s : System) → ∀[ X ⇒ Y ] → ∀[ ⟦ s ⟧s X ⇒ ⟦ s ⟧s Y ]
+    map-s′ : (s : System) → X ⊆ Y → ⟦ s ⟧s X ⊆ ⟦ s ⟧s Y
 \end{code}
 %</map-s-prime-type>
 \begin{code}
@@ -107,7 +107,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 
     sequence-p :
       ∀ {X : ExtOpenFam x} (ps : Premises) →
-      ∀[ ⟦ ps ⟧p (λ Δ Γ B → F (X Δ Γ B)) ⇒ F ∘ ⟦ ps ⟧p X ]
+      ⟦ ps ⟧p (λ Δ Γ B → F (X Δ Γ B)) ⊆ F ∘ ⟦ ps ⟧p X
     sequence-p (⟨ Γ `⊢ A ⟩) t = t
     sequence-p `⊤ tt = pure tt
     sequence-p `ℑ t = pure t
@@ -119,12 +119,12 @@ module Generic.Linear.Syntax.Interpretation.Map
 
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →
-      ∀[ _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A ]
+      _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⊆ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A
     sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
       ∀ {X : ExtOpenFam x} (s : System) → ∀ {A} →
-      ∀[ _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⇒ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A ]
+      _⟨ ⟦ s ⟧s (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⊆ F ∘ _⟨ ⟦ s ⟧s X ⟩⊢ A
     sequence-s (L ▹ rs) (l , t) =
       (l ,_) <$> sequence-r (rs l) t
 \end{code}

@@ -19,7 +19,7 @@ module Generic.Linear.Semantics.Syntactic
   open import Function.Base using (id; _∘_; _$_)
   open import Function.Extra
   open import Size
-  open import Relation.Nary
+  open import Relation.Nary.Extra using (_⊆_)
   open import Relation.Unary.Bunched
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; refl)
 
@@ -55,8 +55,8 @@ module Generic.Linear.Semantics.Syntactic
   record Kit (d : System) (𝓥 : OpenFam v) : Set (suc 0ℓ ⊔ v) where
     field
       ren^𝓥  : ∀ {A} → Renameable ([ 𝓥 ]_⊨ A)
-      vr     : ∀[ _∋_  ⇒ 𝓥             ]
-      tm     : ∀[ 𝓥    ⇒ [ d , ∞ ]_⊢_  ]
+      vr     : _∋_  ⊆ 𝓥
+      tm     : 𝓥    ⊆ [ d , ∞ ]_⊢_
 \end{code}
 %</Kit>
 
@@ -73,7 +73,7 @@ module Generic.Linear.Semantics.Syntactic
 
 %<*reify>
 \begin{code}
-  reify : {{IdentityEnv 𝓥}} → ∀[ Kripke 𝓥 𝓒 ⇒ Scope 𝓒 ]
+  reify : {{IdentityEnv 𝓥}} → Kripke 𝓥 𝓒 ⊆ Scope 𝓒
   reify {x = ctx Q δ} {ctx P γ} {A} b =
     b .get ↙ʳ .app✴ (mkᶜ prf) (>>^Env id^Env ↘ʳ)
     where

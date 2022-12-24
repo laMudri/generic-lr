@@ -37,5 +37,5 @@ module Relation.Unary.Bunched.Checked {a} {A : Set a} where
     _─✴_ = Syn._─✴_
 
     map-✴ : ∀ {v w} {T U : A → Set v} {T′ U′ : A → Set w} →
-            ∀[ T ⇒ T′ ] × ∀[ U ⇒ U′ ] → ∀[ T ✴ U ⇒ T′ ✴ U′ ]
+            T ⊆ T′ × U ⊆ U′ → T ✴ U ⊆ T′ ✴ U′
     map-✴ = Syn.map-✴
