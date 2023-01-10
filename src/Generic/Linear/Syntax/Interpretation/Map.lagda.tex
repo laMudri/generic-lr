@@ -17,6 +17,7 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Data.Product
   open import Data.LTree
   open import Data.LTree.Vector
+  open import Data.Wrap
   open import Function.Base
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡
@@ -29,48 +30,70 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Generic.Linear.Algebra poSemiring
   open import Generic.Linear.Syntax Ty Ann
   open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open CtxDup
 
   private
     variable
       x y : Level
 
   module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
-           (F : LinFuncRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
+           (Ψ : LinFuncRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
 
-    private open module Dummy {s} = FRelLeftSemimodule (Vᶠᴿ s)
 \end{code}
 
 %<*map-p>
 \begin{code}
     map-p : (ps : Premises) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → F .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
     map-p ⟨ Γ `⊢ A ⟩ f r M                = f r M
     map-p `⊤ f r _                        = _
     map-p (ps `∧ qs) f r (M , N)          = map-p ps f r M , map-p qs f r N
-    map-p `ℑ f r ℑᶜ⟨ sp0 ⟩                = ℑᶜ⟨ F .rel-0ₘ (sp0 , r) ⟩
+    map-p `ℑ f r ℑᶜ⟨ sp0 ⟩                = ℑᶜ⟨ Ψ .rel-0ₘ (sp0 , r) ⟩
     map-p (ps `✴ qs) f r (M ✴ᶜ⟨ sp+ ⟩ N)  =
-      let rM ↘, sp+′ ,↙ rN = F .rel-+ₘ (sp+ , r) in
+      let rM ↘, sp+′ ,↙ rN = Ψ .rel-+ₘ (sp+ , r) in
       map-p ps f rM M ✴ᶜ⟨ sp+′ ⟩ map-p qs f rN N
     map-p (p `· ps) f r (⟨ sp* ⟩·ᶜ M)     =
-      let r′ , sp*′ = F .rel-*ₘ (sp* , r) in
+      let r′ , sp*′ = Ψ .rel-*ₘ (sp* , r) in
       ⟨ sp*′ ⟩·ᶜ map-p ps f r′ M
 \end{code}
 %</map-p>
+\begin{code}
+    map-p (`□⁰⁺ˣ ps) f {P} {Q} P∼Q (□ᶜ⟨ mkDup str sp0 sp+ sp* ⟩ M) =
+      let P′ = _ in
+      let _,_ {Q′} P′∼Q′ uQ′ = Ψ .func P′ in
+      let
+        P′∼Q : Ψ .rel P′ Q
+        P′∼Q = Ψ .rel-≤ₘ str ≤*-refl P∼Q
+        Q≤Q′ : Q ≤* Q′
+        Q≤Q′ = uQ′ P′∼Q
+        sp0′ : Q′ ≤0*
+        sp0′ = Ψ .rel-0ₘ (sp0 , P′∼Q′)
+        sp+′ : Q′ ≤[ Q′ +* Q′ ]
+        sp+′ =
+          let rl ↘, sp ,↙ rr = Ψ .rel-+ₘ (sp+ , P′∼Q′) in
+          +ₘ-mono ≤*-refl (Ψ .func _ .unique rl) (Ψ .func _ .unique rr) sp
+        sp*′ : ∀ s → Q′ ≤[ s *ₗ Q′ ]
+        sp*′ s =
+          let r′ , sp = Ψ .rel-*ₘ (sp* s , P′∼Q′) in
+          *ₘ-mono ≤*-refl ≤-refl (Ψ .func _ .unique r′) sp
+      in
+      □ᶜ⟨ mkDup Q≤Q′ sp0′ sp+′ sp*′ ⟩ map-p ps f P′∼Q′ M
+\end{code}
 
 \begin{code}
     map-r : (r : Rule) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → F .rel P Q → ⟦ r ⟧r X (ctx P γ) ⊆ ⟦ r ⟧r Y (ctx Q δ))
-    map-r (ps =⇒ A) f r (q , M) = q , map-p ps f r M
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ r ⟧r X (ctx P γ) ⊆ ⟦ r ⟧r Y (ctx Q δ))
+    map-r (ps `⊆ A) f r (q , M) = q , map-p ps f r M
 \end{code}
 
 %<*map-s-type>
 \begin{code}
     map-s : (s : System) →
-      (∀ {Θ P′ Q′} → F .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → F .rel P Q → ⟦ s ⟧s X (ctx P γ) ⊆ ⟦ s ⟧s Y (ctx Q δ))
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ s ⟧s X (ctx P γ) ⊆ ⟦ s ⟧s Y (ctx Q δ))
 \end{code}
 %</map-s-type>
 \begin{code}
@@ -86,6 +109,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (ps `✴ qs) f (s ✴ᶜ⟨ sp ⟩ t) =
       map-p′ ps f s ✴ᶜ⟨ sp ⟩ map-p′ qs f t
     map-p′ (r `· ps) f (⟨ sp ⟩·ᶜ t) = ⟨ sp ⟩·ᶜ map-p′ ps f t
+    map-p′ (`□⁰⁺ˣ ps) f (□ᶜ⟨ r ⟩ t) = □ᶜ⟨ r ⟩ map-p′ ps f t
 
     map-r′ : (r : Rule) → X ⊆ Y → ⟦ r ⟧r X ⊆ ⟦ r ⟧r Y
     map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
@@ -116,6 +140,8 @@ module Generic.Linear.Syntax.Interpretation.Map
       _✴ᶜ⟨ sp ⟩_ <$> sequence-p ps s ⊛ sequence-p qs t
     sequence-p (ρ `· ps) (⟨ sp ⟩·ᶜ t) =
       ⟨ sp ⟩·ᶜ_ <$> sequence-p ps t
+    sequence-p (`□⁰⁺ˣ ps) (□ᶜ⟨ r ⟩ t) =
+      □ᶜ⟨ r ⟩_ <$> sequence-p ps t
 
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →

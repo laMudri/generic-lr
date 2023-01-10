@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
 
 module Generic.Linear.Example.LnL where
@@ -16,12 +17,21 @@ module Generic.Linear.Example.LnL where
   open import Size
 
   open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+\end{code}
 
+%<*Frag>
+\begin{code}
   data Frag : Set where
     lin int : Frag
+\end{code}
+%</Frag>
 
+\begin{code}
   infixr 5 _t⊗_ _t⊸_ _t×_ _t→_
+\end{code}
 
+%<*Ty>
+\begin{code}
   data Ty : Frag → Set where
     ι : Ty lin
     tI : Ty lin
@@ -33,19 +43,30 @@ module Generic.Linear.Example.LnL where
     _t×_ : (X Y : Ty int) → Ty int
     _t→_ : (X Y : Ty int) → Ty int
     tG : Ty lin → Ty int
+\end{code}
+%</Ty>
 
+%<*SigTy>
+\begin{code}
   ΣTy : Set
   ΣTy = ∃ Ty
+\end{code}
+%</SigTy>
 
+\begin{code}
   t! : Ty lin → Ty lin
   t! A = tF (tG A)
 
   open import Generic.Linear.Syntax ΣTy Ann public
 
   open import Generic.Linear.Syntax.Term ΣTy rawPoSemiring public
+    hiding (`var)
   open import Generic.Linear.Syntax.Interpretation ΣTy rawPoSemiring public
   open import Generic.Linear.Renaming ΣTy poSemiring public
+\end{code}
 
+%<*quoteLnL>
+\begin{code}
   data `LnL : Set where
     `Ii : `LnL
     `Ie : (C : Ty lin) → `LnL
@@ -60,12 +81,12 @@ module Generic.Linear.Example.LnL where
     `×e : (i : Hand) (X Y : Ty int) → `LnL
     `→i `→e : (X Y : Ty int) → `LnL
     `Gi `Ge : (A : Ty lin) → `LnL
+\end{code}
+%</quoteLnL>
 
-  flags : PremisesFlags
-  flags = record noPremisesFlags
-    { Has-⊤ = ⊤ᴾ; Has-∧ = ⊤ᴾ; Has-ℑ = ⊤ᴾ; Has-✴ = ⊤ᴾ; Has-· = ⊤ᴾ; Has-□ = ⊤ᴾ }
-
-  LnL : System flags
+%<*LnL>
+\begin{code}
+  LnL : System
   LnL = `LnL ▹ λ where
     `Ii → `ℑ =⇒ lin , tI
     (`Ie C) → ⟨ []ᶜ `⊢ lin , tI ⟩ `✴ ⟨ []ᶜ `⊢ lin , C ⟩ =⇒ lin , C
@@ -87,13 +108,15 @@ module Generic.Linear.Example.LnL where
     (`→e X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩) =⇒ int , Y
     (`Gi A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ int , tG A
     (`Ge A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
+\end{code}
+%</LnL>
 
+\begin{code}
   Term = [ LnL , ∞ ]_⊢_
-  open WithScope (Scope Term)
 
   open import Generic.Linear.Example.UsageCheck ΣTy public
   open WithPoSemiring poSemiring public
-  open WithInverses flags record
+  open WithInverses record
     { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
     public
 
@@ -105,23 +128,22 @@ module Generic.Linear.Example.LnL where
     open import Generic.Linear.Variable ΣTy U.0-rawPoSemiring public
     open import Generic.Linear.Renaming ΣTy U.0-poSemiring public
 
-  pattern uvar i = V.`var (V.lvar i refl _)
-  pattern uIi = V.`con (`Ii , refl , ℑ⟨ _ ⟩)
-  pattern uIe C s t = V.`con (`Ie C , refl , s ✴⟨ _ ⟩ t)
-  pattern u⊗i s t = V.`con (`⊗i _ _ , refl , s ✴⟨ _ ⟩ t)
-  pattern u⊗e C s t = V.`con (`⊗e _ _ C , refl , s ✴⟨ _ ⟩ t)
+  pattern uIi = V.`con (`Ii , refl , ℑᶜ⟨ _ ⟩)
+  pattern uIe C s t = V.`con (`Ie C , refl , s ✴ᶜ⟨ _ ⟩ t)
+  pattern u⊗i s t = V.`con (`⊗i _ _ , refl , s ✴ᶜ⟨ _ ⟩ t)
+  pattern u⊗e C s t = V.`con (`⊗e _ _ C , refl , s ✴ᶜ⟨ _ ⟩ t)
   pattern u⊸i t = V.`con (`⊸i _ _ , refl , t)
-  pattern u⊸e s t = V.`con (`⊸e _ _ , refl , s ✴⟨ _ ⟩ t)
-  pattern uFi s = V.`con (`Fi _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
-  pattern uFe C s t = V.`con (`Fe _ C , refl , s ✴⟨ _ ⟩ t)
+  pattern u⊸e s t = V.`con (`⊸e _ _ , refl , s ✴ᶜ⟨ _ ⟩ t)
+  pattern uFi s = V.`con (`Fi _ , refl , □ᶜ⟨ _ ⟩ s)
+  pattern uFe C s t = V.`con (`Fe _ C , refl , s ✴ᶜ⟨ _ ⟩ t)
 
-  pattern u1i = V.`con (`1i , refl , □⟨ _ , _ , _ , _ ⟩ tt)
-  pattern u×i s t = V.`con (`×i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ (s , t))
-  pattern u×e i s = V.`con (`×e i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
-  pattern u→i t = V.`con (`→i _ _ , refl , □⟨ _ , _ , _ , _ ⟩ t)
-  pattern u→e s t = V.`con (`→e _ _ , refl , □⟨ _ , _ , _ , _ ⟩ (s , t))
-  pattern uGi s = V.`con (`Gi _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
-  pattern uGe s = V.`con (`Ge _ , refl , □⟨ _ , _ , _ , _ ⟩ s)
+  pattern u1i = V.`con (`1i , refl , □ᶜ⟨ _ ⟩ tt)
+  pattern u×i s t = V.`con (`×i _ _ , refl , □ᶜ⟨ _ ⟩ (s , t))
+  pattern u×e i s = V.`con (`×e i _ _ , refl , □ᶜ⟨ _ ⟩ s)
+  pattern u→i t = V.`con (`→i _ _ , refl , □ᶜ⟨ _ ⟩ t)
+  pattern u→e s t = V.`con (`→e _ _ , refl , □ᶜ⟨ _ ⟩ (s , t))
+  pattern uGi s = V.`con (`Gi _ , refl , □ᶜ⟨ _ ⟩ s)
+  pattern uGe s = V.`con (`Ge _ , refl , □ᶜ⟨ _ ⟩ s)
 
   private
     myCojoin : (A : Ty lin) → Term []ᶜ (lin , t! A t⊸ t! (t! A))
@@ -202,3 +224,4 @@ module Generic.Linear.Example.LnL where
     int (map-□ {S = Kripke _ _ _ _} (λ _ → tt) t)
   IntDupSem .alg (`Ge A , refl , t) = lin tt
   -}
+\end{code}

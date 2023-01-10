@@ -14,7 +14,6 @@ module Generic.Linear.Example.ZeroOneMany where
   open import Relation.Binary.PropositionalEquality as ≡ using
     (_≡_; refl; trans; sym; isEquivalence)
   open import Relation.Unary.Bunched
-  open BunchedDuplicable
 
   infix 7 _*_
   infix 6 _+_
@@ -278,14 +277,12 @@ module Generic.Linear.Example.ZeroOneMany where
   *⁻¹ uω u1 = []
   *⁻¹ uω uω = (uω , ≤-refl) ∷ []
 
-  rep : ∀ bf x → List
-    (Dup _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z) bf (λ _ → ⊤) x)
-  rep bf u0 =
-    □⟨ ≤-refl , pure-If ≤-refl , pure-If ≤-refl , pure-If (≡⇒≤ ∘ annihilʳ) ⟩ _
-    ∷ []
-  rep bf u1 = []
-  rep bf uω =
-    □⟨ ≤-refl , pure-If ω≤0 , pure-If ≤-refl , pure-If lemma ⟩ _ ∷ []
+  open Duplicable _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z)
+    hiding (mkDup)
+  rep : ∀ x → List (∃ (Dup x))
+  rep u0 = (_ , mkDup ≤-refl ≤-refl ≤-refl (≡⇒≤ ∘ annihilʳ)) ∷ []
+  rep u1 = []
+  rep uω = (_ , mkDup ≤-refl ω≤0 ≤-refl lemma) ∷ []
     where
     lemma : ∀ r → uω ≤ r * uω
     lemma u0 = ω≤0

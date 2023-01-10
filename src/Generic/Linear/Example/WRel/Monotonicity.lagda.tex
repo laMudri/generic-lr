@@ -153,13 +153,13 @@ module Generic.Linear.Example.WRel.Monotonicity where
   open import Generic.Linear.Example.UsageCheck Ty as UC
   open UC.WithPoSemiring poSemiring
   open WithInverses record
-    { 0#⁻¹ = ??⁻¹ ; +⁻¹ = ∧⁻¹ ; 1#⁻¹ = ↑↑⁻¹ ; *⁻¹ = *⁻¹ }
+    { 0#⁻¹ = ??⁻¹ ; +⁻¹ = ∧⁻¹ ; 1#⁻¹ = ↑↑⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 \end{code}
 
 %<*patterns>
 \begin{code}
   pattern ulam M = U.`con (`lam _ _ , ≡.refl , M)
-  pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴⟨ _ ⟩ (⟨ _ ⟩· N))
+  pattern uapp M N = U.`con (`app _ _ , ≡.refl , M ✴ᶜ⟨ _ ⟩ (⟨ _ ⟩·ᶜ N))
 \end{code}
 %</patterns>
 

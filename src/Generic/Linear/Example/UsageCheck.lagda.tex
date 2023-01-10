@@ -77,6 +77,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uPremises (ps `∧ qs) = uPremises ps U.`∧ uPremises qs
     uPremises (ps `✴ qs) = uPremises ps U.`✴ uPremises qs
     uPremises (r `· ps) = _ U.`· uPremises ps
+    uPremises (`□⁰⁺ˣ ps) = U.`□⁰⁺ˣ (uPremises ps)
     uRule : Rule → U.Rule
     uRule (ps =⇒ A) = uPremises ps U.=⇒ A
     uSystem : System → U.System
@@ -97,7 +98,6 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Relation.Binary.PropositionalEquality as ≡ using (_≡_)
     open import Relation.Nary
     open import Relation.Unary.Bunched
-    open BunchedDuplicable
     open import Size
 
     pattern uvar i = U.`var (U.lvar i ≡.refl _)
@@ -113,6 +113,11 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
         *⁻¹ : (r q : Ann) → List (∃ \ p → q ≤ r * p)
 \end{code}
 %</NonDetInverses>
+\begin{code}
+      open Duplicable _≤_ (_≤ 0#) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z)
+      field
+        rep : (r : Ann) → List (∃ (Dup r))
+\end{code}
 
 \begin{code}
     module WithInverses (invs : NonDetInverses) where
@@ -141,6 +146,20 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       *ₗ⁻¹ {ε} r Q = (| (V.[] , []ₙ) |)
       *ₗ⁻¹ {s <+> t} r Q =
         (| (×.zip V._++_ _++ₙ_) (*ₗ⁻¹ r (Q ∘ ↙)) (*ₗ⁻¹ r (Q ∘ ↘)) |)
+
+      open CtxDup hiding (mkDup)
+      rep* : ∀ {s} (P : Vector Ann s) → List (∃ (Dup P))
+      rep* {[-]} P =
+        (| (×.map V.[_] λ (mkDup str sp0 sp+ sp*) →
+                          mkDup [ str ]ₙ [ sp0 ]ₙ [ sp+ ]ₙ (λ r → [ sp* r ]ₙ))
+           (rep (P here)) |)
+      rep* {ε} P = (| (V.[] , mkDup []ₙ []ₙ []ₙ (λ _ → []ₙ)) |)
+      rep* {s <+> t} P =
+        (| (×.zip V._++_
+                  λ (mkDup strl sp0l sp+l sp*l) (mkDup strr sp0r sp+r sp*r) →
+                    mkDup (strl ++ₙ strr) (sp0l ++ₙ sp0r) (sp+l ++ₙ sp+r)
+                          (λ r → sp*l r ++ₙ sp*r r))
+           (rep* (P ∘ ↙)) (rep* (P ∘ ↘)) |)
 \end{code}
 
 %<*C>
@@ -165,6 +184,9 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-p sys (r `· ps) {ctx P γ} (⟨ _ ⟩·ᶜ t) = do
         (P′ , sp) ← *ₗ⁻¹ r P
         (| ⟨ sp ⟩·ᶜ_ (lemma-p sys ps t) |)
+      lemma-p sys (`□⁰⁺ˣ ps) {ctx P γ} (□ᶜ⟨ _ ⟩ t) = do
+        (P′ , dd) ← rep* P
+        (| □ᶜ⟨ dd ⟩_ (lemma-p sys ps t) |)
 
       lemma-r : ∀ (sys : System) (r : Rule) {A Γ} →
         U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →

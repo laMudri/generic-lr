@@ -18,18 +18,19 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
   open import Generic.Linear.Everything Conc poSemiring
   open import Generic.Linear.Example.UsageCheck Conc
   open WithPoSemiring poSemiring
-  open WithInverses record { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ }
+  open WithInverses
+    record { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 \end{code}
 
 %<*patterns>
 \begin{code}
-  pattern ucut v e = U.`con (`cut _ , ≡.refl , v ✴⟨ _ ⟩ e)
+  pattern ucut v e = U.`con (`cut _ , ≡.refl , v ✴ᶜ⟨ _ ⟩ e)
   pattern uμ c = U.`con (`μ _ , ≡.refl , c)
   pattern uμ∼ c = U.`con (`μ∼ _ , ≡.refl , c)
   pattern uλ e = U.`con (`λ _ , ≡.refl , e)
   pattern uλ∼ v = U.`con (`λ _ , ≡.refl , v)
   pattern u⟨_,_⟩ e f =
-    U.`con (`⟨-,-⟩ _ _ , ≡.refl , (⟨ _ ⟩· e) ✴⟨ _ ⟩ (⟨ _ ⟩· f))
+    U.`con (`⟨-,-⟩ _ _ , ≡.refl , (⟨ _ ⟩·ᶜ e) ✴ᶜ⟨ _ ⟩ (⟨ _ ⟩·ᶜ f))
   pattern uμ⟨-,-⟩ c = U.`con (`μ⟨-,-⟩ _ _ , ≡.refl , c)
 \end{code}
 %</patterns>
@@ -40,8 +41,16 @@ module Generic.Linear.Example.MuMuTilde.Term (Base : Set) where
     [ MMT , ∞ ] []ᶜ ⊢ trm ((1# , (1A ⅋ 1B) ^⊥) ⅋ (1# , 1B ⅋ 1A))
   myComm A B = elab-unique MMT
     (uμ⟨-,-⟩ (ucut
-      (uμ⟨-,-⟩ (ucut (uλ u⟨ uvar (# 3) , uvar (# 2) ⟩) (uvar (# 0))))
+      (uμ⟨-,-⟩ (ucut (uλ u⟨ uvar #3 , uvar #2 ⟩) (uvar (# 0))))
       (uvar (# 1))))
     []
+    where
+    #3 = ↙ (↙ (↙ (↘ (↘ here))))
+    #2 = ↙ (↙ (↙ (↘ (↙ here))))
 \end{code}
 %</myComm>
+\begin{code}
+    -- (uμ⟨-,-⟩ (ucut
+    --   (uμ⟨-,-⟩ (ucut (uλ u⟨ uvar (# 3) , uvar (# 2) ⟩) (uvar (# 0))))
+    --   (uvar (# 1))))
+\end{code}

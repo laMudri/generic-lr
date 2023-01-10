@@ -9,6 +9,7 @@ module Generic.Linear.Example.Mono where
   open import Level
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary using (U; _∩_)
+  open import Relation.Unary.Bunched using (module Duplicable)
 
   infix 7 _*_
   infix 5 _∧_
@@ -357,3 +358,14 @@ module Generic.Linear.Example.Mono where
   *⁻¹ ~~ ↓↓ = (?? , ↓≤?) ∷ []
   *⁻¹ ~~ ?? = (?? , ≤-refl) ∷ []
   *⁻¹ ~~ ~~ = (~~ , ~~≤) ∷ []
+
+  private
+    lemma : ∀ r → ?? ≤ r * ??
+    lemma r rewrite *-zeroʳ r = ≤-refl
+
+  open Duplicable _≤_ (_≤ ??) (λ x y z → x ≤ y ∧ z) (λ x y z → x ≤ y * z)
+  rep : ∀ a → List (∃ (Dup a))
+  rep ↑↑ = (?? , mkDup ↑≤? ≤-refl ≤-refl lemma) ∷ []
+  rep ↓↓ = (?? , mkDup ↓≤? ≤-refl ≤-refl lemma) ∷ []
+  rep ?? = (?? , mkDup ≤-refl ≤-refl ≤-refl lemma) ∷ []
+  rep ~~ = (~~ , mkDup ≤-refl ≡≤? ≤-refl (λ _ → ~~≤)) ∷ []

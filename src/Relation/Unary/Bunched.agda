@@ -101,3 +101,31 @@ module Relation.Unary.Bunched where
         T-prf : T y
 
   open BunchedDuplicable public using (□⟨_,_,_,_⟩_)
+
+  module BunchedModal {a ℓ} {A : Set a} (R : A → A → Set ℓ) where
+
+    infixr 10 □⟨_⟩_
+
+    record Box {t} (T : A → Set t) (x : A) : Set (a ⊔ ℓ ⊔ t) where
+      constructor □⟨_⟩_
+      field
+        {y} : _
+        R-prf : R x y
+        T-prf : T y
+
+  open BunchedModal public using (□⟨_⟩_)
+
+  module Duplicable
+    {A R : Set} (_≤_ : A → A → Set)
+    (_≤0 : A → Set) (_≤[_+_] : A → A → A → Set) (_≤[_*ₗ_] : A → R → A → Set)
+    where
+
+    record Dup (P Q : A) : Set where
+      constructor mkDup
+      field
+        strengthen : P ≤ Q
+        split-0 : Q ≤0
+        split-+ : Q ≤[ Q + Q ]
+        split-* : ∀ r → Q ≤[ r *ₗ Q ]
+
+  open Duplicable public using (mkDup)

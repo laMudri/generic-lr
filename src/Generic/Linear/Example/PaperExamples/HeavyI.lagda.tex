@@ -24,17 +24,17 @@ open import Size
 open import Generic.Linear.Example.PaperExamples
 open import Generic.Linear.Example.ZeroOneMany
   renaming (u0 to 0#; u1 to 1#; uω to ω#)
-open CPP0 poSemiring hiding (_≤_; 0#; _+_; 1#; _*_; ≤-refl; +-identityʳ)
+open CPP0 poSemiring hiding (_≤_; 0#; _+_; 1#; _*_; ≤-refl; +-identityʳ; ⟨_⟩·_)
 \end{code}
 
 \begin{code}
 pattern ⊸I M = `con (`⊸I _ _ , ≡.refl , M)
-pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩· M)
-pattern !I′ P sp M = `con (`!I _ _ , ≡.refl , ⟨_⟩·_ {z = P} sp M)
-pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ N)
-pattern !E′ P Q sp M N = `con (`!E _ _ _ , ≡.refl , _✴⟨_⟩_ {y = P} {Q} M sp N)
+pattern !I sp M = `con (`!I _ _ , ≡.refl , ⟨ sp ⟩·ᶜ M)
+pattern !I′ P sp M = `con (`!I _ _ , ≡.refl , ⟨_⟩·_ (mkᶜ {Q = P} sp) M)
+pattern !E sp M N = `con (`!E _ _ _ , ≡.refl , M ✴ᶜ⟨ sp ⟩ N)
+pattern !E′ P Q sp M N = `con (`!E _ _ _ , ≡.refl , _✴⟨_⟩_ M (mkᶜ {P = P} {Q} sp) N)
 pattern ⊕I i M = `con (`⊕I i _ _ , ≡.refl , M)
-pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴⟨ sp ⟩ (N , O))
+pattern ⊕E sp M N O = `con (`⊕E _ _ _ , ≡.refl , M ✴ᶜ⟨ sp ⟩ (N , O))
 
 var# : ∀ {s} m {m< : True (m <? size s)} {d sz P Γ} →
   P ≤* ⟨ #_ m {m<} ∣ →

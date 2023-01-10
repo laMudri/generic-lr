@@ -4,6 +4,7 @@ module Generic.Linear.Example.PaperExamples where
 
 open import Algebra.Po
 open import Algebra.Po.Construct.Nat
+open import Data.Hand
 open import Data.LTree
 open import Data.LTree.Vector
 open import Data.Product
@@ -34,17 +35,11 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
   open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
 \end{code}
 
-%<*Side>
-\begin{code}
-  data Side : Set where ll rr : Side
-\end{code}
-%</Side>
-
 %<*qlR>
 \begin{code}
   data `λR : Set where
     `⊸I `⊸E : (A B : Ty) → `λR
-    `⊕I : (i : Side) (A B : Ty) → `λR
+    `⊕I : (i : Hand) (A B : Ty) → `λR
     `⊕E : (A B C : Ty) → `λR
     `!I : (r : Ann) (A : Ty) → `λR
     `!E : (r : Ann) (A C : Ty) → `λR
@@ -90,19 +85,20 @@ module CPP0Concrete where
 
   open import Generic.Linear.Example.UsageCheck Ty
   open WithPoSemiring poSemiring
-  open WithInverses record { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ }
+  open WithInverses record
+    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 \end{code}
 
 %<*patterns>
 \begin{code}
   pattern ⊸I M = U.`con (`⊸I _ _ , ≡.refl , M)
-  pattern !I M = U.`con (`!I _ _ , ≡.refl , ⟨ _ ⟩· M)
-  pattern !E M N = U.`con (`!E _ _ _ , ≡.refl , M ✴⟨ _ ⟩ N)
+  pattern !I M = U.`con (`!I _ _ , ≡.refl , ⟨ _ ⟩·ᶜ M)
+  pattern !E M N = U.`con (`!E _ _ _ , ≡.refl , M ✴ᶜ⟨ _ ⟩ N)
   pattern ⊕I i M = U.`con (`⊕I i _ _ , ≡.refl , M)
-  pattern ⊕E M N O = U.`con (`⊕E _ _ _ , ≡.refl , M ✴⟨ _ ⟩ (N , O))
+  pattern ⊕E M N O = U.`con (`⊕E _ _ _ , ≡.refl , M ✴ᶜ⟨ _ ⟩ (N , O))
 
-  var# : ∀ {s} m {m< : True (m <? size s)} {d sz Γ} →
-    U.[ d , ↑ sz ] U.ctx {s} _ Γ ⊢ Γ (#_ m {m<})
+  var# : ∀ {s} m {m< : True (m <? size s)} {d sz γ} →
+    U.[ d , ↑ sz ] U.ctx {s} _ γ ⊢ γ (#_ m {m<})
   var# {s} m {m<} = U.`var (U.lvar (#_ {s} m {m<}) ≡.refl _)
 \end{code}
 %</patterns>
@@ -117,8 +113,10 @@ module CPP0Concrete where
 \begin{code}
   foo : ∀ {A B} → [ λR , ∞ ] []ᶜ ⊢ (! ω# A ⊕ ! ω# B ⊸ ! ω# (A ⊕ B))
   foo = elab-unique _
-    (⊸I (⊕E (var# 0)  (!E (var# 1) (!I (⊕I ll (var# 2))))
-                      (!E (var# 1) (!I (⊕I rr (var# 2)))))) []
+    (⊸I (⊕E (var# 0)  (!E (var# 1) (!I (⊕I ll (uvar #2))))
+                      (!E (var# 1) (!I (⊕I rr (uvar #2)))))) []
+    where
+    #2 = ↙ (↙ (↘ here))
 \end{code}
 
 \begin{code}

@@ -15,8 +15,9 @@ module Generic.Linear.Syntax.Interpretation
   open import Data.Bool.Base
   open import Data.Product as ×
   open import Data.Unit
+  open import Data.Wrap
   open import Function
-  open import Relation.Binary.PropositionalEquality
+  open import Relation.Binary.PropositionalEquality using (_≡_)
   open import Relation.Unary.Checked
 
   open import Data.LTree
@@ -44,20 +45,25 @@ module Generic.Linear.Syntax.Interpretation
   open BunchedUnit _≤0ᶜ public
   open BunchedConjunction _≤[_+ᶜ_] using (_✴_; map-✴) public
   open BunchedScaling _≤[_*ₗᶜ_] public
-  open BunchedDuplicable _≤ᶜ_ _≤0ᶜ _≤[_+ᶜ_] _≤[_*ₗᶜ_] public
+  -- open BunchedDuplicable _≤ᶜ_ _≤0ᶜ _≤[_+ᶜ_] _≤[_*ₗᶜ_] public
   import Relation.Unary.Bunched as Syn
   open Syn.BunchedOrder _≤ᶜ_ public
   open Syn.BunchedConjunction _≤[_+ᶜ_] using (_─✴_; lam✴; app✴) public
 
+  open module CtxDup {s} = Duplicable (_≤*_ {s}) _≤0* _≤[_+*_] _≤[_*ₗ_]
+  data Dupᶜ (Γ : Ctx) : (Δ : Ctx) → Set where
+    mkᶜ : ∀ {Q} → Dup (Γ .use-ctx) Q → Dupᶜ Γ (ctx Q (Γ .ty-ctx))
+
+  open BunchedModal Dupᶜ public
+
   infixr 9 _✴ᶜ⟨_⟩_
   infixr 10 ⟨_⟩·ᶜ_
-  infixr 10 □ᶜ⟨_,_,_,_⟩_
+  infixr 10 □ᶜ⟨_⟩_
 
   pattern ℑᶜ⟨_⟩ sp = Chk.ℑ⟨ mkᶜ sp ⟩
   pattern _✴ᶜ⟨_⟩_ t sp u = t Chk.✴⟨ mkᶜ sp ⟩ u
   pattern ⟨_⟩·ᶜ_ sp t = Chk.⟨ mkᶜ sp ⟩· t
-  pattern □ᶜ⟨_,_,_,_⟩_ str sp0 sp+ sp* t =
-    Chk.□⟨ mkᶜ str , mkᶜ sp0 , mkᶜ sp+ , mkᶜ sp* ⟩ t
+  pattern □ᶜ⟨_⟩_ r t = Chk.□⟨ mkᶜ r ⟩ t
 \end{code}
 
 %<*semp>
@@ -69,6 +75,9 @@ module Generic.Linear.Syntax.Interpretation
   ⟦ r `· p ⟧p X = r · ⟦ p ⟧p X
 \end{code}
 %</semp>
+\begin{code}
+  ⟦ `□⁰⁺ˣ p ⟧p X = Box (⟦ p ⟧p X)
+\end{code}
 
 %<*semr>
 \begin{code}
