@@ -88,26 +88,26 @@ module Generic.Linear.Example.LnL where
 \begin{code}
   LnL : System
   LnL = `LnL ▹ λ where
-    `Ii → `ℑ =⇒ lin , tI
-    (`Ie C) → ⟨ []ᶜ `⊢ lin , tI ⟩ `✴ ⟨ []ᶜ `⊢ lin , C ⟩ =⇒ lin , C
-    (`⊗i A B) → ⟨ []ᶜ `⊢ lin , A ⟩ `✴ ⟨ []ᶜ `⊢ lin , B ⟩ =⇒ lin , A t⊗ B
+    `Ii → `ℑ `⊆ lin , tI
+    (`Ie C) → ⟨ []ᶜ `⊢ lin , tI ⟩ `✴ ⟨ []ᶜ `⊢ lin , C ⟩ `⊆ lin , C
+    (`⊗i A B) → ⟨ []ᶜ `⊢ lin , A ⟩ `✴ ⟨ []ᶜ `⊢ lin , B ⟩ `⊆ lin , A t⊗ B
     (`⊗e A B C) →
       ⟨ []ᶜ `⊢ lin , A t⊗ B ⟩ `✴
       ⟨ [ u1 , lin , A ]ᶜ ++ᶜ [ u1 , lin , B ]ᶜ `⊢ lin , C ⟩
-      =⇒ lin , C
-    (`⊸i A B) → ⟨ [ u1 , lin , A ]ᶜ `⊢ lin , B ⟩ =⇒ lin , A t⊸ B
-    (`⊸e A B) → ⟨ []ᶜ `⊢ lin , A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ lin , B
-    (`Fi X) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X ⟩ =⇒ lin , tF X
+      `⊆ lin , C
+    (`⊸i A B) → ⟨ [ u1 , lin , A ]ᶜ `⊢ lin , B ⟩ `⊆ lin , A t⊸ B
+    (`⊸e A B) → ⟨ []ᶜ `⊢ lin , A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ lin , A ⟩ `⊆ lin , B
+    (`Fi X) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X ⟩ `⊆ lin , tF X
     (`Fe X C) →
-      ⟨ []ᶜ `⊢ lin , tF X ⟩ `✴ ⟨ [ uω , int , X ]ᶜ `⊢ lin , C ⟩ =⇒ lin , C
+      ⟨ []ᶜ `⊢ lin , tF X ⟩ `✴ ⟨ [ uω , int , X ]ᶜ `⊢ lin , C ⟩ `⊆ lin , C
 
-    `1i → `□⁰⁺ˣ `⊤ =⇒ int , t1
-    (`×i X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X ⟩ `∧ ⟨ []ᶜ `⊢ int , Y ⟩) =⇒ int , X t× Y
-    (`×e i X Y) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X t× Y ⟩ =⇒ int , [ X > i < Y ]
-    (`→i X Y) → `□⁰⁺ˣ ⟨ [ uω , int , X ]ᶜ `⊢ int , Y ⟩ =⇒ int , X t→ Y
-    (`→e X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩) =⇒ int , Y
-    (`Gi A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ lin , A ⟩ =⇒ int , tG A
-    (`Ge A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , tG A ⟩ =⇒ lin , A
+    `1i → `□⁰⁺ˣ `⊤ `⊆ int , t1
+    (`×i X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X ⟩ `∧ ⟨ []ᶜ `⊢ int , Y ⟩) `⊆ int , X t× Y
+    (`×e i X Y) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X t× Y ⟩ `⊆ int , [ X > i < Y ]
+    (`→i X Y) → `□⁰⁺ˣ ⟨ [ uω , int , X ]ᶜ `⊢ int , Y ⟩ `⊆ int , X t→ Y
+    (`→e X Y) → `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩) `⊆ int , Y
+    (`Gi A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ lin , A ⟩ `⊆ int , tG A
+    (`Ge A) → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , tG A ⟩ `⊆ lin , A
 \end{code}
 %</LnL>
 

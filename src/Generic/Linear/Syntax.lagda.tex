@@ -81,7 +81,7 @@ connectives:
 \end{verbatim}
 
 \begin{code}
-  infix 1 _=⇒_ _▹_
+  infix 1 _`⊆_ _▹_
   infixr 2 _`✴_
   infixr 2 _`∧_
   infixr 3 _`·_
@@ -103,7 +103,7 @@ connectives:
 %<*Rule>
 \begin{code}
   record Rule : Set where
-    constructor _=⇒_
+    constructor _`⊆_
     field premises : Premises; conclusion : Ty
 \end{code}
 %</Rule>

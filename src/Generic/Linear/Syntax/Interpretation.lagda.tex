@@ -82,7 +82,7 @@ module Generic.Linear.Syntax.Interpretation
 %<*semr>
 \begin{code}
   ⟦_⟧r : Rule → ExtOpenFam ℓ → OpenFam ℓ
-  ⟦ ps =⇒ A′ ⟧r X Γ A = A′ ≡ A × ⟦ ps ⟧p X Γ
+  ⟦ ps `⊆ A′ ⟧r X Γ A = A′ ≡ A × ⟦ ps ⟧p X Γ
 \end{code}
 %</semr>
 

@@ -42,8 +42,8 @@ module Generic.Linear.Example.LTLC where
 
   LTLC : System flags
   LTLC = `LTLC ▹ λ where
-    (`lam A B) → ⟨ [(u1 , A)]ᶜ `⊢ B ⟩ =⇒ A ⊸ B
-    (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ =⇒ B
+    (`lam A B) → ⟨ [(u1 , A)]ᶜ `⊢ B ⟩ `⊆ A ⊸ B
+    (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ `⊆ B
 
   Term = [ LTLC , ∞ ]_⊢_
   open WithScope (Scope Term)

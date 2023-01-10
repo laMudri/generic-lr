@@ -56,20 +56,20 @@ module Generic.Linear.Example.LRBidi where
 
     LR : System flags
     LR = `LR ▹ λ where
-      (`emb A) → ⟨ []ᶜ `⊢ (syn , A) ⟩ =⇒ (chk , A)
-      (`ann A) → ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , A)
-      (`lam A B) → ⟨ [ u1 , syn , A ]ᶜ `⊢ (chk , B) ⟩ =⇒ (chk , A ⊸ B)
-      (`app A B) → ⟨ []ᶜ `⊢ (syn , A ⊸ B) ⟩ `✴ ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (syn , B)
-      (`bang ρ A) → ρ `· ⟨ []ᶜ `⊢ (chk , A) ⟩ =⇒ (chk , ! ρ A)
+      (`emb A) → ⟨ []ᶜ `⊢ (syn , A) ⟩ `⊆ (chk , A)
+      (`ann A) → ⟨ []ᶜ `⊢ (chk , A) ⟩ `⊆ (syn , A)
+      (`lam A B) → ⟨ [ u1 , syn , A ]ᶜ `⊢ (chk , B) ⟩ `⊆ (chk , A ⊸ B)
+      (`app A B) → ⟨ []ᶜ `⊢ (syn , A ⊸ B) ⟩ `✴ ⟨ []ᶜ `⊢ (chk , A) ⟩ `⊆ (syn , B)
+      (`bang ρ A) → ρ `· ⟨ []ᶜ `⊢ (chk , A) ⟩ `⊆ (chk , ! ρ A)
       (`bm ρ A Z) →
         ⟨ []ᶜ `⊢ (syn , ! ρ A) ⟩ `✴ ⟨ [ ρ , syn , A ]ᶜ `⊢ (chk , Z) ⟩
-        =⇒ (syn , Z)
-      `ze → `ℑ =⇒ (chk , nat)
-      `su → ⟨ []ᶜ `⊢ (chk , nat) ⟩ =⇒ (chk , nat)
+        `⊆ (syn , Z)
+      `ze → `ℑ `⊆ (chk , nat)
+      `su → ⟨ []ᶜ `⊢ (chk , nat) ⟩ `⊆ (chk , nat)
       (`iter Z) →
         ⟨ []ᶜ `⊢ (syn , nat) ⟩ `✴
         `□⁰⁺ (⟨ []ᶜ `⊢ (chk , Z) ⟩ `∧ ⟨ [ u1 , syn , Z ]ᶜ `⊢ (chk , Z) ⟩)
-        =⇒ (syn , Z)
+        `⊆ (syn , Z)
 
     Term = [ LR , ∞ ]_⊢_
 

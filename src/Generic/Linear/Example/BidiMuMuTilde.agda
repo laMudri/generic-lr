@@ -94,26 +94,26 @@ module Generic.Linear.Example.BidiMuMuTilde where
         Untyped = `Untyped ▹ λ where
           (`cut p) →
             ⟨ []ᶜ `⊢ just (syn , p) ⟩ `✴ ⟨ []ᶜ `⊢ just (chk , neg p) ⟩
-            =⇒ nothing
+            `⊆ nothing
           (`μ p) →
             ⟨ [ 1# , just (syn , neg p) ]ᶜ `⊢ nothing ⟩
-            =⇒ just (chk , p)
+            `⊆ just (chk , p)
           (`λ p) →
             ⟨ []ᶜ `⊢ just (chk , neg p) ⟩
-            =⇒ just (chk , p)
+            `⊆ just (chk , p)
           (`⟨-,-⟩ p) →
             ⟨ []ᶜ `⊢ just (chk , p) ⟩ `✴ ⟨ []ᶜ `⊢ just (chk , p) ⟩
-            =⇒ just (chk , p)
+            `⊆ just (chk , p)
           (`μ⟨-,-⟩ p) →
             ⟨ [ 1# , just (syn , neg p) ]ᶜ ++ᶜ [ 1# , just (syn , neg p) ]ᶜ
               `⊢ nothing ⟩
-            =⇒ just (chk , p)
+            `⊆ just (chk , p)
           (ann {p} A) →
             ⟨ []ᶜ `⊢ just (chk , p) ⟩
-            =⇒ just (syn , p)
+            `⊆ just (syn , p)
           (emb p) →
             ⟨ []ᶜ `⊢ just (syn , p) ⟩
-            =⇒ just (chk , p)
+            `⊆ just (chk , p)
 
         UntypedTm = [ Untyped , ∞ ]_⊢_
 
@@ -152,25 +152,25 @@ module Generic.Linear.Example.BidiMuMuTilde where
         Typed = `Typed ▹ λ where
           (`cut {p} A) →
             ⟨ []ᶜ `⊢ syn A ⟩ `✴ ⟨ []ᶜ `⊢ chk A (neg p) ⟩
-            =⇒ com
+            `⊆ com
           (`μ {p} A) →
             ⟨ [ 1# , syn A ]ᶜ `⊢ com ⟩
-            =⇒ chk A p
+            `⊆ chk A p
           (`λ A q) →
             ⟨ []ᶜ `⊢ chk A (neg q) ⟩
-            =⇒ chk (A ^⊥) q
+            `⊆ chk (A ^⊥) q
           (`⟨-,-⟩ {p} A B) →
             ⟨ []ᶜ `⊢ chk A p ⟩ `✴ ⟨ []ᶜ `⊢ chk B p ⟩
-            =⇒ chk (A ⊗ B) p
+            `⊆ chk (A ⊗ B) p
           (`μ⟨-,-⟩ {p} A B) →
             ⟨ [ 1# , syn A ]ᶜ ++ᶜ [ 1# , syn B ]ᶜ `⊢ com ⟩
-            =⇒ chk (A ⊗ B) (neg p)
+            `⊆ chk (A ⊗ B) (neg p)
           (`ann {p} A) →
             ⟨ []ᶜ `⊢ chk A p ⟩
-            =⇒ syn A
+            `⊆ syn A
           (`emb {p} A) →
             ⟨ []ᶜ `⊢ syn A ⟩
-            =⇒ chk A p
+            `⊆ chk A p
 
         TypedTm = [ Typed , ∞ ]_⊢_
 

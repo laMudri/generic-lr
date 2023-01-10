@@ -61,8 +61,8 @@ module Generic.Linear.Example.AnnotatedArrow
 
   AnnArr : System flags
   AnnArr = `AnnArr ▹ λ where
-    (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
-    (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
+    (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ `⊆ rA ⊸ B
+    (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ `⊆ B
 
   Term = [ AnnArr , ∞ ]_⊢_
   open WithScope (Scope Term)

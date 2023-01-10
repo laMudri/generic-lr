@@ -11,7 +11,7 @@ module Generic.Simple.Syntax (Ty : Set) where
   open import Relation.Unary.Checked
   open import Relation.Binary.PropositionalEquality hiding ([_])
 
-  infix 1 _=⇒_ _▹_
+  infix 1 _`⊆_ _▹_
   infixr 2 _`∧_
 
   private
@@ -46,7 +46,7 @@ module Generic.Simple.Syntax (Ty : Set) where
 
 \begin{code}
   record Rule : Set where
-    constructor _=⇒_
+    constructor _`⊆_
     field
       premises : Premises
       conclusion : Ty
@@ -75,7 +75,7 @@ module Generic.Simple.Syntax (Ty : Set) where
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
 
     ⟦_⟧r : Rule → Scoped ℓ
-    ⟦ ps =⇒ A′ ⟧r A PΓ = A′ ≡ A × ⟦ ps ⟧p PΓ
+    ⟦ ps `⊆ A′ ⟧r A PΓ = A′ ≡ A × ⟦ ps ⟧p PΓ
 
     ⟦_⟧s : System → Scoped ℓ
     ⟦ L ▹ rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
@@ -103,7 +103,7 @@ module Generic.Simple.Syntax (Ty : Set) where
     map-r : (r : Rule) →
             (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →
             (∀ {A} → ⟦ r ⟧r X A Γ → ⟦ r ⟧r Y A Δ)
-    map-r (ps =⇒ A) f (q , t) = q , map-p ps f t
+    map-r (ps `⊆ A) f (q , t) = q , map-p ps f t
 
     map-s : (s : System) →
             (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →

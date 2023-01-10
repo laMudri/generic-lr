@@ -22,7 +22,6 @@ module Generic.Linear.Syntax.Interpretation.Map
   open import Function.Extra
   open import Relation.Binary.PropositionalEquality as ≡
   open import Relation.Nary.Extra using (_⊆_)
-  -- open import Relation.Unary.Checked using (_⊆_)
 
   open PoSemiring poSemiring renaming (Carrier to Ann)
 
@@ -39,7 +38,6 @@ module Generic.Linear.Syntax.Interpretation.Map
   module _ {ℓ s t} {γ : Vector Ty s} {δ : Vector Ty t}
            (Ψ : LinFuncRel s t ℓ) {X : ExtOpenFam x} {Y : ExtOpenFam y}
     where
-
 \end{code}
 
 %<*map-p>
@@ -112,7 +110,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     map-p′ (`□⁰⁺ˣ ps) f (□ᶜ⟨ r ⟩ t) = □ᶜ⟨ r ⟩ map-p′ ps f t
 
     map-r′ : (r : Rule) → X ⊆ Y → ⟦ r ⟧r X ⊆ ⟦ r ⟧r Y
-    map-r′ (ps =⇒ A) f (q , t) = q , map-p′ ps f t
+    map-r′ (ps `⊆ A) f (q , t) = q , map-p′ ps f t
 \end{code}
 
 %<*map-s-prime-type>
@@ -146,7 +144,7 @@ module Generic.Linear.Syntax.Interpretation.Map
     sequence-r :
       ∀ {X : ExtOpenFam x} (r : Rule) → ∀ {A} →
       _⟨ ⟦ r ⟧r (λ Δ Γ B → F (X Δ Γ B)) ⟩⊢ A ⊆ F ∘ _⟨ ⟦ r ⟧r X ⟩⊢ A
-    sequence-r (ps =⇒ A) (q , t) = (q ,_) <$> sequence-p ps t
+    sequence-r (ps `⊆ A) (q , t) = (q ,_) <$> sequence-p ps t
 
     sequence-s :
       ∀ {X : ExtOpenFam x} (s : System) → ∀ {A} →

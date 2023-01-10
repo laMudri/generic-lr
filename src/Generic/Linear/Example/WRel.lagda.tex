@@ -205,8 +205,8 @@ module Generic.Linear.Example.WRel where
 
     AnnArr : System
     AnnArr = `AnnArr ▹ λ where
-      (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ =⇒ rA ⊸ B
-      (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ =⇒ B
+      (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ `⊆ rA ⊸ B
+      (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ `⊆ B
 \end{code}
 %</AnnArr>
 

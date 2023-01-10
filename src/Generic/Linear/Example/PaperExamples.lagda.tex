@@ -50,14 +50,14 @@ module CPP0 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 \begin{code}
   λR : System
   λR = `λR ▹ λ where
-    (`⊸I A B)     → ⟨ [ 1# · A ]ᶜ `⊢ B ⟩                       =⇒ (A ⊸ B)
-    (`⊸E A B)     → (⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩)         =⇒ B
-    (`!I r A)     → (r `· ⟨ []ᶜ `⊢ A ⟩)                        =⇒ (! r A)
-    (`!E r A C)   → (⟨ []ᶜ `⊢ ! r A ⟩ `✴ ⟨ [ r · A ]ᶜ `⊢ C ⟩)  =⇒ C
-    (`⊕I ll A B)  → ⟨ []ᶜ `⊢ A ⟩                               =⇒ (A ⊕ B)
-    (`⊕I rr A B)  → ⟨ []ᶜ `⊢ B ⟩                               =⇒ (A ⊕ B)
+    (`⊸I A B)     → ⟨ [ 1# ∙ A ]ᶜ `⊢ B ⟩                       `⊆ (A ⊸ B)
+    (`⊸E A B)     → (⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩)         `⊆ B
+    (`!I r A)     → (r `· ⟨ []ᶜ `⊢ A ⟩)                        `⊆ (! r A)
+    (`!E r A C)   → (⟨ []ᶜ `⊢ ! r A ⟩ `✴ ⟨ [ r ∙ A ]ᶜ `⊢ C ⟩)  `⊆ C
+    (`⊕I ll A B)  → ⟨ []ᶜ `⊢ A ⟩                               `⊆ (A ⊕ B)
+    (`⊕I rr A B)  → ⟨ []ᶜ `⊢ B ⟩                               `⊆ (A ⊕ B)
     (`⊕E A B C)   →
-      ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# · A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# · B ]ᶜ `⊢ C ⟩) =⇒ C
+      ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# ∙ A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# ∙ B ]ᶜ `⊢ C ⟩) `⊆ C
 \end{code}
 %</lR>
 
@@ -164,22 +164,22 @@ module Example1 (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
 \begin{code}
   Sys .rules (`lam r A B) =
     ⟨ [ r , A ]ᶜ `⊢ B ⟩
-    =⇒ r · A ⊸ B
+    `⊆ r · A ⊸ B
   Sys .rules (`app r A B) =
     ⟨ []ᶜ `⊢ r · A ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩
-    =⇒ B
+    `⊆ B
 \end{code}
 %</exIfunrules>
 %<*exIsumrules>
 \begin{code}
   Sys .rules (`inl A B) =
     ⟨ []ᶜ `⊢ A ⟩
-    =⇒ A ⊕ B
+    `⊆ A ⊕ B
   Sys .rules (`inr A B) =
     ⟨ []ᶜ `⊢ B ⟩
-    =⇒ A ⊕ B
+    `⊆ A ⊕ B
   Sys .rules (`case A B C) =
     ⟨ []ᶜ `⊢ A ⊕ B ⟩ `✴ (⟨ [ 1# , A ]ᶜ `⊢ C ⟩ `∧ ⟨ [ 1# , B ]ᶜ `⊢ C ⟩)
-    =⇒ C
+    `⊆ C
 \end{code}
 %</exIsumrules>

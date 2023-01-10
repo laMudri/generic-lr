@@ -81,28 +81,28 @@ module Generic.Linear.Example.LR where
 
     LR : System flags
     LR = `LR ▹ λ where
-      (`0e Z) → (⟨ []ᶜ `⊢ t0 ⟩ `✴ `⊤) =⇒ Z
-      (`⊕i i A B) → ⟨ []ᶜ `⊢ [ A > i < B ] ⟩ =⇒ A t⊕ B
+      (`0e Z) → (⟨ []ᶜ `⊢ t0 ⟩ `✴ `⊤) `⊆ Z
+      (`⊕i i A B) → ⟨ []ᶜ `⊢ [ A > i < B ] ⟩ `⊆ A t⊕ B
       (`⊕e A B Z) →
         ⟨ []ᶜ `⊢ A t⊕ B ⟩ `✴ (⟨ [ u1 , A ]ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , B ]ᶜ `⊢ Z ⟩)
-        =⇒ Z
-      `⊤i → `⊤ =⇒ t⊤
-      (`&i A B) → ⟨ []ᶜ `⊢ A ⟩ `∧ ⟨ []ᶜ `⊢ B ⟩ =⇒ A t& B
-      (`&e i A B) → ⟨ []ᶜ `⊢ A t& B ⟩ =⇒ [ A > i < B ]
-      `Ii → `ℑ =⇒ tI
-      (`Ie Z) → ⟨ []ᶜ `⊢ tI ⟩ `✴ ⟨ []ᶜ `⊢ Z ⟩ =⇒ Z
-      (`⊗i A B) → ⟨ []ᶜ `⊢ A ⟩ `✴ ⟨ []ᶜ `⊢ B ⟩ =⇒ A t⊗ B
+        `⊆ Z
+      `⊤i → `⊤ `⊆ t⊤
+      (`&i A B) → ⟨ []ᶜ `⊢ A ⟩ `∧ ⟨ []ᶜ `⊢ B ⟩ `⊆ A t& B
+      (`&e i A B) → ⟨ []ᶜ `⊢ A t& B ⟩ `⊆ [ A > i < B ]
+      `Ii → `ℑ `⊆ tI
+      (`Ie Z) → ⟨ []ᶜ `⊢ tI ⟩ `✴ ⟨ []ᶜ `⊢ Z ⟩ `⊆ Z
+      (`⊗i A B) → ⟨ []ᶜ `⊢ A ⟩ `✴ ⟨ []ᶜ `⊢ B ⟩ `⊆ A t⊗ B
       (`⊗e A B Z) →
-        (⟨ []ᶜ `⊢ A t⊗ B ⟩ `✴ ⟨ [ u1 , A ]ᶜ ++ᶜ [ u1 , B ]ᶜ `⊢ Z ⟩) =⇒ Z
-      (`⊸i A B) → ⟨ [ u1 , A ]ᶜ `⊢ B ⟩ =⇒ A t⊸ B
-      (`⊸e A B) → ⟨ []ᶜ `⊢ A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ =⇒ B
-      (`!i A) → uω `· ⟨ []ᶜ `⊢ A ⟩ =⇒ t! A
-      (`!e A Z) → ⟨ []ᶜ `⊢ t! A ⟩ `✴ ⟨ [ uω , A ]ᶜ `⊢ Z ⟩ =⇒ Z
-      `ze → `ℑ =⇒ nat
-      `su → ⟨ []ᶜ `⊢ nat ⟩ =⇒ nat
+        (⟨ []ᶜ `⊢ A t⊗ B ⟩ `✴ ⟨ [ u1 , A ]ᶜ ++ᶜ [ u1 , B ]ᶜ `⊢ Z ⟩) `⊆ Z
+      (`⊸i A B) → ⟨ [ u1 , A ]ᶜ `⊢ B ⟩ `⊆ A t⊸ B
+      (`⊸e A B) → ⟨ []ᶜ `⊢ A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ `⊆ B
+      (`!i A) → uω `· ⟨ []ᶜ `⊢ A ⟩ `⊆ t! A
+      (`!e A Z) → ⟨ []ᶜ `⊢ t! A ⟩ `✴ ⟨ [ uω , A ]ᶜ `⊢ Z ⟩ `⊆ Z
+      `ze → `ℑ `⊆ nat
+      `su → ⟨ []ᶜ `⊢ nat ⟩ `⊆ nat
       (`iter Z) →
         let bf = boxFlags true true false in
-        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ bf (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) =⇒ Z
+        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ bf (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) `⊆ Z
 
     Term = [ LR , ∞ ]_⊢_
 

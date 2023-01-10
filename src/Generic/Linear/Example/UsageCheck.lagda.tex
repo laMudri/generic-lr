@@ -79,7 +79,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uPremises (r `· ps) = _ U.`· uPremises ps
     uPremises (`□⁰⁺ˣ ps) = U.`□⁰⁺ˣ (uPremises ps)
     uRule : Rule → U.Rule
-    uRule (ps =⇒ A) = uPremises ps U.=⇒ A
+    uRule (ps `⊆ A) = uPremises ps U.`⊆ A
     uSystem : System → U.System
     uSystem (L ▹ rs) = L U.▹ λ l → uRule (rs l)
 
@@ -191,7 +191,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
       lemma-r : ∀ (sys : System) (r : Rule) {A Γ} →
         U.⟦ uRule r ⟧r (U.Scope (𝓒 sys)) (uCtx Γ) A →
         List (⟦ r ⟧r (Scope [ sys , ∞ ]_⊢_) Γ A)
-      lemma-r sys (ps =⇒ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
+      lemma-r sys (ps `⊆ B) (q , t) = (| (q ,_) (lemma-p sys ps t) |)
 \end{code}
 
 %<*lemma-type>
