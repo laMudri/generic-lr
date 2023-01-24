@@ -121,6 +121,7 @@ connectives:
   open System public
 \end{code}
 
+%<*dashOpenFam>
 \begin{code}
   _─OpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
   I ─OpenFam ℓ = Ctx → I → Set ℓ
@@ -128,6 +129,7 @@ connectives:
   _─ExtOpenFam_ : ∀ {i} → Set i → ∀ ℓ → Set (i ⊔ suc ℓ)
   I ─ExtOpenFam ℓ = Ctx → I ─OpenFam ℓ
 \end{code}
+%</dashOpenFam>
 
 %<*OpenFam>
 \begin{code}
