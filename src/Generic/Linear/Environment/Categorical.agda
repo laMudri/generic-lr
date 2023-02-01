@@ -44,9 +44,9 @@ module Generic.Linear.Environment.Categorical
       lift : ∀ {Γ Δ} (ρ : [ 𝓤 ] Γ ⇒ᵉ Δ) → ∀[ 𝓥 Δ ⇒ 𝓦 Γ ]
 
     >>^Env : ∀ {Γ Δ Θ} → [ 𝓤 ] Γ ⇒ᵉ Δ → [ 𝓥 ] Δ ⇒ᵉ Θ → [ 𝓦 ] Γ ⇒ᵉ Θ
-    >>^Env ρ σ .Ψ = σ .Ψ >>ᴿ ρ .Ψ
-    >>^Env ρ σ .fit-here = σ .fit-here , ρ .fit-here
-    >>^Env ρ σ .lookup (s , r) v = lift (relocate ρ r) (σ .lookup s v)
+    >>^Env ρ σ .Ψ = ρ .Ψ >>ᴿ σ .Ψ
+    >>^Env ρ σ .fit-here = ρ .fit-here , σ .fit-here
+    >>^Env ρ σ .lookup (r , s) v = lift (relocate ρ r) (σ .lookup s v)
   open ComposeEnv {{...}} public
 
   instance

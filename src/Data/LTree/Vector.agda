@@ -58,7 +58,9 @@ module Data.LTree.Vector where
   open import Data.Fin.Base using (Fin; zero; suc)
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≗_)
 
-  {- TODO: contribute to stdlib
+  -- TODO: contribute Product⊤ₙ stuff to stdlib
+
+  {-
   tabulate⊤ₙ : ∀ n {ls} {as : Sets n ls} → (∀ k → Projₙ as k) → Product⊤ n as
   tabulate⊤ₙ zero f = _
   tabulate⊤ₙ (suc n) f = f zero , tabulate⊤ₙ n λ k → f (suc k)
@@ -82,6 +84,12 @@ module Data.LTree.Vector where
   map×⊤ₙ← g zero tt = tt
   map×⊤ₙ← g (suc n) (x , xs) = g x , map×⊤ₙ← g n xs
 
+  map×⊤ₙ→ : ∀ {f} {F : ∀ {l} → Set l → Set (f l)} →
+    (∀ {a} {A : Set a} → A → F A) →
+    ∀ n {as} {As : Sets n as} → (Product⊤ n As → Product⊤ n (smap f F n As))
+  map×⊤ₙ→ g zero tt = tt
+  map×⊤ₙ→ g (suc n) (x , xs) = g x , map×⊤ₙ→ g n xs
+
   map×⊤ₙ←∘map×⊤ₙ-→ : ∀ n {as} {As : Sets n as} {f g : Level → Level}
     {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
     {p} (P : Product⊤ n As → Set p)
@@ -95,12 +103,39 @@ module Data.LTree.Vector where
   map×⊤ₙ←∘map×⊤ₙ-← : ∀ n {as} {As : Sets n as} {f g : Level → Level}
     {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
     {p} (P : Product⊤ n As → Set p)
-    (i : ∀ {a} {A : Set a} → F A → A) (j : ∀ {a} {A : Set a} → G A → F A)
-    (xs : Product⊤ n (smap g G n As)) →
+    {i : ∀ {a} {A : Set a} → F A → A} {j : ∀ {a} {A : Set a} → G A → F A}
+    {xs : Product⊤ n (smap g G n As)} →
     P (map×⊤ₙ← (i ∘ j) n xs) → P (map×⊤ₙ← i n (map×⊤ₙ j n xs))
-  map×⊤ₙ←∘map×⊤ₙ-← zero P i j tt p = p
-  map×⊤ₙ←∘map×⊤ₙ-← (suc n) P i j (x , xs) p =
-    map×⊤ₙ←∘map×⊤ₙ-← n (λ xs → P (i (j x) , xs)) i j xs p
+  map×⊤ₙ←∘map×⊤ₙ-← zero P {xs = tt} p = p
+  map×⊤ₙ←∘map×⊤ₙ-← (suc n) P {i} {j} {xs = x , xs} p =
+    map×⊤ₙ←∘map×⊤ₙ-← n (λ xs → P (i (j x) , xs)) {xs = xs} p
+
+  const×⊤ₙ :
+    ∀ {f} {F : ∀ {a} → Set a → Set (f a)} → (∀ {a} {A : Set a} → F A) →
+    ∀ {n as} {As : Sets n as} → Product⊤ n (smap f F n As)
+  const×⊤ₙ x {zero} = tt
+  const×⊤ₙ x {suc n} = x , const×⊤ₙ x {n}
+
+  zipWith×⊤ₙ :
+    ∀ {f g h} {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
+    {H : ∀ {l} → Set l → Set (h l)} → (∀ {a} {A : Set a} → F A → G A → H A) →
+    ∀ {n as} {As : Sets n as} →
+    Product⊤ n (smap f F n As) → Product⊤ n (smap g G n As) →
+    Product⊤ n (smap h H n As)
+  zipWith×⊤ₙ c {zero} tt tt = tt
+  zipWith×⊤ₙ c {suc n} (x , xs) (y , ys) = c x y , zipWith×⊤ₙ c {n} xs ys
+
+  -- map×⊤ₙ←∘zipWith×⊤ₙ-← : ∀ n {as} {As : Sets n as} {f g h : Level → Level}
+  --   {F : ∀ {l} → Set l → Set (f l)} {G : ∀ {l} → Set l → Set (g l)}
+  --   {H : ∀ {l} → Set l → Set (h l)}
+  --   {p} (P : Product⊤ n As → Set p)
+  --   (i : ∀ {a} {A : Set a} → F A → A) (j : ∀ {a} {A : Set a} → G A → H A → F A)
+  --   (xs : Product⊤ n (smap g G n As)) (ys : Product⊤ n (smap h H n As)) →
+  --   P (zipWith×⊤ₙ (λ x y → i (j x y)) xs ys) → P (map×⊤ₙ← i n (zipWith×⊤ₙ j xs ys))
+  -- map×⊤ₙ←∘zipWith×⊤ₙ-← n P i j xs p = ?
+  -- map×⊤ₙ←∘map×⊤ₙ-← zero P i j tt p = p
+  -- map×⊤ₙ←∘map×⊤ₙ-← (suc n) P i j (x , xs) p =
+  --   map×⊤ₙ←∘map×⊤ₙ-← n (λ xs → P (i (j x) , xs)) i j xs p
 
   record Liftₙ′ {n as r} {As : Sets n as} (R : As ⇉ Set r)
     {s} (vs : Product⊤ n (smap id (λ A → Vector A s) n As)) : Set r where
@@ -170,7 +205,7 @@ module Data.LTree.Vector where
 
   module _ {n as r} {As : Sets n as} {R : As ⇉ Set r} where
 
-    infix 5 _++ₙ_
+    infix 5 _++ₙ_ _++ₙ⁺_
 
     [_]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
       uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs) → Liftₙ′ R vs
@@ -188,6 +223,49 @@ module Data.LTree.Vector where
     (ru ++ₙ rv) .get (↘ i) =
       map×⊤ₙ←∘map×⊤ₙ-→ n (uncurry⊤ₙ n R) _ _ _ (rv .get i)
 
+    -- The ⁺-variants synthesise the shape of the vectors they relate.
+
+    [_]ₙ⁺ : {xs : Product⊤ n As} →
+      uncurry⊤ₙ n R xs → Liftₙ′ R (map×⊤ₙ→ [_] n xs)
+    [ rx ]ₙ⁺ = [ lemma R rx ]ₙ
+      where
+      lemma : ∀ {n as} {As : Sets n as} (R : As ⇉ Set r) {xs : Product⊤ n As} →
+        uncurry⊤ₙ n R xs →
+        uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n (map×⊤ₙ→ [_] n xs))
+      lemma {zero} R r = r
+      lemma {suc n} R r = lemma {n} (R _) r
+
+    []ₙ⁺ : Liftₙ′ R (const×⊤ₙ [])
+    []ₙ⁺ = []ₙ
+
+    _++ₙ⁺_ :
+      ∀ {s t} {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+      {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} →
+      Liftₙ′ R us → Liftₙ′ R vs →
+      Liftₙ′ R (zipWith×⊤ₙ _++_ us vs)
+    _++ₙ⁺_ {s} {t} ru rv =
+      (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (lemma-u R (ru .get i)))
+        ++ₙ
+      (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (lemma-v R (rv .get i)))
+      where
+      lemma-u : ∀ {n as} {As : Sets n as} (R : As ⇉ Set r)
+        {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+        {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} {i} →
+        uncurry⊤ₙ n R (map×⊤ₙ← (_$ i) n us) →
+        uncurry⊤ₙ n R (map×⊤ₙ← (_$ ↙ i) n (zipWith×⊤ₙ _++_ us vs))
+      lemma-u {zero} R r = r
+      lemma-u {suc n} R r = lemma-u {n} (R _) r
+
+      lemma-v : ∀ {n as} {As : Sets n as} (R : As ⇉ Set r)
+        {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+        {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} {i} →
+        uncurry⊤ₙ n R (map×⊤ₙ← (_$ i) n vs) →
+        uncurry⊤ₙ n R (map×⊤ₙ← (_$ ↘ i) n (zipWith×⊤ₙ _++_ us vs))
+      lemma-v {zero} R r = r
+      lemma-v {suc n} R r = lemma-v {n} (R _) r
+
+    -- We have a kind of pattern-matching for Liftₙ inhabitants.
+
     un[-]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
       Liftₙ′ R vs → uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs)
     un[-]ₙ r = r .get here
@@ -197,9 +275,9 @@ module Data.LTree.Vector where
       Liftₙ′ R vs →
       Liftₙ′ R (map×⊤ₙ (_∘ ↙) n vs) × Liftₙ′ R (map×⊤ₙ (_∘ ↘) n vs)
     un++ₙ r .proj₁ .get i =
-      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) _ _ _ (r .get (↙ i))
+      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (r .get (↙ i))
     un++ₙ r .proj₂ .get j =
-      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) _ _ _ (r .get (↘ j))
+      map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (r .get (↘ j))
 
   module _ (b : A → B) (e : B) (a : B → B → B) where
 
@@ -298,3 +376,50 @@ module Data.LTree.Vector where
       Lift₁∼ {R = R} ∼ {s <+> t} {xs} (mk (ρ .get ∘ ↙) ++₁ mk (ρ .get ∘ ↘)) ρ
     ++₁η refl .get (↙ i) = refl
     ++₁η refl .get (↘ i) = refl
+
+  private
+    -- Here's an alternative way to define Liftₙ, with less uncurrying.
+    -- I haven't decided how it compares to the one I'm actually using.
+    -- It is more symmetrical, but I don't know how well it unifies.
+
+    record Liftₙ′0 {n as r} {As : Sets n as} (R : Product⊤ n As → Set r)
+      {s} (vs : Product⊤ n (smap id (λ A → Vector A s) n As)) : Set r where
+      constructor mk
+      field get : ∀ (i : Ptr s) → R (map×⊤ₙ← (_$ i) n vs)
+    open Liftₙ′0  -- public
+
+    Liftₙ0 : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
+      smap id (λ A → Vector A s) n As ⇉ Set r
+    Liftₙ0 {n} R = curry⊤ₙ n (Liftₙ′0 (uncurry⊤ₙ n R))
+
+    module _ {n as r} {As : Sets n as} {R : Product⊤ n As → Set r} where
+
+      _++ₙ0_ :
+        ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
+        Liftₙ′0 R (map×⊤ₙ (_∘ ↙) n vs) → Liftₙ′0 R (map×⊤ₙ (_∘ ↘) n vs) →
+        Liftₙ′0 R vs
+      (ru ++ₙ0 rv) .get (↙ i) = map×⊤ₙ←∘map×⊤ₙ-→ n R _ _ _ (ru .get i)
+      (ru ++ₙ0 rv) .get (↘ i) = map×⊤ₙ←∘map×⊤ₙ-→ n R _ _ _ (rv .get i)
+
+      _++ₙ⁺0_ :
+        ∀ {s t} {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+        {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} →
+        Liftₙ′0 R us → Liftₙ′0 R vs →
+        Liftₙ′0 R (zipWith×⊤ₙ _++_ us vs)
+      _++ₙ⁺0_ {s} {t} ru rv =
+        (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n R (lemma-u R (ru .get i))) ++ₙ0
+        (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n R (lemma-v R (rv .get i)))
+        where
+        lemma-u : ∀ {n as} {As : Sets n as} (R : Product⊤ n As → Set r)
+          {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+          {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} {i} →
+          R (map×⊤ₙ← (_$ i) n us) → R (map×⊤ₙ← (_$ ↙ i) n (zipWith×⊤ₙ _++_ us vs))
+        lemma-u {zero} R r = r
+        lemma-u {suc n} R r = lemma-u {n} (λ xs → R (_ , xs)) r
+
+        lemma-v : ∀ {n as} {As : Sets n as} (R : Product⊤ n As → Set r)
+          {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
+          {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} {i} →
+          R (map×⊤ₙ← (_$ i) n vs) → R (map×⊤ₙ← (_$ ↘ i) n (zipWith×⊤ₙ _++_ us vs))
+        lemma-v {zero} R r = r
+        lemma-v {suc n} R r = lemma-v {n} (λ xs → R (_ , xs)) r

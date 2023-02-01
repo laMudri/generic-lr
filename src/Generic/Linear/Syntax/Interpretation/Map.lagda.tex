@@ -43,55 +43,55 @@ module Generic.Linear.Syntax.Interpretation.Map
 %<*map-p>
 \begin{code}
     map-p : (ps : Premises) →
-      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → Ψ .rel P Q → ⟦ ps ⟧p X (ctx P γ) → ⟦ ps ⟧p Y (ctx Q δ))
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx Q′ δ) ⊆ Y Θ (ctx P′ γ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ ps ⟧p X (ctx Q δ) → ⟦ ps ⟧p Y (ctx P γ))
     map-p ⟨ Γ `⊢ A ⟩ f r M                = f r M
     map-p `⊤ f r _                        = _
     map-p (ps `∧ qs) f r (M , N)          = map-p ps f r M , map-p qs f r N
-    map-p `ℑ f r ℑᶜ⟨ sp0 ⟩                = ℑᶜ⟨ Ψ .rel-0ₘ (sp0 , r) ⟩
+    map-p `ℑ f r ℑᶜ⟨ sp0 ⟩                = ℑᶜ⟨ Ψ .rel-0ₘ (r , sp0) ⟩
     map-p (ps `✴ qs) f r (M ✴ᶜ⟨ sp+ ⟩ N)  =
-      let rM ↘, sp+′ ,↙ rN = Ψ .rel-+ₘ (sp+ , r) in
+      let rM ↘, sp+′ ,↙ rN = Ψ .rel-+ₘ (r , sp+) in
       map-p ps f rM M ✴ᶜ⟨ sp+′ ⟩ map-p qs f rN N
     map-p (p `· ps) f r (⟨ sp* ⟩·ᶜ M)     =
-      let r′ , sp*′ = Ψ .rel-*ₘ (sp* , r) in
+      let r′ , sp*′ = Ψ .rel-*ₘ (r , sp*) in
       ⟨ sp*′ ⟩·ᶜ map-p ps f r′ M
 \end{code}
 %</map-p>
 \begin{code}
     map-p (`□⁰⁺ˣ ps) f {P} {Q} P∼Q (□ᶜ⟨ mkDup str sp0 sp+ sp* ⟩ M) =
-      let P′ = _ in
-      let _,_ {Q′} P′∼Q′ uQ′ = Ψ .func P′ in
+      let Q′ = _ in
+      let _,_ {P′} P′∼Q′ uP′ = Ψ .func Q′ in
       let
-        P′∼Q : Ψ .rel P′ Q
-        P′∼Q = Ψ .rel-≤ₘ str ≤*-refl P∼Q
-        Q≤Q′ : Q ≤* Q′
-        Q≤Q′ = uQ′ P′∼Q
-        sp0′ : Q′ ≤0*
-        sp0′ = Ψ .rel-0ₘ (sp0 , P′∼Q′)
-        sp+′ : Q′ ≤[ Q′ +* Q′ ]
+        P∼Q′ : Ψ .rel P Q′
+        P∼Q′ = Ψ .rel-≤ₘ ≤*-refl str P∼Q
+        P≤P′ : P ≤* P′
+        P≤P′ = uP′ P∼Q′
+        sp0′ : P′ ≤0*
+        sp0′ = Ψ .rel-0ₘ (P′∼Q′ , sp0)
+        sp+′ : P′ ≤[ P′ +* P′ ]
         sp+′ =
-          let rl ↘, sp ,↙ rr = Ψ .rel-+ₘ (sp+ , P′∼Q′) in
+          let rl ↘, sp ,↙ rr = Ψ .rel-+ₘ (P′∼Q′ , sp+) in
           +ₘ-mono ≤*-refl (Ψ .func _ .unique rl) (Ψ .func _ .unique rr) sp
-        sp*′ : ∀ s → Q′ ≤[ s *ₗ Q′ ]
+        sp*′ : ∀ s → P′ ≤[ s *ₗ P′ ]
         sp*′ s =
-          let r′ , sp = Ψ .rel-*ₘ (sp* s , P′∼Q′) in
+          let r′ , sp = Ψ .rel-*ₘ (P′∼Q′ , sp* s) in
           *ₘ-mono ≤*-refl ≤-refl (Ψ .func _ .unique r′) sp
       in
-      □ᶜ⟨ mkDup Q≤Q′ sp0′ sp+′ sp*′ ⟩ map-p ps f P′∼Q′ M
+      □ᶜ⟨ mkDup P≤P′ sp0′ sp+′ sp*′ ⟩ map-p ps f P′∼Q′ M
 \end{code}
 
 \begin{code}
     map-r : (r : Rule) →
-      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → Ψ .rel P Q → ⟦ r ⟧r X (ctx P γ) ⊆ ⟦ r ⟧r Y (ctx Q δ))
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx Q′ δ) ⊆ Y Θ (ctx P′ γ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ r ⟧r X (ctx Q δ) ⊆ ⟦ r ⟧r Y (ctx P γ))
     map-r (ps `⊆ A) f r (q , M) = q , map-p ps f r M
 \end{code}
 
 %<*map-s-type>
 \begin{code}
     map-s : (s : System) →
-      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx P′ γ) ⊆ Y Θ (ctx Q′ δ)) →
-      (∀ {P Q} → Ψ .rel P Q → ⟦ s ⟧s X (ctx P γ) ⊆ ⟦ s ⟧s Y (ctx Q δ))
+      (∀ {Θ P′ Q′} → Ψ .rel P′ Q′ → X Θ (ctx Q′ δ) ⊆ Y Θ (ctx P′ γ)) →
+      (∀ {P Q} → Ψ .rel P Q → ⟦ s ⟧s X (ctx Q δ) ⊆ ⟦ s ⟧s Y (ctx P γ))
 \end{code}
 %</map-s-type>
 \begin{code}

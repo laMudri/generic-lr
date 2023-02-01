@@ -25,10 +25,10 @@ module Algebra.Relational.Relation where
         rel : REL M.Carrierₘ N.Carrierₘ r
       private _∼_ = rel
       field
-        rel-≤ₘ : ∀ {x x′ y y′} → x M.≤ₘ x′ → y′ N.≤ₘ y → x ∼ y → x′ ∼ y′
-        rel-0ₘ : ∀ {z} → M._≤0ₘ ◇ _∼ z → z N.≤0ₘ
-        rel-+ₘ : ∀ {x y z} → M._≤[ x +ₘ y ] ◇ _∼ z → x ∼_ ↘ z N.≤[_+ₘ_] ↙ y ∼_
-        rel-*ₘ : ∀ {r x z} → M._≤[ r *ₘ x ] ◇ _∼ z → x ∼_ ◇ z N.≤[ r *ₘ_]
+        rel-≤ₘ : ∀ {x x′ y y′} → x′ M.≤ₘ x → y N.≤ₘ y′ → x ∼ y → x′ ∼ y′
+        rel-0ₘ : ∀ {z} → z ∼_ ◇ N._≤0ₘ → z M.≤0ₘ
+        rel-+ₘ : ∀ {x y z} → z ∼_ ◇ N._≤[ x +ₘ y ] → _∼ x ↘ z M.≤[_+ₘ_] ↙ _∼ y
+        rel-*ₘ : ∀ {r x z} → z ∼_ ◇ N._≤[ r *ₘ x ] → _∼ x ◇ z M.≤[ r *ₘ_]
 
     record RelLeftSemimoduleFuncRel (r : Level)
       : Set (c ⊔ ℓ ⊔ cm ⊔ cn ⊔ ℓm ⊔ ℓn ⊔ suc r)
@@ -37,11 +37,11 @@ module Algebra.Relational.Relation where
         rel : REL M.Carrierₘ N.Carrierₘ r
       private _∼_ = rel
       field
-        rel-≤ₘ : ∀ {x x′ y y′} → x M.≤ₘ x′ → y′ N.≤ₘ y → x ∼ y → x′ ∼ y′
-        rel-0ₘ : ∀ {z} → M._≤0ₘ ◇ _∼ z → z N.≤0ₘ
-        rel-+ₘ : ∀ {x y z} → M._≤[ x +ₘ y ] ◇ _∼ z → x ∼_ ↘ z N.≤[_+ₘ_] ↙ y ∼_
-        rel-*ₘ : ∀ {r x z} → M._≤[ r *ₘ x ] ◇ _∼ z → x ∼_ ◇ z N.≤[ r *ₘ_]
-        func : ∀ x → Universally≤ N._≤ₘ_ (x ∼_)
+        rel-≤ₘ : ∀ {x x′ y y′} → x′ M.≤ₘ x → y N.≤ₘ y′ → x ∼ y → x′ ∼ y′
+        rel-0ₘ : ∀ {z} → z ∼_ ◇ N._≤0ₘ → z M.≤0ₘ
+        rel-+ₘ : ∀ {x y z} → z ∼_ ◇ N._≤[ x +ₘ y ] → _∼ x ↘ z M.≤[_+ₘ_] ↙ _∼ y
+        rel-*ₘ : ∀ {r x z} → z ∼_ ◇ N._≤[ r *ₘ x ] → _∼ x ◇ z M.≤[ r *ₘ_]
+        func : ∀ y → Universally≤ M._≤ₘ_ (_∼ y)
 
       relLeftSemimoduleRel : RelLeftSemimoduleRel r
       relLeftSemimoduleRel = record

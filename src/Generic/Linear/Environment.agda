@@ -46,13 +46,13 @@ module Generic.Linear.Environment
     open Ctx Δ renaming (shape to t; ty-ctx to δ; use-ctx to Q)
 
     field
-      Ψ : LinFuncRel t s 0ℓ
-      fit-here : Ψ .rel Q P
-      lookup : ∀ {P′ Q′} → Ψ .rel Q′ P′ → ctx Q′ δ ∋_ ⊆ 𝓥 (ctx P′ γ)
+      Ψ : LinFuncRel s t 0ℓ
+      fit-here : Ψ .rel P Q
+      lookup : ∀ {P′ Q′} → Ψ .rel P′ Q′ → ctx Q′ δ ∋_ ⊆ 𝓥 (ctx P′ γ)
   open [_]_⇒ᵉ_ public
 
   relocate : ∀ {𝓥 : OpenFam ℓ} {s t P P′ Q Q′ γ δ} →
-    (ρ : [ 𝓥 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) → ρ .Ψ .rel Q′ P′ →
+    (ρ : [ 𝓥 ] ctx {s} P γ ⇒ᵉ ctx {t} Q δ) → ρ .Ψ .rel P′ Q′ →
     [ 𝓥 ] ctx P′ γ ⇒ᵉ ctx Q′ δ
   relocate ρ r = record { [_]_⇒ᵉ_ ρ; fit-here = r }
 

@@ -62,11 +62,11 @@ module Generic.Linear.Environment.Properties
     ++ᵉ′ (ρ ✴ᶜ⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↙ i) q b) =
       let br , bs = un++ₙ b in
       let v = ρ .lookup r (lvar i q br) in
-      psh^𝓥 (+ₘ-identityʳ→ (r+s , σ .Ψ .rel-0ₘ (≤*→0* bs , s))) v
+      psh^𝓥 (+ₘ-identityʳ→ (r+s , σ .Ψ .rel-0ₘ (s , ≤*→0* bs))) v
     ++ᵉ′ (ρ ✴ᶜ⟨ sp ⟩ σ) .lookup (r ↘, r+s ,↙ s) (lvar (↘ i) q b) =
       let br , bs = un++ₙ b in
       let v = σ .lookup s (lvar i q bs) in
-      psh^𝓥 (+ₘ-identityˡ→ (ρ .Ψ .rel-0ₘ (≤*→0* br , r) , r+s)) v
+      psh^𝓥 (+ₘ-identityˡ→ (ρ .Ψ .rel-0ₘ (r , ≤*→0* br) , r+s)) v
 
     ++ᵉ : [ 𝓥 ]_⇒ᵉ Γ ✴ [ 𝓥 ]_⇒ᵉ Δ ⊆ [ 𝓥 ]_⇒ᵉ Γ ++ᶜ Δ
     ++ᵉ = ++ᵉ′
