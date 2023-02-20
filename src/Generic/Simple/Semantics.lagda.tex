@@ -1,0 +1,65 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
+module Generic.Simple.Semantics (Ty : Set) where
+
+  open import Data.LTree
+  open import Data.LTree.Vector
+  open import Data.Product
+  open import Function.Extra using ([_]_⊨_)
+  open import Level
+  open import Size
+  open import Relation.Nary
+
+  open import Generic.Simple.Syntax Ty
+  open import Generic.Simple.Syntax.Term Ty
+  open import Generic.Simple.Environment Ty
+
+  private
+    variable
+      sz : Size
+\end{code}
+
+%<*Kripke>
+\begin{code}
+  Kripke : (𝓥 𝓒 : OpenFam) → Ctx → OpenFam
+  Kripke 𝓥 𝓒 Δ Γ A = □ ([ 𝓥 ]_⇒ᵉ Δ ⇒ [ 𝓒 ]_⊨ A) Γ
+\end{code}
+%</Kripke>
+
+\begin{code}
+  mapK𝓒 : ∀ {𝓒 𝓒′ A B} → ∀[ [ 𝓒 ]_⊨ A ⇒ [ 𝓒′ ]_⊨ B ] →
+    (∀ {𝓥 Γ Δ} → Kripke 𝓥 𝓒 Δ Γ A → Kripke 𝓥 𝓒′ Δ Γ B)
+  mapK𝓒 f b r ρ = f (b r ρ)
+\end{code}
+
+%<*Semantics>
+\begin{code}
+  record Semantics (d : System) (𝓥 𝓒 : OpenFam) : Set where
+    infix 20 _𝓥⊨_ _𝓒⊨_; private _𝓥⊨_ = 𝓥; _𝓒⊨_ = 𝓒
+    field
+      ren^𝓥 : ∀ {A} → ∀[ _𝓥⊨ A ⇒ □ (_𝓥⊨ A) ]
+      ⟦var⟧ : ∀[ 𝓥 ⇒ 𝓒 ]
+      ⟦con⟧ : ∀[ ⟦ d ⟧s (Kripke 𝓥 𝓒) ⇒ 𝓒 ]
+\end{code}
+%</Semantics>
+
+\begin{code}
+    bindEnv : ∀ {Δ Δr} →
+      ∀[ [ 𝓥 ]_⇒ᵉ Δ ⇒ □ ([ 𝓥 ]_⇒ᵉ Δr ⇒ [ 𝓥 ]_⇒ᵉ (Δ ++ᶜ Δr)) ]
+    bindEnv ρ r σ (el (↙ i) q) = ren^𝓥 (ρ (el i q)) r
+    bindEnv ρ r σ (el (↘ i) q) = σ (el i q)
+\end{code}
+
+%<*sem>
+\begin{code}
+    sem : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz A} →
+      [ d , sz ] Δ ⊢ A → Γ 𝓒⊨ A
+    body : ∀ {Γ Δ} → [ 𝓥 ] Γ ⇒ᵉ Δ → ∀ {sz Θ A} →
+      Scope [ d , sz ]_⊢_ Θ Δ A → Kripke 𝓥 𝓒 Θ Γ A
+
+    sem ρ (`var v) = ⟦var⟧ (ρ v)
+    sem ρ (`con M) = ⟦con⟧ (map-s d (body ρ) M)
+
+    body ρ M r σ = sem (bindEnv ρ r σ) M
+\end{code}
+%</sem>

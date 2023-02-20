@@ -16,7 +16,7 @@ module Generic.Simple.Syntax (Ty : Set) where
 
   private
     variable
-      ℓ t u x y : Level
+      t u x y : Level
 
   record Ctx : Set where
     constructor ctx
@@ -59,54 +59,82 @@ module Generic.Simple.Syntax (Ty : Set) where
       rules : (l : Label) → Rule
   open System public
 
-  Scoped : ∀ ℓ → Set (suc ℓ)
-  Scoped ℓ = Ty → Ctx → Set ℓ
+  OpenFam : Set (suc 0ℓ)
+  OpenFam = Ctx → Ty → Set
 
-  Scope : ∀ {ℓ} → Scoped ℓ → Ctx → Scoped ℓ
-  Scope T QΔ A = (_++ᶜ QΔ) ⊢ T A
+  Scope : OpenFam → Ctx → OpenFam
+  Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
 \end{code}
 
 \begin{code}
-  module WithScope (⟦-,_⊢_⟧ : Ctx → Scoped ℓ) where
+  module WithScope (
+\end{code}
+%<*WithScope>
+\begin{code}[inline]
+    ,_⟦_⊢_⟧ : Ctx → OpenFam
+\end{code}
+%</WithScope>
+\begin{code}
+    ) where
+\end{code}
 
-    ⟦_⟧p : Premises → Ctx → Set ℓ
-    ⟦ ⟨ Γ `⊢ A ⟩ ⟧p = ⟦-, Γ ⊢ A ⟧
+%<*semp>
+\begin{code}
+    ⟦_⟧p : Premises → Ctx → Set
+    ⟦ ⟨ Δ `⊢ A ⟩ ⟧p Γ = , Δ ⟦ Γ ⊢ A ⟧
     ⟦ `⊤ ⟧p = U
     ⟦ p `∧ q ⟧p = ⟦ p ⟧p ∩ ⟦ q ⟧p
+\end{code}
+%</semp>
 
-    ⟦_⟧r : Rule → Scoped ℓ
-    ⟦ ps `⊆ A′ ⟧r A PΓ = A′ ≡ A × ⟦ ps ⟧p PΓ
+%<*semr>
+\begin{code}
+    ⟦_⟧r : Rule → OpenFam
+    ⟦ ps `⊆ A′ ⟧r Γ A = A′ ≡ A × ⟦ ps ⟧p Γ
+\end{code}
+%</semr>
 
-    ⟦_⟧s : System → Scoped ℓ
-    ⟦ L ▹ rs ⟧s A PΓ = Σ[ l ∈ L ] ⟦ rs l ⟧r A PΓ
+%<*sems>
+\begin{code}
+    ⟦_⟧s : System → OpenFam
+    ⟦ L ▹ rs ⟧s Γ A = Σ[ l ∈ L ] ⟦ rs l ⟧r Γ A
+\end{code}
+%</sems>
 
-  ⟦_⟧p : Premises → (Ctx → Scoped ℓ) → (Ctx → Set ℓ)
+\begin{code}
+  ⟦_⟧p : Premises → (Ctx → OpenFam) → (Ctx → Set)
   ⟦ ps ⟧p Sc = let module W = WithScope Sc in W.⟦ ps ⟧p
 
-  ⟦_⟧r : Rule → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧r : Rule → (Ctx → OpenFam) → OpenFam
   ⟦ r ⟧r Sc = let module W = WithScope Sc in W.⟦ r ⟧r
 
-  ⟦_⟧s : System → (Ctx → Scoped ℓ) → Scoped ℓ
+  ⟦_⟧s : System → (Ctx → OpenFam) → OpenFam
   ⟦ s ⟧s Sc = let module W = WithScope Sc in W.⟦ s ⟧s
 \end{code}
 
 \begin{code}
-  module _ {Γ Δ : Ctx} {X : Ctx → Scoped x} {Y : Ctx → Scoped y} where
+  module _ {Γ Δ : Ctx} {X : Ctx → OpenFam} {Y : Ctx → OpenFam} where
 
     map-p : (ps : Premises) →
-            (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →
-            (⟦ ps ⟧p X Γ → ⟦ ps ⟧p Y Δ)
-    map-p ⟨ Γ `⊢ A ⟩ f t = f t
+      (∀ {Θ A} → X Θ Γ A → Y Θ Δ A) →
+      (⟦ ps ⟧p X Γ → ⟦ ps ⟧p Y Δ)
+    map-p ⟨ Θ `⊢ A ⟩ f t = f t
     map-p `⊤ f _ = _
     map-p (ps `∧ qs) f (s , t) = map-p ps f s , map-p qs f t
 
     map-r : (r : Rule) →
-            (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →
-            (∀ {A} → ⟦ r ⟧r X A Γ → ⟦ r ⟧r Y A Δ)
+      (∀ {Θ A} → X Θ Γ A → Y Θ Δ A) →
+      (∀ {A} → ⟦ r ⟧r X Γ A → ⟦ r ⟧r Y Δ A)
     map-r (ps `⊆ A) f (q , t) = q , map-p ps f t
+\end{code}
 
+%<*map-s-type>
+\begin{code}
     map-s : (s : System) →
-            (∀ {Θ A} → X Θ A Γ → Y Θ A Δ) →
-            (∀ {A} → ⟦ s ⟧s X A Γ → ⟦ s ⟧s Y A Δ)
+      (∀ {Θ A} → X Θ Γ A → Y Θ Δ A) →
+      (∀ {A} → ⟦ s ⟧s X Γ A → ⟦ s ⟧s Y Δ A)
+\end{code}
+%</map-s-type>
+\begin{code}
     map-s (L ▹ rs) f (l , t) = l , map-r (rs l) f t
 \end{code}

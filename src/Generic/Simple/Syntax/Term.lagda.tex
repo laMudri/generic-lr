@@ -2,19 +2,19 @@
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 module Generic.Simple.Syntax.Term (Ty : Set) where
 
-  open import Level
   open import Size
-  open import Relation.Unary
+  open import Relation.Nary
 
   open import Generic.Simple.Syntax Ty
-  open import Generic.Simple.Environment Ty
+  open import Generic.Simple.Environment Ty using (_∋_)
 
-  private
-    variable
-      A : Ty
-      sz : Size
-
-  data Tm (d : System) : Size → Scoped 0ℓ where
-    `var : ∀[ Var                      A ⇒ Tm d (↑ sz) A ]
-    `con : ∀[ ⟦ d ⟧s (Scope (Tm d sz)) A ⇒ Tm d (↑ sz) A ]
+  infix 20 [_,_]_⊢_
 \end{code}
+
+%<*Tm>
+\begin{code}
+  data [_,_]_⊢_ (d : System) : Size → OpenFam where
+    `var  : ∀ {sz} → ∀[ _∋_                             ⇒ [ d , (↑ sz) ]_⊢_ ]
+    `con  : ∀ {sz} → ∀[ ⟦ d ⟧s (Scope ([ d , sz ]_⊢_))  ⇒ [ d , (↑ sz) ]_⊢_ ]
+\end{code}
+%</Tm>

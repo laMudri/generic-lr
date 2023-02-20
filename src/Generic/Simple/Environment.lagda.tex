@@ -4,7 +4,8 @@ module Generic.Simple.Environment (Ty : Set) where
 
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Function.Base
+  open import Function.Base using (_∘_)
+  open import Function.Extra using ([_]_⊨_)
   open import Level
   open import Relation.Binary.PropositionalEquality
   open import Relation.Unary
@@ -13,56 +14,60 @@ module Generic.Simple.Environment (Ty : Set) where
 
   private
     variable
-      ℓ : Level
-      𝓥 : Scoped ℓ
-      T : Ctx → Set ℓ
+      𝓥 : OpenFam
+      T : Ctx → Set
       A : Ty
       Γ Δ Θ : Ctx
 
-  record Var (A : Ty) (Γ : Ctx) : Set where
-    constructor var
+  infix 20 _∋_ _⇒ʳ_
+
+  record _∋_ (Γ : Ctx) (A : Ty) : Set where
+    constructor el
     field
       idx : Ptr (Γ .shape)
       tyq : Γ .ty-ctx idx ≡ A
-  open Var public
+  open _∋_ public
 
-  record _─Env (Γ : Ctx) (𝓥 : Scoped ℓ) (Δ : Ctx) : Set ℓ where
-    constructor pack
-    field lookup : ∀ {A} (v : Var A Γ) → 𝓥 A Δ
-  open _─Env public
+  [_]_⇒ᵉ_ : OpenFam → (Γ Δ : Ctx) → Set
+  [ 𝓥 ] Γ ⇒ᵉ Δ = ∀ {A} (v : Δ ∋ A) → 𝓥 Γ A
 
-  leftᵛ : ∀ {s t A Γ} → Var A (ctx (Γ ∘ ↙)) → Var A (ctx {s <+> t} Γ)
-  leftᵛ (var i q) = var (↙ i) q
-  rightᵛ : ∀ {s t A Γ} → Var A (ctx (Γ ∘ ↘)) → Var A (ctx {s <+> t} Γ)
-  rightᵛ (var i q) = var (↘ i) q
+  -- record [_]_⇒ᵉ_ (𝓥 : OpenFam) (Γ Δ : Ctx) : Set where
+  --   constructor pack
+  --   field lookup : ∀ {A} (v : Δ ∋ A) → 𝓥 Γ A
+  -- open [_]_⇒ᵉ_ public
 
-  Thinning : (Γ Δ : Ctx) → Set
-  Thinning Γ Δ = (Γ ─Env) Var Δ
+  leftᵛ : ∀ {s t A Γ} → ctx (Γ ∘ ↙) ∋ A → ctx {s <+> t} Γ ∋ A
+  leftᵛ (el i q) = el (↙ i) q
+  rightᵛ : ∀ {s t A Γ} → ctx (Γ ∘ ↘) ∋ A → ctx {s <+> t} Γ ∋ A
+  rightᵛ (el i q) = el (↘ i) q
 
-  □ : (Ctx → Set ℓ) → (Ctx → Set ℓ)
-  (□ T) PΓ = ∀[ Thinning PΓ ⇒ T ]
+  _⇒ʳ_ : (Γ Δ : Ctx) → Set
+  _⇒ʳ_ = [ _∋_ ]_⇒ᵉ_
 
-  Thinnable : (Ctx → Set ℓ) → Set ℓ
-  Thinnable T = ∀[ T ⇒ □ T ]
+  □ : (Ctx → Set) → (Ctx → Set)
+  (□ T) Γ = ∀[ (_⇒ʳ Γ) ⇒ T ]
 
-  th^Var : Thinnable (Var A)
-  th^Var v th = th .lookup v
+  Renameable : (Ctx → Set) → Set
+  Renameable T = ∀[ T ⇒ □ T ]
 
-  identity : Thinning Γ Γ
-  identity .lookup v = v
+  ren^Var : Renameable (_∋ A)
+  ren^Var v th = th v
 
-  select : Thinning Γ Δ → (Δ ─Env) 𝓥 Θ → (Γ ─Env) 𝓥 Θ
-  select th ρ .lookup v = ρ .lookup (th .lookup v)
+  identity : Γ ⇒ʳ Γ
+  identity v = v
+
+  select : Γ ⇒ʳ Δ → [ 𝓥 ] Θ ⇒ᵉ Γ → [ 𝓥 ] Θ ⇒ᵉ Δ
+  select th ρ v = ρ (th v)
 
   extract : ∀[ □ T ⇒ T ]
   extract t = t identity
 
   duplicate : ∀[ □ T ⇒ □ (□ T) ]
-  duplicate t th ph = t (select th ph)
+  duplicate t th ph = t (select {𝓥 = _∋_} th ph)
 
-  th^□ : Thinnable (□ T)
-  th^□ = duplicate
+  ren^□ : Renameable (□ T)
+  ren^□ = duplicate
 
-  th^Env : (∀ {A} → Thinnable (𝓥 A)) → Thinnable ((Γ ─Env) 𝓥)
-  th^Env th^𝓥 ρ th .lookup v = th^𝓥 (ρ .lookup v) th
+  ren^Env : (∀ {A} → Renameable ([ 𝓥 ]_⊨ A)) → Renameable ([ 𝓥 ]_⇒ᵉ Γ)
+  ren^Env th^𝓥 ρ th v = th^𝓥 (ρ v) th
 \end{code}
