@@ -1,0 +1,121 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
+
+module Generic.Linear.Example.Graph where
+
+open import Data.LTree
+open import Data.LTree.Automation
+open import Data.LTree.Vector hiding ([_])
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Product
+open import Data.Unit
+open import Level using (Level; Lift)
+open import Proposition
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+-- open import Relation.Unary
+open import Relation.Unary.Bunched
+open import Size
+
+open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+\end{code}
+
+%<*Sort>
+\begin{code}
+data Sort : Set where
+  wire : Sort
+  bundle : LTree → Sort
+\end{code}
+%</Sort>
+
+\begin{code}
+open import Generic.Linear.Syntax Sort Ann public
+open import Generic.Linear.Syntax.Term Sort rawPoSemiring public
+open import Generic.Linear.Syntax.Interpretation Sort rawPoSemiring public
+open import Generic.Linear.Renaming Sort poSemiring public
+\end{code}
+
+%<*qGraphL>
+\begin{code}
+data `GraphL : Set where
+  `η∘ `μ∘ `η∙ `μ∙ `end : LTree → `GraphL
+\end{code}
+%</qGraphL>
+
+%<*end-premises>
+\begin{code}
+end-premises : LTree → Premises
+end-premises [-] = ⟨ []ᶜ `⊢ wire ⟩
+end-premises ε = `ℑ
+end-premises (s <+> t) = end-premises s `✴ end-premises t
+\end{code}
+%</end-premises>
+
+%<*GraphL>
+\begin{code}
+GraphL : System
+GraphL = `GraphL ▹ λ where
+  (`η∘ s) →   ⟨ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩ `⊆ bundle s
+  (`μ∘ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩
+              `⊆ bundle s
+  (`η∙ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ []ᶜ `⊢ bundle s ⟩ `⊆ bundle s
+  (`μ∙ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ u1 ∙ wire ]ᶜ ++ᶜ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩
+              `⊆ bundle s
+  (`end s) →  end-premises s `⊆ bundle s
+\end{code}
+%</GraphL>
+
+%<*Graph>
+\begin{code}
+Graph : LTree → LTree → Set
+Graph s t = [ GraphL , ∞ ] ctx {s} (λ _ → u1) (λ _ → wire) ⊢ bundle t
+\end{code}
+%</Graph>
+
+\begin{code}
+open import Generic.Linear.Example.UsageCheck Sort public
+open WithPoSemiring poSemiring public
+open WithInverses record
+  { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
+  public
+
+module V where
+
+  open import Generic.Linear.Syntax.Term Sort U.0-rawPoSemiring public
+  open import Generic.Linear.Syntax.Interpretation Sort U.0-rawPoSemiring
+    public
+  open import Generic.Linear.Variable Sort U.0-rawPoSemiring public
+  open import Generic.Linear.Renaming Sort U.0-poSemiring public
+
+UGraph : LTree → LTree → Set
+UGraph s t = U.[ uSystem GraphL , ∞ ] U.ctx {s} _ (λ _ → wire) ⊢ bundle t
+\end{code}
+
+%<*patterns>
+\begin{code}
+pattern uη∘ M = U.`con (`η∘ _ , refl , M)
+pattern uμ∘ u v M = U.`con (`μ∘ _ , refl , u ✴ᶜ⟨ _ ⟩ v ✴ᶜ⟨ _ ⟩ M)
+pattern uη∙ v M = U.`con (`η∙ _ , refl , v ✴ᶜ⟨ _ ⟩ M)
+pattern uμ∙ v M = U.`con (`μ∙ _ , refl , v ✴ᶜ⟨ _ ⟩ M)
+pattern uend Ms = U.`con (`end _ , refl , Ms)
+\end{code}
+%</patterns>
+
+\begin{code}
+myGraph′ : Graph ([-] <+> [-]) ([-] <+> [-])
+myGraph′ = elab-unique GraphL
+  (uend (uvar (# 1) ✴ᶜ⟨ _ ⟩ uvar (# 0)))
+  (λ _ → u1)
+\end{code}
+
+%<*myGraph>
+\begin{code}
+myGraph : Graph ([-] <+> [-]) ([-] <+> [-])
+myGraph = elab-unique GraphL
+    (uμ∙ (uvar# 0)
+    (uμ∘ (uvar# 3) (uvar# 1)
+    (uη∘
+    (uη∙ (uvar# 4)
+    (uend (uvar# 5 ✴ᶜ⟨ _ ⟩ (uvar# 2)))))))
+  (λ _ → u1)
+\end{code}
+%</myGraph>

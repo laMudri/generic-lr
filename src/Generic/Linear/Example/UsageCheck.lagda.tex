@@ -101,6 +101,14 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Size
 
     pattern uvar i = U.`var (U.lvar i ≡.refl _)
+
+    open import Data.LTree.Automation
+    open import Data.Nat using (_<?_)
+    open import Relation.Nullary.Decidable using (True)
+
+    uvar# : ∀ {s} m {m< : True (m <? size s)} {d sz Γ} →
+      U.[ d , ↑ sz ] U.ctx {s} _ Γ ⊢ Γ (#_ m {m<})
+    uvar# {s} m {m<} = U.`var (U.lvar (#_ {s} m {m<}) ≡.refl _)
 \end{code}
 
 %<*NonDetInverses>
