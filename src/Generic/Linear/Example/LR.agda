@@ -66,20 +66,7 @@ module Generic.Linear.Example.LR where
       `ze `su : {{_ : Has-ℕ}} → `LR
       `iter : {{_ : Has-ℕ}} (Z : Ty) → `LR
 
-    flags : PremisesFlags
-    flags = allPremisesFlags
-      -- NOTE: the following are the precise flags required, but instance
-      -- search (with --overlapping-instances) takes too long.
-      -- record noPremisesFlags
-      -- { Has-⊤ = Has-0 ∨ᴾ Has-⊤
-      -- ; Has-∧ = Has-⊕ ∨ᴾ Has-& ∨ᴾ Has-ℕ
-      -- ; Has-ℑ = Has-I ∨ᴾ Has-ℕ
-      -- ; Has-✴ = Has-0 ∨ᴾ Has-⊕ ∨ᴾ Has-I ∨ᴾ Has-⊗ ∨ᴾ Has-⊸ ∨ᴾ Has-! ∨ᴾ Has-ℕ
-      -- ; Has-· = Has-!
-      -- ; Has-□ = Has-ℕ
-      -- }
-
-    LR : System flags
+    LR : System
     LR = `LR ▹ λ where
       (`0e Z) → (⟨ []ᶜ `⊢ t0 ⟩ `✴ `⊤) `⊆ Z
       (`⊕i i A B) → ⟨ []ᶜ `⊢ [ A > i < B ] ⟩ `⊆ A t⊕ B
@@ -101,8 +88,7 @@ module Generic.Linear.Example.LR where
       `ze → `ℑ `⊆ nat
       `su → ⟨ []ᶜ `⊢ nat ⟩ `⊆ nat
       (`iter Z) →
-        let bf = boxFlags true true false in
-        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□ bf (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) `⊆ Z
+        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□⁰⁺ˣ (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) `⊆ Z
 
     Term = [ LR , ∞ ]_⊢_
 
@@ -116,7 +102,7 @@ module Generic.Linear.Example.LR where
 
     open import Generic.Linear.Example.UsageCheck Ty public
     open WithPoSemiring poSemiring public
-    open WithInverses flags record
+    open WithInverses record
       { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
       public
 
@@ -128,28 +114,30 @@ module Generic.Linear.Example.LR where
       open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
       open import Generic.Linear.Renaming Ty U.0-poSemiring public
 
-    pattern uvar i = V.`var (V.lvar i refl _)
     pattern u⊸i t = V.`con (`⊸i _ _ , refl , t)
-    pattern u⊸e f s = V.`con (`⊸e _ _ , refl , f ✴⟨ _ ⟩ s)
-    pattern u!i s = V.`con (`!i _ , refl , ⟨ _ ⟩· s)
-    pattern u!e T e t = V.`con (`!e _ T , refl , e ✴⟨ _ ⟩ t)
-    pattern uze = V.`con (`ze , refl , ℑ⟨ _ ⟩)
+    pattern u⊸e f s = V.`con (`⊸e _ _ , refl , f ✴ᶜ⟨ _ ⟩ s)
+    pattern u!i s = V.`con (`!i _ , refl , ⟨ _ ⟩·ᶜ s)
+    pattern u!e T e t = V.`con (`!e _ T , refl , e ✴ᶜ⟨ _ ⟩ t)
+    pattern uze = V.`con (`ze , refl , ℑᶜ⟨ _ ⟩)
     pattern usu s = V.`con (`su , refl , s)
     pattern uiter T e s t =
-      V.`con (`iter T , refl , e ✴⟨ _ ⟩ (□⟨ _ , _ , _ , _ ⟩ (s , t)))
+      V.`con (`iter T , refl , e ✴ᶜ⟨ _ ⟩ (□ᶜ⟨ _ ⟩ (s , t)))
 
   private
     open WithLLFlags allLLFlags
 
     myK : ∀ A B → Term []ᶜ (t! (A t⊸ B) t⊸ t! A t⊸ t! B)
-    myK A B = elab-unique LR
-      (u⊸i (u⊸i (u!e _ (uvar (# 0)) (u!e _ (uvar (# 1))
-        (u!i (u⊸e (uvar (# 2)) (uvar (# 3))))))))
-      []
+    myK A B =
+      let #1 : Ptr ((((ε <+> [-]) <+> [-]) <+> [-]) <+> ε)
+          #1 = # 1 in
+      elab-unique LR
+        (u⊸i (u⊸i (u!e _ (uvar# 0) (u!e _ (uvar #1)
+          (u!i (u⊸e (uvar# 2) (uvar# 3)))))))
+        []
 
     deepid : Term []ᶜ (nat t⊸ nat)
     deepid = elab-unique LR
-      (u⊸i (uiter _ (uvar (# 0)) uze (usu (uvar (# 1)))))
+      (u⊸i (uiter _ (uvar# 0) uze (usu (uvar# 1))))
       []
 
     -- dupNat : nat t⊸ t! uω nat
@@ -159,9 +147,12 @@ module Generic.Linear.Example.LR where
     --                !i (suc m)
 
     dupNat : Term []ᶜ (nat t⊸ t! nat)
-    dupNat = elab-unique LR
-      (u⊸i (uiter (t! nat) (uvar (# 0))
-        (u!i uze)
-        (u!e (t! nat) (uvar (# 1))
-          (u!i (usu (uvar (# 2)))))))
-      []
+    dupNat =
+      let #1 : Ptr (((ε <+> [-]) <+> [-]) <+> ε)
+          #1 = # 1 in
+      elab-unique LR
+        (u⊸i (uiter (t! nat) (uvar# 0)
+          (u!i uze)
+          (u!e (t! nat) (uvar #1)
+            (u!i (usu (uvar# 2))))))
+        []
