@@ -2,7 +2,7 @@
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 open import Algebra.Po
-open import Level
+open import Level hiding (lift)
 
 module Generic.Linear.Semantics.Syntactic
   (Ty : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
@@ -139,10 +139,8 @@ module Generic.Linear.Semantics.Syntactic
   sub : [ d ] Γ ⇒ˢ Δ → [ d , ∞ ] Δ ⊢ A → [ d , ∞ ] Γ ⊢ A
   sub σ t = semantics Sub σ t
 
-  -- _>>ˢ_ : Substitution d Γ Δ → Substitution d Δ Θ → Substitution d Γ Θ
-  -- (ρ >>ˢ σ) .M = ρ .M *ᴹ σ .M
-  -- (ρ >>ˢ σ) .fit-here = {!!}
-  -- (ρ >>ˢ σ) .lookup v = psh^Tm {!!} (sub σ (psh^Tm (≤*-trans (ρ .fit-here) {!!}) (ρ .lookup v)))
+  ren-to-sub : ∀ {Γ Δ d} → Γ ⇒ʳ Δ → [ d ] Γ ⇒ˢ Δ
+  ren-to-sub ρ = >>^Env id^Env ρ
 
   module WithKit (K : Kit d 𝓥) where
     private
@@ -150,6 +148,7 @@ module Generic.Linear.Semantics.Syntactic
     open With-psh^𝓥 (λ {_} {γ} → K.psh^𝓥 {γ = γ})
 
     infix 5 _++ᵏ_
+    infixr 5 _>>ᵏ_
 
     1ᵏ : [ 𝓥 ] Γ ⇒ᵉ Γ
     1ᵏ = id^Env
@@ -168,13 +167,24 @@ module Generic.Linear.Semantics.Syntactic
       r ≤ s → 𝓥 [ 1# ∙ A ]ᶜ B → [ 𝓥 ] [ r ∙ A ]ᶜ ⇒ᵉ [ s ∙ B ]ᶜ
     [ le ∙ t ]ᵏ = [-]ᵉ (⟨ [ ≤-trans le (*.identity .proj₂ _) ]ₙ ⟩·ᶜ t)
 
+    instance
+      ComposeEnv^⊢ : ComposeEnv 𝓥 [ d , ∞ ]_⊢_ [ d , ∞ ]_⊢_
+      ComposeEnv^⊢ .lift ρ v = Semantics.semantics (kit→sem K) ρ v
+
+    _>>ᵏ_ : [ 𝓥 ] Γ ⇒ᵉ Δ → [ d ] Δ ⇒ˢ Θ → [ d ] Γ ⇒ˢ Θ
+    _>>ᵏ_ = >>^Env
+
   module _ {d} where
     open WithKit (Sub-Kit {d})
 
     infix 5 _++ˢ_
+    infixr 5 _>>ˢ_
 
     1ˢ : [ d ] Γ ⇒ˢ Γ
     1ˢ = 1ᵏ
+
+    _>>ˢ_ : [ d ] Γ ⇒ˢ Δ → [ d ] Δ ⇒ˢ Θ → [ d ] Γ ⇒ˢ Θ
+    _>>ˢ_ = _>>ᵏ_
 
     []ˢ : [ d ] []ᶜ ⇒ˢ []ᶜ
     []ˢ = []ᵏ

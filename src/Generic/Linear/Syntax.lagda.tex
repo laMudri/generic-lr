@@ -1,12 +1,12 @@
 \begin{code}
-{-# OPTIONS --safe --without-K #-}
+{-# OPTIONS --safe --without-K --postfix-projections #-}
 
 module Generic.Linear.Syntax (Ty Ann : Set) where
 
   open import Data.Bool.Base
   open import Data.LTree
   open import Data.LTree.Vector
-  open import Data.Product using (_×_; _,_)
+  open import Data.Product using (_×_; _,_; proj₁; proj₂)
   open import Data.Unit.Polymorphic using (⊤; tt)
   open import Level
   open import Function.Base using (_∘_; _⟨_⟩_)
@@ -67,6 +67,11 @@ module Generic.Linear.Syntax (Ty Ann : Set) where
 
   rightᶜ′ : ∀ {s t} → SizedCtx (s <+> t) → Ctx
   rightᶜ′ (sctx P γ) = ctx (P ∘ ↘) (γ ∘ ↘)
+
+  map-ctx : (Ann × Ty → Ann × Ty) → (Ctx → Ctx)
+  map-ctx f Γ .shape = Γ .shape
+  map-ctx f (ctx P γ) .use-ctx i = f (P i , γ i) .proj₁
+  map-ctx f (ctx P γ) .ty-ctx i = f (P i , γ i) .proj₂
 \end{code}
 
 Premises to each rule form a tree.

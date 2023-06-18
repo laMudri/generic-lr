@@ -220,6 +220,7 @@ module Generic.Linear.Example.ZeroOneMany where
       ; *-mono = *-mono
       }
     }
+  open PoSemiring poSemiring public using (≤-reflexive)
 
   skewSemiring : SkewSemiring 0ℓ 0ℓ
   skewSemiring = record
@@ -313,3 +314,18 @@ module Generic.Linear.Example.ZeroOneMany where
   ω*-≤ u0 = ≤-refl
   ω*-≤ u1 = ω≤1
   ω*-≤ uω = ≤-refl
+
+  ≤0-dup : ∀ {x} → x ≤ u0 → x ≤ x + x
+  ≤0-dup ≤-refl = ≤-refl
+  ≤0-dup ω≤0 = ≤-refl
+
+  ≤0-scl : ∀ {x r} → x ≤ u0 → x ≤ r * x
+  ≤0-scl {r = r} ≤-refl = ≡.subst (_≤ r * u0) (≡.sym (annihilʳ r)) ≤-refl
+  ≤0-scl ω≤0 = uω≤
+
+  *-comm : ∀ x y → x * y ≡ y * x
+  *-comm u0 y = annihilʳ y
+  *-comm u1 y = *-identityʳ y
+  *-comm uω u0 = refl
+  *-comm uω u1 = refl
+  *-comm uω uω = refl

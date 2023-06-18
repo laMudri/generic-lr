@@ -136,7 +136,7 @@ module Generic.Linear.Algebra (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
     let f , ux = F .func y in
     (f , g) , λ (f′ , g′) → ux (F .rel-≤ₘ ≤*-refl (uy g′) f′)
 
-  -- Parallel addition
+  -- Pointwise operations
 
   0ᴿ : ∀ {s t} → LinFuncRel s t 0ℓ
   0ᴿ .rel x y = x ≤0ₘ
