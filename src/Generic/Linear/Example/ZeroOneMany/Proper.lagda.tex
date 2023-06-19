@@ -1,0 +1,40 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --postfix-projections #-}
+
+module Generic.Linear.Example.ZeroOneMany.Proper (Ty : Set) where
+
+  open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+  open import Generic.Linear.Example.ZeroOneMany.LinIntView
+
+  open import Generic.Linear.Syntax Ty Ann
+  open import Generic.Linear.Syntax.Interpretation Ty rawPoSemiring
+  open import Generic.Linear.Syntax.Term Ty rawPoSemiring
+  open import Generic.Linear.Variable Ty rawPoSemiring
+
+  open import Data.Product
+  open import Data.Sum
+  open import Data.Unit using (⊤; tt)
+  open import Relation.Binary.PropositionalEquality
+  open import Relation.Unary.Bunched
+
+  Proper : ∀ {d sz Γ A} → [ d , sz ] Γ ⊢ A → Set
+  Proper {L ▹ rs} (`var x) = ⊤
+  Proper {L ▹ rs} (`con (l , refl , M)) = Proper-inner (rs l .premises) M
+    where
+    Proper-inner : ∀ ps {d sz Γ} → ⟦ ps ⟧p (Scope [ d , sz ]_⊢_) Γ → Set
+    Proper-inner ⟨ Δ `⊢ A ⟩ M = Proper M
+    Proper-inner `⊤ M = ⊤
+    Proper-inner (ps `∧ qs) (M , N) = Proper-inner ps M × Proper-inner qs N
+    Proper-inner `ℑ M = ⊤
+    Proper-inner (ps `✴ qs) {Γ = ctx R γ} (M ✴⟨ mkᶜ {P} {Q} _ ⟩ N) =
+      (∀ i →
+        (Linear (R i) → Linear (P i) × Linear (Q i)) ×
+        (Linear (P i) ⊎ Linear (Q i) → Linear (R i)))
+      × Proper-inner ps M × Proper-inner qs N
+    Proper-inner (r `· ps) {Γ = ctx R γ} (⟨ mkᶜ {P} _ ⟩· M) =
+      (∀ i → (Linear (R i) → Linear (P i)) × (Linear (P i) → Linear (R i)))
+      × Proper-inner ps M
+    Proper-inner (`□⁰⁺ˣ ps) {Γ = ctx R γ} (□⟨ mkᶜ {P} _ ⟩ M) =
+      (∀ i → (Linear (R i) → Linear (P i)) × (Linear (P i) → Linear (R i)))
+      × Proper-inner ps M
+\end{code}
