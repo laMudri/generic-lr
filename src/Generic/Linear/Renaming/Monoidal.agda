@@ -1,6 +1,6 @@
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
--- The monoidal structure of the category of thinnings
+-- Ρe monoidal structure of ρe category of ρinnings
 
 open import Algebra.Po
 open import Level using (Level; 0ℓ)
@@ -15,6 +15,8 @@ module Generic.Linear.Renaming.Monoidal
   open import Data.LTree.Vector
   open import Data.Product
   open import Data.Unit
+  open import Function.Base using (_$_; _∘_)
+  open import Relation.Unary.Bunched
 
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Algebra poSemiring
@@ -28,15 +30,25 @@ module Generic.Linear.Renaming.Monoidal
 
   open With-psh^𝓥 {𝓥 = _∋_} psh^∋
 
+  infix 50 _++ʳ′_ _++ʳ_
+
+  []ʳ′ : ∀ {Γ Δ : SizedCtx ε} → sctx→ctx Γ ⇒ʳ sctx→ctx Δ
+  []ʳ′ = []ᵉ′ ℑᶜ⟨ []ₙ ⟩
+
   []ʳ : []ᶜ ⇒ʳ []ᶜ
-  []ʳ = identity
+  []ʳ = []ʳ′
+
+  _++ʳ′_ : ∀ {sΓ tΓ sΔ tΔ}
+    {Γ : SizedCtx (sΓ <+> tΓ)} {Δ : SizedCtx (sΔ <+> tΔ)} →
+    leftᶜ′ Γ ⇒ʳ leftᶜ′ Δ → rightᶜ′ Γ ⇒ʳ rightᶜ′ Δ → sctx→ctx Γ ⇒ʳ sctx→ctx Δ
+  _++ʳ′_ {Γ = sctx P γ} {sctx Q δ} ρ σ = ++ᵉ′ $
+    (↙ʳ′ 0*-triv >>ʳ ρ)
+      ✴⟨ mkᶜ {P = _ ++ _} {_ ++ _} (+*-identity↘ _ ++ₙ +*-identity↙ _) ⟩
+    (↘ʳ′ 0*-triv >>ʳ σ)
 
   _++ʳ_ : ∀ {Γl Γr Δl Δr} →
     Γl ⇒ʳ Δl → Γr ⇒ʳ Δr → Γl ++ᶜ Γr ⇒ʳ Δl ++ᶜ Δr
-  th ++ʳ ph = ++ᵉ
-    (compose th ↙ʳ
-      ✴ᶜ⟨ +*-identity↘ _ ++ₙ +*-identity↙ _ ⟩
-     compose ph ↘ʳ)
+  ρ ++ʳ σ = ρ ++ʳ′ σ
 
   ++-[]ʳ← : ∀ {Γ} → Γ ⇒ʳ Γ ++ᶜ []ᶜ
   ++-[]ʳ← = ++ᵉ (identity ✴ᶜ⟨ +*-identity↘ _ ⟩ ([]ᵉ ℑᶜ⟨ 0*-triv ⟩))

@@ -75,6 +75,10 @@ module Relation.Unary.Bunched where
         split : x ∼ r *ₗ z
         T-prf : T z
 
+    map-· : ∀ {r t t′} {T : A → Set t} {T′ : A → Set t′} →
+      T ⊆ T′ → r · T ⊆ r · T′
+    map-· f (⟨ sp ⟩· t) = ⟨ sp ⟩· f t
+
   open BunchedScaling public using (⟨_⟩·_)
 
   record BoxFlags : Set where

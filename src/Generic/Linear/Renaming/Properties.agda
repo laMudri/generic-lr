@@ -82,10 +82,9 @@ module Generic.Linear.Renaming.Properties
   select : ∀ {Γ Δ Θ : Ctx} → Γ ⇒ʳ Δ → [ 𝓥 ] Θ ⇒ᵉ Γ → [ 𝓥 ] Θ ⇒ᵉ Δ
   select th ρ = postren^Env ρ th
 
-  compose : ∀ {Γ Δ Θ : Ctx} → Δ ⇒ʳ Θ → Γ ⇒ʳ Δ → Γ ⇒ʳ Θ
-  compose th ph = select th ph
+  compose : ∀ {Γ Δ Θ : Ctx} → Γ ⇒ʳ Δ → Δ ⇒ʳ Θ → Γ ⇒ʳ Θ
+  compose = postren^Env
 
-  -- TODO: this is now the wrong way round.
   infixr 5 _>>ʳ_
   _>>ʳ_ = compose
 
@@ -93,7 +92,7 @@ module Generic.Linear.Renaming.Properties
   extract t = t identity
 
   duplicate : □ʳ T ⊆ □ʳ (□ʳ T)
-  duplicate t ρ σ = t (compose ρ σ)
+  duplicate t ρ σ = t (compose σ ρ)
 
   ren^□ : Renameable (□ʳ T)
   ren^□ = duplicate
@@ -118,12 +117,22 @@ module Generic.Linear.Renaming.Properties
     ≤*-trans (th .fit-here) (unrowL₂ (*ᴹ-mono (rowL₂ PP) ≤ᴹ-refl))
   -}
 
+  open SizedCtx
+
+  ↙ʳ′ : ∀ {s t} {Γ : SizedCtx (s <+> t)} →
+    (Γ .use-ctx ∘ ↘) ≤0* → sctx→ctx Γ ⇒ʳ leftᶜ′ Γ
+  ↙ʳ′ sp0 .Ψ = [ 1ᴿ │ 0ᴿ ]ᴿ
+  ↙ʳ′ sp0 .fit-here = ≤*-refl , sp0
+  ↙ʳ′ sp0 .lookup (le , sp0′) v = psh^∋ le v ↙ᵛ sp0′
+
+  ↘ʳ′ : ∀ {s t} {Γ : SizedCtx (s <+> t)} →
+    (Γ .use-ctx ∘ ↙) ≤0* → sctx→ctx Γ ⇒ʳ rightᶜ′ Γ
+  ↘ʳ′ sp0 .Ψ = [ 0ᴿ │ 1ᴿ ]ᴿ
+  ↘ʳ′ sp0 .fit-here = sp0 , ≤*-refl
+  ↘ʳ′ sp0 .lookup (sp0′ , le) v = sp0′ ↘ᵛ psh^∋ le v
+
   ↙ʳ : ∀ {Γ t δ} → Γ ++ᶜ ctx {t} 0* δ ⇒ʳ Γ
-  ↙ʳ .Ψ = [ 1ᴿ │ 0ᴿ ]ᴿ
-  ↙ʳ .fit-here = ≤*-refl , 0*-triv
-  ↙ʳ .lookup (le , sp0) v = psh^∋ le v ↙ᵛ sp0
+  ↙ʳ = ↙ʳ′ 0*-triv
 
   ↘ʳ : ∀ {s γ Δ} → ctx {s} 0* γ ++ᶜ Δ ⇒ʳ Δ
-  ↘ʳ .Ψ = [ 0ᴿ │ 1ᴿ ]ᴿ
-  ↘ʳ .fit-here = 0*-triv , ≤*-refl
-  ↘ʳ .lookup (sp0 , le) v = sp0 ↘ᵛ psh^∋ le v
+  ↘ʳ = ↘ʳ′ 0*-triv
