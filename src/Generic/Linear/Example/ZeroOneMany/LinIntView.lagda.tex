@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --sized-types --without-K --postfix-projections #-}
 
 module Generic.Linear.Example.ZeroOneMany.LinIntView where
@@ -8,11 +9,17 @@ module Generic.Linear.Example.ZeroOneMany.LinIntView where
   open import Data.Product
   open import Function.Base using (case_of_)
   open import Relation.Binary.PropositionalEquality
+\end{code}
 
+%<*Linear>
+\begin{code}
   data Linear : Ann → Set where
     u0-lin : Linear u0
     u1-lin : Linear u1
+\end{code}
+%</Linear>
 
+\begin{code}
   linear-≤ : ∀ {x y} → x ≤ y → Linear x → Linear y
   linear-≤ ≤-refl l = l
 
@@ -28,16 +35,28 @@ module Generic.Linear.Example.ZeroOneMany.LinIntView where
   linear-/ω {z} {u0} le l = u0-lin
   linear-/ω {z} {u1} le l = u1-lin
   linear-/ω {.(uω * uω)} {uω} ≤-refl ()
+\end{code}
 
+%<*LIView>
+\begin{code}
   data LIView : Ann → Set where
     view-lin : ∀ {x} (l : Linear x) → LIView x
     view-int : LIView uω
+\end{code}
+%</LIView>
 
+%<*liview-type>
+\begin{code}[inline]
   liview : ∀ x → LIView x
+\end{code}
+%</liview-type>
+\begin{code}
   liview u0 = view-lin u0-lin
   liview u1 = view-lin u1-lin
   liview uω = view-int
+\end{code}
 
+\begin{code}
   liview-prop : ∀ {x} (u v : LIView x) → u ≡ v
   liview-prop view-int view-int = refl
   liview-prop (view-lin u0-lin) (view-lin u0-lin) = refl
@@ -47,3 +66,4 @@ module Generic.Linear.Example.ZeroOneMany.LinIntView where
   is-lin x = case liview x of λ where
     view-int → false
     (view-lin _) → true
+\end{code}
