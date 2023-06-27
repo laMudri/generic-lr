@@ -83,6 +83,21 @@ module Generic.Linear.Semantics.Syntactic
 %</reify>
 
 \begin{code}
+  reify[]′ : ∀ {Δ : SizedCtx ε} → Kripke 𝓥 𝓒 (sctx→ctx Δ) ⊆ 𝓒
+  reify[]′ b = b .get 1ʳ .app✴ (mkᶜ (+*-identity↘ _)) ρ
+    where
+    open [_]_⇒ᵉ_
+    ρ : [ 𝓥 ] _ ⇒ᵉ _
+    ρ .Ψ = [─]ᴿ
+    ρ .fit-here = 0*-triv
+    ρ .lookup r (lvar i q b) with i
+    ... | there () _
+
+  reify[] : Kripke 𝓥 𝓒 []ᶜ ⊆ 𝓒
+  reify[] = reify[]′
+\end{code}
+
+\begin{code}
   module _ where
     open Kit
 \end{code}
