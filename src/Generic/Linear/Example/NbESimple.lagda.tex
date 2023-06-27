@@ -1,0 +1,95 @@
+\begin{code}
+{-# OPTIONS --sized-types --without-K --prop --postfix-projections #-}
+
+open import Algebra.Po
+open import Level hiding (zero)
+
+module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
+
+  open PoSemiring poSemiring renaming (Carrier to Ann) using ()
+
+  open import Data.LTree
+  open import Data.LTree.Vector
+  open import Data.Product
+  open import Data.Wrap renaming ([_] to mk)
+  open import Function hiding (_∋_)
+  open import Function.Extra
+  open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+  open import Relation.Unary.Bunched
+  open import Size
+
+  infixr 50 _⊸_
+
+  data Ty : Set where
+    ι : Ty
+    _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
+
+  data Frag : Set where
+    nf ne : Frag
+
+  open import Generic.Linear.Everything Ty poSemiring
+    hiding (Ann; lift; ⟨_⟩·_; refl)
+  -- open module Dummy {s} = PoLeftSemimodule (Vᴾ s)
+
+  data L : Set where
+    `app `lam : (rA : Ann × Ty) (B : Ty) → L
+
+  system : System
+  system = L ▹ λ where
+    (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ `⊆ B
+    (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ `⊆ rA ⊸ B
+
+  Term = [ system , ∞ ]_⊢_
+
+  open Semantics
+
+  infix 20 _⊨_
+  _⊨_ : OpenFam (suc 0ℓ)
+  Γ ⊨ ι = Lift (suc 0ℓ) (Term Γ ι)
+  Γ ⊨ (r , A) ⊸ B = □ʳ ((r · _⊨ A) ─✴ _⊨ B) Γ
+
+  ren^⊨ : ∀ {A} → Renameable (_⊨ A)
+  ren^⊨ {ι} (lift M) ρ = lift (ren^⊢ M ρ)
+  ren^⊨ {rA ⊸ B} b = duplicate b
+
+  open With-psh^𝓥 {𝓥 = _⊨_} (λ sub {A} v → ren⇒psh (ren^⊨ {A}) sub {A} v)
+
+  evalSem : Semantics system _⊨_ _⊨_
+  evalSem .ren^𝓥 {A} = ren^⊨ {A}
+  evalSem .⟦var⟧ = id
+  evalSem .⟦con⟧ (`app _ _ , refl , M ✴⟨ sp+ ⟩ (⟨ sp* ⟩· N)) =
+    reify[] M 1ʳ .app✴ sp+ (⟨ sp* ⟩· reify[] N)
+  evalSem .⟦con⟧ (`lam _ _ , refl , M) ρ .app✴ sp+ [N] =
+    M .get ρ .app✴ sp+ ([-]ᵉ [N])
+
+  eval : ∀ {Γ Δ} → [ _⊨_ ] Γ ⇒ᵉ Δ → {A : Ty} → Term Δ A → Γ ⊨ A
+  eval ρ M = semantics evalSem ρ M
+
+  nbeReify : ∀ {Γ} A → Γ ⊨ A → Term Γ A
+  nbeReflect : ∀ {Γ} A → Term Γ A → Γ ⊨ A
+
+  nbeReify ι (lift v) = v
+  nbeReify ((r , A) ⊸ B) v =
+    `con (`lam _ _ , refl ,
+      nbeReify B (v ↙ʳ .app✴ (mkᶜ sp+) (⟨ sp* ⟩·ᶜ
+        nbeReflect A (`var (lvar (↘ here) refl (≤*-refl ++ₙ [ ≤-refl ]ₙ))))))
+    where
+    sp+ : ∀ {s t} {P : Vector Ann s} {Q : Vector Ann t} →
+      (P ++ Q) ≤[ (P ++ 0*) +* (0* ++ Q) ]
+    sp+ = +*-identity↘ _ ++ₙ +*-identity↙ _
+
+    sp* : ∀ {s r} → (0* {s} ++ [ r ]) ≤[ r *ₗ (0* ++ [ 1# ]) ]
+    sp* = (mk λ _ → ≤-reflexive (sym (annihilʳ _))) ++ₙ [ *.identity .proj₂ _ ]ₙ
+
+  nbeReflect ι M = lift M
+  nbeReflect ((r , A) ⊸ B) M ρ .app✴ (mkᶜ sp+) (⟨ sp* ⟩·ᶜ N) =
+    nbeReflect B (`con (`app _ _ , refl ,
+      ren (↙ʳ′ []ₙ >>ʳ ρ) M ✴ᶜ⟨ sp+ ⟩ ⟨ sp* ⟩·ᶜ nbeReify A (ren^⊨ N (↙ʳ′ []ₙ))))
+
+  instance
+    identityEnv^⊨ : IdentityEnv _⊨_
+    identityEnv^⊨ .pure x = nbeReflect _ (`var x)
+
+  nbe : ∀ {Γ A} → Term Γ A → Term Γ A
+  nbe M = nbeReify _ (eval id^Env M)
+\end{code}
