@@ -65,11 +65,11 @@ module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
 \begin{code}
   ren^⊨ : ∀ {A} → Renameable (_⊨ A)
   ren^⊨ {ι} (lift M) ρ = lift (ren^⊢ M ρ)
-  ren^⊨ {rA ⊸ B} b = duplicate b
+  ren^⊨ {rA ⊸ B} b = ren^□ b
 \end{code}
 
 \begin{code}
-  open With-psh^𝓥 {𝓥 = _⊨_} (λ sub {A} v → ren⇒psh (ren^⊨ {A}) sub {A} v)
+  open With-psh^𝓥 {𝓥 = _⊨_} (ren⇒psh (λ {A} → ren^⊨ {A}))
 \end{code}
 
 %<*evalSem>
