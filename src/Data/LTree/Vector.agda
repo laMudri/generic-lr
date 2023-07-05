@@ -151,7 +151,7 @@ module Data.LTree.Vector where
   [ x ] _ = x
 
   [] : Vector A ε
-  [] (there () _)
+  [] ()
 
   _++_ : Vector A s → Vector A t → Vector A (s <+> t)
   (u ++ v) (↙ i) = u i
@@ -161,7 +161,7 @@ module Data.LTree.Vector where
   un[-] v = v here
 
   un++ : Vector A (s <+> t) → Vector A s × Vector A t
-  un++ v = v ∘ there left , v ∘ there right
+  un++ v = v ∘ ↙ , v ∘ ↘
 
   module _ {R : Pred A r} where
 
@@ -171,7 +171,7 @@ module Data.LTree.Vector where
     [ r ]₁ .get here = r
 
     []₁ : {u : Vector A ε} → Lift₁ R u
-    []₁ .get (there () _)
+    []₁ .get ()
 
     _++₁_ : {u : Vector A (s <+> t)} →
             Lift₁ R (u ∘ ↙) → Lift₁ R (u ∘ ↘) → Lift₁ R u
@@ -187,7 +187,7 @@ module Data.LTree.Vector where
     [ r ]₂ .get here = r
 
     []₂ : {u : Vector A ε} {v : Vector B ε} → Lift₂ R u v
-    []₂ .get (there () _)
+    []₂ .get ()
 
     _++₂_ : {u : Vector A (s <+> t)} {v : Vector B (s <+> t)} →
       Lift₂ R (u ∘ ↙) (v ∘ ↙) → Lift₂ R (u ∘ ↘) (v ∘ ↘) → Lift₂ R u v
@@ -212,7 +212,7 @@ module Data.LTree.Vector where
     [ r ]ₙ .get here = r
 
     []ₙ : {vs : Product⊤ n (smap id (λ A → Vector A ε) n As)} → Liftₙ′ R vs
-    []ₙ .get (there () _)
+    []ₙ .get ()
 
     _++ₙ_ :
       ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
@@ -336,7 +336,7 @@ module Data.LTree.Vector where
 
     []₁∼ : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ} {xs} →
            Lift₁∼ {R = R} ∼ {xs = xs} []₁ []₁
-    []₁∼ .get (there () i)
+    []₁∼ .get ()
 
     _++₁∼_ : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ} {s t xs ρl ρr σl σr} →
              Lift₁∼ ∼ {s} {xs ∘ ↙} ρl σl →
@@ -363,7 +363,7 @@ module Data.LTree.Vector where
     []₁η : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ}
            (refl : ∀ {x} → Reflexive (∼ {x})) {xs ρ} →
            Lift₁∼ {R = R} ∼ {ε} {xs} []₁ ρ
-    []₁η refl .get (there () i)
+    []₁η refl .get ()
 
     [-]₁η : ∀ {R : Pred A r} {∼ : ∀ {x} → Rel (R x) ℓ}
             (refl : ∀ {x} → Reflexive (∼ {x})) {xs ρ} →

@@ -90,8 +90,7 @@ module Generic.Linear.Semantics.Syntactic
     ρ : [ 𝓥 ] _ ⇒ᵉ _
     ρ .Ψ = [─]ᴿ
     ρ .fit-here = 0*-triv
-    ρ .lookup r (lvar i q b) with i
-    ... | there () _
+    ρ .lookup r (lvar () q b)
 
   reify[] : Kripke 𝓥 𝓒 []ᶜ ⊆ 𝓒
   reify[] = reify[]′

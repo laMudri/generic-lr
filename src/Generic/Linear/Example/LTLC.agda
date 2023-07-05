@@ -37,16 +37,15 @@ module Generic.Linear.Example.LTLC where
   data `LTLC : Set where
     `lam `app : (A B : Ty) → `LTLC
 
-  flags : PremisesFlags
-  flags = record noPremisesFlags { Has-✴ = ⊤ᴾ }
+  -- flags : PremisesFlags
+  -- flags = record noPremisesFlags { Has-✴ = ⊤ᴾ }
 
-  LTLC : System flags
+  LTLC : System  -- flags
   LTLC = `LTLC ▹ λ where
     (`lam A B) → ⟨ [(u1 , A)]ᶜ `⊢ B ⟩ `⊆ A ⊸ B
     (`app A B) → ⟨ []ᶜ `⊢ A ⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ `⊆ B
 
   Term = [ LTLC , ∞ ]_⊢_
-  open WithScope (Scope Term)
 
   pattern var i les = `var (lvar i refl les)
   pattern lam t = `con (`lam _ _ , refl , t)
@@ -55,8 +54,8 @@ module Generic.Linear.Example.LTLC where
 
   open import Generic.Linear.Example.UsageCheck Ty
   open WithPoSemiring poSemiring
-  open WithInverses flags record
-    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = λ { {{()}} } }
+  open WithInverses record
+    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
 
   module V where
 
@@ -66,7 +65,6 @@ module Generic.Linear.Example.LTLC where
     open import Generic.Linear.Variable Ty U.0-rawPoSemiring public
     open import Generic.Linear.Renaming Ty U.0-poSemiring public
 
-  pattern uvar i = V.`var (V.lvar i refl _)
   pattern ulam t = V.`con (`lam _ _ , refl , t)
   pattern uapp s t =
     V.`con (`app _ _ , refl , s ✴⟨ _ ⟩ t)
@@ -99,33 +97,33 @@ module Generic.Linear.Example.LTLC where
             (↙ (↙ (↙ (↙ (↘ here)))))
             refl
             (mk λ where
-              (↙ (↙ (↙ (↙ (↙ (there () _))))))
+              (↙ (↙ (↙ (↙ (↙ ())))))
               (↙ (↙ (↙ (↙ (↘ here))))) → ≤-refl
               (↙ (↙ (↙ (↘ _)))) → ≤-refl
               (↙ (↙ (↘ _))) → ≤-refl
-              (↙ (↘ (there () _)))
-              (↘ (there () _))
+              (↙ (↘ ()))
+              (↘ ())
             )))
           (mk λ where
-            (↙ (↙ (↙ (↙ (there () _)))))
+            (↙ (↙ (↙ (↙ ()))))
             (↙ (↙ (↙ (↘ _)))) → ≤-refl
             (↙ (↙ (↘ _))) → ≤-refl
             (↙ (↘ _)) → ≤-refl
-            (↘ (there () _))
+            (↘ ())
           )
           (`var (lvar
             (↙ (↙ (↘ here)))
             refl
             (mk λ where
-              (↙ (↙ (↙ (↙ (↙ (there () _))))))
+              (↙ (↙ (↙ (↙ (↙ ())))))
               (↙ (↙ (↙ (↙ (↘ _))))) → ≤-refl
               (↙ (↙ (↙ (↘ _)))) → ≤-refl
               (↙ (↙ (↘ here))) → ≤-refl
-              (↙ (↘ (there () _)))
-              (↘ (there () _))
+              (↙ (↘ ()))
+              (↘ ())
             )))))
         (mk λ where
-          (↙ (↙ (↙ (there () _))))
+          (↙ (↙ (↙ ())))
           (↙ (↙ (↘ _))) → ≤-refl
           (↙ (↘ _)) → ≤-refl
           (↘ _) → ≤-refl
@@ -134,11 +132,11 @@ module Generic.Linear.Example.LTLC where
           (↙ (↙ (↘ here)))
           refl
           (mk λ where
-            (↙ (↙ (↙ (↙ (there () _)))))
+            (↙ (↙ (↙ (↙ ()))))
             (↙ (↙ (↙ (↘ _)))) → ≤-refl
             (↙ (↙ (↘ here))) → ≤-refl
             (↙ (↘ _)) → ≤-refl
-            (↘ (there () _))
+            (↘ ())
           )))))))
 
   myC′ : (A B C : Ty) → Term []ᶜ ((A ⊸ B ⊸ C) ⊸ (B ⊸ A ⊸ C))

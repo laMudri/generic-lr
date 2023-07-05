@@ -29,23 +29,20 @@ module Data.LTree where
   private
     variable
       s s′ t : LTree
+\end{code}
 
   -- Pointers to boxes
 
-  data Ptr : LTree → Set
-  data In-node : (s t : LTree) → Set
-
-  data Ptr where
+%<*Ptr>
+\begin{code}
+  data Ptr : LTree → Set where
     here : Ptr [-]
-    there : (d : In-node s t) → Ptr s → Ptr t
+    ↙ : ∀ {s t} → Ptr s → Ptr (s <+> t)
+    ↘ : ∀ {s t} → Ptr t → Ptr (s <+> t)
+\end{code}
+%</Ptr>
 
-  data In-node where
-    left : In-node s (s <+> t)
-    right : In-node t (s <+> t)
-
-  pattern ↙ s = there left s
-  pattern ↘ s = there right s
-
+\begin{code}
   private
     example-ltree : LTree
     example-ltree = ([-] <+> [-]) <+> (ε <+> [-])
@@ -53,18 +50,12 @@ module Data.LTree where
     example-ptr : Ptr example-ltree
     example-ptr = ↙ (↘ here)
 
-  there-injective :
-    {d : In-node s t} {e : In-node s′ t} {i : Ptr s} {j : Ptr s′} →
-    there d i ≡ there e j →
-    Σ[ sq ∈ s ≡ s′ ] (subst (λ z → In-node z t) sq d ≡ e × subst Ptr sq i ≡ j)
-  there-injective refl = refl , refl , refl
-
   ↙-injective :
-    {i j : Ptr s} → there (left {t = t}) i ≡ there left j → i ≡ j
+    {i j : Ptr s} → ↙ {t = t} i ≡ ↙ j → i ≡ j
   ↙-injective refl = refl
 
   ↘-injective :
-    {i j : Ptr t} → there (right {s = s}) i ≡ there right j → i ≡ j
+    {i j : Ptr t} → ↘ {s = s} i ≡ ↘ j → i ≡ j
   ↘-injective refl = refl
 
   _≟_ : (i j : Ptr s) → Dec (i ≡ j)

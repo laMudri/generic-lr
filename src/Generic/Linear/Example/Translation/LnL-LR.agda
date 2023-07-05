@@ -308,7 +308,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
     *-distrib-[]ᶜ : LR.[]ᶜ LR.⇒ʳ LnL.[]ᶜ *Ctx
     *-distrib-[]ᶜ .Ψ = 1ᴿ
     *-distrib-[]ᶜ .fit-here = []ₙ
-    *-distrib-[]ᶜ .lookup _ (LR.lvar (there () i) q b)
+    *-distrib-[]ᶜ .lookup _ (LR.lvar () q b)
 
     *-distrib-++ᶜ : ∀ {Γ Δ} →
       Γ *Ctx LR.++ᶜ Δ *Ctx LR.⇒ʳ (Γ LnL.++ᶜ Δ) *Ctx
