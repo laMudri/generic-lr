@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 -- Functional vectors indexed by tree sizes
@@ -30,10 +31,16 @@ module Data.LTree.Vector where
       s t : LTree
 
   infix 5 _++_
+\end{code}
 
+%<*Vector>
+\begin{code}
   Vector : Set a → LTree → Set a
   Vector A s = Ptr s → A
+\end{code}
+%</Vector>
 
+\begin{code}
   lift₀ : A → ∀ {s} → Vector A s
   lift₀ x _ = x
 
@@ -423,3 +430,4 @@ module Data.LTree.Vector where
           R (map×⊤ₙ← (_$ i) n vs) → R (map×⊤ₙ← (_$ ↘ i) n (zipWith×⊤ₙ _++_ us vs))
         lemma-v {zero} R r = r
         lemma-v {suc n} R r = lemma-v {n} (λ xs → R (_ , xs)) r
+\end{code}

@@ -179,7 +179,7 @@ module Generic.Linear.Example.WRel where
 %<*Ty>
 \begin{code}
     data Ty : Set where
-      base : BaseTy → Ty
+      ι : BaseTy → Ty
       _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
 \end{code}
 %</Ty>
@@ -198,24 +198,24 @@ module Generic.Linear.Example.WRel where
     open import Generic.Linear.Everything Ty poSemiring hiding (Ann) public
 \end{code}
 
-%<*AnnArr>
+%<*system>
 \begin{code}
-    data `AnnArr : Set where
-      `lam `app : (rA : Ann × Ty) (B : Ty) → `AnnArr
+    data L : Set where
+      `lam `app : (rA : Ann × Ty) (B : Ty) → L
 
-    AnnArr : System
-    AnnArr = `AnnArr ▹ λ where
+    system : System
+    system = L ▹ λ where
       (`lam rA B) → ⟨ [ rA ]ᶜ `⊢ B ⟩ `⊆ rA ⊸ B
       (`app rA@(r , A) B) → ⟨ []ᶜ `⊢ rA ⊸ B ⟩ `✴ r `· ⟨ []ᶜ `⊢ A ⟩ `⊆ B
 \end{code}
-%</AnnArr>
+%</system>
 
 \begin{code}
     open WithPoSemiring poSemiring
 
     module WithSemantics
       (worlds : CommutativeRelMonoid 0ℓ 0ℓ) (open WithWorlds worlds)
-      (base⟦_⟧ : BaseTy → WRel _≤ʷ_) (bang : Bang)
+      (ι⟦_⟧ : BaseTy → WRel _≤ʷ_) (bang : Bang)
       where
 
       open Bang bang
@@ -224,7 +224,7 @@ module Generic.Linear.Example.WRel where
 %<*sem>
 \begin{code}
       ⟦_⟧ : Ty → WRel _≤ʷ_
-      ⟦ base α ⟧ = base⟦ α ⟧
+      ⟦ ι α ⟧ = ι⟦ α ⟧
       ⟦ (r , A) ⊸ B ⟧ = !ᴿ r ⟦ A ⟧ ⊸ᴿ ⟦ B ⟧
 \end{code}
 %</sem>
@@ -290,24 +290,20 @@ module Generic.Linear.Example.WRel where
 
 %<*Wrel>
 \begin{code}
-      Wrel : Semantics AnnArr _∋_ ⟦_⊢_⟧
+      Wrel : Semantics system _∋_ ⟦_⊢_⟧
       Wrel .ren^𝓥 = ren^∋
       Wrel .⟦var⟧ = lookupᴿ
       Wrel .⟦con⟧ (`lam (r , A) B , ≡.refl , m) = curryᴿ (reify m)
-      Wrel .⟦con⟧ {ctx R γ} (`app (r , A) B , ≡.refl ,
-        _✴⟨_⟩_ {ctx P .γ} {ctx rQ .γ} m (mkᶜ sp+)
-          (⟨_⟩·_ {ctx Q .γ} (mkᶜ sp*) n)) =
-        let  n′ : WRelMor ⟦ ctx Q γ ⟧ᶜ ⟦ A ⟧
-             n′ = reify n ∘ᴿ ⊗ᴿ-unitʳ←
-             m′ : WRelMor (⟦ ctx P γ ⟧ᶜ ⊗ᴿ !ᴿ r ⟦ A ⟧) ⟦ B ⟧
-             m′ = uncurryᴿ (reify m ∘ᴿ ⊗ᴿ-unitʳ←) in
-        m′ ∘ᴿ map-⊗ᴿ idᴿ (!ᴿ-map n′ ∘ᴿ ctx-* sp*) ∘ᴿ ctx-+ sp+
+      Wrel .⟦con⟧ (`app (r , A) B , ≡.refl , m ✴ᶜ⟨ sp+ ⟩ (⟨ sp* ⟩·ᶜ n)) =
+        uncurryᴿ (reify[] m)
+          ∘ᴿ map-⊗ᴿ idᴿ (!ᴿ-map (reify[] n) ∘ᴿ ctx-* sp*)
+          ∘ᴿ ctx-+ sp+
 \end{code}
 %</Wrel>
 
 %<*wrel>
 \begin{code}
-      wrel : ∀ {sz Γ A} → [ AnnArr , sz ] Γ ⊢ A → ⟦ Γ ⊢ A ⟧
+      wrel : ∀ {sz Γ A} → [ system , sz ] Γ ⊢ A → ⟦ Γ ⊢ A ⟧
       wrel = semantics Wrel 1ʳ
 \end{code}
 %</wrel>

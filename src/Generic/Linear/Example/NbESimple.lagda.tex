@@ -4,7 +4,9 @@
 open import Algebra.Po
 open import Level hiding (zero)
 
-module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ) where
+module Generic.Linear.Example.NbESimple
+  (BaseTy : Set) (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
+  where
 
   open PoSemiring poSemiring renaming (Carrier to Ann) using ()
 
@@ -25,7 +27,7 @@ module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
 %<*Ty>
 \begin{code}
   data Ty : Set where
-    ι : Ty
+    ι : BaseTy → Ty
     _⊸_ : (rA : Ann × Ty) (B : Ty) → Ty
 \end{code}
 %</Ty>
@@ -57,14 +59,14 @@ module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
 %<*vDash>
 \begin{code}
   _⊨_ : OpenFam (suc 0ℓ)
-  Γ ⊨ ι = Lift (suc 0ℓ) (Term Γ ι)
+  Γ ⊨ (ι α) = Lift (suc 0ℓ) (Term Γ (ι α))
   Γ ⊨ (r , A) ⊸ B = □ʳ ((r · _⊨ A) ─✴ _⊨ B) Γ
 \end{code}
 %</vDash>
 
 \begin{code}
   ren^⊨ : ∀ {A} → Renameable (_⊨ A)
-  ren^⊨ {ι} (lift M) ρ = lift (ren^⊢ M ρ)
+  ren^⊨ {ι α} (lift M) ρ = lift (ren^⊢ M ρ)
   ren^⊨ {rA ⊸ B} b = ren^□ b
 \end{code}
 
@@ -96,7 +98,7 @@ module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
   nbeReify : ∀ {Γ} A → Γ ⊨ A → Term Γ A
   nbeReflect : ∀ {Γ} A → Term Γ A → Γ ⊨ A
 
-  nbeReify ι (lift v) = v
+  nbeReify (ι α) (lift v) = v
   nbeReify ((r , A) ⊸ B) v =
     `con (`lam _ _ , refl ,
       nbeReify B (v ↙ʳ .app✴ (mkᶜ sp+) (⟨ sp* ⟩·ᶜ
@@ -109,7 +111,7 @@ module Generic.Linear.Example.NbESimple (poSemiring : PoSemiring 0ℓ 0ℓ 0ℓ)
     sp* : ∀ {s r} → (0* {s} ++ [ r ]) ≤[ r *ₗ (0* ++ [ 1# ]) ]
     sp* = (mk λ _ → ≤-reflexive (sym (annihilʳ _))) ++ₙ [ *.identity .proj₂ _ ]ₙ
 
-  nbeReflect ι M = lift M
+  nbeReflect (ι α) M = lift M
   nbeReflect ((r , A) ⊸ B) M ρ .app✴ (mkᶜ sp+) (⟨ sp* ⟩·ᶜ N) =
     nbeReflect B (`con (`app _ _ , refl ,
       ren (↙ʳ′ []ₙ >>ʳ ρ) M ✴ᶜ⟨ sp+ ⟩ ⟨ sp* ⟩·ᶜ nbeReify A (ren^⊨ N (↙ʳ′ []ₙ))))
