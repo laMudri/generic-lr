@@ -165,11 +165,11 @@ module Generic.Linear.Example.WRel.Monotonicity where
 
 %<*minus>
 \begin{code}
-  minus : [ AnnArr , ∞ ]
-    [ ~~ , (↑↑ , base tt) ⊸ (↑↑ , base tt) ⊸ base tt ]ᶜ ++ᶜ
-    [ ~~ , (↓↓ , base tt) ⊸ base tt ]ᶜ
-    ⊢ ((↑↑ , base tt) ⊸ (↓↓ , base tt) ⊸ base tt)
-  minus = elab-unique AnnArr
+  minus : [ system , ∞ ]
+    [ ~~ , (↑↑ , ι tt) ⊸ (↑↑ , ι tt) ⊸ ι tt ]ᶜ ++ᶜ
+    [ ~~ , (↓↓ , ι tt) ⊸ ι tt ]ᶜ
+    ⊢ ((↑↑ , ι tt) ⊸ (↓↓ , ι tt) ⊸ ι tt)
+  minus = elab-unique system
     (ulam (ulam (uapp  (uapp (uvar (#0)) (uvar (# 2)))
                        (uapp (uvar (# 1)) (uvar (# 3))))))
     ([ ~~ ] ++ [ ~~ ])
