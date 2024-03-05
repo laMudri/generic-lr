@@ -136,18 +136,26 @@ connectives:
 \end{code}
 %</dashOpenFam>
 
-%<*OpenFam>
+%<*OpenType>
 \begin{code}
   OpenType : ∀ ℓ → Set (suc ℓ)
   OpenType ℓ = Ctx → Set ℓ
+\end{code}
+%</OpenType>
 
+%<*OpenFam>
+\begin{code}
   OpenFam : ∀ ℓ → Set (suc ℓ)
   OpenFam ℓ = Ctx → Ty → Set ℓ
+\end{code}
+%</OpenFam>
 
+%<*ExtOpenFam>
+\begin{code}
   ExtOpenFam : ∀ ℓ → Set (suc ℓ)
   ExtOpenFam ℓ = Ctx → OpenFam ℓ
 \end{code}
-%</OpenFam>
+%</ExtOpenFam>
 
 \begin{code}
   private

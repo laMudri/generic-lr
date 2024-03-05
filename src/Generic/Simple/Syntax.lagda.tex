@@ -35,36 +35,65 @@ module Generic.Simple.Syntax (Ty : Set) where
   ctx Γ ++ᶜ ctx Δ = ctx (Γ ++ Δ)
 \end{code}
 
-%<*SimplePremises>
+%<*Premises>
 \begin{code}
   data Premises : Set where
-    ⟨_`⊢_⟩ : (Γ : Ctx) (A : Ty) → Premises
+    ⟨_`⊢_⟩ : (Δ : Ctx) (A : Ty) → Premises
     `⊤ : Premises
     _`∧_ : (p q : Premises) → Premises
 \end{code}
-%</SimplePremises>
+%</Premises>
 
+\begin{code}
+  private
+    dummy : (Δ : Ctx) (A : Ty) → Premises
+    dummy Δ A =
+\end{code}
+%<*single-premise>
+\begin{code}[inline]
+      ⟨ Δ `⊢ A ⟩
+\end{code}
+%</single-premise>
+
+%<*Rule>
 \begin{code}
   record Rule : Set where
     constructor _`⊆_
     field
       premises : Premises
       conclusion : Ty
+\end{code}
+%</Rule>
+\begin{code}
   open Rule public
+\end{code}
 
+%<*System>
+\begin{code}
   record System : Set₁ where
     constructor _▹_
     field
       Label : Set
       rules : (l : Label) → Rule
+\end{code}
+%</System>
+\begin{code}
   open System public
+\end{code}
 
+%<*OpenFam>
+\begin{code}
   OpenFam : Set (suc 0ℓ)
   OpenFam = Ctx → Ty → Set
+\end{code}
+%</OpenFam>
 
+%<*Scope>
+\begin{code}
   Scope : OpenFam → Ctx → OpenFam
   Scope T Δ Γ A = T (Γ ++ᶜ Δ) A
 \end{code}
+%</Scope>
 
 \begin{code}
   module WithScope (
