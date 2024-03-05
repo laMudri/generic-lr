@@ -304,9 +304,9 @@ module Data.LTree.Vector where
     setoid S s .Carrier = Vector (S .Carrier) s
     setoid S s ._≈_ = Liftₙ (S ._≈_)
     setoid S s .isEquivalence .refl .get i = S .refl
-    setoid S s .isEquivalence .sym p .get i = S .sym (p .get i)
+    setoid S s .isEquivalence .sym p .get i = S .isEquivalence .sym (p .get i)
     setoid S s .isEquivalence .trans p q .get i =
-      S .trans (p .get i) (q .get i)
+      S .isEquivalence .trans (p .get i) (q .get i)
 
     [-]ˢ : ∀ {S} → S ⟶ setoid {a} {ℓ} S [-]
     [-]ˢ ._⟨$⟩_ = [_]
@@ -333,9 +333,10 @@ module Data.LTree.Vector where
     setoidL₁ S xs .Carrier = Lift₁ (Carrier ∘ S) xs
     setoidL₁ S xs ._≈_ ρ σ = Lift₁∼ (S _ ._≈_) ρ σ
     setoidL₁ S xs .isEquivalence .refl .get i = S _ .refl
-    setoidL₁ S xs .isEquivalence .sym p .get i = S _ .sym (p .get i)
+    setoidL₁ S xs .isEquivalence .sym p .get i =
+      S _ .isEquivalence .sym (p .get i)
     setoidL₁ S xs .isEquivalence .trans p q .get i =
-      S _ .trans (p .get i) (q .get i)
+      S _ .isEquivalence .trans (p .get i) (q .get i)
 
     [_]₁∼ : ∀ {R : Pred A r} {_∼_ : ∀ {x} → Rel (R x) ℓ} {xs a b} →
             a ∼ b → Lift₁∼ {R = R} _∼_ {xs = xs} [ a ]₁ [ b ]₁
