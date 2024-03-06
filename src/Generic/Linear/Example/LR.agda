@@ -20,7 +20,7 @@ module Generic.Linear.Example.LR where
   open import Size
 
   open import Generic.Linear.Example.LLFlags
-  open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+  open import Generic.Linear.Example.ZeroOneMany renaming (0#1ω to Ann)
 
   module WithLLFlags (llfl : LLFlags) where
 
@@ -71,7 +71,7 @@ module Generic.Linear.Example.LR where
       (`0e Z) → (⟨ []ᶜ `⊢ t0 ⟩ `✴ `⊤) `⊆ Z
       (`⊕i i A B) → ⟨ []ᶜ `⊢ [ A > i < B ] ⟩ `⊆ A t⊕ B
       (`⊕e A B Z) →
-        ⟨ []ᶜ `⊢ A t⊕ B ⟩ `✴ (⟨ [ u1 , A ]ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , B ]ᶜ `⊢ Z ⟩)
+        ⟨ []ᶜ `⊢ A t⊕ B ⟩ `✴ (⟨ [ 1# , A ]ᶜ `⊢ Z ⟩ `∧ ⟨ [ 1# , B ]ᶜ `⊢ Z ⟩)
         `⊆ Z
       `⊤i → `⊤ `⊆ t⊤
       (`&i A B) → ⟨ []ᶜ `⊢ A ⟩ `∧ ⟨ []ᶜ `⊢ B ⟩ `⊆ A t& B
@@ -80,15 +80,15 @@ module Generic.Linear.Example.LR where
       (`Ie Z) → ⟨ []ᶜ `⊢ tI ⟩ `✴ ⟨ []ᶜ `⊢ Z ⟩ `⊆ Z
       (`⊗i A B) → ⟨ []ᶜ `⊢ A ⟩ `✴ ⟨ []ᶜ `⊢ B ⟩ `⊆ A t⊗ B
       (`⊗e A B Z) →
-        (⟨ []ᶜ `⊢ A t⊗ B ⟩ `✴ ⟨ [ u1 , A ]ᶜ ++ᶜ [ u1 , B ]ᶜ `⊢ Z ⟩) `⊆ Z
-      (`⊸i A B) → ⟨ [ u1 , A ]ᶜ `⊢ B ⟩ `⊆ A t⊸ B
+        (⟨ []ᶜ `⊢ A t⊗ B ⟩ `✴ ⟨ [ 1# , A ]ᶜ ++ᶜ [ 1# , B ]ᶜ `⊢ Z ⟩) `⊆ Z
+      (`⊸i A B) → ⟨ [ 1# , A ]ᶜ `⊢ B ⟩ `⊆ A t⊸ B
       (`⊸e A B) → ⟨ []ᶜ `⊢ A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ A ⟩ `⊆ B
-      (`!i A) → uω `· ⟨ []ᶜ `⊢ A ⟩ `⊆ t! A
-      (`!e A Z) → ⟨ []ᶜ `⊢ t! A ⟩ `✴ ⟨ [ uω , A ]ᶜ `⊢ Z ⟩ `⊆ Z
+      (`!i A) → ω# `· ⟨ []ᶜ `⊢ A ⟩ `⊆ t! A
+      (`!e A Z) → ⟨ []ᶜ `⊢ t! A ⟩ `✴ ⟨ [ ω# , A ]ᶜ `⊢ Z ⟩ `⊆ Z
       `ze → `ℑ `⊆ nat
       `su → ⟨ []ᶜ `⊢ nat ⟩ `⊆ nat
       (`iter Z) →
-        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□⁰⁺ˣ (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ u1 , Z ]ᶜ `⊢ Z ⟩) `⊆ Z
+        ⟨ []ᶜ `⊢ nat ⟩ `✴ `□⁰⁺ˣ (⟨ []ᶜ `⊢ Z ⟩ `∧ ⟨ [ 1# , Z ]ᶜ `⊢ Z ⟩) `⊆ Z
 
     Term = [ LR , ∞ ]_⊢_
 
@@ -103,7 +103,7 @@ module Generic.Linear.Example.LR where
     open import Generic.Linear.Example.UsageCheck Ty public
     open WithPoSemiring poSemiring public
     open WithInverses record
-      { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
+      { 0#⁻¹ = 0#⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = 1#⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
       public
 
     module V where
@@ -140,10 +140,10 @@ module Generic.Linear.Example.LR where
       (u⊸i (uiter _ (uvar# 0) uze (usu (uvar# 1))))
       []
 
-    -- dupNat : nat t⊸ t! uω nat
-    -- dupNat = λn. iter n return t! uω nat where
+    -- dupNat : nat t⊸ t! ω# nat
+    -- dupNat = λn. iter n return t! ω# nat where
     --   0          ↦ !i 0
-    --   suc _ | ih ↦ let !i m = ih return t! uω nat in
+    --   suc _ | ih ↦ let !i m = ih return t! ω# nat in
     --                !i (suc m)
 
     dupNat : Term []ᶜ (nat t⊸ t! nat)

@@ -16,7 +16,7 @@ open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 open import Relation.Unary.Bunched
 open import Size
 
-open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+open import Generic.Linear.Example.ZeroOneMany renaming (0#1ω to Ann)
 \end{code}
 
 %<*Sort>
@@ -54,11 +54,11 @@ end-premises (s <+> t) = end-premises s `✴ end-premises t
 \begin{code}
 GraphL : System
 GraphL = `GraphL ▹ λ where
-  (`η∘ s) →   ⟨ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩ `⊆ bundle s
-  (`μ∘ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩
+  (`η∘ s) →   ⟨ [ 1# ∙ wire ]ᶜ `⊢ bundle s ⟩ `⊆ bundle s
+  (`μ∘ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ 1# ∙ wire ]ᶜ `⊢ bundle s ⟩
               `⊆ bundle s
   (`η∙ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ []ᶜ `⊢ bundle s ⟩ `⊆ bundle s
-  (`μ∙ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ u1 ∙ wire ]ᶜ ++ᶜ [ u1 ∙ wire ]ᶜ `⊢ bundle s ⟩
+  (`μ∙ s) →   ⟨ []ᶜ `⊢ wire ⟩ `✴ ⟨ [ 1# ∙ wire ]ᶜ ++ᶜ [ 1# ∙ wire ]ᶜ `⊢ bundle s ⟩
               `⊆ bundle s
   (`end s) →  end-premises s `⊆ bundle s
 \end{code}
@@ -67,7 +67,7 @@ GraphL = `GraphL ▹ λ where
 %<*Graph>
 \begin{code}
 Graph : LTree → LTree → Set
-Graph s t = [ GraphL , ∞ ] ctx {s} (λ _ → u1) (λ _ → wire) ⊢ bundle t
+Graph s t = [ GraphL , ∞ ] ctx {s} (λ _ → 1#) (λ _ → wire) ⊢ bundle t
 \end{code}
 %</Graph>
 
@@ -75,7 +75,7 @@ Graph s t = [ GraphL , ∞ ] ctx {s} (λ _ → u1) (λ _ → wire) ⊢ bundle t
 open import Generic.Linear.Example.UsageCheck Sort public
 open WithPoSemiring poSemiring public
 open WithInverses record
-  { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
+  { 0#⁻¹ = 0#⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = 1#⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
   public
 
 module V where
@@ -104,7 +104,7 @@ pattern uend Ms = U.`con (`end _ , refl , Ms)
 myGraph′ : Graph ([-] <+> [-]) ([-] <+> [-])
 myGraph′ = elab-unique GraphL
   (uend (uvar (# 1) ✴ᶜ⟨ _ ⟩ uvar (# 0)))
-  (λ _ → u1)
+  (λ _ → 1#)
 \end{code}
 
 %<*myGraph>
@@ -116,6 +116,6 @@ myGraph = elab-unique GraphL
     (uη∘
     (uη∙ (uvar# 4)
     (uend (uvar# 5 ✴ᶜ⟨ _ ⟩ (uvar# 2)))))))
-  (λ _ → u1)
+  (λ _ → 1#)
 \end{code}
 %</myGraph>

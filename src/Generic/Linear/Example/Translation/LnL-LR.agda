@@ -24,7 +24,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
   open import Size
 
   open import Generic.Linear.Example.LLFlags
-  open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+  open import Generic.Linear.Example.ZeroOneMany renaming (0#1ω to Ann)
   open import Generic.Linear.Example.ZeroOneMany.LinIntView
   open import Generic.Linear.Operations rawPoSemiring
   open import Generic.Linear.Algebra poSemiring
@@ -109,11 +109,11 @@ module Generic.Linear.Example.Translation.LnL-LR where
   o-var* = lift₂ o-var
 
   o-ann : Ann → Ann → Ann
-  o-ann r s = if is-lin r then s else uω
+  o-ann r s = if is-lin r then s else ω#
 
   o-ann-≤ : ∀ r s → o-ann r s ≤ s
   o-ann-≤ r s with liview r
-  ... | view-int = uω≤
+  ... | view-int = ω#≤
   ... | view-lin l = ≤-refl
 
   o-ann* : ∀ {s} → Vector Ann s → Vector Ann s → Vector Ann s
@@ -128,14 +128,14 @@ module Generic.Linear.Example.Translation.LnL-LR where
   ... | view-int | sp+i = ≤-refl
   ... | view-lin l | sp+i = sp+i
 
-  mend-*ₗ : ∀ {s} {R P : Vector Ann s} → R ≤[ uω *ₗ P ] → R ≤[ uω *ₗ R ]
+  mend-*ₗ : ∀ {s} {R P : Vector Ann s} → R ≤[ ω# *ₗ P ] → R ≤[ ω# *ₗ R ]
   mend-*ₗ {R = R} {P} sp* .get i with R i | sp* .get i
-  ... | u0 | sp*i = ≤-refl
-  ... | uω | sp*i = ≤-refl
-  ... | u1 | sp*i with P i
-  mend-*ₗ sp* .get i | u1 | () | u0
-  ...   | u1 = sp*i
-  ...   | uω = sp*i
+  ... | 0# | sp*i = ≤-refl
+  ... | ω# | sp*i = ≤-refl
+  ... | 1# | sp*i with P i
+  mend-*ₗ sp* .get i | 1# | () | 0#
+  ...   | 1# = sp*i
+  ...   | ω# = sp*i
 
   module _ where
     open LnL.Ctx
@@ -170,39 +170,39 @@ module Generic.Linear.Example.Translation.LnL-LR where
       )
     open LnL.With-psh^𝓥 (λ {s} {γ} {P} {Q} → LnL.psh^⊢ {LnL} {s} {γ} {P} {Q})
 
-    foo : ∀ {A z x} → z ≤ uω * x →
+    foo : ∀ {A z x} → z ≤ ω# * x →
       (x LnL.· LnL.[ LnL , ∞ ]_⊢ o-var x A) LnL.[ z ∙ o-var z A ]ᶜ
     foo {A} {z} {x} le with liview x | liview z
     ... | view-lin lx | view-lin lz =
-      ⟨ LnL.mkᶜ {Q = [ uω ]} [ ≤-trans le (≤-reflexive (*-comm uω _)) ]ₙ ⟩·
+      ⟨ LnL.mkᶜ {Q = [ ω# ]} [ ≤-trans le (≤-reflexive (*-comm ω# _)) ]ₙ ⟩·
         LnL.`var (LnL.lvar here refl [ ω≤1 ]ₙ)
     ... | view-lin lx | view-int =
-      ⟨ LnL.mkᶜ {Q = [ uω ]} [ uω≤ ]ₙ ⟩·
+      ⟨ LnL.mkᶜ {Q = [ ω# ]} [ ω#≤ ]ₙ ⟩·
         LnL.`con (`Ge _ , refl ,
-          □ᶜ⟨ mkDup ≤*-refl [ uω≤ ]ₙ [ uω≤ ]ₙ (λ _ → [ uω≤ ]ₙ) ⟩
+          □ᶜ⟨ mkDup ≤*-refl [ ω#≤ ]ₙ [ ω#≤ ]ₙ (λ _ → [ ω#≤ ]ₙ) ⟩
             LnL.`var (LnL.lvar (↙ here) refl ([ ω≤1 ]ₙ ++ₙ []ₙ)))
     foo ≤-refl | view-int | view-int =
-      ⟨ LnL.mkᶜ {Q = [ uω ]} [ ≤-refl ]ₙ ⟩·
+      ⟨ LnL.mkᶜ {Q = [ ω# ]} [ ≤-refl ]ₙ ⟩·
         LnL.`var (LnL.lvar here refl [ ω≤1 ]ₙ)
 
     bar : ∀ {A z x} → (Linear z → Linear x) →
       (x LnL.· LnL.[ LnL , ∞ ]_⊢ o-var x A) LnL.[ o-ann z x ∙ o-var z A ]ᶜ
     bar {A} {z} {x} l with liview z
     ... | view-lin lz =
-      ⟨ LnL.mkᶜ {Q = [ u1 ]} [ ≤-reflexive (*-identityʳ _) ]ₙ ⟩·
+      ⟨ LnL.mkᶜ {Q = [ 1# ]} [ ≤-reflexive (*-identityʳ _) ]ₙ ⟩·
           LnL.`var (LnL.lvar here eq [ ≤-refl ]ₙ)
         where
         eq : (lin , A ᵒTy) ≡ o-var x A
         eq rewrite liview-prop (liview x) (view-lin (l lz)) = refl
     ... | view-int =
-      ⟨ LnL.mkᶜ {Q = [ uω ]} [ uω≤  ]ₙ ⟩· M
+      ⟨ LnL.mkᶜ {Q = [ ω# ]} [ ω#≤  ]ₙ ⟩· M
       where
-      M : LnL.[ LnL , ∞ ] LnL.[ uω ∙ (int , tG (A ᵒTy)) ]ᶜ ⊢ o-var x A
+      M : LnL.[ LnL , ∞ ] LnL.[ ω# ∙ (int , tG (A ᵒTy)) ]ᶜ ⊢ o-var x A
       M with liview x
       ... | view-int = LnL.`var (LnL.lvar here refl [ ω≤1 ]ₙ)
       ... | view-lin lx =
         LnL.`con $ `Ge _ , refl ,
-          □ᶜ⟨ mkDup ≤*-refl [ ω≤0 ]ₙ [ ≤-refl ]ₙ (λ r → [ uω≤ ]ₙ) ⟩
+          □ᶜ⟨ mkDup ≤*-refl [ ω≤0 ]ₙ [ ≤-refl ]ₙ (λ r → [ ω#≤ ]ₙ) ⟩
             LnL.`var (LnL.lvar (↙ here) refl ([ ω≤1 ]ₙ ++ₙ []ₙ))
 
   o𝓒 : LR.OpenFam 0ℓ
@@ -242,7 +242,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       R≤0 : R ≤0*
       R≤0 .get j with (i ≟ j) .does | (i ≟ j) .proof | b .get j
       ... | false | ofⁿ z | le = le
-      ... | true | ofʸ refl | le with uω ← R j = ω≤0
+      ... | true | ofʸ refl | le with ω# ← R j = ω≤0
 
       R≤R+R : R ≤[ R +* R ]
       R≤R+R .get j = ≤0-dup (R≤0 .get j)
@@ -369,7 +369,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
         ⟨ (mk λ i → lemma (≤-trans (str .get i) (sp0 .get i))) ⟩·ᶜ
           ren th (*reify t))
       where
-      lemma : ∀ {x} → x ≤ u0 → x ≤ uω * x
+      lemma : ∀ {x} → x ≤ 0# → x ≤ ω# * x
       lemma ≤-refl = ≤-refl
       lemma ω≤0 = ≤-refl
     *Sem .⟦con⟧ (`Fe X C , refl , s ✴ᶜ⟨ sp+ ⟩ t) =
@@ -381,9 +381,9 @@ module Generic.Linear.Example.Translation.LnL-LR where
       let ths = ++-[]ʳ→ ++ʳ *-distrib-[]ᶜ in
       let tht = ++-[]ʳ→ ++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗i _ _ , refl ,
-        LR.`con (`!i _ , refl , ⟨ sp* uω ++ₙ []ₙ ⟩·ᶜ ren ths (*reify s))
+        LR.`con (`!i _ , refl , ⟨ sp* ω# ++ₙ []ₙ ⟩·ᶜ ren ths (*reify s))
           ✴ᶜ⟨ +ₘ-mono str ≤*-refl ≤*-refl sp+ ⟩
-        LR.`con (`!i _ , refl , ⟨ sp* uω ++ₙ []ₙ ⟩·ᶜ ren tht (*reify t)))
+        LR.`con (`!i _ , refl , ⟨ sp* ω# ++ₙ []ₙ ⟩·ᶜ ren tht (*reify t)))
     *Sem .⟦con⟧ (`×e ll X Y , refl , □ᶜ⟨ mkDup str sp0 sp+ sp* ⟩ t) =
       let th = 1ʳ ++ʳ *-distrib-[]ᶜ in
       LR.`con (`⊗e _ _ _ , refl ,
@@ -421,7 +421,7 @@ module Generic.Linear.Example.Translation.LnL-LR where
       LR.`con (`⊸e _ _ , refl ,
         ren ths (*reify s)
           ✴ᶜ⟨ +ₘ-mono str ≤*-refl ≤*-refl sp+ ⟩
-        LR.`con (`!i _ , refl , ⟨ sp* uω ++ₙ []ₙ ⟩·ᶜ
+        LR.`con (`!i _ , refl , ⟨ sp* ω# ++ₙ []ₙ ⟩·ᶜ
           ren tht (*reify t)))
     *Sem .⟦con⟧ (`Gi A , refl , □ᶜ⟨ mkDup str sp0 sp+ sp* ⟩ t) =
       let th = ++-[]ʳ← >>ʳ (subuse-ren str ++ʳ *-distrib-[]ᶜ) in

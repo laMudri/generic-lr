@@ -16,7 +16,7 @@ module Generic.Linear.Example.LnL where
   open import Relation.Unary.Bunched
   open import Size
 
-  open import Generic.Linear.Example.ZeroOneMany renaming (u01ω to Ann)
+  open import Generic.Linear.Example.ZeroOneMany renaming (0#1ω to Ann)
 \end{code}
 
 %<*Frag>
@@ -91,20 +91,20 @@ module Generic.Linear.Example.LnL where
     (`Ie C)      → ⟨ []ᶜ `⊢ lin , tI ⟩ `✴ ⟨ []ᶜ `⊢ lin , C ⟩     `⊆ lin , C
     (`⊗i A B)    → ⟨ []ᶜ `⊢ lin , A ⟩ `✴ ⟨ []ᶜ `⊢ lin , B ⟩      `⊆ lin , A t⊗ B
     (`⊗e A B C)  →
-      ⟨ []ᶜ `⊢ lin , A t⊗ B ⟩ `✴ ⟨ [ u1 , lin , A ]ᶜ ++ᶜ [ u1 , lin , B ]ᶜ `⊢ lin , C ⟩
+      ⟨ []ᶜ `⊢ lin , A t⊗ B ⟩ `✴ ⟨ [ 1# , lin , A ]ᶜ ++ᶜ [ 1# , lin , B ]ᶜ `⊢ lin , C ⟩
                                                                  `⊆ lin , C
-    (`⊸i A B)    → ⟨ [ u1 , lin , A ]ᶜ `⊢ lin , B ⟩              `⊆ lin , A t⊸ B
+    (`⊸i A B)    → ⟨ [ 1# , lin , A ]ᶜ `⊢ lin , B ⟩              `⊆ lin , A t⊸ B
     (`⊸e A B)    →
       ⟨ []ᶜ `⊢ lin , A t⊸ B ⟩ `✴ ⟨ []ᶜ `⊢ lin , A ⟩              `⊆ lin , B
     (`Fi X)      → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X ⟩                      `⊆ lin , tF X
     (`Fe X C)    →
-      ⟨ []ᶜ `⊢ lin , tF X ⟩ `✴ ⟨ [ uω , int , X ]ᶜ `⊢ lin , C ⟩  `⊆ lin , C
+      ⟨ []ᶜ `⊢ lin , tF X ⟩ `✴ ⟨ [ ω# , int , X ]ᶜ `⊢ lin , C ⟩  `⊆ lin , C
 
     `1i          → `□⁰⁺ˣ `⊤                                      `⊆ int , t1
     (`×i X Y)    →
       `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X ⟩ `∧ ⟨ []ᶜ `⊢ int , Y ⟩)           `⊆ int , X t× Y
     (`×e i X Y)  → `□⁰⁺ˣ ⟨ []ᶜ `⊢ int , X t× Y ⟩  `⊆ int , [ X > i < Y ]
-    (`→i X Y)    → `□⁰⁺ˣ ⟨ [ uω , int , X ]ᶜ `⊢ int , Y ⟩        `⊆ int , X t→ Y
+    (`→i X Y)    → `□⁰⁺ˣ ⟨ [ ω# , int , X ]ᶜ `⊢ int , Y ⟩        `⊆ int , X t→ Y
     (`→e X Y)    →
       `□⁰⁺ˣ (⟨ []ᶜ `⊢ int , X t→ Y ⟩ `∧ ⟨ []ᶜ `⊢ int , X ⟩)      `⊆ int , Y
     (`Gi A)      → `□⁰⁺ˣ ⟨ []ᶜ `⊢ lin , A ⟩                      `⊆ int , tG A
@@ -118,7 +118,7 @@ module Generic.Linear.Example.LnL where
   open import Generic.Linear.Example.UsageCheck ΣTy public
   open WithPoSemiring poSemiring public
   open WithInverses record
-    { 0#⁻¹ = u0⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = u1⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
+    { 0#⁻¹ = 0#⁻¹ ; +⁻¹ = +⁻¹ ; 1#⁻¹ = 1#⁻¹ ; *⁻¹ = *⁻¹ ; rep = rep }
     public
 
   module V where
@@ -138,7 +138,7 @@ module Generic.Linear.Example.LnL where
   pattern uFi s = V.`con (`Fi _ , refl , □ᶜ⟨ _ ⟩ s)
   pattern uFe C s t = V.`con (`Fe _ C , refl , s ✴ᶜ⟨ _ ⟩ t)
 
-  pattern u1i = V.`con (`1i , refl , □ᶜ⟨ _ ⟩ tt)
+  pattern 1#i = V.`con (`1i , refl , □ᶜ⟨ _ ⟩ tt)
   pattern u×i s t = V.`con (`×i _ _ , refl , □ᶜ⟨ _ ⟩ (s , t))
   pattern u×e i s = V.`con (`×e i _ _ , refl , □ᶜ⟨ _ ⟩ s)
   pattern u→i t = V.`con (`→i _ _ , refl , □ᶜ⟨ _ ⟩ t)
@@ -159,7 +159,7 @@ module Generic.Linear.Example.LnL where
 
   {-
   -- Establish the invariant that in the intuitionistic fragment, all
-  -- annotations are duplicable (i.e, either uω or u0).
+  -- annotations are duplicable (i.e, either ω# or 0#).
 
   open import Algebra.Relational using (_◇_; _,_; middle; fst; snd)
   open import Data.LTree.Matrix

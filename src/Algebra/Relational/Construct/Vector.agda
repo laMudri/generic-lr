@@ -24,7 +24,7 @@ module Algebra.Relational.Construct.Vector where
       { refl = λ { .get i → refl }
       ; trans = λ { uu vv .get i → trans (uu .get i) (vv .get i) }
       }
-    ; 0ₘ-mono = λ { uu u0 .get i → 0-mono (uu .get i) (u0 .get i) }
+    ; 0ₘ-mono = λ { uu 0# .get i → 0-mono (uu .get i) (0# .get i) }
     ; +ₘ-mono = λ { ww uu vv wuv .get i →
       +-mono (ww .get i) (uu .get i) (vv .get i) (wuv .get i) }
     ; *ₘ-mono = λ { vv rr uu vru .get i →
@@ -34,8 +34,8 @@ module Algebra.Relational.Construct.Vector where
         { +ₘ-isCommutativeRelMonoid = record
           { isRelMonoid = record
             { isLeftSkewRelMonoid = record
-              { identityˡ→ = λ { (u0 , wuv) .get i →
-                +-identityˡ→ (u0 .get i , wuv .get i) }
+              { identityˡ→ = λ { (0# , wuv) .get i →
+                +-identityˡ→ (0# .get i , wuv .get i) }
               ; identityʳ← = λ { (mk wu) →
                 let f i = +-identityʳ← (wu i) in
                 mk (fst ∘ f) , mk (snd ∘ f) }
@@ -69,14 +69,14 @@ module Algebra.Relational.Construct.Vector where
           *-func _ _ .holds , mk λ i →
             *-mono refl (*-func _ _ .unique (lemma i .fst)) refl (lemma i .snd)
         ; *ₘ-annihilˡ→ = λ (r0 , ru) → mk λ i → annihilˡ→ (r0 , (ru .get i))
-        ; *ₘ-annihilˡ← = λ u0 →
+        ; *ₘ-annihilˡ← = λ 0# →
           0-func .holds , mk λ i →
-            let r0 , ru = annihilˡ← (u0 .get i) in
+            let r0 , ru = annihilˡ← (0# .get i) in
             *-mono refl (0-func .unique r0) refl ru
-        ; *ₘ-annihilʳ→ = λ (ru , u0) →
-          mk λ i → annihilʳ→ (ru .get i , u0 .get i)
-        ; *ₘ-annihilʳ← = λ u0 →
-          let lemma = λ i → annihilʳ← (u0 .get i) in
+        ; *ₘ-annihilʳ→ = λ (ru , 0#) →
+          mk λ i → annihilʳ→ (ru .get i , 0# .get i)
+        ; *ₘ-annihilʳ← = λ 0# →
+          let lemma = λ i → annihilʳ← (0# .get i) in
           (mk λ i → lemma i .fst) , (mk λ i → lemma i .snd)
         ; *ₘ-distribˡ→ = λ (rs , rsu) →
           let lemma = λ i → distribˡ→ (rs , rsu .get i) in
@@ -99,7 +99,7 @@ module Algebra.Relational.Construct.Vector where
       ; 0ₘ-func = λ where
         .witness i → 0-func .witness
         .holds .get i → 0-func .holds
-        .unique u0 .get i → 0-func .unique (u0 .get i)
+        .unique 0# .get i → 0-func .unique (0# .get i)
       ; +ₘ-func = λ u v → λ where
         .witness i → +-func (u i) (v i) .witness
         .holds .get i → +-func _ _ .holds

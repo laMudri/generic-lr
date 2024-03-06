@@ -156,8 +156,8 @@ module Algebra.PoToRel where
         ≤ₘ-trans vru (≤ₘ-trans (*ₘ-monoˡ r0) (≤ₘ-reflexive (*ₘ-annihilˡ _)))
       ; *ₘ-annihilˡ← = λ v0 →
         R.≤-refl , ≤ₘ-trans v0 (≤ₘ-reflexive (≈ₘ-sym (*ₘ-annihilˡ _)))
-      ; *ₘ-annihilʳ→ = λ (vru , u0) →
-        ≤ₘ-trans vru (≤ₘ-trans (*ₘ-monoʳ u0) (≤ₘ-reflexive (*ₘ-annihilʳ _)))
+      ; *ₘ-annihilʳ→ = λ (vru , 0#) →
+        ≤ₘ-trans vru (≤ₘ-trans (*ₘ-monoʳ 0#) (≤ₘ-reflexive (*ₘ-annihilʳ _)))
       ; *ₘ-annihilʳ← = λ v0 →
         ≤ₘ-trans v0 (≤ₘ-reflexive (≈ₘ-sym (*ₘ-annihilʳ _))) , ≤ₘ-refl
       ; *ₘ-distribˡ→ = λ (r+s , rs*u) →
