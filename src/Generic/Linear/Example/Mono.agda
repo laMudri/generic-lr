@@ -311,16 +311,9 @@ module Generic.Linear.Example.Mono where
       ; isSemiring = record
         { isSemiringWithoutAnnihilatingZero = record
           { +-isCommutativeMonoid = meet-isCommutativeMonoid
-          ; *-isMonoid = record
-            { isSemigroup = record
-              { isMagma = record
-                { isEquivalence = isEquivalence
-                ; ∙-cong = cong₂ _*_
-                }
-              ; assoc = *-assoc
-              }
-            ; identity = *-identityˡ , *-identityʳ
-            }
+          ; *-cong = cong₂ _*_
+          ; *-assoc = *-assoc
+          ; *-identity = *-identityˡ , *-identityʳ
           ; distrib = *-distribʳ , *-distribˡ
           }
         ; zero = *-zeroˡ , *-zeroʳ

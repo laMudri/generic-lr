@@ -3,6 +3,7 @@
 module Algebra.Skew where
 
   open import Algebra.Core
+  open import Algebra.Module.Core
   import Algebra.Skew.Definitions as Defs
   import Algebra.Skew.Definitions.Left as LeftDefs
   import Algebra.Skew.Definitions.Right as RightDefs
@@ -10,7 +11,7 @@ module Algebra.Skew where
   open import Function.Base using (flip)
   open import Level
   open import Relation.Binary.Core using (Rel; _Preserves_⟶_)
-  open import Relation.Binary.Definitions
+  open import Relation.Binary.Definitions hiding (Monotonic₁; Monotonic₂)
 
   -- Structures without properties
 

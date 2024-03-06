@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 module Generic.Linear.Example.ZeroOneMany where
@@ -201,16 +202,9 @@ module Generic.Linear.Example.ZeroOneMany where
               }
             ; comm = +-comm
             }
-          ; *-isMonoid = record
-            { isSemigroup = record
-              { isMagma = record
-                { isEquivalence = isEquivalence
-                ; ∙-cong = ≡.cong₂ _
-                }
-              ; assoc = *-assoc
-              }
-            ; identity = λ- refl , sym ∘ *-identityʳ
-            }
+          ; *-cong = ≡.cong₂ _
+          ; *-assoc = *-assoc
+          ; *-identity = λ- refl , sym ∘ *-identityʳ
           ; distrib = (λ x y z → sym (distribʳ x y z))
                     , (λ x y z → distribˡ y z x)
           }
@@ -253,22 +247,37 @@ module Generic.Linear.Example.ZeroOneMany where
                 , (λ x y z → ≡⇒≤ (distribʳ x y z))
       }
     }
+\end{code}
 
+%<*u0-inv>
+\begin{code}
   u0⁻¹ : ∀ x → List (x ≤ u0)
   u0⁻¹ u0 = ≤-refl ∷ []
   u0⁻¹ u1 = []
   u0⁻¹ uω = ω≤0 ∷ []
+\end{code}
+%</u0-inv>
 
+%<*plus-inv>
+\begin{code}
   +⁻¹ : ∀ x → List (∃ \ ((y , z) : _ × _) → x ≤ y + z)
   +⁻¹ u0 = ((u0 , u0) , ≤-refl) ∷ []
   +⁻¹ u1 = ((u1 , u0) , ≤-refl) ∷ ((u0 , u1) , ≤-refl) ∷ []
   +⁻¹ uω = ((uω , uω) , ≤-refl) ∷ []
+\end{code}
+%</plus-inv>
 
+%<*u1-inv>
+\begin{code}
   u1⁻¹ : ∀ x → List (x ≤ u1)
   u1⁻¹ u0 = []
   u1⁻¹ u1 = ≤-refl ∷ []
   u1⁻¹ uω = ω≤1 ∷ []
+\end{code}
+%</u1-inv>
 
+%<*mult-inv>
+\begin{code}
   *⁻¹ : ∀ x z → List (∃ \ y → z ≤ x * y)
   *⁻¹ u0 u0 = (uω , ≤-refl) ∷ []
   *⁻¹ u0 u1 = []
@@ -277,7 +286,10 @@ module Generic.Linear.Example.ZeroOneMany where
   *⁻¹ uω u0 = (u0 , ≤-refl) ∷ []
   *⁻¹ uω u1 = []
   *⁻¹ uω uω = (uω , ≤-refl) ∷ []
+\end{code}
+%</mult-inv>
 
+\begin{code}
   open Duplicable _≤_ (_≤ u0) (λ x y z → x ≤ y + z) (λ x y z → x ≤ y * z)
     hiding (mkDup)
   rep : ∀ x → List (∃ (Dup x))
@@ -329,3 +341,4 @@ module Generic.Linear.Example.ZeroOneMany where
   *-comm uω u0 = refl
   *-comm uω u1 = refl
   *-comm uω uω = refl
+\end{code}

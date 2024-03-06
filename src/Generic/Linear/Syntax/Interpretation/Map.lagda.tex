@@ -121,7 +121,7 @@ module Generic.Linear.Syntax.Interpretation.Map
 \begin{code}
     map-s′ (L ▹ rs) f (l , t) = l , map-r′ (rs l) f t
 
-  open import Category.Applicative
+  open import Effect.Applicative
 
   module _ {F : Set x → Set x} {{appF : RawApplicative F}} where
 

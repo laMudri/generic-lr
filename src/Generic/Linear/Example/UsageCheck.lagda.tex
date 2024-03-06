@@ -9,7 +9,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
 
   open import Data.Empty
   open import Data.List as L using (List; []; _∷_)
-  open import Data.Unit hiding (_≤_)
+  open import Data.Unit using (⊤; tt)
   open import Proposition
 
   Lone : ∀ {a} {A : Set a} → List A → Set
@@ -83,8 +83,8 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     uSystem : System → U.System
     uSystem (L ▹ rs) = L U.▹ λ l → uRule (rs l)
 
-    open import Category.Functor
-    open import Category.Monad
+    open import Effect.Functor
+    open import Effect.Monad
     open import Data.Bool.Extra
     open import Data.List.Categorical
     open RawFunctor (functor {0ℓ}) using (_<$>_)

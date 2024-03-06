@@ -6,6 +6,7 @@ module Algebra.Po where
     ( LeftIdentity; Associative; LeftZero; RightZero; _DistributesOverˡ_
     ; _DistributesOverʳ_
     )
+  open import Algebra.Module using (Opₗ; Opᵣ)
   import Algebra.Module.Definitions.Left as LeftDefs
   open import Algebra.Skew
   open import Data.Product

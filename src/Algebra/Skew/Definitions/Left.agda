@@ -7,6 +7,7 @@ module Algebra.Skew.Definitions.Left
   where
 
   open import Algebra.Core
+  open import Algebra.Module.Core
   open import Data.Product
 
   Monotonic : ∀ {ℓ′} → Rel A ℓ′ → Opₗ A M → Set _
