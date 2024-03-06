@@ -86,7 +86,7 @@ module Generic.Linear.Example.UsageCheck (Ty : Set) where
     open import Effect.Functor
     open import Effect.Monad
     open import Data.Bool.Extra
-    open import Data.List.Categorical
+    open import Data.List.Effectful
     open RawFunctor (functor {0ℓ}) using (_<$>_)
     open RawMonad (monad {0ℓ}) using (pure; _>>=_) renaming (_⊛_ to _<*>_)
     open import Data.LTree
