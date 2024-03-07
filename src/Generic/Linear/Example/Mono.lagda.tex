@@ -1,3 +1,4 @@
+\begin{code}
 {-# OPTIONS --safe --without-K --postfix-projections #-}
 
 module Generic.Linear.Example.Mono where
@@ -14,10 +15,16 @@ module Generic.Linear.Example.Mono where
   infix 7 _*_
   infix 5 _∧_
   infix 4 _≤_
+\end{code}
 
+%<*WayUp>
+\begin{code}
   data WayUp : Set where
     ↑↑ ↓↓ ?? ~~ : WayUp
+\end{code}
+%</WayUp>
 
+\begin{code}
   data _≤_ : (a b : WayUp) → Set where
     ≤-refl : ∀ {a} → a ≤ a
     ≡≤↑ : ~~ ≤ ↑↑
@@ -362,3 +369,4 @@ module Generic.Linear.Example.Mono where
   rep ↓↓ = (?? , mkDup ↓≤? ≤-refl ≤-refl lemma) ∷ []
   rep ?? = (?? , mkDup ≤-refl ≤-refl ≤-refl lemma) ∷ []
   rep ~~ = (~~ , mkDup ≤-refl ≡≤? ≤-refl (λ _ → ~~≤)) ∷ []
+\end{code}
