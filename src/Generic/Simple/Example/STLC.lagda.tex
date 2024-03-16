@@ -1,0 +1,27 @@
+\begin{code}
+module Generic.Simple.Example.STLC where
+
+  infixr 25 _`→_
+
+  data Ty : Set where
+    ι : Ty
+    _`→_ : (A B : Ty) → Ty
+
+  open import Generic.Simple.Syntax Ty
+\end{code}
+
+%<*Label>
+\begin{code}
+  data `STλC : Set where
+    `app `lam : (A B : Ty) → `STλC
+\end{code}
+%</Label>
+
+%<*System>
+\begin{code}
+  STλC : System
+  STλC = `STλC ▹ λ where
+    (`app A B)  → ⟨ []ᶜ `⊢ (A `→ B) ⟩ `∧ ⟨ []ᶜ `⊢ A ⟩  `⊆ B
+    (`lam A B)  → ⟨ [ A ]ᶜ `⊢ B ⟩                      `⊆ (A `→ B)
+\end{code}
+%</System>
