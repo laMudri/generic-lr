@@ -83,10 +83,10 @@ module Data.LTree.Matrix where
   getcol M j i = M i j
 
   getrowL₂ : {M : Matrix A s t} {N : Matrix B s t} →
-             Lift₂ᴹ R M N → (i : Ptr s) → Lift₂ R (getrow M i) (getrow N i)
+             Lift₂ᴹ R M N → (i : Ptr s) → Liftₙ R (getrow M i) (getrow N i)
   getrowL₂ MN i .get j = MN .get i j
   getcolL₂ : {M : Matrix A s t} {N : Matrix B s t} →
-             Lift₂ᴹ R M N → (j : Ptr t) → Lift₂ R (getcol M j) (getcol N j)
+             Lift₂ᴹ R M N → (j : Ptr t) → Liftₙ R (getcol M j) (getcol N j)
   getcolL₂ MN j .get i = MN .get i j
 
   -- Block matrix operations
@@ -97,7 +97,7 @@ module Data.LTree.Matrix where
   col u = lift₁ [_] u
 
   rowL₂ : {u : Vector A t} {v : Vector B t} →
-          Lift₂ R u v → Lift₂ᴹ R (row u) (row v)
+          Liftₙ R u v → Lift₂ᴹ R (row u) (row v)
   rowL₂ uv .get _ i = uv .get i
 
   unrow : Matrix A [-] t → Vector A t
@@ -106,7 +106,7 @@ module Data.LTree.Matrix where
   uncol M = lift₁ un[-] M
 
   unrowL₂ : {u : Vector A t} {v : Vector B t} →
-            Lift₂ᴹ R (row u) (row v) → Lift₂ R u v
+            Lift₂ᴹ R (row u) (row v) → Liftₙ R u v
   unrowL₂ uv .get i = uv .get here i
 
   [─] : Matrix A ε t
@@ -135,17 +135,17 @@ module Data.LTree.Matrix where
   -- TODO: deprecate in favour of rowL₂, unrowL₂, &c.
 
   row-cong₂ : ∀ {u : Vector A t} {v : Vector B t} →
-              Lift₂ R u v → Lift₂ᴹ R (row u) (row v)
+              Liftₙ R u v → Lift₂ᴹ R (row u) (row v)
   row-cong₂ (mk uv) = mk (λ _ j → uv j)
   col-cong₂ : ∀ {u : Vector A s} {v : Vector B s} →
-              Lift₂ R u v → Lift₂ᴹ R (col u) (col v)
+              Liftₙ R u v → Lift₂ᴹ R (col u) (col v)
   col-cong₂ (mk uv) = mk (λ i _ → uv i)
 
   unrow-cong₂ : ∀ {M : Matrix A [-] t} {N : Matrix B [-] t} →
-                Lift₂ᴹ R M N → Lift₂ R (unrow M) (unrow N)
+                Lift₂ᴹ R M N → Liftₙ R (unrow M) (unrow N)
   unrow-cong₂ (mk MN) = mk (λ j → MN here j)
   uncol-cong₂ : ∀ {M : Matrix A s [-]} {N : Matrix B s [-]} →
-                Lift₂ᴹ R M N → Lift₂ R (uncol M) (uncol N)
+                Lift₂ᴹ R M N → Liftₙ R (uncol M) (uncol N)
   uncol-cong₂ (mk MN) = mk (λ i → MN i here)
 
   private
