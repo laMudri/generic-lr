@@ -11,7 +11,7 @@ module Data.LTree.Vector where
   open import Data.Product using (_×_; proj₁; proj₂; _,_; uncurry)
   open import Data.Product.Relation.Binary.Pointwise.NonDependent as ×PW
     using (×-setoid)
-  open import Data.Product.Nary.NonDependent
+  open import Data.Product.Nary.NonDependent hiding (Allₙ)
   open import Data.Unit using (⊤; tt)
   open import Function.Base using (id; _∘_; _$_; case_of_; case_return_of_; _∋_)
   open import Function.Equality using (_⟶_; _⟨$⟩_; cong)
@@ -133,15 +133,15 @@ module Data.LTree.Vector where
   -- map×⊤ₙ←∘map×⊤ₙ-← (suc n) P i j (x , xs) p =
   --   map×⊤ₙ←∘map×⊤ₙ-← n (λ xs → P (i (j x) , xs)) i j xs p
 
-  record Liftₙ′ {n as r} {As : Sets n as} (R : As ⇉ Set r)
+  record Allₙ′ {n as r} {As : Sets n as} (R : As ⇉ Set r)
     {s} (vs : Product⊤ n (smap id (λ A → Vector A s) n As)) : Set r where
     constructor mk
     field get : ∀ (i : Ptr s) → uncurry⊤ₙ n R (map×⊤ₙ← (_$ i) n vs)
-  open Liftₙ′ public
+  open Allₙ′ public
 
-  Liftₙ : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
+  Allₙ : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
     smap id (λ A → Vector A s) n As ⇉ Set r
-  Liftₙ {n} R = curry⊤ₙ n (Liftₙ′ R)
+  Allₙ {n} R = curry⊤ₙ n (Allₙ′ R)
 
   [_] : A → Vector A [-]
   [ x ] _ = x
@@ -164,16 +164,16 @@ module Data.LTree.Vector where
     infix 5 _++ₙ_ _++ₙ⁺_
 
     [_]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
-      uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs) → Liftₙ′ R vs
+      uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs) → Allₙ′ R vs
     [ r ]ₙ .get here = r
 
-    []ₙ : {vs : Product⊤ n (smap id (λ A → Vector A ε) n As)} → Liftₙ′ R vs
+    []ₙ : {vs : Product⊤ n (smap id (λ A → Vector A ε) n As)} → Allₙ′ R vs
     []ₙ .get ()
 
     _++ₙ_ :
       ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
-      Liftₙ′ R (map×⊤ₙ (_∘ ↙) n vs) → Liftₙ′ R (map×⊤ₙ (_∘ ↘) n vs) →
-      Liftₙ′ R vs
+      Allₙ′ R (map×⊤ₙ (_∘ ↙) n vs) → Allₙ′ R (map×⊤ₙ (_∘ ↘) n vs) →
+      Allₙ′ R vs
     (ru ++ₙ rv) .get (↙ i) =
       map×⊤ₙ←∘map×⊤ₙ-→ n (uncurry⊤ₙ n R) _ _ _ (ru .get i)
     (ru ++ₙ rv) .get (↘ i) =
@@ -182,7 +182,7 @@ module Data.LTree.Vector where
     -- The ⁺-variants synthesise the shape of the vectors they relate.
 
     [_]ₙ⁺ : {xs : Product⊤ n As} →
-      uncurry⊤ₙ n R xs → Liftₙ′ R (map×⊤ₙ→ [_] n xs)
+      uncurry⊤ₙ n R xs → Allₙ′ R (map×⊤ₙ→ [_] n xs)
     [ rx ]ₙ⁺ = [ lemma R rx ]ₙ
       where
       lemma : ∀ {n as} {As : Sets n as} (R : As ⇉ Set r) {xs : Product⊤ n As} →
@@ -191,14 +191,14 @@ module Data.LTree.Vector where
       lemma {zero} R r = r
       lemma {suc n} R r = lemma {n} (R _) r
 
-    []ₙ⁺ : Liftₙ′ R (const×⊤ₙ [])
+    []ₙ⁺ : Allₙ′ R (const×⊤ₙ [])
     []ₙ⁺ = []ₙ
 
     _++ₙ⁺_ :
       ∀ {s t} {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
       {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} →
-      Liftₙ′ R us → Liftₙ′ R vs →
-      Liftₙ′ R (zipWith×⊤ₙ _++_ us vs)
+      Allₙ′ R us → Allₙ′ R vs →
+      Allₙ′ R (zipWith×⊤ₙ _++_ us vs)
     _++ₙ⁺_ {s} {t} ru rv =
       (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (lemma-u R (ru .get i)))
         ++ₙ
@@ -220,16 +220,16 @@ module Data.LTree.Vector where
       lemma-v {zero} R r = r
       lemma-v {suc n} R r = lemma-v {n} (R _) r
 
-    -- We have a kind of pattern-matching for Liftₙ inhabitants.
+    -- We have a kind of pattern-matching for Allₙ inhabitants.
 
     un[-]ₙ : {vs : Product⊤ n (smap id (λ A → Vector A [-]) n As)} →
-      Liftₙ′ R vs → uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs)
+      Allₙ′ R vs → uncurry⊤ₙ n R (map×⊤ₙ← (_$ here) n vs)
     un[-]ₙ r = r .get here
 
     un++ₙ :
       ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
-      Liftₙ′ R vs →
-      Liftₙ′ R (map×⊤ₙ (_∘ ↙) n vs) × Liftₙ′ R (map×⊤ₙ (_∘ ↘) n vs)
+      Allₙ′ R vs →
+      Allₙ′ R (map×⊤ₙ (_∘ ↙) n vs) × Allₙ′ R (map×⊤ₙ (_∘ ↘) n vs)
     un++ₙ r .proj₁ .get i =
       map×⊤ₙ←∘map×⊤ₙ-← n (uncurry⊤ₙ n R) (r .get (↙ i))
     un++ₙ r .proj₂ .get j =
@@ -251,7 +251,7 @@ module Data.LTree.Vector where
 
     setoid : Setoid a ℓ → LTree → Setoid a ℓ
     setoid S s .Carrier = Vector (S .Carrier) s
-    setoid S s ._≈_ = Liftₙ (S ._≈_)
+    setoid S s ._≈_ = Allₙ (S ._≈_)
     setoid S s .isEquivalence .refl .get i = S .refl
     setoid S s .isEquivalence .sym p .get i = S .isEquivalence .sym (p .get i)
     setoid S s .isEquivalence .trans p q .get i =
@@ -271,34 +271,34 @@ module Data.LTree.Vector where
     ++ˢ .cong (p , q) = p ++ₙ q
 
   private
-    -- Here's an alternative way to define Liftₙ, with less uncurrying.
+    -- Here's an alternative way to define Allₙ, with less uncurrying.
     -- I haven't decided how it compares to the one I'm actually using.
     -- It is more symmetrical, but I don't know how well it unifies.
 
-    record Liftₙ′0 {n as r} {As : Sets n as} (R : Product⊤ n As → Set r)
+    record Allₙ′0 {n as r} {As : Sets n as} (R : Product⊤ n As → Set r)
       {s} (vs : Product⊤ n (smap id (λ A → Vector A s) n As)) : Set r where
       constructor mk
       field get : ∀ (i : Ptr s) → R (map×⊤ₙ← (_$ i) n vs)
-    open Liftₙ′0  -- public
+    open Allₙ′0  -- public
 
-    Liftₙ0 : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
+    Allₙ0 : ∀ {n as r} {As : Sets n as} (R : As ⇉ Set r) {s} →
       smap id (λ A → Vector A s) n As ⇉ Set r
-    Liftₙ0 {n} R = curry⊤ₙ n (Liftₙ′0 (uncurry⊤ₙ n R))
+    Allₙ0 {n} R = curry⊤ₙ n (Allₙ′0 (uncurry⊤ₙ n R))
 
     module _ {n as r} {As : Sets n as} {R : Product⊤ n As → Set r} where
 
       _++ₙ0_ :
         ∀ {s t} {vs : Product⊤ n (smap id (λ A → Vector A (s <+> t)) n As)} →
-        Liftₙ′0 R (map×⊤ₙ (_∘ ↙) n vs) → Liftₙ′0 R (map×⊤ₙ (_∘ ↘) n vs) →
-        Liftₙ′0 R vs
+        Allₙ′0 R (map×⊤ₙ (_∘ ↙) n vs) → Allₙ′0 R (map×⊤ₙ (_∘ ↘) n vs) →
+        Allₙ′0 R vs
       (ru ++ₙ0 rv) .get (↙ i) = map×⊤ₙ←∘map×⊤ₙ-→ n R _ _ _ (ru .get i)
       (ru ++ₙ0 rv) .get (↘ i) = map×⊤ₙ←∘map×⊤ₙ-→ n R _ _ _ (rv .get i)
 
       _++ₙ⁺0_ :
         ∀ {s t} {us : Product⊤ n (smap id (λ A → Vector A s) n As)}
         {vs : Product⊤ n (smap id (λ A → Vector A t) n As)} →
-        Liftₙ′0 R us → Liftₙ′0 R vs →
-        Liftₙ′0 R (zipWith×⊤ₙ _++_ us vs)
+        Allₙ′0 R us → Allₙ′0 R vs →
+        Allₙ′0 R (zipWith×⊤ₙ _++_ us vs)
       _++ₙ⁺0_ {s} {t} ru rv =
         (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n R (lemma-u R (ru .get i))) ++ₙ0
         (mk λ i → map×⊤ₙ←∘map×⊤ₙ-← n R (lemma-v R (rv .get i)))

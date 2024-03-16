@@ -59,8 +59,8 @@ module Algebra.Po.Construct.Vector where
     PoLeftSemimodule R c ℓ₁ ℓ₂
   Vector-poLeftSemimodule R s = record
     { Carrierₘ = Vector Carrier s
-    ; _≈ₘ_ = Liftₙ _≈_
-    ; _≤ₘ_ = Liftₙ _≤_
+    ; _≈ₘ_ = Allₙ _≈_
+    ; _≤ₘ_ = Allₙ _≤_
     ; 0ₘ = lift₀ 0#
     ; _+ₘ_ = lift₂ _+_
     ; _*ₘ_ = λ r v → lift₁ (r *_) v

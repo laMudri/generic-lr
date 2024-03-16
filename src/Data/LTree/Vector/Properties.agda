@@ -27,7 +27,7 @@ module Data.LTree.Vector.Properties where
     (_≈_ : Rel A r) {_+_ : Op₂ A} (+-cong : Defs.Congruent₂ _≈_ _+_)
     where
 
-    cong₂ : Defs.Congruent₂ (Liftₙ _≈_ {s}) (lift₂ _+_)
+    cong₂ : Defs.Congruent₂ (Allₙ _≈_ {s}) (lift₂ _+_)
     cong₂ uu vv .get i = +-cong (uu .get i) (vv .get i)
 
   module SumCong
@@ -38,7 +38,7 @@ module Data.LTree.Vector.Properties where
 
     open Sum 0# _+_
 
-    ∑-cong : ∀ {s} {u v : Vector A s} → Liftₙ _≈_ u v → ∑ u ≈ ∑ v
+    ∑-cong : ∀ {s} {u v : Vector A s} → Allₙ _≈_ u v → ∑ u ≈ ∑ v
     ∑-cong {[-]} (mk qs) = qs here
     ∑-cong {ε} (mk qs) = 0-cong
     ∑-cong {s <+> t} (mk qs) =

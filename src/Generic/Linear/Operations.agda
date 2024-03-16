@@ -13,7 +13,7 @@ module Generic.Linear.Operations (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ) 
   open import Data.LTree.Matrix
   open import Data.Nat.Base using (ℕ; zero; suc)
   open import Data.Product
-  open import Data.Product.Nary.NonDependent
+  open import Data.Product.Nary.NonDependent hiding (Allₙ)
   open import Function.Base
   open import Function.Nary.NonDependent
   open import Relation.Binary.PropositionalEquality as ≡ using (_≡_; _≗_)
@@ -30,8 +30,8 @@ module Generic.Linear.Operations (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ) 
   -- x ≤[ y + z ] = x ≤ y + z
   -- x ≤[ y * z ] = x ≤ y * z
 
-  _≈*_ = Liftₙ _≈_
-  _≤*_ = Liftₙ _≤_
+  _≈*_ = Allₙ _≈_
+  _≤*_ = Allₙ _≤_
   0* = lift₀ 0#
   _+*_ = lift₂ _+_
 
@@ -42,11 +42,11 @@ module Generic.Linear.Operations (rawPoSemiring : RawPoSemiring 0ℓ 0ℓ 0ℓ) 
   ⟨_∣ = 1ᴹ  where open Ident 0# 1#
 
   _≤0* : ∀ {s} → Vector Ann s → Set
-  _≤0* = Liftₙ (_≤ 0#)
+  _≤0* = Allₙ (_≤ 0#)
   _≤[_+*_] : ∀ {s} → (R P Q : Vector Ann s) → Set
-  _≤[_+*_] = Liftₙ λ z x y → z ≤ x + y
+  _≤[_+*_] = Allₙ λ z x y → z ≤ x + y
   _≤[_*ₗ_] : ∀ {s} → Vector Ann s → Ann → Vector Ann s → Set
-  R ≤[ r *ₗ P ] = (Liftₙ λ z x → z ≤ r * x) R P
+  R ≤[ r *ₗ P ] = (Allₙ λ z x → z ≤ r * x) R P
 
   -- Conversion between n-ary relations and _≤*_
 

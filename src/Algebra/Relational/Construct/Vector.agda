@@ -16,10 +16,10 @@ module Algebra.Relational.Construct.Vector where
     ∀ {c ℓ} (R : FRelSemiring c ℓ) → LTree → FRelLeftSemimodule R c ℓ
   Vector-fRelLeftSemimodule R s = record
     { Carrierₘ = Vector Carrier s
-    ; _≤ₘ_ = Liftₙ _≤_
-    ; _≤0ₘ = Liftₙ _≤0
-    ; _≤[_+ₘ_] = Liftₙ _≤[_+_]
-    ; _≤[_*ₘ_] = λ v r u → Liftₙ _≤[ r *_] v u
+    ; _≤ₘ_ = Allₙ _≤_
+    ; _≤0ₘ = Allₙ _≤0
+    ; _≤[_+ₘ_] = Allₙ _≤[_+_]
+    ; _≤[_*ₘ_] = λ v r u → Allₙ _≤[ r *_] v u
     ; isProset = record
       { refl = λ { .get i → refl }
       ; trans = λ { uu vv .get i → trans (uu .get i) (vv .get i) }
